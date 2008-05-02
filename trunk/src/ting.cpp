@@ -29,6 +29,8 @@ THE SOFTWARE. */
 
 #include "ting.hpp"
 
+#include <assert.h>
+
 //#include <iostream>
 
 //
@@ -56,33 +58,32 @@ typedef pthread_mutex_t T_Mutex;
 typedef pthread_cond_t T_CondVar;
 typedef sem_t T_Semaphore;
 
-//TODO: implement
 #endif
 
 using namespace ting;
 
-inline static T_Thread& CastToThread(ting::Thread::C_SystemIndependentThreadHandle& thr){
+inline static T_Thread& CastToThread(ting::Thread::SystemIndependentThreadHandle& thr){
     M_TING_STATIC_ASSERT( sizeof(thr) >= sizeof(T_Thread) )
     return *reinterpret_cast<T_Thread*>(&thr);
 };
 
-//inline static const T_Thread& CastToThread(ting::Thread::C_SystemIndependentThreadHandle& thr){
+//inline static const T_Thread& CastToThread(ting::Thread::SystemIndependentThreadHandle& thr){
 //    return CastToThread(const_cast<ting::Thread::C_SystemIndependentThreadHandle&>(thr));
 //};
 
-inline static T_Mutex& CastToMutex(ting::Mutex::C_SystemIndependentMutexHandle& mut){
+inline static T_Mutex& CastToMutex(ting::Mutex::SystemIndependentMutexHandle& mut){
     M_TING_STATIC_ASSERT( sizeof(mut) >= sizeof(T_Mutex) )
     return *reinterpret_cast<T_Mutex*>(&mut);
 };
 
 #ifndef __WIN32__
-inline static T_CondVar& CastToCondVar(ting::CondVar::C_SystemIndependentCondVarHandle& cond){
+inline static T_CondVar& CastToCondVar(ting::CondVar::SystemIndependentCondVarHandle& cond){
     M_TING_STATIC_ASSERT( sizeof(cond) >= sizeof(T_CondVar) )
     return *reinterpret_cast<T_CondVar*>(&cond);
 };
 #endif
 
-inline static T_Semaphore& CastToSemaphore(ting::Semaphore::C_SystemIndependentSemaphoreHandle& sem){
+inline static T_Semaphore& CastToSemaphore(ting::Semaphore::SystemIndependentSemaphoreHandle& sem){
     M_TING_STATIC_ASSERT( sizeof(sem) >= sizeof(T_Semaphore) )
     return *reinterpret_cast<T_Semaphore*>(&sem);
 };
@@ -96,7 +97,11 @@ static void* RunThread(void *data)
 #endif
 {
     ting::Thread *thr = reinterpret_cast<ting::Thread*>(data);
-    thr->Run();
+    try{
+        thr->Run();
+    }catch(...){
+        assert(false);
+    }
     
 #ifdef M__PTHREAD
     pthread_exit(0);
@@ -114,7 +119,9 @@ Thread::Thread() :
 };
 
 void Thread::Start(uint stackSize){
-    //TODO: use mutex here
+    //protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
+    ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
+    
     if(this->isRunning){
         throw ting::Exc("Thread::Start(): Thread is already running");
     }
@@ -133,6 +140,7 @@ void Thread::Start(uint stackSize){
         pthread_attr_setstacksize (&attr, static_cast<size_t>(stackSize));
         
         if(pthread_create(&CastToThread(this->thr), &attr, &RunThread, this) !=0){
+            pthread_attr_destroy(&attr);
             throw ting::Exc("Thread::Start(): starting thread failed");
         }
         pthread_attr_destroy(&attr);
@@ -143,7 +151,9 @@ void Thread::Start(uint stackSize){
 };
 
 void Thread::Join(){
-    //TODO: use mutex
+    //protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
+    ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
+    
     if(!this->isRunning)
         return;
     
@@ -153,12 +163,11 @@ void Thread::Join(){
     CastToThread(this->thr) = NULL;
 #else //pthread
     pthread_join(CastToThread(this->thr), 0);
-    //TODO: need to close the thread handle???
 #endif
+    this->isRunning = false;
 };
 
 Thread::~Thread(){
-    //TODO: use mutex
     this->quitFlag = true;
     this->PushQuitMessage();
     this->Join();
