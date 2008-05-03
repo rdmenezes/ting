@@ -285,8 +285,16 @@ bool Semaphore::Wait(uint timeoutMillis){
             throw ting::Exc("Semaphore::Wait(): wait failed");
         }
     }else{
-        //TODO: implement use sem_timedwait
-        throw ting::Exc("Semaphore::Wait(): unimplemented");
+        timespec ts;
+        ts.tv_sec = timeoutMillis / 1000;
+        ts.tv_nsec = (timeoutMillis%1000)*1000*1000;
+        if(sem_timedwait(&CastToSemaphore(this->sem), &ts) != 0){
+            if(errno == ETIMEDOUT)
+                return false;
+            else
+                throw ting::Exc("Semaphore::Wait(): error");
+        }
+        return true;
     }
 #endif
     return false;
