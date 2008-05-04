@@ -137,7 +137,7 @@ public:
     void Unlock();
     
     /**
-    @breif Helper class which automatically Locks the given mutex.
+    @brief Helper class which automatically Locks the given mutex.
     This helper class automatically locks the given mutex in the constructor and
     unlocks the mutex in destructor. This class is useful if the code between
     mutex lock/unlock may return or throw an exception,
