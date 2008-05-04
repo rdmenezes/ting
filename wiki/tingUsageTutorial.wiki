@@ -1,13 +1,31 @@
 #summary ting library usage tutorial
 
-= Introduction =
+=Creating a Thread=
+first of all we need to include *sckt* header to use the library
+{{{
+#include <ting.hpp>
+}}}
 
-Add your content here.
+After that we can start using the library. To create a thread one needs to derive a new class representing her thread from ting::Thread base class and override its ting::Thread::Run() method
+{{{
+class MyThread : public ting::Thread{
+public:
+    //override
+    void Run(){
+        //do some thread acctions
+    };
+};
+}}}
+After we have our thread class defined we can create an object of this class and start the thread execution by calling ting::Thread::Start() method on it
+{{{
+MyThread thr; //create an object on the stack for simplicity
+thr.Start();//start thread execution
+}}}
+After starting the thread we can wait for it to finish its execution by calling ting::Thread::Join() method on the thread object. After this call we can surely say that thread has finished its execution
+{{{
+thr.Join();
+}}}
 
 
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+=Messages and Message Queues=
+To Be Done!
