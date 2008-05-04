@@ -1,4 +1,5 @@
 #summary ting library usage tutorial
+#labels Featured
 
 =Creating a Thread=
 first of all we need to include *sckt* header to use the library
