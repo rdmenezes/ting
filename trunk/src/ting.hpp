@@ -253,7 +253,7 @@ class M_DECLSPEC QuitMessage : public Message{
             thr(thread)
     {
         if(!this->thr){
-            //TODO: throw exception
+            throw ting::Exc("QuitMessage::QuitMessage(): thread pointer passed is 0");
         }
     };
     

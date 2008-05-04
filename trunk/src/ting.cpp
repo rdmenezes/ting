@@ -411,10 +411,24 @@ void CondVar::Notify(){
 #endif
 };
 
+#ifdef __WIN32__
+static LARGE_INTEGER perfCounterFreq = {0};
+#endif
+
 ting::u32 ting::GetTicks(){
 #ifdef __WIN32__
-    //TODO: use QueryPerformanceCounter() ???
-    return GetTickCount();
+    if(perfCounterFreq.QuadPart == 0){
+        if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
+            //looks like the system does not support high resolution tick counter
+            return GetTickCount();
+        }
+    }
+    LARGE_INTEGER ticks;
+    if(QueryPerformanceCounter(&ticks) == FALSE){
+        return GetTickCount();
+    }
+    
+    return uint((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
 #else
     clock_t ticks = clock();
     u64 msec = u64(ticks) * 1000 / CLOCKS_PER_SEC;
