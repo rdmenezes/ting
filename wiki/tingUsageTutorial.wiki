@@ -13,7 +13,7 @@ class MyThread : public ting::Thread{
 public:
     //override
     void Run(){
-        //do some thread acctions
+        //do some thread actions
     };
 };
 }}}
