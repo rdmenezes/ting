@@ -96,6 +96,7 @@ public:
 
 Now, we can send this message to the thread's queue
 {{{
+//Create and start the thread we're going to send the message to
 MyThread thread;
 thread.Start();
 
