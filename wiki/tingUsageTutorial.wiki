@@ -28,5 +28,40 @@ thr.Join();
 }}}
 
 
+
+
+Note that the destructor of _ting::Thread_ class also calls the _Join()_ method to ensure that the thread is finished before destroying the thread object. Before calling _Join()_ the destructor pushes a _ting::QuitMessage_ to thread's message queue (see next section about Messages and Queues), so you probably should do message handling in your implementation of _ting::Thread::Run()_ method.
+
 =Messages and Message Queues=
-To Be Done!
+Every thread object has its own message queue _ting::Thread::queue_, thus the thread can receive and handle messages from other threads.
+
+Typical implementation of the _ting::Thread::Run()_ method which handles messages looks as follows
+{{{
+void MyThread::Run(){
+    while( !this->quitFlag){
+        std::auto_ptr<ting::Message> m = this->queue.GetMsg();
+        m->Handle();
+    }
+};
+}}}
+This example use _ting::Queue::GetMsg()_ to retrieve messages from the queue, _GetMsg()_ blocks execution if there are no messages on the queue until some message arrives.
+
+It is also possible to use _ting::Queue::PeekMsg()_ which does not block execution, typical implementation of _Run()_ method will look as follows
+
+{{{
+void MyThread::Run(){
+    while( !this->quitFlag){
+        //handle all messages on the queue
+        std::auto_ptr<ting::Message> m;
+        while( (m = this->queue.PeekMsg()).get() != 0){
+            m->Handle();
+        }
+        //do some actions to be done every cycle
+        //...
+    }
+};
+}}}
+
+Note taht each thread object has a quitFlag volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
+
+Note that _ting::QuitMessage_ will set the _quitFlag_ when it is handled.
