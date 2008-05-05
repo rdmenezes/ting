@@ -10,6 +10,11 @@ first of all we need to include *sckt* header to use the library
 After that we can start using the library. To create a thread one needs to derive a new class representing her thread from ting::Thread base class and override its ting::Thread::Run() method
 {{{
 class MyThread : public ting::Thread{
+    //define some variables specific to your thread,
+    //in this example we have two ints: a and b
+    int a;
+    int b;
+
 public:
     //override
     void Run(){
@@ -26,11 +31,9 @@ After starting the thread we can wait for it to finish its execution by calling 
 {{{
 thr.Join();
 }}}
-
-
-
-
 Note that the destructor of _ting::Thread_ class also calls the _Join()_ method to ensure that the thread is finished before destroying the thread object. Before calling _Join()_ the destructor pushes a _ting::QuitMessage _ to thread's message queue (see next section about Messages and Queues), so you probably should do message handling in your implementation of _ting::Thread::Run()_ method.
+
+
 
 =Messages and Message Queues=
 Every thread object has its own message queue (_ting::Thread::queue_), thus the thread can receive and handle messages from other threads.
@@ -65,3 +68,40 @@ void MyThread::Run(){
 Note that each thread object has a _quitFlag_ volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
 
 Note that _ting::QuitMessage _ will set the _quitFlag_ when it is handled.
+
+==Creating your own message==
+Messages is a mean to ask some thread to execute some code.
+To do this one needs to create his/her own message (implementing its handler) and send it to the threads queue.
+
+Let's define our own message class deriving it from _ting::Message _
+{{{
+class MyMessage : public ting::Message{
+    MyThread *myThr;
+public:
+    MyMessage(MyThread *mt) :
+            myThr(mt)
+    {
+        //assert that this->myThr is not 0.
+        //...
+    };
+
+    //override
+    void Handle(){
+        //implement handler for this message
+        this->myThr->a = 10;
+        this->myThr->b = 20;
+    };
+};
+}}}
+
+Now, we can send this message to the thread's queue
+{{{
+MyThread thread;
+thread.Start();
+
+//create the message
+std::auto_ptr<ting::Message> msg( new MyMessage(&thread) );
+
+//send the message
+thread.PushMessage(msg);
+}}}
