@@ -30,10 +30,10 @@ thr.Join();
 
 
 
-Note that the destructor of _ting::Thread_ class also calls the _Join()_ method to ensure that the thread is finished before destroying the thread object. Before calling _Join()_ the destructor pushes a _ting::QuitMessage_ to thread's message queue (see next section about Messages and Queues), so you probably should do message handling in your implementation of _ting::Thread::Run()_ method.
+Note that the destructor of _ting::Thread_ class also calls the _Join()_ method to ensure that the thread is finished before destroying the thread object. Before calling _Join()_ the destructor pushes a _ting::QuitMessage _ to thread's message queue (see next section about Messages and Queues), so you probably should do message handling in your implementation of _ting::Thread::Run()_ method.
 
 =Messages and Message Queues=
-Every thread object has its own message queue _ting::Thread::queue_, thus the thread can receive and handle messages from other threads.
+Every thread object has its own message queue (_ting::Thread::queue_), thus the thread can receive and handle messages from other threads.
 
 Typical implementation of the _ting::Thread::Run()_ method which handles messages looks as follows
 {{{
@@ -62,6 +62,6 @@ void MyThread::Run(){
 };
 }}}
 
-Note taht each thread object has a quitFlag volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
+Note that each thread object has a _quitFlag_ volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
 
 Note that _ting::QuitMessage_ will set the _quitFlag_ when it is handled.
