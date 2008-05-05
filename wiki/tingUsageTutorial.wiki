@@ -64,4 +64,4 @@ void MyThread::Run(){
 
 Note that each thread object has a _quitFlag_ volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
 
-Note that _ting::QuitMessage_ will set the _quitFlag_ when it is handled.
+Note that _ting::QuitMessage _ will set the _quitFlag_ when it is handled.
