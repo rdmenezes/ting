@@ -105,3 +105,4 @@ std::auto_ptr<ting::Message> msg( new MyMessage(&thread) );
 //send the message
 thread.PushMessage(msg);
 }}}
+Note that our _Handle()_ method accesses private variables of the thread, so one should probably add a friend declaration to the MyThread class to indicate that MyMessage is a friend of MyThread class and can access its private variables. This will also ideologically indicate that MyThread can handle messages of type MyMessage.
