@@ -540,5 +540,8 @@ public:
 
 u32 GetTicks();
 
-};//~namespace ting
+}//~namespace ting
+
+//NOTE: do not put semicolon after namespace, some compilers issue a warning on this thinking that it is a declaration.
+
 #endif//~once
