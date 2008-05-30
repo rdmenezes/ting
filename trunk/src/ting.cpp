@@ -31,7 +31,7 @@ THE SOFTWARE. */
 
 #include <assert.h>
 
-//#include <iostream>
+#define M_TING_ASSERT(x) assert(x)
 
 //
 //  Windows specific definitions
@@ -53,6 +53,9 @@ typedef HANDLE T_Semaphore;
 typedef RThread T_Thread;
 typedef RCriticalSection T_Mutex;
 typedef RSemaphore T_Semaphore;
+
+#undef M_TING_ASSERT
+#define M_TING_ASSERT(x) __ASSERT_ALWAYS((x),User::Panic(_L("ASSERTION FAILED!"),3));
 
 #else //assume pthread
 #define M_PTHREAD
@@ -110,7 +113,7 @@ static void* RunThread(void *data)
     try{
         thr->Run();
     }catch(...){
-        assert(false);
+        M_TING_ASSERT(false)
     }
     
 #ifdef M__PTHREAD
