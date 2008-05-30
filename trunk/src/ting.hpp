@@ -525,9 +525,7 @@ public:
     /**
     @brief Send 'Quit' message to thread's queue.
     */
-    void PushQuitMessage(){
-        this->PushMessage( ting::MsgAutoPtr(new QuitMessage(this)) );
-    };
+    void PushQuitMessage();
 
     /**
     @brief Send a message to thread's queue.

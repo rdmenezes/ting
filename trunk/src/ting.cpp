@@ -201,6 +201,17 @@ Thread::~Thread(){
     this->Join();
 };
 
+void Thread::PushQuitMessage(){
+    ting::MsgAutoPtr msg(new QuitMessage(this));
+    
+#ifdef __SYMBIAN32__
+    if(msg.get() == 0)
+        throw ting::Exc("Thread::PushQuitMessage(): failed to create message object, memory allocation error");
+#endif
+    
+    this->PushMessage( msg );
+};
+
 //static
 void Thread::Sleep(uint msec){
 #ifdef __WIN32__
