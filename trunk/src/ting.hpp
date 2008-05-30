@@ -36,9 +36,11 @@ THE SOFTWARE. */
 #define M_DECLSPEC
 #endif
 
+#ifndef __SYMBIAN32__
 #include <memory>
 #include <exception>
 #include <new>
+#endif
 
 namespace ting{
 
@@ -76,15 +78,20 @@ class Thread;
 /**
 @brief Basic exception class
 */
-class M_DECLSPEC Exc : public std::exception{
+#ifdef __SYMBIAN32__ // we have symbian which does not have std c++ library
+class M_DECLSPEC Exc
+#else
+class M_DECLSPEC Exc : public std::exception
+#endif
+{
     char *msg;
 public:
     /**
     @brief Exception constructor.
     @param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
     */
-    Exc(const char* message = 0) throw(std::bad_alloc);
-    virtual ~Exc()throw();
+    Exc(const char* message = 0);
+    virtual ~Exc();
     
     /**
     @brief Returns a pointer to exception message.
@@ -92,7 +99,7 @@ public:
             Note, that after the exception object is destroyed the pointer returned by this method become invalid.
     */
     //override from std::exception
-    const char *what()const throw(){
+    const char *what()const{
         return this->msg;//this->msg is never 0 (see Exc constructor for more info).
     };
 };
@@ -116,9 +123,9 @@ public:
     
 private:
     //forbid copying
-    Mutex(const Mutex& m){};
-    Mutex(Mutex& m){};
-    Mutex& operator=(const Mutex& m){return *this;};
+    Mutex(const Mutex& ){};
+    Mutex(Mutex& ){};
+    Mutex& operator=(const Mutex& ){return *this;};
     
 public:
     Mutex();
@@ -173,9 +180,9 @@ public:
     
 private:
     //forbid copying
-    Semaphore(const Semaphore& m){};
-    Semaphore(Semaphore& m){};
-    Semaphore& operator=(const Semaphore& m){return *this;};
+    Semaphore(const Semaphore& ){};
+    Semaphore(Semaphore& ){};
+    Semaphore& operator=(const Semaphore& ){return *this;};
 public:
     
     Semaphore(uint initialValue = 0);
@@ -197,9 +204,9 @@ public:
 #endif //~DOC_DONT_EXTRACT
 private:
     //forbid copying
-    CondVar(const CondVar& c){};
-    CondVar(CondVar& c){};
-    CondVar& operator=(const CondVar& c){return *this;};
+    CondVar(const CondVar& ){};
+    CondVar(CondVar& ){};
+    CondVar& operator=(const CondVar& ){return *this;};
 public:
     CondVar();
     ~CondVar();
@@ -208,6 +215,206 @@ public:
 
     void Notify();
 };
+
+#ifdef __SYMBIAN32__
+template<typename _Tp> class auto_ptr{
+    private:
+      _Tp* _M_ptr;
+      
+    public:
+      /// The pointed-to type.
+      typedef _Tp element_type;
+      
+      /**
+       *  @brief  An %auto_ptr is usually constructed from a raw pointer.
+       *  @param  p  A pointer (defaults to NULL).
+       *
+       *  This object now @e owns the object pointed to by @a p.
+       */
+      explicit
+      auto_ptr(element_type* __p = 0) throw() : _M_ptr(__p) { }
+
+      /**
+       *  @brief  An %auto_ptr can be constructed from another %auto_ptr.
+       *  @param  a  Another %auto_ptr of the same type.
+       *
+       *  This object now @e owns the object previously owned by @a a,
+       *  which has given up ownsership.
+       */
+      auto_ptr(auto_ptr& __a) throw() : _M_ptr(__a.release()) { }
+
+      /**
+       *  @brief  An %auto_ptr can be constructed from another %auto_ptr.
+       *  @param  a  Another %auto_ptr of a different but related type.
+       *
+       *  A pointer-to-Tp1 must be convertible to a
+       *  pointer-to-Tp/element_type.
+       *
+       *  This object now @e owns the object previously owned by @a a,
+       *  which has given up ownsership.
+       */
+      template<typename _Tp1>
+        auto_ptr(auto_ptr<_Tp1>& __a) throw() : _M_ptr(__a.release()) { }
+
+      /**
+       *  @brief  %auto_ptr assignment operator.
+       *  @param  a  Another %auto_ptr of the same type.
+       *
+       *  This object now @e owns the object previously owned by @a a,
+       *  which has given up ownsership.  The object that this one @e
+       *  used to own and track has been deleted.
+       */
+      auto_ptr&
+      operator=(auto_ptr& __a) throw()
+      {
+	reset(__a.release());
+	return *this;
+      }
+
+      /**
+       *  @brief  %auto_ptr assignment operator.
+       *  @param  a  Another %auto_ptr of a different but related type.
+       *
+       *  A pointer-to-Tp1 must be convertible to a pointer-to-Tp/element_type.
+       *
+       *  This object now @e owns the object previously owned by @a a,
+       *  which has given up ownsership.  The object that this one @e
+       *  used to own and track has been deleted.
+       */
+      template<typename _Tp1>
+        auto_ptr&
+        operator=(auto_ptr<_Tp1>& __a) throw()
+        {
+	  reset(__a.release());
+	  return *this;
+	}
+
+      /**
+       *  When the %auto_ptr goes out of scope, the object it owns is
+       *  deleted.  If it no longer owns anything (i.e., @c get() is
+       *  @c NULL), then this has no effect.
+       *
+       *  @if maint
+       *  The C++ standard says there is supposed to be an empty throw
+       *  specification here, but omitting it is standard conforming.  Its
+       *  presence can be detected only if _Tp::~_Tp() throws, but this is
+       *  prohibited.  [17.4.3.6]/2
+       *  @end maint
+       */
+      ~auto_ptr() { delete _M_ptr; }
+      
+      /**
+       *  @brief  Smart pointer dereferencing.
+       *
+       *  If this %auto_ptr no longer owns anything, then this
+       *  operation will crash.  (For a smart pointer, "no longer owns
+       *  anything" is the same as being a null pointer, and you know
+       *  what happens when you dereference one of those...)
+       */
+      element_type&
+      operator*() const throw() 
+      {
+	_GLIBCXX_DEBUG_ASSERT(_M_ptr != 0);
+	return *_M_ptr; 
+      }
+      
+      /**
+       *  @brief  Smart pointer dereferencing.
+       *
+       *  This returns the pointer itself, which the language then will
+       *  automatically cause to be dereferenced.
+       */
+      element_type*
+      operator->() const throw() 
+      {
+	_GLIBCXX_DEBUG_ASSERT(_M_ptr != 0);
+	return _M_ptr; 
+      }
+      
+      /**
+       *  @brief  Bypassing the smart pointer.
+       *  @return  The raw pointer being managed.
+       *
+       *  You can get a copy of the pointer that this object owns, for
+       *  situations such as passing to a function which only accepts
+       *  a raw pointer.
+       *
+       *  @note  This %auto_ptr still owns the memory.
+       */
+      element_type*
+      get() const throw() { return _M_ptr; }
+      
+      /**
+       *  @brief  Bypassing the smart pointer.
+       *  @return  The raw pointer being managed.
+       *
+       *  You can get a copy of the pointer that this object owns, for
+       *  situations such as passing to a function which only accepts
+       *  a raw pointer.
+       *
+       *  @note  This %auto_ptr no longer owns the memory.  When this object
+       *  goes out of scope, nothing will happen.
+       */
+      element_type*
+      release() throw()
+      {
+	element_type* __tmp = _M_ptr;
+	_M_ptr = 0;
+	return __tmp;
+      }
+      
+      /**
+       *  @brief  Forcibly deletes the managed object.
+       *  @param  p  A pointer (defaults to NULL).
+       *
+       *  This object now @e owns the object pointed to by @a p.  The
+       *  previous object has been deleted.
+       */
+      void
+      reset(element_type* __p = 0) throw()
+      {
+	if (__p != _M_ptr)
+	  {
+	    delete _M_ptr;
+	    _M_ptr = __p;
+	  }
+      }
+      
+      /** @{
+       *  @brief  Automatic conversions
+       *
+       *  These operations convert an %auto_ptr into and from an auto_ptr_ref
+       *  automatically as needed.  This allows constructs such as
+       *  @code
+       *    auto_ptr<Derived>  func_returning_auto_ptr(.....);
+       *    ...
+       *    auto_ptr<Base> ptr = func_returning_auto_ptr(.....);
+       *  @endcode
+       */
+//      auto_ptr(auto_ptr_ref<element_type> __ref) throw()
+//      : _M_ptr(__ref._M_ptr) { }
+      
+//      auto_ptr&
+//      operator=(auto_ptr_ref<element_type> __ref) throw()
+//      {
+//	if (__ref._M_ptr != this->get())
+//	  {
+//	    delete _M_ptr;
+//	    _M_ptr = __ref._M_ptr;
+//	  }
+//	return *this;
+//      }
+      
+//      template<typename _Tp1>
+//        operator auto_ptr_ref<_Tp1>() throw()
+//        { return auto_ptr_ref<_Tp1>(this->release()); }
+//
+//      template<typename _Tp1>
+//        operator auto_ptr<_Tp1>() throw()
+//        { return auto_ptr<_Tp1>(this->release()); }
+      /** @}  */
+};
+#endif
 
 class M_DECLSPEC Message{
     friend class Queue;
@@ -225,6 +432,12 @@ class M_DECLSPEC Message{
     virtual void Handle()=0;
 };
 
+#ifndef __SYMBIAN32__
+typedef std::auto_ptr<Message> MsgAutoPtr;
+#else
+typedef auto_ptr<Message> MsgAutoPtr;
+#endif
+
 class M_DECLSPEC Queue{
     CondVar cond;
     
@@ -239,11 +452,11 @@ class M_DECLSPEC Queue{
     {};
     ~Queue();
     
-    void PushMessage(std::auto_ptr<Message> msg);
+    void PushMessage(MsgAutoPtr msg);
     
-    std::auto_ptr<Message> PeekMsg();
+    MsgAutoPtr PeekMsg();
     
-    std::auto_ptr<Message> GetMsg();
+    MsgAutoPtr GetMsg();
 };
 
 class M_DECLSPEC QuitMessage : public Message{
@@ -313,14 +526,14 @@ public:
     @brief Send 'Quit' message to thread's queue.
     */
     void PushQuitMessage(){
-        this->PushMessage( std::auto_ptr<Message>(new QuitMessage(this)) );
+        this->PushMessage( ting::MsgAutoPtr(new QuitMessage(this)) );
     };
 
     /**
     @brief Send a message to thread's queue.
     @param msg - a message to send.
     */
-    void PushMessage(std::auto_ptr<Message> msg){
+    void PushMessage(ting::MsgAutoPtr msg){
         this->queue.PushMessage(msg);
     };
 };

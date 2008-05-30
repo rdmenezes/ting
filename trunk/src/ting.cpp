@@ -46,8 +46,16 @@ typedef HANDLE T_Thread;
 typedef CRITICAL_SECTION T_Mutex;
 typedef HANDLE T_Semaphore;
 
+#elif defined(__SYMBIAN32__)
+#include <string.h>
+#include <e32std.h>
+#include <hal.h>
+typedef RThread T_Thread;
+typedef RCriticalSection T_Mutex;
+typedef RSemaphore T_Semaphore;
+
 #else //assume pthread
-#define M__PTHREAD
+#define M_PTHREAD
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -76,7 +84,7 @@ inline static T_Mutex& CastToMutex(ting::Mutex::SystemIndependentMutexHandle& mu
     return *reinterpret_cast<T_Mutex*>(&mut);
 };
 
-#ifndef __WIN32__
+#if !defined(__WIN32__) && !defined(__SYMBIAN32__)
 inline static T_CondVar& CastToCondVar(ting::CondVar::SystemIndependentCondVarHandle& cond){
     M_TING_STATIC_ASSERT( sizeof(cond) >= sizeof(T_CondVar) )
     return *reinterpret_cast<T_CondVar*>(&cond);
@@ -90,7 +98,9 @@ inline static T_Semaphore& CastToSemaphore(ting::Semaphore::SystemIndependentSem
 
 #ifdef __WIN32__
 static DWORD __stdcall RunThread(void *data)
-#elif defined(M__PTHREAD) //pthread
+#elif defined(__SYMBIAN32__)
+static TInt RunThread(TAny *data)
+#elif defined(M_PTHREAD) //pthread
 static void* RunThread(void *data)
 #else
 #error "Unknown platform"
@@ -131,6 +141,14 @@ void Thread::Start(uint stackSize){
     if(CastToThread(this->thr) == NULL){
         throw ting::Exc("Thread::Start(): starting thread failed");
     }
+#elif defined(__SYMBIAN32__)
+    
+    if( CastToThread(this->thr).Create(_L("ting thread"), &RunThread,
+                                       stackSize==0 ? KDefaultStackSize : stackSize,
+                                       NULL, reinterpret_cast<TAny*>(this)) != KErrNone){
+        throw ting::Exc("Thread::Start(): starting thread failed");
+    }
+    CastToThread(this->thr).Resume();//start the thread execution
 #else //pthread
     {
         pthread_attr_t attr;
@@ -161,6 +179,13 @@ void Thread::Join(){
     WaitForSingleObject(CastToThread(this->thr), INFINITE);
     CloseHandle(CastToThread(this->thr));
     CastToThread(this->thr) = NULL;
+#elif defined(__SYMBIAN32__)
+    {
+        TRequestStatus reqStat;
+        CastToThread(this->thr).Logon(reqStat);
+        User::WaitForRequest(reqStat);
+        CastToThread(this->thr).Close();
+    }
 #else //pthread
     pthread_join(CastToThread(this->thr), 0);
 #endif
@@ -177,7 +202,9 @@ Thread::~Thread(){
 void Thread::Sleep(uint msec){
 #ifdef __WIN32__
     SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
-#else //pthreads
+#elif defined(__SYMBIAN32__)
+    User::After(msec*1000);
+#else //assume pthreads
     if(msec == 0){
         pthread_yield();
     }else{
@@ -188,17 +215,26 @@ void Thread::Sleep(uint msec){
 
 
 
-ting::Exc::Exc(const char* message) throw(std::bad_alloc){
+ting::Exc::Exc(const char* message){
     if(message==0)
         message = "unknown exception";
     
     int len = strlen(message);
+
+#ifdef __SYMBIAN32__
+    //if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
     this->msg = new char[len+1];
+#else
+    //we do not want another exception, use std::no_throw
+    this->msg = new(std::no_throw) char[len+1];
+#endif
+    if(!this->msg)
+        return;
     memcpy(this->msg, message, len);
     this->msg[len] = 0;//null-terminate
 };
 
-ting::Exc::~Exc()throw(){
+ting::Exc::~Exc(){
     delete[] this->msg;
 };
 
@@ -207,6 +243,10 @@ ting::Exc::~Exc()throw(){
 Mutex::Mutex(){
 #ifdef __WIN32__
     InitializeCriticalSection(&CastToMutex(this->mut));
+#elif defined(__SYMBIAN32__)
+    if( CastToMutex(this->mut).CreateLocal() != KErrNone){
+        throw ting::Exc("Mutex::Mutex(): failed creating mutex");
+    }
 #else //pthread
     pthread_mutex_init(&CastToMutex(this->mut), NULL);
 #endif
@@ -215,6 +255,8 @@ Mutex::Mutex(){
 Mutex::~Mutex(){
 #ifdef __WIN32__
     DeleteCriticalSection(&CastToMutex(this->mut) );
+#elif defined(__SYMBIAN32__)
+    CastToMutex(this->mut).Close();
 #else //pthread
     pthread_mutex_destroy(&CastToMutex(this->mut));
 #endif
@@ -223,6 +265,8 @@ Mutex::~Mutex(){
 void Mutex::Lock(){
 #ifdef __WIN32__
     EnterCriticalSection(&CastToMutex(this->mut));
+#elif defined(__SYMBIAN32__)
+    CastToMutex(this->mut).Wait();
 #else //pthread
     pthread_mutex_lock(&CastToMutex(this->mut));
 #endif
@@ -231,6 +275,8 @@ void Mutex::Lock(){
 void Mutex::Unlock(){
 #ifdef __WIN32__
     LeaveCriticalSection(&CastToMutex(this->mut));
+#elif defined(__SYMBIAN32__)
+    CastToMutex(this->mut).Signal();
 #else //pthread
     pthread_mutex_unlock(&CastToMutex(this->mut));
 #endif
@@ -245,6 +291,10 @@ Semaphore::Semaphore(uint initialValue){
 //        std::cout<<"Semaphore::Semaphore(): failed"<<std::endl;
         throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
     }
+#elif defined(__SYMBIAN32__)
+    if(CastToSemaphore(this->sem).CreateLocal(initialValue) != KErrNone){
+        throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
+    }
 #else //pthread
     if( sem_init(&CastToSemaphore(this->sem), 0, initialValue) < 0 ){
         throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
@@ -256,6 +306,8 @@ Semaphore::Semaphore(uint initialValue){
 Semaphore::~Semaphore(){
 #ifdef __WIN32__
     CloseHandle(CastToSemaphore(this->sem));
+#elif defined(__SYMBIAN32__)
+    CastToSemaphore(this->sem).Close();
 #else //pthread
     sem_destroy(&CastToSemaphore(this->sem));
 #endif
@@ -274,6 +326,12 @@ bool Semaphore::Wait(uint timeoutMillis){
         default:
             throw ting::Exc("Semaphore::Wait(): wait failed");
             break;
+    }
+#elif defined(__SYMBIAN32__)
+    if(timeoutMillis == 0){
+        CastToSemaphore(this->sem).Wait();
+    }else{
+        throw ting::Exc("Semaphore::Wait(): timeout wait unimplemented on Symbian, TODO: implement");
     }
 #else //pthread
     if(timeoutMillis == 0){
@@ -306,6 +364,8 @@ void Semaphore::Post(){
     if( ReleaseSemaphore(CastToSemaphore(this->sem), 1, NULL) == 0 ){
         throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
     }
+#elif defined(__SYMBIAN32__)
+    CastToSemaphore(this->sem).Signal();
 #else //pthread
     if(sem_post(&CastToSemaphore(this->sem)) < 0){
         throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
@@ -346,7 +406,7 @@ static inline ting::uint& CVNumSignals(ting::CondVar* cv){
 };
 
 CondVar::CondVar(){
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__SYMBIAN32__)
     CVMut(this) = new Mutex();
     CVSemWait(this) = new Semaphore();
     CVSemDone(this) = new Semaphore();
@@ -358,7 +418,7 @@ CondVar::CondVar(){
 };
 
 CondVar::~CondVar(){
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__SYMBIAN32__)
     delete CVMut(this);
     delete CVSemWait(this);
     delete CVSemDone(this);
@@ -368,7 +428,7 @@ CondVar::~CondVar(){
 };
 
 void CondVar::Wait(Mutex &mutex){
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__SYMBIAN32__)
     CVMut(this)->Lock();
     ++CVNumWaiters(this);
     CVMut(this)->Unlock();
@@ -394,7 +454,7 @@ void CondVar::Wait(Mutex &mutex){
 };
 
 void CondVar::Notify(){
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__SYMBIAN32__)
     CVMut(this)->Lock();
     
     if(CVNumWaiters(this) > CVNumSignals(this)){
@@ -413,6 +473,8 @@ void CondVar::Notify(){
 
 #ifdef __WIN32__
 static LARGE_INTEGER perfCounterFreq = {0};
+#elif defined(__SYMBIAN32__)
+static TUint32 counterFreq = 0;
 #endif
 
 ting::u32 ting::GetTicks(){
@@ -429,6 +491,13 @@ ting::u32 ting::GetTicks(){
     }
     
     return uint((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
+#elif defined(__SYMBIAN32__)
+    if(counterFreq == 0){
+        TInt freq;
+        HAL::Get(HALData::EFastCounterFrequency, freq);
+        counterFreq = freq;
+    }
+    return u32( (u64(User::FastCounter()) * 1000) / counterFreq );
 #else
     clock_t ticks = clock();
     u64 msec = u64(ticks) * 1000 / CLOCKS_PER_SEC;
@@ -437,7 +506,7 @@ ting::u32 ting::GetTicks(){
 };
 
 
-void Queue::PushMessage(std::auto_ptr<Message> msg){
+void Queue::PushMessage(ting::MsgAutoPtr msg){
     {
         Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
         if(this->first){
@@ -453,23 +522,23 @@ void Queue::PushMessage(std::auto_ptr<Message> msg){
     this->cond.Notify();
 };
 
-std::auto_ptr<Message> Queue::PeekMsg(){
+ting::MsgAutoPtr Queue::PeekMsg(){
     Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
     if(this->first){
         Message* ret = this->first;
         this->first = this->first->next;
-        return std::auto_ptr<Message>(ret);
+        return ting::MsgAutoPtr(ret);
     }
     
-    return std::auto_ptr<Message>();
+    return ting::MsgAutoPtr();
 };
 
-std::auto_ptr<Message> Queue::GetMsg(){
+ting::MsgAutoPtr Queue::GetMsg(){
     Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
     if(this->first){
         Message* ret = this->first;
         this->first = this->first->next;
-        return std::auto_ptr<Message>(ret);
+        return ting::MsgAutoPtr(ret);
     }
     
     this->cond.Wait(this->mut);
@@ -478,7 +547,7 @@ std::auto_ptr<Message> Queue::GetMsg(){
     
     Message* ret = this->first;
     this->first = this->first->next;
-    return std::auto_ptr<Message>(ret);
+    return ting::MsgAutoPtr(ret);
 };
 
 Queue::~Queue(){
