@@ -91,8 +91,8 @@ public:
     @brief Exception constructor.
     @param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
     */
-    Exc(const char* message = 0);
-    virtual ~Exc();
+    Exc(const char* message = 0) throw();
+    virtual ~Exc() throw();
     
     /**
     @brief Returns a pointer to exception message.
@@ -100,7 +100,7 @@ public:
             Note, that after the exception object is destroyed the pointer returned by this method become invalid.
     */
     //override from std::exception
-    const char *what()const{
+    const char *what()const throw(){
         return this->msg;//this->msg is never 0 (see Exc constructor for more info).
     };
 };

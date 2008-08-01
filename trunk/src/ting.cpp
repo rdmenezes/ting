@@ -31,7 +31,7 @@ THE SOFTWARE. */
 
 #include <assert.h>
 
-#define M_TING_ASSERT(x) assert(x)
+#define M_TING_ASSERT(x) assert(x);
 
 //
 //  Windows specific definitions
@@ -229,7 +229,7 @@ void Thread::Sleep(uint msec){
 
 
 
-ting::Exc::Exc(const char* message){
+ting::Exc::Exc(const char* message) throw(){
     if(message==0)
         message = "unknown exception";
     
@@ -239,8 +239,8 @@ ting::Exc::Exc(const char* message){
     //if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
     this->msg = new char[len+1];
 #else
-    //we do not want another exception, use std::no_throw
-    this->msg = new(std::no_throw) char[len+1];
+    //we do not want another exception, use std::nothrow
+    this->msg = new(std::nothrow) char[len+1];
 #endif
     if(!this->msg)
         return;
@@ -248,7 +248,7 @@ ting::Exc::Exc(const char* message){
     this->msg[len] = 0;//null-terminate
 };
 
-ting::Exc::~Exc(){
+ting::Exc::~Exc() throw(){
     delete[] this->msg;
 };
 
