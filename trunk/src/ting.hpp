@@ -18,7 +18,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE. */ 
+THE SOFTWARE. */
 
 // (c) Ivan Gagis
 // e-mail: igagis@gmail.com
@@ -93,7 +93,7 @@ public:
     */
     Exc(const char* message = 0) throw();//use throw() because base class (std::exception) uses it
     virtual ~Exc() throw();//use throw() because base class (std::exception) uses it
-    
+
     /**
     @brief Returns a pointer to exception message.
     @return a pointer to objects internal memory buffer holding the exception message null-terminated string.
@@ -111,27 +111,23 @@ Mutex stands for "Mutual execution".
 */
 class M_DECLSPEC Mutex{
     friend class CondVar;
-    
+
 public:
-#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this class
-    //Size of this struct should be large enough to hold mutex handle on all
-    //platforms.
-    //pthread requires 24 bytes.
-    struct SystemIndependentMutexHandle{
-        ting::byte handle[24];
-    } mut;
+#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
+	//A pointer to store system dependent handle
+    void* handle;
 #endif //~DOC_DONT_EXTRACT
-    
+
 private:
     //forbid copying
     Mutex(const Mutex& ){};
     Mutex(Mutex& ){};
     Mutex& operator=(const Mutex& ){return *this;};
-    
+
 public:
     Mutex();
     ~Mutex();
-    
+
     /**
     @brief Acquire mutex lock.
     If one thread acquired the mutex lock then all other threads
@@ -143,7 +139,7 @@ public:
     @brief Release mutex lock.
     */
     void Unlock();
-    
+
     /**
     @brief Helper class which automatically Locks the given mutex.
     This helper class automatically locks the given mutex in the constructor and
@@ -170,38 +166,38 @@ public:
 */
 class M_DECLSPEC Semaphore{
 public:
-#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this class
-    //Size of this struct should be large enough to hold condvar handle on all
-    //platforms.
-    //pthread requires 16 bytes.
-    struct SystemIndependentSemaphoreHandle{
-        ting::byte handle[16];
-    } sem;
+#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
+	//A pointer to store system dependent handle
+    void* handle;
 #endif //~DOC_DONT_EXTRACT
-    
+
 private:
     //forbid copying
     Semaphore(const Semaphore& ){};
     Semaphore(Semaphore& ){};
     Semaphore& operator=(const Semaphore& ){return *this;};
 public:
-    
+
     Semaphore(uint initialValue = 0);
     ~Semaphore();
-    
+
     bool Wait(uint timeoutMillis = 0);
     void Post();
 };
 
 class M_DECLSPEC CondVar{
 public:
-#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this class
-    //Size of this struct should be large enough to hold condvar handle on all
-    //platforms.
-    //pthread requires 48 bytes.
-    struct SystemIndependentCondVarHandle{
-        ting::byte handle[48];
-    } cond;
+#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
+#if defined(__WIN32__) || defined(__SYMBIAN32__)
+	Mutex* mutex;
+	Semaphore* sem_wait;
+	Semaphore*sem_done;
+	uint num_waiters;
+	uint num_signals;
+#else
+	//A pointer to store system dependent handle
+    void* handle;
+#endif
 #endif //~DOC_DONT_EXTRACT
 private:
     //forbid copying
@@ -219,17 +215,17 @@ public:
 
 class M_DECLSPEC Message{
     friend class Queue;
-    
+
     Message *next;//pointer to the next message in a single-linked list
-    
+
   protected:
     Message() :
             next(0)
     {};
-    
+
   public:
     virtual ~Message(){};
-    
+
     virtual void Handle()=0;
 };
 
@@ -237,9 +233,9 @@ typedef std::auto_ptr<Message> MsgAutoPtr;
 
 class M_DECLSPEC Queue{
     CondVar cond;
-    
+
     Mutex mut;
-    
+
     Message *first,
             *last;
   public:
@@ -248,11 +244,11 @@ class M_DECLSPEC Queue{
             last(0)
     {};
     ~Queue();
-    
+
     void PushMessage(MsgAutoPtr msg);
-    
+
     MsgAutoPtr PeekMsg();
-    
+
     MsgAutoPtr GetMsg();
 };
 
@@ -266,7 +262,7 @@ class M_DECLSPEC QuitMessage : public Message{
             throw ting::Exc("QuitMessage::QuitMessage(): thread pointer passed is 0");
         }
     };
-    
+
     //override
     void Handle();
 };
@@ -279,27 +275,26 @@ Thread::Run() method.
 class M_DECLSPEC Thread{
     friend class QuitMessage;
 //    static int ThreadRunFunction(void* thrObj);
-    
+
     ting::Mutex mutex;
 public:
-#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this class
-    struct SystemIndependentThreadHandle{
-        ting::byte handle[sizeof(void*)];
-    } thr;
+#ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
+	//A pointer to store system dependent handle
+    void* handle;
 #endif //~DOC_DONT_EXTRACT
-    
+
 protected:
     volatile bool quitFlag;//looks like it is no necessary to protect this flag by mutex, volatile will be enough
     volatile bool isRunning;//true if thread is running
-    
+
     Queue queue;
 public:
     Thread();
-    
+
     virtual ~Thread();
-    
+
     virtual void Run()=0;
-    
+
     /**
     @brief Start thread execution.
     @param stackSize - size of the stack in bytes which should be allocated for this thread.
@@ -307,18 +302,18 @@ public:
     */
     //0 stacksize stands for default stack size (platform dependent)
     void Start(uint stackSize = 0);
-    
+
     /**
     @brief Wait for thread finish its execution.
     */
     void Join();
-    
+
     /**
     @brief Suspend the thread for a given number of milliseconds.
     @param msec - number of milliseconds the thread should be suspended.
     */
     static void Sleep(uint msec = 0);
-    
+
     /**
     @brief Send 'Quit' message to thread's queue.
     */
