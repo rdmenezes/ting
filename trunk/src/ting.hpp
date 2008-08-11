@@ -188,7 +188,7 @@ public:
 class M_DECLSPEC CondVar{
 public:
 #ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
-#if defined(__WIN32__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 	Mutex* mutex;
 	Semaphore* sem_wait;
 	Semaphore*sem_done;

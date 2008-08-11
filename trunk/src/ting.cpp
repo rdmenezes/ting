@@ -242,7 +242,7 @@ ting::Exc::Exc(const char* message) throw(){
     if(message==0)
         message = "unknown exception";
 
-    int len = strlen(message);
+    size_t len = strlen(message);
 
 #ifdef __SYMBIAN32__
     //if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
