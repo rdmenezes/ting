@@ -2,7 +2,7 @@
 #labels Featured
 
 =Creating a Thread=
-first of all we need to include *sckt* header to use the library
+first of all we need to include *ting* header to use the library
 {{{
 #include <ting.hpp>
 }}}
