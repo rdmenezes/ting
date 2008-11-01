@@ -123,8 +123,9 @@ static void* RunThread(void *data)
 };
 
 Thread::Thread() :
-        quitFlag(false),
-        isRunning(false)
+		preallocatedQuitMessage(new QuitMessage(this)),
+		isRunning(false),
+        quitFlag(false)
 {
 	this->handle = new ThreadType();
 #if defined(__WIN32__)
@@ -207,14 +208,8 @@ Thread::~Thread(){
 };
 
 void Thread::PushQuitMessage(){
-    ting::MsgAutoPtr msg(new QuitMessage(this));
-
-#ifdef __SYMBIAN32__
-    if(msg.get() == 0)
-        throw ting::Exc("Thread::PushQuitMessage(): failed to create message object, memory allocation error");
-#endif
-
-    this->PushMessage( msg );
+//	ASSERT(this->preallocatedQuitMessage)
+    this->PushMessage(this->preallocatedQuitMessage);
 };
 
 //static

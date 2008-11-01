@@ -277,15 +277,19 @@ class M_DECLSPEC Thread{
 //    static int ThreadRunFunction(void* thrObj);
 
     ting::Mutex mutex;
+
+	ting::MsgAutoPtr preallocatedQuitMessage;
+
+	volatile bool isRunning;//true if thread is running
 public:
 #ifndef DOC_DONT_EXTRACT //direction to doxygen not to extract this member
 	//A pointer to store system dependent handle
     void* handle;
 #endif //~DOC_DONT_EXTRACT
 
+
 protected:
-    volatile bool quitFlag;//looks like it is no necessary to protect this flag by mutex, volatile will be enough
-    volatile bool isRunning;//true if thread is running
+    volatile bool quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
 
     Queue queue;
 public:
