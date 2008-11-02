@@ -4,7 +4,7 @@
 =Creating a Thread=
 first of all we need to include *ting* header to use the library
 {{{
-#include <ting.hpp>
+#include <ting/ting.hpp>
 }}}
 
 After that we can start using the library. To create a thread one needs to derive a new class representing her thread from ting::Thread base class and override its ting::Thread::Run() method
@@ -42,7 +42,7 @@ Typical implementation of the _ting::Thread::Run()_ method which handles message
 {{{
 void MyThread::Run(){
     while( !this->quitFlag){
-        std::auto_ptr<ting::Message> m = this->queue.GetMsg();
+        ting::Ptr<ting::Message> m = this->queue.GetMsg();
         m->Handle();
     }
 };
@@ -55,8 +55,7 @@ It is also possible to use _ting::Queue::PeekMsg()_ which does not block executi
 void MyThread::Run(){
     while( !this->quitFlag){
         //handle all messages on the queue
-        std::auto_ptr<ting::Message> m;
-        while( (m = this->queue.PeekMsg()).get() != 0){
+        while(ting::Ptr<ting::Message> m = this->queue.PeekMsg()){
             m->Handle();
         }
         //do some actions to be done every cycle
