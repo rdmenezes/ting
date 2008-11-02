@@ -48,7 +48,7 @@ template <class T_Type> inline void Exchange( T_Type &a, T_Type &b){
 //quick exchange two unsigned 32bit integers
 template <> inline void Exchange<u32>(u32 &x, u32 &y){
 //	TRACE(<<"Exchange<u32>(): invoked"<<std::endl)
-	//!!!Do not make y^=x^=y^=x;
+	//NOTE: Do not make y^=x^=y^=x;
 	//Some compilers (e.g. gcc4.1) may generate incorrect code
 	y ^= x;
 	x ^= y;

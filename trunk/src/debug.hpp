@@ -146,7 +146,7 @@ inline void LogAssert(const char* file, int line){
 namespace ting{
 namespace ting_debug{
 template <bool b> struct C_StaticAssert{
-    virtual void STATIC_ASSERTION_FAILED()=0;
+    virtual void STATIC_ASSERTION_FAILED() = 0;
     virtual ~C_StaticAssert(){};
 };
 template <> struct C_StaticAssert<true>{};
