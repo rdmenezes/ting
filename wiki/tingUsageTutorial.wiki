@@ -41,7 +41,7 @@ Every thread object has its own message queue (_ting::Thread::queue_), thus the 
 Typical implementation of the _ting::Thread::Run()_ method which handles messages looks as follows
 {{{
 void MyThread::Run(){
-    while( !this->quitFlag){
+    while(!this->quitFlag){
         ting::Ptr<ting::Message> m = this->queue.GetMsg();
         m->Handle();
     }
@@ -53,7 +53,7 @@ It is also possible to use _ting::Queue::PeekMsg()_ which does not block executi
 
 {{{
 void MyThread::Run(){
-    while( !this->quitFlag){
+    while(!this->quitFlag){
         //handle all messages on the queue
         while(ting::Ptr<ting::Message> m = this->queue.PeekMsg()){
             m->Handle();
