@@ -20,16 +20,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
+// General types definitions
+// Version 2
+//
 // Author: Ivan Gagis <igagis@gmail.com>
-// Version: 1
 
-// Description:
-//          ting is a ThreadING library
+#ifndef M_TYPES_HPP
+#define M_TYPES_HPP
 
-#ifndef M_ting_hpp
-#define M_ting_hpp
+#include "debug.hpp"
 
-#include "gendef.hpp"
-#include "Thread.hpp"
+namespace ting{
 
-#endif//~once
+typedef unsigned char u8;    STATIC_ASSERT(sizeof(u8) == 1)
+
+STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
+
+typedef signed char s8;    STATIC_ASSERT(sizeof(s8) == 1)
+typedef unsigned short int u16;    STATIC_ASSERT(sizeof(u16) == 2)
+typedef signed short int s16;    STATIC_ASSERT(sizeof(s16) == 2)
+typedef unsigned int u32;    STATIC_ASSERT(sizeof(u32) == 4)
+typedef signed int s32;    STATIC_ASSERT(sizeof(s32) == 4)
+typedef unsigned long long int u64;    STATIC_ASSERT(sizeof(u64) == 8 && u64(-1) == 0xffffffffffffffffLL)
+typedef long long int s64;    STATIC_ASSERT( sizeof(u64) == 8)
+
+typedef unsigned int uint;
+typedef u8 byte;
+
+}//~namespace ting
+
+#endif //~once

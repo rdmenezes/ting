@@ -21,15 +21,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 // Author: Ivan Gagis <igagis@gmail.com>
-// Version: 1
+// Version 9
 
-// Description:
-//          ting is a ThreadING library
+// General definitions
 
-#ifndef M_ting_hpp
-#define M_ting_hpp
+#ifndef M_GENDEF_HPP
+#define M_GENDEF_HPP
 
-#include "gendef.hpp"
-#include "Thread.hpp"
+#ifdef _MSC_VER //If Microsoft C++ compiler
+#pragma warning(disable:4290)
+#endif
 
-#endif//~once
+#include "debug.hpp" //debugging facilities
+
+#include "types.hpp"
+#include "Exc.hpp"
+
+namespace ting{
+
+template <class T_Type> inline void Exchange( T_Type &a, T_Type &b){
+	T_Type tmp = a;
+	a = b;
+	b = tmp;
+};
+
+//quick exchange two unsigned 32bit integers
+template <> inline void Exchange<u32>(u32 &x, u32 &y){
+//	TRACE(<<"Exchange<u32>(): invoked"<<std::endl)
+	//!!!Do not make y^=x^=y^=x;
+	//Some compilers (e.g. gcc4.1) may generate incorrect code
+	y ^= x;
+	x ^= y;
+	y ^= x;
+};
+
+//quick exchange two floats
+template <> inline void Exchange<float>(float &x, float &y){
+//	TRACE(<<"Exchange<float>(): invoked"<<std::endl)
+	STATIC_ASSERT(sizeof(float) == sizeof(u32))
+	Exchange<u32>(reinterpret_cast<u32&>(x), reinterpret_cast<u32&>(y));
+};
+
+};//~namespace ting
+
+#endif //~once
