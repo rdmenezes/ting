@@ -100,7 +100,7 @@ MyThread thread;
 thread.Start();
 
 //create the message
-std::auto_ptr<ting::Message> msg( new MyMessage(&thread) );
+ting::Ptr<ting::Message> msg( new MyMessage(&thread) );
 
 //send the message
 thread.PushMessage(msg);
