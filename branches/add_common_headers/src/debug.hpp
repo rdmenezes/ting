@@ -44,6 +44,7 @@ THE SOFTWARE. */
 //
 //
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
 #ifdef __SYMBIAN32__
@@ -58,6 +59,7 @@ inline std::ofstream& DebugLogger(){
 #endif
 }//~namespace ting_debug
 }//~namespace ting
+#endif //~M_DOC_DONT_EXTRACT //for doxygen
 
 #ifdef __SYMBIAN32__
 #define LOG_ALWAYS(x)
@@ -137,24 +139,25 @@ inline void LogAssert(const char* file, int line){
 #define ASS(x) (x)
 #endif//~#ifdef DEBUG
 
-namespace ting{
-namespace ting_debug{
-
 //==================
 //=  Static assert =
 //==================
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
+namespace ting{
+namespace ting_debug{
 template <bool b> struct C_StaticAssert{
     virtual void STATIC_ASSERTION_FAILED()=0;
     virtual ~C_StaticAssert(){};
 };
 template <> struct C_StaticAssert<true>{};
+}//~namespace ting_debug
+}//~namespace ting
 #define M_STATIC_ASSERT_II(x, l) struct C_StaticAssertInst_##l{ \
     ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
 };
 #define M_STATIC_ASSERT_I(x, l) M_STATIC_ASSERT_II(x, l)
-#define STATIC_ASSERT(x)  M_STATIC_ASSERT_I(x, __LINE__)
+#endif //~M_DOC_DONT_EXTRACT //for doxygen
 
-}//~namespace ting_debug
-}//~namespace ting
+#define STATIC_ASSERT(x)  M_STATIC_ASSERT_I(x, __LINE__)
 
 #endif//~once
