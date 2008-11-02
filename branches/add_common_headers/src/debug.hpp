@@ -63,10 +63,10 @@ inline std::ofstream& DebugLogger(){
 
 #ifdef __SYMBIAN32__
 #define LOG_ALWAYS(x)
-#define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
+#define TRACE_ALWAYS(x)
 #else
 #define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
-#define TRACE_ALWAYS(x)
+#define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
 #endif
 
 #ifdef DEBUG

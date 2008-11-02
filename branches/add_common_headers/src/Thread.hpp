@@ -536,7 +536,8 @@ public:
 
 	virtual ~Thread(){
 		this->quitFlag = true;
-		this->PushQuitMessage();
+		ASSERT(this->preallocatedQuitMessage.IsValid())
+		this->PushMessage(this->preallocatedQuitMessage);
 		this->Join();
 	};
 
@@ -645,12 +646,8 @@ public:
 
 	/**
 	@brief Send 'Quit' message to thread's queue.
-	NOTE that pushing quit message is allowed only once per thread object life time.
 	*/
-	void PushQuitMessage(){
-		ASSERT(this->preallocatedQuitMessage.IsValid())
-		this->PushMessage(this->preallocatedQuitMessage);
-	};
+	inline void PushQuitMessage();//see implementation below
 
 	/**
 	@brief Send a message to thread's queue.
@@ -676,6 +673,10 @@ class QuitMessage : public Message{
 		this->thr->quitFlag = true;
 	};
 };
+
+inline void Thread::PushQuitMessage(){
+	this->PushMessage(new QuitMessage(this));
+}
 
 inline Thread::Thread() :
 		preallocatedQuitMessage(new QuitMessage(this)),
