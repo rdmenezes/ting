@@ -20,11 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
+// ting 0.2
 // Author: Ivan Gagis <igagis@gmail.com>
-// Version: 18
 
-// Description:
-//      Pointer wrapper
+// File description:
+//	Pointer wrapper
 
 #ifndef M_PTR_HPP
 #define M_PTR_HPP

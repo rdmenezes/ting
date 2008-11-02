@@ -20,11 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
+// ting 0.2
 // Author: Ivan Gagis <igagis@gmail.com>
-// Version: 1
 
-// Description:
-//          ting is a ThreadING library
+// File description:
+//	main header file of the ting library
 
 #ifndef M_ting_hpp
 #define M_ting_hpp

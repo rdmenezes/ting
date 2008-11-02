@@ -20,10 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
+// ting 0.2
 // Author: Ivan Gagis <igagis@gmail.com>
-// Version 9
 
-// General definitions
+// File description:
+//	General definitions
 
 #ifndef M_GENDEF_HPP
 #define M_GENDEF_HPP

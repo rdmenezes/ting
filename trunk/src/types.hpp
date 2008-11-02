@@ -20,10 +20,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// General types definitions
-// Version 2
-//
+// ting 0.2
 // Author: Ivan Gagis <igagis@gmail.com>
+
+// File description:
+//	General types definitions
 
 #ifndef M_TYPES_HPP
 #define M_TYPES_HPP
