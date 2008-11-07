@@ -1,0 +1,17 @@
+Package: libting-dev
+Version: 0.2
+Section: devel 
+Priority: extra
+Architecture: i386
+Essential: no
+Depends: 
+Pre-Depends:  
+Recommends: 
+Suggests: 
+Installed-Size: 35581
+Maintainer: Ivan Gagis <igagis@gmail.com>
+Conflicts: 
+Replaces: 
+Provides: ting
+Description: simple cross-platform C++ library for multithreaded development. It provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar
+ The library code is entirely in .hpp files.
