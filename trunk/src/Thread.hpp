@@ -182,6 +182,13 @@ public:
 
 /**
 @brief Semaphore class.
+The semaphore is actually an unsigned integer value which can be incremented
+(by Semaphore::Signal()) or decremented (by Semaphore::Wait()). If the value
+is 0 then any try to decrement it will result in the current thread stops
+execution until the value will be incremented so the thred will be able to
+decrement it. If there are several threads waiting for semaphore decrement and
+some other thread increments it then only one of the hanging threads will be
+resumed, other threads will remain waiting for next increment.
 */
 class Semaphore{
 	//system dependent handle
@@ -201,24 +208,23 @@ class Semaphore{
 	Semaphore& operator=(const Semaphore& ){return *this;};
 public:
 
+	/**
+	@breif Create the semaphore with given initial value.
+	*/
 	Semaphore(uint initialValue = 0){
 #ifdef __WIN32__
-		this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL);
-		if(this->s == NULL){
-	//        LOG(<<"Semaphore::Semaphore(): failed"<<std::endl)
-			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
-		}
+		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
 #elif defined(__SYMBIAN32__)
-		if(this->s.CreateLocal(initialValue) != KErrNone){
-			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
-		}
+		if(this->s.CreateLocal(initialValue) != KErrNone)
 #elif defined(M_PTHREAD)
-		if(sem_init(&this->s, 0, initialValue) < 0 ){
-			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
-		}
+		if(sem_init(&this->s, 0, initialValue) < 0 )
 #else
 #error "unknown system"
 #endif
+		{
+			LOG(<<"Semaphore::Semaphore(): failed"<<std::endl)
+			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
+		}
 	};
 
 	~Semaphore(){
@@ -233,6 +239,18 @@ public:
 #endif
 	};
 
+	/**
+	@brief Wait on semaphore.
+	Decrments semaphore value. If current value is 0 then this method will wait
+	until some other thread signalls the semaphore (i.e. increments the value)
+	by calling Semaphore::Signal() on that semaphore.
+	@param timeoutMillis - waiting timeout.
+	                       If timeoutMillis is 0 (the default value) then this
+	                       method will wait forever or until the semaphore is
+	                       signalled.
+	@return returns true if the semaphore value was decremented.
+	@return returns false if the timeout was hit.
+	*/
 	bool Wait(uint timeoutMillis = 0){
 #ifdef __WIN32__
 		switch( WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis)) ){
@@ -250,7 +268,7 @@ public:
 		if(timeoutMillis == 0){
 			this->s.Wait();
 		}else{
-			throw ting::Exc("Semaphore::Wait(): timeout wait unimplemented on Symbian, TODO: implement");
+			throw ting::Exc("Semaphore::Wait(): timeouted wait unimplemented on Symbian, TODO: implement");
 		}
 #elif defined(M_PTHREAD)
 		if(timeoutMillis == 0){
@@ -276,14 +294,13 @@ public:
 #else
 #error "unknown system"
 #endif
+		return true;
 	};
 
-	//TODO: remove this method
-	inline void Post(){
-		LOG(<<"Semaphore::Post(): is deprecated, use Semaphore::Signal()"<<std::endl)
-		this->Signal();
-	};
-
+	/**
+	@brief Signal the semaphore.
+	Increments the semaphore value.
+	*/
 	inline void Signal(){
 #ifdef __WIN32__
 		if( ReleaseSemaphore(this->s, 1, NULL) == 0 ){
@@ -404,7 +421,7 @@ public:
 };
 
 class Queue{
-	CondVar cond;
+	Semaphore sem;
 
 	Mutex mut;
 
@@ -445,12 +462,18 @@ class Queue{
 				this->last = this->first = msg.Extract();
 			}
 		}
-		this->cond.Notify();
+		this->sem.Signal();
 	};
 
 	Ptr<Message> PeekMsg(){
 		Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
 		if(this->first){
+			//Decrement semaphore value, because we take one message from queue.
+			//The semaphore value should be > 0 here, so there will be no hang
+			//in Wait().
+			//The semaphore value actually reflects the number of Messages in
+			//the queue.
+			this->sem.Wait();
 			Message* ret = this->first;
 			this->first = this->first->next;
 			return Ptr<Message>(ret);
@@ -459,17 +482,22 @@ class Queue{
 	};
 
 	Ptr<Message> GetMsg(){
-		Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
-		if(this->first){
+		{
+			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+			if(this->first){
+				Message* ret = this->first;
+				this->first = this->first->next;
+				return Ptr<Message>(ret);
+			}
+		}
+		this->sem.Wait();
+		{
+			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
 			return Ptr<Message>(ret);
 		}
-		this->cond.Wait(this->mut);
-		ASSERT(this->first)
-		Message* ret = this->first;
-		this->first = this->first->next;
-		return Ptr<Message>(ret);
 	};
 };
 
