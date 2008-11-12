@@ -47,9 +47,9 @@ void MyThread::Run(){
     }
 };
 }}}
-This example use _ting::Queue::GetMsg()_ to retrieve messages from the queue, _GetMsg()_ blocks execution if there are no messages on the queue until some message arrives.
+This example uses _ting::Queue::GetMsg()_ to retrieve messages from the queue, _GetMsg()_ blocks execution if there are no messages on the queue until some message arrives.
 
-It is also possible to use _ting::Queue::PeekMsg()_ which does not block execution, typical implementation of _Run()_ method will look as follows
+It is also possible to use _ting::Queue::PeekMsg()_ which does not block execution, then typical implementation of _Run()_ method would look as follows
 
 {{{
 void MyThread::Run(){
@@ -69,8 +69,8 @@ Note that each thread object has a _quitFlag_ volatile member variable which ser
 Note that _ting::QuitMessage _ will set the _quitFlag_ when it is handled.
 
 ==Creating your own message==
-Messages is a mean to ask some thread to execute some code.
-To do this one needs to create his/her own message (implementing its handler) and send it to the threads queue.
+A _Message_ is a mean to ask some thread to execute some code fragment.
+To do this one needs to create his/her own message (implementing its handler, i.e define the code fragment we want other to execute) and send it to the threads queue.
 
 Let's define our own message class deriving it from _ting::Message _
 {{{
