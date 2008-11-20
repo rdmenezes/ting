@@ -31,6 +31,7 @@ THE SOFTWARE. */
 
 #include <string.h>
 #include <exception>
+#include <new>                    //for std::nothrow
 
 namespace ting{
 
