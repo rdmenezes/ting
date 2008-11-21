@@ -109,7 +109,8 @@ template <class T> class Array{//TODO: add T* as iterator. because [] operator i
 		ASSERT(i < this->Size() && this->arr)
 		return this->arr[i];
 	};
-	inline const T& Elem(uint i)const{
+
+	inline const T& operator[](uint i)const{
 		ASSERT(i < this->Size() && this->arr)
 		return this->arr[i];
 	};
