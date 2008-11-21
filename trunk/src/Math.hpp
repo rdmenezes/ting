@@ -65,7 +65,7 @@ template <typename T> inline T DPi(){
 };
 
 template <typename T> inline T D2Pi(){
-	return T(2 * DPi());
+	return T(2 * DPi<T>());
 };
 
 template <typename T> inline T DNaN(){
@@ -103,11 +103,11 @@ template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
 	T_Type a;
 	if(x == 0)
-		a = DPi() / 2;
+		a = DPi<T_Type>() / 2;
 	else if(x > 0)
 		a = T_Type(atan(Abs(y / x)));
 	else
-		a = DPi() - T_Type(atan(Abs(y / x)));
+		a = DPi<T_Type>() - T_Type(atan(Abs(y / x)));
 
 	if(y >= 0)
 		return a;
