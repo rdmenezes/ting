@@ -120,6 +120,7 @@ public:
 private:
 	inline void* operator new(size_t){
 		ASSERT(false)//forbidden
+		return reinterpret_cast<void*>(0);
 	};
 
 	inline void operator delete(void*){
