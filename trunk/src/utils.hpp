@@ -25,10 +25,10 @@ THE SOFTWARE. */
 // Author: Ivan Gagis <igagis@gmail.com>
 
 // File description:
-//	General definitions
+//	Utility functions and classes
 
-#ifndef M_GENDEF_HPP
-#define M_GENDEF_HPP
+#ifndef M_UTILS_HPP
+#define M_UTILS_HPP
 
 #ifdef _MSC_VER //If Microsoft C++ compiler
 #pragma warning(disable:4290)
@@ -37,7 +37,6 @@ THE SOFTWARE. */
 #include "debug.hpp" //debugging facilities
 
 #include "types.hpp"
-#include "Exc.hpp"
 
 namespace ting{
 
