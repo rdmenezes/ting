@@ -30,7 +30,14 @@ THE SOFTWARE. */
 #ifndef M_ting_hpp
 #define M_ting_hpp
 
-#include "gendef.hpp"
+#include "Array.hpp"
+#include "debug.hpp"
+#include "Exc.hpp"
+#include "Math.hpp"
+#include "Ptr.hpp"
+#include "Singleton.hpp"
 #include "Thread.hpp"
+#include "types.hpp"
+#include "utils.hpp"
 
 #endif//~once

@@ -27,8 +27,8 @@ THE SOFTWARE. */
 // File description:
 //	Debug utilities
 
-#ifndef M_DEBUG_HPP
-#define M_DEBUG_HPP
+#ifndef M_debug_hpp
+#define M_debug_hpp
 
 #ifdef __SYMBIAN32__
 #else

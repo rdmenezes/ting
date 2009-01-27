@@ -27,8 +27,8 @@ THE SOFTWARE. */
 // File description:
 //	Utility functions and classes
 
-#ifndef M_UTILS_HPP
-#define M_UTILS_HPP
+#ifndef M_utils_hpp
+#define M_utils_hpp
 
 #ifdef _MSC_VER //If Microsoft C++ compiler
 #pragma warning(disable:4290)

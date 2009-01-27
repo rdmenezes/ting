@@ -28,13 +28,11 @@ THE SOFTWARE. */
 //	Math utilities
 
 
-#ifndef M_Math_hpp
-#define M_Math_hpp
+#ifndef M_math_hpp
+#define M_math_hpp
 
 #include <math.h>
 #include <limits> //this is for std::numeric_limits<float>::quiet_NaN(); etc.
-
-#include "gendef.hpp"
 
 namespace ting{
 

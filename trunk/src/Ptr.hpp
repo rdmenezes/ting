@@ -27,10 +27,10 @@ THE SOFTWARE. */
 // File description:
 //	Pointer wrapper
 
-#ifndef M_PTR_HPP
-#define M_PTR_HPP
+#ifndef M_Ptr_hpp
+#define M_Ptr_hpp
 
-#include "gendef.hpp"
+#include "debug.hpp"
 
 //#define M_ENABLE_PTR_PRINT
 #ifdef M_ENABLE_PTR_PRINT

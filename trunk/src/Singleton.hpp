@@ -27,10 +27,11 @@ THE SOFTWARE. */
 // File description:
 //	Singleton base class (template)
 
-#ifndef M_Singleton_HPP
-#define M_Singleton_HPP
+#ifndef M_Singleton_hpp
+#define M_Singleton_hpp
 
-#include <ting/gendef.hpp>
+#include "Exc.hpp"
+#include "debug.hpp"
 
 namespace ting{
 

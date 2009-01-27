@@ -37,7 +37,7 @@ THE SOFTWARE. */
 #define M_ARRAY_PRINT(x)
 #endif
 
-#include "gendef.hpp"
+#include "debug.hpp"
 
 namespace ting{
 

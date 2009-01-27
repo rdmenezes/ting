@@ -27,8 +27,8 @@ THE SOFTWARE. */
 // File description:
 //	Basic Exception class
 
-#ifndef M_EXC_HPP
-#define M_EXC_HPP
+#ifndef M_Exc_hpp
+#define M_Exc_hpp
 
 #include <string.h>
 #include <exception>

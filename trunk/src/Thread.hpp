@@ -30,7 +30,7 @@ THE SOFTWARE. */
 #ifndef M_Thread_hpp
 #define M_Thread_hpp
 
-#include "gendef.hpp"
+#include "debug.hpp"
 #include "Ptr.hpp"
 
 #if defined(__WIN32__) || defined(WIN32)

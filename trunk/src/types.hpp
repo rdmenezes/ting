@@ -27,8 +27,8 @@ THE SOFTWARE. */
 // File description:
 //	General types definitions
 
-#ifndef M_TYPES_HPP
-#define M_TYPES_HPP
+#ifndef M_types_hpp
+#define M_types_hpp
 
 #include "debug.hpp"
 
