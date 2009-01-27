@@ -32,7 +32,7 @@ THE SOFTWARE. */
 
 #include <ting/gendef.hpp>
 
-namespace igagis{
+namespace ting{
 
 template <class T> class Singleton{
 	
