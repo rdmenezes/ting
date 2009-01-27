@@ -33,7 +33,7 @@ THE SOFTWARE. */
 #include "Array.hpp"
 #include "debug.hpp"
 #include "Exc.hpp"
-#include "Math.hpp"
+#include "math.hpp"
 #include "Ptr.hpp"
 #include "Singleton.hpp"
 #include "Thread.hpp"
