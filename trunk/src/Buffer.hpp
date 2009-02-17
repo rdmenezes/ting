@@ -24,47 +24,67 @@ THE SOFTWARE. */
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
 
+// Created on January 31, 2009, 11:04 PM
 // File description:
-//	Singleton base class (template)
+//	Static buffer wrapper
+ 
 
-#ifndef M_Singleton_hpp
-#define M_Singleton_hpp
+#ifndef M_Buffer_hpp
+#define	M_Buffer_hpp
 
-#include "Exc.hpp"
+#include "types.hpp"
 #include "debug.hpp"
 
 namespace ting{
 
-template <class T> class Singleton{
-	
-	inline static T*& StaticMemoryBlock(){
-		static T* instance = 0;
-		return instance;
+template <class T> class Buffer{
+protected:
+	T* buf;
+	ting::uint size;
+
+	inline Buffer(T* buf_ptr, ting::uint buf_size) :
+			buf(buf_ptr),
+			size(buf_size)
+	{};
+
+	inline Buffer(const Buffer& b){
+		ASSERT(false)//not implemented yet
 	};
-
-protected://use only as a base class
-	Singleton(){
-		if(Singleton::StaticMemoryBlock() != 0)
-			throw ting::Exc("Singleton::Singleton(): instance is already created");
-
-		Singleton::StaticMemoryBlock() = static_cast<T*>(this);
+	inline Buffer(Buffer& b){
+		ASSERT(false)//not implemented yet
 	};
 
 public:
-	inline static bool IsCreated(){
-		return Singleton::StaticMemoryBlock() != 0;
+	inline ting::uint Size()const{
+		return this->size;
+	}
+
+	inline const T& operator[](uint i)const{
+		ASSERT(i < this->Size())
+		return this->buf[i];
 	};
 
-	inline static T& Inst(){
-		ASSERT(Singleton::StaticMemoryBlock())
-		return *(Singleton::StaticMemoryBlock());
+	inline T& operator[](uint i){
+		ASSERT(i < this->Size())
+		return this->buf[i];
 	};
 
-	~Singleton(){
-		ASSERT(Singleton::StaticMemoryBlock() == static_cast<T*>(this))
-		Singleton::StaticMemoryBlock() = 0;
+	inline operator const T*()const{
+		return this->buf;
+	};
+
+	inline operator T*(){
+		return const_cast<T*>(this->operator const T*());
 	};
 };
 
-};//~namespace igagis
-#endif//~once
+template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
+	T static_buffer[buf_size];
+public:
+	inline StaticBuffer() :
+			Buffer<T>(&this->static_buffer[0], buf_size)
+	{};
+};
+
+}//~namespace
+#endif //~once

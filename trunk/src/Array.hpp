@@ -38,6 +38,7 @@ THE SOFTWARE. */
 #endif
 
 #include "debug.hpp"
+#include "types.hpp"
 
 namespace ting{
 
@@ -90,6 +91,22 @@ template <class T> class Array{//TODO: add T* as iterator. because [] operator i
 		M_ARRAY_PRINT(<<"Array::~Array(): invoked"<<std::endl)
 		delete[] this->arr;
 		M_ARRAY_PRINT(<<"Array::~Array(): exit"<<std::endl)
+	};
+
+	void Grow(uint deltaSize){
+		//TODO: test this method. it is untested so far
+		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
+		T* oldArr = this->arr;
+		uint oldSize = this->size;
+		try{
+			this->PrivateInit(oldSize + deltaSize);
+		}catch(...){
+			this->arr = oldArr;
+			this->size = oldSize;
+			throw;
+		}
+		memcpy(this->arr, oldArr, oldSize);
+		delete[] oldArr;
 	};
 
 	inline uint Size()const{

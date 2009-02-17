@@ -32,6 +32,7 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "Ptr.hpp"
+#include "types.hpp"
 
 #if defined(__WIN32__) || defined(WIN32)
 #ifndef __WIN32__
