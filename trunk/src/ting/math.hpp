@@ -67,6 +67,13 @@ template <typename T> inline T D2Pi(){
 	return T(2 * DPi<T>());
 };
 
+/**
+@return natural logarithm of 2
+*/
+template <typename T> inline T DLnOf2(){
+	return T(0.693147181);
+};
+
 template <typename T> inline T DNaN(){
 	return std::numeric_limits<T>::quiet_NaN();
 };
