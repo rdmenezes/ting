@@ -33,6 +33,7 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "Ptr.hpp"
 #include "types.hpp"
+#include "Exc.hpp"
 
 #if defined(__WIN32__) || defined(WIN32)
 #ifndef __WIN32__
@@ -565,7 +566,6 @@ public:
 	inline Thread();//see implementation below as inline method
 
 	virtual ~Thread(){
-		this->quitFlag = true;
 		ASSERT(this->preallocatedQuitMessage.IsValid())
 		this->PushMessage(this->preallocatedQuitMessage);
 		this->Join();
@@ -627,6 +627,7 @@ public:
 	@brief Wait for thread finish its execution.
 	*/
 	void Join(){
+		this->quitFlag = true;
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
 		ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
 

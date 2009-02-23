@@ -39,27 +39,28 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "types.hpp"
+#include "Buffer.hpp"
 
 namespace ting{
 
-template <class T> class Array{//TODO: add T* as iterator. because [] operator is slow
-	uint size;
+template <class T> class Array : public ting::Buffer<T>{
+//	uint size;
 	
-	T* arr;//NOTE: do not use Ptr class, because we call new[]
+//	T* arr;//NOTE: do not use Ptr class, because we call new[]
 
 	inline void PrivateInit(uint arraySize){
 		this->size = arraySize;
 		if(this->size == 0){
-			this->arr = 0;
+			this->buf = 0;
 			return;
 		}
 
 		M_ARRAY_PRINT(<<"Array::PrivateInit(): size="<<size<<std::endl)
 		try{
-			this->arr = new T[arraySize];
+			this->buf = new T[arraySize];
 		}catch(...){
 			M_ARRAY_PRINT(<<"Array::Init(): exception caught"<<size<<std::endl)
-			this->arr = 0;
+			this->buf = 0;
 			this->size = 0;
 			throw;//rethrow the exception
 		}
@@ -81,57 +82,57 @@ template <class T> class Array{//TODO: add T* as iterator. because [] operator i
 	inline Array& operator=(const Array& a){
 		//behavior similar to C_Ptr class
 		this->size = a.size;
-		this->arr = a.arr;
+		this->buf = a.buf;
 		const_cast<Array&>(a).size = 0;
-		const_cast<Array&>(a).arr = 0;
+		const_cast<Array&>(a).buf = 0;
 		return (*this);
 	};
 
 	~Array(){
 		M_ARRAY_PRINT(<<"Array::~Array(): invoked"<<std::endl)
-		delete[] this->arr;
+		delete[] this->buf;
 		M_ARRAY_PRINT(<<"Array::~Array(): exit"<<std::endl)
 	};
 
 	void Grow(uint deltaSize){
 		//TODO: test this method. it is untested so far
 		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
-		T* oldArr = this->arr;
+		T* oldArr = this->buf;
 		uint oldSize = this->size;
 		try{
 			this->PrivateInit(oldSize + deltaSize);
 		}catch(...){
-			this->arr = oldArr;
+			this->buf = oldArr;
 			this->size = oldSize;
 			throw;
 		}
-		memcpy(this->arr, oldArr, oldSize);
+		memcpy(this->buf, oldArr, oldSize);
 		delete[] oldArr;
 	};
 
-	inline uint Size()const{
-		return this->size;
-	};
+//	inline uint Size()const{
+//		return this->size;
+//	};
 
-	//returns length of element in bytes
-	inline uint SizeOfElem()const{
-		return sizeof(*(this->arr));
-	};
+//	//returns length of element in bytes
+//	inline uint SizeOfElem()const{
+//		return sizeof(*(this->arr));
+//	};
+//
+//	//returns length of array in bytes
+//	inline uint SizeInBytes()const{
+//		return this->Size() * this->SizeOfElem();
+//	};
 
-	//returns length of array in bytes
-	inline uint SizeInBytes()const{
-		return this->Size() * this->SizeOfElem();
-	};
-
-	inline T& operator[](uint i){
-		ASSERT(i < this->Size() && this->arr)
-		return this->arr[i];
-	};
-
-	inline const T& operator[](uint i)const{
-		ASSERT(i < this->Size() && this->arr)
-		return this->arr[i];
-	};
+//	inline T& operator[](uint i){
+//		ASSERT(i < this->Size() && this->arr)
+//		return this->arr[i];
+//	};
+//
+//	inline const T& operator[](uint i)const{
+//		ASSERT(i < this->Size() && this->arr)
+//		return this->arr[i];
+//	};
 
 	void Init(uint arraySize){
 		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
@@ -140,7 +141,7 @@ template <class T> class Array{//TODO: add T* as iterator. because [] operator i
 	};
 
 	inline bool IsValid()const{
-		return this->arr != 0;
+		return this->buf != 0;
 	};
 
 	operator bool(){
@@ -149,16 +150,16 @@ template <class T> class Array{//TODO: add T* as iterator. because [] operator i
 
 	void Reset(){
 		this->~Array();
-		this->arr = 0;
+		this->buf = 0;
 		this->size = 0;
 	};
 
 	T* Buf(){
-		return this->arr;
+		return this->buf;
 	};
 	
 	const T* Buf()const{
-		return this->arr;
+		return this->buf;
 	};
 };
 

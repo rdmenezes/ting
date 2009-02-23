@@ -56,7 +56,7 @@ public:
 	};
 
 	inline static T& Inst(){
-		ASSERT(Singleton::StaticMemoryBlock())
+		ASSERT(Singleton::IsCreated())
 		return *(Singleton::StaticMemoryBlock());
 	};
 

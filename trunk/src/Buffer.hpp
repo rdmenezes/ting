@@ -42,6 +42,8 @@ protected:
 	T* buf;
 	ting::uint size;
 
+	inline Buffer(){};
+
 	inline Buffer(T* buf_ptr, ting::uint buf_size) :
 			buf(buf_ptr),
 			size(buf_size)
@@ -59,6 +61,16 @@ public:
 		return this->size;
 	}
 
+		//returns length of element in bytes
+	inline ting::uint SizeOfElem()const{
+		return sizeof(*(this->buf));
+	};
+
+	//returns length of array in bytes
+	inline ting::uint SizeInBytes()const{
+		return this->Size() * this->SizeOfElem();
+	};
+
 	inline const T& operator[](uint i)const{
 		ASSERT(i < this->Size())
 		return this->buf[i];
@@ -69,13 +81,13 @@ public:
 		return this->buf[i];
 	};
 
-	inline operator const T*()const{
-		return this->buf;
-	};
-
-	inline operator T*(){
-		return const_cast<T*>(this->operator const T*());
-	};
+//	inline operator const T*()const{
+//		return this->buf;
+//	};
+//
+//	inline operator T*(){
+//		return const_cast<T*>(this->operator const T*());
+//	};
 };
 
 template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
