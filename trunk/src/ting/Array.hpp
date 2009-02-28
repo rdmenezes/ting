@@ -80,7 +80,7 @@ template <class T> class Array : public ting::Buffer<T>{
 	};
 
 	inline Array& operator=(const Array& a){
-		//behavior similar to C_Ptr class
+		//behavior similar to Ptr class
 		this->size = a.size;
 		this->buf = a.buf;
 		const_cast<Array&>(a).size = 0;
@@ -109,30 +109,6 @@ template <class T> class Array : public ting::Buffer<T>{
 		memcpy(this->buf, oldArr, oldSize);
 		delete[] oldArr;
 	};
-
-//	inline uint Size()const{
-//		return this->size;
-//	};
-
-//	//returns length of element in bytes
-//	inline uint SizeOfElem()const{
-//		return sizeof(*(this->arr));
-//	};
-//
-//	//returns length of array in bytes
-//	inline uint SizeInBytes()const{
-//		return this->Size() * this->SizeOfElem();
-//	};
-
-//	inline T& operator[](uint i){
-//		ASSERT(i < this->Size() && this->arr)
-//		return this->arr[i];
-//	};
-//
-//	inline const T& operator[](uint i)const{
-//		ASSERT(i < this->Size() && this->arr)
-//		return this->arr[i];
-//	};
 
 	void Init(uint arraySize){
 		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
