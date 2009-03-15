@@ -44,9 +44,6 @@ THE SOFTWARE. */
 namespace ting{
 
 template <class T> class Array : public ting::Buffer<T>{
-//	uint size;
-	
-//	T* arr;//NOTE: do not use Ptr class, because we call new[]
 
 	inline void PrivateInit(uint arraySize){
 		this->size = arraySize;
@@ -73,6 +70,9 @@ template <class T> class Array : public ting::Buffer<T>{
 	explicit inline Array(uint arraySize = 0){
 		this->PrivateInit(arraySize);
 	};
+
+	//TODO: implement
+	//explicit inline Array(uint arraySize, const T& init)
 
 	//copy constructor
 	inline Array(const Array& a){

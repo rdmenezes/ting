@@ -241,13 +241,29 @@ protected:
 public:
 	template <class TS> inline Ref<TS> StaticCast(){
 		return Ref<TS>(static_cast<TS*>(this->operator->()));
-	};
+	}
+
+	template <class TS> inline Ref<TS> DynamicCast(){
+		TS* t = dynamic_cast<TS*>(this->operator->());
+		if(t)
+			return Ref<TS>(t);
+		else
+			return Ref<TS>();
+	}
+
+	template <class TS> inline const Ref<TS> DynamicCast()const{
+		const TS* t = dynamic_cast<const TS*>(this->operator->());
+		if(t)
+			return Ref<TS>(const_cast<TS*>(t));
+		else
+			return Ref<TS>();
+	}
 	
 	inline Ref() :
 			p(0)
 	{
 		M_REF_PRINT(<<"Ref::Ref(): invoked, p="<<(this->p)<<std::endl)
-	};
+	}
 	
 	//NOTE: this constructor should be explicit to prevent undesired conversions from T* to Ref<T>
 	explicit inline Ref(T* rc) :
@@ -256,7 +272,12 @@ public:
 		M_REF_PRINT(<<"Ref::Ref(rc): invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
 		this->p->AddRef();
-	};
+	}
+
+	Ref& Seize(T* rc){
+		this->operator=(Ref<T>(rc));
+		return *this;
+	}
 
 	inline Ref(WeakRef<T> wr) :
 			p(wr.GetRefCounted())
@@ -265,7 +286,7 @@ public:
 		//ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
 		if(this->IsValid())
 			this->p->AddRef();
-	};
+	}
 
 	//copy constructor
 	Ref(const Ref& r){
@@ -273,7 +294,7 @@ public:
 		this->p = r.p;
 		if(this->IsValid())
 			this->p->AddRef();
-	};
+	}
 
 	virtual ~Ref(){
 		M_REF_PRINT(<<"Ref::~Ref(): invoked, p="<<(this->p)<<std::endl)
@@ -287,39 +308,39 @@ public:
 //                LOG(<<"Ref::~Ref(): object "<<(this->p)<<" deleted"<<std::endl)
 			}
 		}
-	};
+	}
 
 	//returns true if the reference is valid (not 0)
 	inline bool IsValid()const{
 		M_REF_PRINT(<<"Ref::IsValid(): invoked, this->p="<<(this->p)<<std::endl)
 		return (this->p != 0);
-	};
+	}
 
 	inline bool IsNotValid()const{
 		M_REF_PRINT(<<"Ref::IsNotValid(): invoked, this->p="<<(this->p)<<std::endl)
 		return !this->IsValid();
-	};
+	}
 
 	inline bool operator==(const Ref &r)const{
 		return this->p == r.p;
-	};
+	}
 
 	inline bool operator==(const RefCounted *rc)const{
 		return this->p == rc;
-	};
+	}
 
 	inline bool operator!()const{
 		return !this->IsValid();
-	};
+	}
 
 	inline operator bool()const{
 		return this->IsValid();
-	};
+	}
 
 	void Reset(){
 		this->~Ref();
 		this->p = 0;
-	};
+	}
 
 	Ref& operator=(const Ref &r){
 		M_REF_PRINT(<<"Ref::operator=(): invoked, p="<<(this->p)<<std::endl)
