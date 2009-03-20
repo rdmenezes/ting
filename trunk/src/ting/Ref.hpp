@@ -31,6 +31,7 @@ THE SOFTWARE. */
 #define M_Ref_hpp
 
 #include "debug.hpp"
+#include "types.hpp"
 
 //#define M_ENABLE_REF_PRINT
 #ifdef M_ENABLE_REF_PRINT
