@@ -364,31 +364,38 @@ public:
 		M_REF_PRINT(<<"Ref::operator*(): invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "Ref::operator*(): this->p is zero")
 		return static_cast<T&>(*this->p);
-	};
+	}
 
 	inline const T& operator*()const{
 		M_REF_PRINT(<<"const Ref::operator*(): invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "const Ref::operator*(): this->p is zero")
 		return static_cast<T&>(*this->p);
-	};
+	}
 
 	inline T* operator->(){
 		M_REF_PRINT(<<"Ref::operator->(): invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
 		return static_cast<T*>(this->p);
-	};
+	}
+
 
 	inline const T* operator->()const{
 		M_REF_PRINT(<<"Ref::operator->()const: invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
 		return static_cast<T*>(this->p);
-	};
+	}
 
 
 	//for type downcast
-	template <typename TBase> operator Ref<TBase>(){
-		return Ref<TBase>(this->operator->());
-	};
+	template <typename TBase> inline operator Ref<TBase>(){
+		//downcasting of invalid reference is also possible
+		if(this->IsNotValid())
+			return Ref<TBase>();
+		
+		//NOTE: static cast to T*, not to TBase*,
+		//this is to forbid automatic upcast
+		return Ref<TBase>(static_cast<T*>(this->p));
+	}
 
 
 private:
