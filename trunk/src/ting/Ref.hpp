@@ -260,7 +260,11 @@ public:
 			return Ref<TS>();
 	}
 	
-	inline Ref() :
+	//the int argument is just to make possible
+	//auto conversion from 0 to invalid Ref object
+	//i.e. it will be possible to write 'return 0;'
+	//from the function returning Ref
+	inline Ref(int v = 0) :
 			p(0)
 	{
 		M_REF_PRINT(<<"Ref::Ref(): invoked, p="<<(this->p)<<std::endl)
