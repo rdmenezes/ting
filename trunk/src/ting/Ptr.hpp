@@ -44,7 +44,7 @@ namespace ting{
 template <class T> class Ptr{
 	void* p;
 public:
-	inline Ptr(T* ptr = 0) :
+	explicit inline Ptr(T* ptr = 0) :
 			p(ptr)
 	{};
 	
