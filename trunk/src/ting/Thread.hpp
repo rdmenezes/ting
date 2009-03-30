@@ -706,7 +706,7 @@ class QuitMessage : public Message{
 };
 
 inline void Thread::PushQuitMessage(){
-	this->PushMessage(new QuitMessage(this));
+	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
 }
 
 inline Thread::Thread() :
