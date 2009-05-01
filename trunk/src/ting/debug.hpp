@@ -157,7 +157,7 @@ template <> struct C_StaticAssert<true>{};
 #define M_STATIC_ASSERT_II(x, l, c) struct C_StaticAssertInst_##l##_##c{ \
     ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
 };
-#define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l)
+#define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
 
 #if defined(__GNUG__) || (_MSC_VER >= 7100)
