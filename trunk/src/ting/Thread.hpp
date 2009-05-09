@@ -485,20 +485,25 @@ class Queue{
 	};
 
 	Ptr<Message> GetMsg(){
+//		TRACE(<< "Queue::GetMsg(): enter" << std::endl)
 		{
 			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
 			if(this->first){
 				Message* ret = this->first;
 				this->first = this->first->next;
+				TRACE(<< "Queue::GetMsg(): exit1" << std::endl)
 				return Ptr<Message>(ret);
 			}
 		}
+//		TRACE(<< "Queue::GetMsg(): waiting" << std::endl)
 		this->sem.Wait();
+//		TRACE(<< "Queue::GetMsg(): signalled" << std::endl)
 		{
 			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
 			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
+//			TRACE(<< "Queue::GetMsg(): exit2" << std::endl)
 			return Ptr<Message>(ret);
 		}
 	};
@@ -534,7 +539,7 @@ class Thread{
 		pthread_exit(0);
 #endif
 		return 0;
-	};
+	}
 
 	ting::Mutex mutex;
 
@@ -556,7 +561,9 @@ class Thread{
 	//forbid copying
 	Thread(const Thread& ){};
 	Thread(Thread& ){};
-	Thread& operator=(const Thread& ){return *this;};
+	Thread& operator=(const Thread& ){
+		return *this;
+	}
 
 protected:
 	volatile bool quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
@@ -565,17 +572,13 @@ protected:
 public:
 	inline Thread();//see implementation below as inline method
 
-	virtual ~Thread(){
-		ASSERT(this->preallocatedQuitMessage.IsValid())
-		this->PushMessage(this->preallocatedQuitMessage);
-		this->Join();
-	};
+	virtual ~Thread(){}
 
 	/**
 	@brief This should be overriden, this is what to be run in new thread.
 	Pure virtual method, it is called in new thread when thread runs.
 	*/
-	virtual void Run()=0;
+	virtual void Run() = 0;
 
 	/**
 	@brief Start thread execution.
@@ -633,6 +636,9 @@ public:
 
 		if(!this->isRunning)
 			return;
+
+		ASSERT(this->preallocatedQuitMessage.IsValid())
+		this->PushMessage(this->preallocatedQuitMessage);
 
 #ifdef __WIN32__
 		WaitForSingleObject(this->th, INFINITE);

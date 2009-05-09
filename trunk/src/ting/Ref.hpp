@@ -32,10 +32,11 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "types.hpp"
+#include "Thread.hpp"
 
 //#define M_ENABLE_REF_PRINT
 #ifdef M_ENABLE_REF_PRINT
-#define M_REF_PRINT(x) LOG(<<"[REF]" x)
+#define M_REF_PRINT(x) TRACE(<<"[REF]" x)
 #else
 #define M_REF_PRINT(x)
 #endif
@@ -68,20 +69,25 @@ private:
 				prev(0)
 		{
 			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(): invoked"<<std::endl)
-		};
-		CWeakRefBase(RefCounted* rcounted) :
-				rc(rcounted),
-				prev(0)
-		{
-			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(rcounted): enter"<<std::endl)
-			if(this->rc){
-				this->next = this->rc->weakRefList;
-				if(this->next) this->next->prev = this;
-				this->rc->weakRefList = this;
-			}else
-				this->next=0;
-			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(rcounted): exit"<<std::endl)
-		};
+		}
+
+		//TODO: implement
+		inline CWeakRefBase(Ref<RefCounted>& rcounted);
+
+//		CWeakRefBase(RefCounted* rcounted) :
+//				rc(rcounted),
+//				prev(0)
+//		{
+//			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(rcounted): enter"<<std::endl)
+//			if(this->rc){
+//				this->next = this->rc->weakRefList;
+//				if(this->next) this->next->prev = this;
+//				this->rc->weakRefList = this;
+//			}else
+//				this->next=0;
+//			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(rcounted): exit"<<std::endl)
+//		}
+
 		virtual ~CWeakRefBase(){
 			M_REF_PRINT(<<"CWeakRefBase::"<<__func__<<"(): enter, this="<<this<<std::endl)
 			if(this->rc)
@@ -93,7 +99,8 @@ private:
 			}
 			if(this->next)
 				this->next->prev=this->prev;
-		};
+		}
+
 	protected:
 		CWeakRefBase& operator=(RefCounted *r){
 			this->~CWeakRefBase();
@@ -108,26 +115,30 @@ private:
 			}else
 				this->next=0;
 			return *this;
-		};
+		}
 	};//~class CWeakRefBase
 
 private:
 	uint numRefs;
 
+	Mutex mut;
+
 	CWeakRefBase* weakRefList;//weak references are organized into double linked list
 
-	inline void AddRef()throw(){
-		M_REF_PRINT(<<"RefCounted::AddRef(): invoked, this->numRefs="<<(this->numRefs)<<std::endl)
+	inline uint AddRef()throw(){
+		Mutex::LockerUnlocker l(this->mut);
 		++this->numRefs;
-	};
+		M_REF_PRINT(<<"RefCounted::AddRef(): invoked, this->numRefs="<<(this->numRefs)<<std::endl)
+		return this->numRefs;
+	}
+
 	inline uint RemRef()throw(){
+		Mutex::LockerUnlocker l(this->mut);
 		--this->numRefs;
+		M_REF_PRINT(<<"RefCounted::RemRef(): invoked, this->numRefs="<<(this->numRefs)<<std::endl)
 		return this->numRefs;
-	};
+	}
 protected:
-	inline uint NumRefs()const throw(){
-		return this->numRefs;
-	};
 
 	//only base classes can construct this class
 	//i.e. use of this class is allowed only as a base class
@@ -158,6 +169,8 @@ private:
 	inline RefCounted(const RefCounted& rc){};
 };
 
+//TODO: rewrite WeakRef to support mutex locking to make it thread safe
+
 //Class WeakRef (template).
 //Weak Reference to a reference counted object.
 //T should be RefCounted!!!
@@ -165,63 +178,59 @@ template <class T> class WeakRef : public RefCounted::CWeakRefBase{
 	friend class Ref<T>;
 	inline T* GetRefCounted(){
 		return static_cast<T*>(this->rc);
-	};
+	}
   public:
-	inline WeakRef() :
-			RefCounted::CWeakRefBase(0)
-	{};
+	inline WeakRef(){}
 	
-	inline WeakRef(T* rc) :
-			RefCounted::CWeakRefBase(rc)
-	{};
+//	inline WeakRef(T* rc) :
+//			RefCounted::CWeakRefBase(rc)
+//	{}
 	
 	inline WeakRef(Ref<T> r);
 
 	//copy constructor
-	inline WeakRef(const WeakRef &r) :
-			RefCounted::CWeakRefBase(r.rc)
-	{};
+	inline WeakRef(const WeakRef &r);
 
 	//returns true if the reference is valid (not 0)
-	inline bool IsValid()const{
-		M_REF_PRINT(<<"WeakRef::IsValid(): invoked, this->rc="<<(this->rc)<<std::endl)
-		return (this->rc != 0);
-	};
+//	inline bool IsValid()const{
+//		M_REF_PRINT(<<"WeakRef::IsValid(): invoked, this->rc="<<(this->rc)<<std::endl)
+//		return (this->rc != 0);
+//	}
 
-	inline WeakRef& operator=(const Ref<T> &r){
-		this->RefCounted::CWeakRefBase::operator=(r.p);
-		return *this;
-	};
+//	inline WeakRef& operator=(const Ref<T> &r){
+//		this->RefCounted::CWeakRefBase::operator=(r.p);
+//		return *this;
+//	}
+//
+//	inline WeakRef& operator=(const WeakRef<T> &r){
+//		this->RefCounted::CWeakRefBase::operator=(r.rc);
+//		return *this;
+//	}
 
-	inline WeakRef& operator=(const WeakRef<T> &r){
-		this->RefCounted::CWeakRefBase::operator=(r.rc);
-		return *this;
-	};
-
-	inline WeakRef& operator=(const T* r){
-		this->RefCounted::CWeakRefBase::operator=(static_cast<RefCounted*>(const_cast<T*>(r)));
-		return *this;
-	};
+//	inline WeakRef& operator=(const T* r){
+//		this->RefCounted::CWeakRefBase::operator=(static_cast<RefCounted*>(const_cast<T*>(r)));
+//		return *this;
+//	}
 
 	inline void Reset(){
-		this->operator=(reinterpret_cast<const T*>(0));
-	};
+		this->operator=(0);
+	}
 
-	inline bool operator==(const T* therc)const{
-		return this->rc == therc;
-	};
-
-	inline bool operator==(const Ref<T> ref)const{
-		return this->rc == ref.p;
-	};
-
-	inline bool operator!=(const T* therc)const{
-		return !this->operator==(therc);
-	};
-
-	inline operator bool()const{
-		return this->IsValid();
-	};
+//	inline bool operator==(const T* therc)const{
+//		return this->rc == therc;
+//	}
+//
+//	inline bool operator==(const Ref<T> ref)const{
+//		return this->rc == ref.p;
+//	}
+//
+//	inline bool operator!=(const T* therc)const{
+//		return !this->operator==(therc);
+//	}
+//
+//	inline operator bool()const{
+//		return this->IsValid();
+//	}
 
 private:
 	inline static void* operator new(size_t size){
@@ -284,14 +293,15 @@ public:
 		return *this;
 	}
 
-	inline Ref(WeakRef<T> wr) :
-			p(wr.GetRefCounted())
-	{
-		M_REF_PRINT(<<"Ref::Ref(wr): invoked, p="<<(this->p)<<std::endl)
-		//ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
-		if(this->IsValid())
-			this->p->AddRef();
-	}
+	//TODO: implememnt
+//	inline Ref(WeakRef<T> wr) :
+//			p(wr.GetRefCounted())
+//	{
+//		M_REF_PRINT(<<"Ref::Ref(wr): invoked, p="<<(this->p)<<std::endl)
+//		//ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
+//		if(this->IsValid())
+//			this->p->AddRef();
+//	}
 
 	//copy constructor
 	Ref(const Ref& r){
@@ -301,13 +311,14 @@ public:
 			this->p->AddRef();
 	}
 
-	virtual ~Ref(){
+	~Ref(){
 		M_REF_PRINT(<<"Ref::~Ref(): invoked, p="<<(this->p)<<std::endl)
 		if(this->IsValid()){
-			M_REF_PRINT(<<"Ref::~Ref(): this->p->NumRefs()="<<(this->p->NumRefs())<<std::endl)
+			M_REF_PRINT(<<"Ref::~Ref(): this->p->numRefs="<<(this->p->numRefs)<<std::endl)
 			if(this->p->RemRef() == 0){
 				ASSERT(this->IsValid())
 //                LOG(<<"Ref::~Ref(): deleting object "<<(this->p)<<std::endl)
+				M_REF_PRINT(<<"Ref::~Ref(): deleting "<<(this->p)<<std::endl)
 				delete static_cast<T*>(this->p);
 				M_REF_PRINT(<<"Ref::~Ref(): object "<<(this->p)<<" deleted"<<std::endl)
 //                LOG(<<"Ref::~Ref(): object "<<(this->p)<<" deleted"<<std::endl)
@@ -330,9 +341,9 @@ public:
 		return this->p == r.p;
 	}
 
-	inline bool operator==(const RefCounted *rc)const{
-		return this->p == rc;
-	}
+//	inline bool operator==(const RefCounted *rc)const{
+//		return this->p == rc;
+//	}
 
 	inline bool operator!()const{
 		return !this->IsValid();
@@ -407,11 +418,22 @@ private:
 	}
 };
 
+
+
 template <class T> inline WeakRef<T>::WeakRef(Ref<T> r) :
-		RefCounted::CWeakRefBase(r.p)
+			RefCounted::CWeakRefBase(r.StaticCast())
 {
 	M_REF_PRINT(<<"WeakRef::"<<__func__<<"(Ref): invoked"<<std::endl)
-};
+}
 
-};//~namespace igagis
+
+
+//copy constructor
+template <class T> inline WeakRef<T>::WeakRef(const WeakRef<T> &r) :
+		RefCounted::CWeakRefBase(Ref<T>(r).StaticCast())
+{}
+
+
+
+}//~namespace
 #endif//~once
