@@ -654,7 +654,11 @@ public:
 #else
 #error "unknown system"
 #endif
-		this->isRunning = false;
+
+		//NOTE: once this->isRunning flag is set it should not be cleared because,
+		//once the thread is started it cannot be started again, even if it
+		//was stopped after first start. Thread can only be started once.
+		//Thus, do not clear this->isRunning flag here.
 	};
 
 	/**
