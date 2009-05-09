@@ -31,7 +31,6 @@ After starting the thread we can wait for it to finish its execution by calling 
 {{{
 thr.Join();
 }}}
-Note that the destructor of _ting::Thread_ class also calls the _Join()_ method to ensure that the thread is finished before destroying the thread object. Before calling _Join()_ the destructor pushes a _ting::QuitMessage _ to thread's message queue (see next section about Messages and Queues), so you probably should do message handling in your implementation of _ting::Thread::Run()_ method.
 
 
 
