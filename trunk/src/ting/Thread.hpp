@@ -532,9 +532,11 @@ class Thread{
 		try{
 			thr->Run();
 		}catch(...){
-			ASSERT(false)
+			ASSERT_INFO(false, "uncaught exception in Thread::Run()")
 		}
 
+		thr->state = STOPPED;
+		
 #ifdef M_PTHREAD
 		pthread_exit(0);
 #endif
@@ -545,7 +547,11 @@ class Thread{
 
 	Ptr<ting::Message> preallocatedQuitMessage;
 
-	volatile bool isRunning;//true if thread is running
+	enum E_State{
+		NEW,
+		RUNNING,
+		STOPPED
+	} state;
 
 	//system dependent handle
 #if defined(WIN32)
@@ -559,8 +565,10 @@ class Thread{
 #endif
 
 	//forbid copying
-	Thread(const Thread& ){};
-	Thread(Thread& ){};
+	Thread(const Thread& ){}
+
+	Thread(Thread& ){}
+	
 	Thread& operator=(const Thread& ){
 		return *this;
 	}
@@ -572,7 +580,9 @@ protected:
 public:
 	inline Thread();//see implementation below as inline method
 
-	virtual ~Thread(){}
+	virtual ~Thread(){
+		ASSERT(this->state != RUNNING)
+	}
 
 	/**
 	@brief This should be overriden, this is what to be run in new thread.
@@ -590,8 +600,8 @@ public:
 		//protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
 		ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
 
-		if(this->isRunning)
-			throw ting::Exc("Thread::Start(): Thread is already running");
+		if(this->state != NEW)
+			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
 
 #ifdef __WIN32__
 		this->th = CreateThread(NULL, static_cast<size_t>(stackSize), &RunThread, reinterpret_cast<void*>(this), 0, NULL);
@@ -623,8 +633,8 @@ public:
 #else
 #error "unknown system"
 #endif
-		this->isRunning = true;
-	};
+		this->state = RUNNING;
+	}
 
 	/**
 	@brief Wait for thread finish its execution.
@@ -634,7 +644,7 @@ public:
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
 		ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
 
-		if(!this->isRunning)
+		if(this->state != RUNNING)
 			return;
 
 		ASSERT(this->preallocatedQuitMessage.IsValid())
@@ -655,11 +665,8 @@ public:
 #error "unknown system"
 #endif
 
-		//NOTE: once this->isRunning flag is set it should not be cleared because,
-		//once the thread is started it cannot be started again, even if it
-		//was stopped after first start. Thread can only be started once.
-		//Thus, do not clear this->isRunning flag here.
-	};
+		this->state = STOPPED;
+	}
 
 	/**
 	@brief Suspend the thread for a given number of milliseconds.
@@ -683,7 +690,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	/**
 	@brief Send 'Quit' message to thread's queue.
@@ -696,7 +703,7 @@ public:
 	*/
 	void PushMessage(Ptr<ting::Message> msg){
 		this->queue.PushMessage(msg);
-	};
+	}
 };
 
 class QuitMessage : public Message{
@@ -721,7 +728,7 @@ inline void Thread::PushQuitMessage(){
 
 inline Thread::Thread() :
 		preallocatedQuitMessage(new QuitMessage(this)),
-		isRunning(false),
+		state(Thread::NEW),
 		quitFlag(false)
 {
 #if defined(__WIN32__)
