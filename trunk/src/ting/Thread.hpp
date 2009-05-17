@@ -284,9 +284,16 @@ public:
 			}
 		}else{
 			timespec ts;
-			ts.tv_sec = timeoutMillis / 1000;
-			ts.tv_nsec = (timeoutMillis % 1000) * 1000 * 1000;
-			if(sem_timedwait(&this->s, &ts) != 0){
+
+			if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
+				throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
+
+			ts.tv_sec += timeoutMillis / 1000;
+			ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
+			ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
+			ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
+
+			if(sem_timedwait(&this->s, &ts) == -1){
 				if(errno == ETIMEDOUT)
 					return false;
 				else
@@ -298,13 +305,14 @@ public:
 #error "unknown system"
 #endif
 		return true;
-	};
+	}
 
 	/**
 	@brief Signal the semaphore.
 	Increments the semaphore value.
 	*/
 	inline void Signal(){
+//		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #ifdef __WIN32__
 		if( ReleaseSemaphore(this->s, 1, NULL) == 0 ){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
@@ -350,7 +358,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	~CondVar(){
 #if defined(__WIN32__) || defined(__SYMBIAN32__)
@@ -359,7 +367,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	void Wait(Mutex& mutex){
 #if defined(__WIN32__) || defined(__SYMBIAN32__)
@@ -385,7 +393,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	void Notify(){
 #if defined(__WIN32__) || defined(__SYMBIAN32__)
@@ -404,7 +412,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 };
 
 class Message{
@@ -647,6 +655,8 @@ public:
 		if(this->state != RUNNING)
 			return;
 
+		//send preallocated quit message to threads message
+		//queue to unblock possible waiting GetMsg() call.
 		ASSERT(this->preallocatedQuitMessage.IsValid())
 		this->PushMessage(this->preallocatedQuitMessage);
 
