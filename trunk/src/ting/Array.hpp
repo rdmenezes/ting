@@ -130,11 +130,19 @@ template <class T> class Array : public ting::Buffer<T>{
 		this->size = 0;
 	};
 
-	T* Buf(){
+	inline T* Begin(){
+		return this->buf;
+	}
+
+	inline T* End(){
+		return this->buf + this->size;
+	}
+
+	inline T* Buf(){
 		return this->buf;
 	};
 	
-	const T* Buf()const{
+	inline const T* Buf()const{
 		return this->buf;
 	};
 };

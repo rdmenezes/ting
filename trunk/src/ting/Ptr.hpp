@@ -128,5 +128,5 @@ private:
 	};
 };
 
-};//~namespace ting
+}//~namespace ting
 #endif//~once

@@ -381,7 +381,7 @@ public:
 
 		this->cvMutex.Lock();
 		if(this->numSignals > 0){
-			this->semDone.Post();
+			this->semDone.Signal();
 			--this->numSignals;
 		}
 		--this->numWaiters;
@@ -401,7 +401,7 @@ public:
 
 		if(this->numWaiters > this->numSignals){
 			++this->numSignals;
-			this->semWait.Post();
+			this->semWait.Signal();
 			this->cvMutex.Unlock();
 			this->semDone.Wait();
 		}else{

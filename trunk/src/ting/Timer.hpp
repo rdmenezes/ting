@@ -30,6 +30,13 @@ THE SOFTWARE. */
 #ifndef M_Timer_hpp
 #define M_Timer_hpp
 
+//#define M_ENABLE_TIMER_TRACE
+#ifdef M_ENABLE_TIMER_TRACE
+#define M_TIMER_TRACE(x) TRACE(<<"[Timer]" x)
+#else
+#define M_TIMER_TRACE(x)
+#endif
+
 #ifdef _MSC_VER //If Microsoft C++ compiler
 #pragma warning(disable:4290)
 #endif
@@ -248,7 +255,7 @@ inline void TimerLib::TimerThread::Run(){
 	while(!this->quitFlag){
 		//check warp
 		ting::u32 ticks = ting::GetTicks();
-//		TRACE(<<"TimerThread: ticks = " << ticks << std::endl)
+		M_TIMER_TRACE(<<"TimerThread: ticks = " << ticks << std::endl)
 
 		if(ticks < ting::u32(-1) / 2){
 			if(this->warpFlag){
@@ -279,10 +286,10 @@ inline void TimerLib::TimerThread::Run(){
 		}
 
 		//notify expired timers
-//		TRACE(<<"TimerThread: search for expired timers, size = " << this->timers.size() << std::endl)
+		M_TIMER_TRACE(<<"TimerThread: search for expired timers, size = " << this->timers.size() << std::endl)
 		for(T_TimerIter i = this->timers.begin(); i != this->timers.end();){
 			if(!(*i)->warp){
-//				TRACE(<<"TimerThread: warp is not set, endTime = "<< (*i)->endTime << std::endl)
+				M_TIMER_TRACE(<<"TimerThread: warp is not set, endTime = "<< (*i)->endTime << std::endl)
 				if((*i)->endTime <= ticks){
 					u32 newTimeout = (*i)->OnExpire();
 					if(newTimeout == 0){
@@ -294,16 +301,16 @@ inline void TimerLib::TimerThread::Run(){
 					}
 				}
 			}else{
-//				TRACE(<<"TimerThread: warp is set" << std::endl)
+				M_TIMER_TRACE(<<"TimerThread: warp is set" << std::endl)
 			}
 			++i;
 		}
 
 		if(this->timers.size() == 0){
 			this->mutex.Unlock();
-//			TRACE(<<"TimerThread: waiting forever" << std::endl)
+			M_TIMER_TRACE(<<"TimerThread: waiting forever" << std::endl)
 			this->sema.Wait();
-//			TRACE(<<"TimerThread: signalled" << std::endl)
+			M_TIMER_TRACE(<<"TimerThread: signalled" << std::endl)
 			this->mutex.Lock();
 			continue;
 		}
@@ -327,9 +334,9 @@ inline void TimerLib::TimerThread::Run(){
 
 		this->mutex.Unlock();
 
-//		TRACE(<<"TimerThread: waiting for "<<millis<< " ms" << std::endl)
+		M_TIMER_TRACE(<<"TimerThread: waiting for "<<millis<< " ms" << std::endl)
 		this->sema.Wait(millis);
-//		TRACE(<<"TimerThread: signalled" << std::endl)
+		M_TIMER_TRACE(<<"TimerThread: signalled" << std::endl)
 		//It does not matter signalled or timed out
 
 		this->mutex.Lock();
