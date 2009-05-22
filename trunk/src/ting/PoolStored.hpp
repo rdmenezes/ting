@@ -86,7 +86,7 @@ template <class T> class PoolStored{
 		static void* Alloc(){
 			ChunksList &cl = Chunks();
 			
-			ting::Mutex::LockerUnlocker mutlock(cl.mutex);
+			ting::Mutex::Guard mutlock(cl.mutex);
 
 			//find chunk with free cell
 			Chunk *chunk = 0;
@@ -122,7 +122,7 @@ template <class T> class PoolStored{
 			
 			ChunksList &cl = Chunks();
 
-			ting::Mutex::LockerUnlocker mutlock(cl.mutex);
+			ting::Mutex::Guard mutlock(cl.mutex);
 			
 			//find chunk the p belongs to
 			for(typename ChunksList::T_Iter i = cl.chunks.begin(); i != cl.chunks.end(); ++i){

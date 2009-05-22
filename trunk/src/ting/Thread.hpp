@@ -164,22 +164,24 @@ public:
 	mutex lock/unlock may return or throw an exception,
 	then the mutex will not remain locked in such case.
 	*/
-	class LockerUnlocker{
+	class Guard{
 		Mutex *mut;
 
 		//forbid copying
-		LockerUnlocker(const LockerUnlocker& ){};
-		LockerUnlocker(LockerUnlocker& ){};
-		LockerUnlocker& operator=(const LockerUnlocker& ){return *this;};
+		Guard(const Guard& ){}
+		Guard(Guard& ){}
+		Guard& operator=(const Guard& ){
+			return *this;
+		}
 	public:
-		LockerUnlocker(Mutex &m):
+		Guard(Mutex &m):
 				mut(&m)
 		{
 			this->mut->Lock();
-		};
-		~LockerUnlocker(){
+		}
+		~Guard(){
 			this->mut->Unlock();
-		};
+		}
 	};
 };//~class Mutex
 
@@ -451,7 +453,7 @@ class Queue{
 	{};
 
 	~Queue(){
-		Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+		Mutex::Guard mutexLockerUnlocker(this->mut);
 		Message *msg = this->first;
 		Message	*nextMsg;
 		while(msg){
@@ -463,7 +465,7 @@ class Queue{
 
 	void PushMessage(Ptr<Message> msg){
 		{
-			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+			Mutex::Guard mutexLockerUnlocker(this->mut);
 			if(this->first){
 				ASSERT(this->last && this->last->next == 0)
 				this->last = this->last->next = msg.Extract();
@@ -477,7 +479,7 @@ class Queue{
 	};
 
 	Ptr<Message> PeekMsg(){
-		Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+		Mutex::Guard mutexLockerUnlocker(this->mut);
 		if(this->first){
 			//Decrement semaphore value, because we take one message from queue.
 			//The semaphore value should be > 0 here, so there will be no hang
@@ -495,7 +497,7 @@ class Queue{
 	Ptr<Message> GetMsg(){
 //		TRACE(<< "Queue::GetMsg(): enter" << std::endl)
 		{
-			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+			Mutex::Guard mutexLockerUnlocker(this->mut);
 			if(this->first){
 				Message* ret = this->first;
 				this->first = this->first->next;
@@ -507,7 +509,7 @@ class Queue{
 		this->sem.Wait();
 //		TRACE(<< "Queue::GetMsg(): signalled" << std::endl)
 		{
-			Mutex::LockerUnlocker mutexLockerUnlocker(this->mut);
+			Mutex::Guard mutexLockerUnlocker(this->mut);
 			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
@@ -606,7 +608,7 @@ public:
 	//0 stacksize stands for default stack size (platform dependent)
 	void Start(uint stackSize = 0){
 		//protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
-		ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
+		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
 
 		if(this->state != NEW)
 			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
@@ -650,7 +652,7 @@ public:
 	void Join(){
 		this->quitFlag = true;
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
-		ting::Mutex::LockerUnlocker mutexLockerUnlocker(this->mutex);
+		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
 
 		if(this->state != RUNNING)
 			return;
