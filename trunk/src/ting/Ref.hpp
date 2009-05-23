@@ -55,14 +55,16 @@ class RefCounted{
 private:
 	inline uint AddRef()throw(){
 		ASSERT(this->counter)
-		Mutex::Guard mutexGuard(this->counter->mutex);
 		M_REF_PRINT(<<"RefCounted::AddRef(): invoked, old numHardRefs = "<<(this->counter->numHardRefs)<<std::endl)
+		Mutex::Guard mutexGuard(this->counter->mutex);
+		M_REF_PRINT(<<"RefCounted::AddRef(): mutex locked "<<std::endl)
 		return ++(this->counter->numHardRefs);
 	}
 
 	inline uint RemRef()throw(){
-		this->counter->mutex.Lock();
 		M_REF_PRINT(<<"RefCounted::RemRef(): invoked, old numHardRefs = "<<(this->counter->numHardRefs)<<std::endl)
+		this->counter->mutex.Lock();
+		M_REF_PRINT(<<"RefCounted::RemRef(): mutex locked"<<std::endl)
 		uint n = --(this->counter->numHardRefs);
 
 		if(n == 0){//if no more references to the RefCounted
@@ -73,11 +75,13 @@ private:
 			}else{//no weak references
 				//NOTE: unlock before deleting because the mutex object is in Counter.
 				this->counter->mutex.Unlock();
+				M_REF_PRINT(<<"RefCounted::RemRef(): mutex unlocked"<<std::endl)
 				delete this->counter;
 				return n;
 			}
 		}
 		this->counter->mutex.Unlock();
+		M_REF_PRINT(<<"RefCounted::RemRef(): mutex unlocked"<<std::endl)
 
 		return n;
 	}
@@ -87,11 +91,17 @@ private:
 		Mutex mutex;
 		uint numHardRefs;
 		uint numWeakRefs;
-		Counter(RefCounted *ptr) :
+		inline Counter(RefCounted *ptr) :
 				p(ptr),
 				numHardRefs(0),
 				numWeakRefs(0)
-		{}
+		{
+			M_REF_PRINT(<< "Counter::Counter(): counter object created" << std::endl)
+		}
+
+		inline ~Counter(){
+			M_REF_PRINT(<<"Counter::~Counter(): counter object destroyed"<<std::endl)
+		}
 	};
 
 	Counter *counter;
@@ -166,6 +176,7 @@ public:
 		M_REF_PRINT(<<"Ref::Ref(rc): invoked, p="<<(this->p)<<std::endl)
 		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
 		this->p->AddRef();
+		M_REF_PRINT(<<"Ref::Ref(rc): exiting"<<(this->p)<<std::endl)
 	}
 
 	inline Ref(const WeakRef<T> &r);
@@ -182,7 +193,6 @@ public:
 	~Ref(){
 		M_REF_PRINT(<<"Ref::~Ref(): invoked, p="<<(this->p)<<std::endl)
 		if(this->IsValid()){
-			M_REF_PRINT(<<"Ref::~Ref(): this->p->numRefs="<<(this->p->numRefs)<<std::endl)
 			if(this->p->RemRef() == 0){
 				ASSERT(this->IsValid())
 				M_REF_PRINT(<<"Ref::~Ref(): deleting "<<(this->p)<<std::endl)
@@ -265,6 +275,8 @@ public:
 		//downcasting of invalid reference is also possible
 		if(this->IsNotValid())
 			return 0;
+
+		M_REF_PRINT(<<"Ref::downcast(): invoked, p="<<(this->p)<<std::endl)
 
 		//NOTE: static cast to T*, not to TBase*,
 		//this is to forbid automatic upcast

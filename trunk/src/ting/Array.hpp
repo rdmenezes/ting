@@ -52,16 +52,16 @@ template <class T> class Array : public ting::Buffer<T>{
 			return;
 		}
 
-		M_ARRAY_PRINT(<<"Array::PrivateInit(): size="<<size<<std::endl)
+		M_ARRAY_PRINT(<< "Array::PrivateInit(): size = " << this->size << std::endl)
 		try{
 			this->buf = new T[arraySize];
 		}catch(...){
-			M_ARRAY_PRINT(<<"Array::Init(): exception caught"<<size<<std::endl)
+			M_ARRAY_PRINT(<< "Array::Init(): exception caught" << this->size << std::endl)
 			this->buf = 0;
 			this->size = 0;
 			throw;//rethrow the exception
 		}
-		M_ARRAY_PRINT(<<"Array::PrivateInit(): arr="<<static_cast<void*>(arr)<<std::endl)
+		M_ARRAY_PRINT(<< "Array::PrivateInit(): buf = " << static_cast<void*>(this->buf) << std::endl)
 	};
 
   public:
@@ -89,14 +89,15 @@ template <class T> class Array : public ting::Buffer<T>{
 	};
 
 	~Array(){
-		M_ARRAY_PRINT(<<"Array::~Array(): invoked"<<std::endl)
+		M_ARRAY_PRINT(<< "Array::~Array(): invoked" << std::endl)
 		delete[] this->buf;
-		M_ARRAY_PRINT(<<"Array::~Array(): exit"<<std::endl)
+		M_ARRAY_PRINT(<< "Array::~Array(): exit" << std::endl)
 	};
 
 	void Grow(uint deltaSize){
-		//TODO: test this method. it is untested so far
-		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
+		ASSERT(false)//TODO: test this method. it is untested so far
+
+		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
 		T* oldArr = this->buf;
 		uint oldSize = this->size;
 		try{
@@ -111,7 +112,7 @@ template <class T> class Array : public ting::Buffer<T>{
 	};
 
 	void Init(uint arraySize){
-		M_ARRAY_PRINT(<<"Array::Init(): arr="<<(void*)arr<<std::endl)
+		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
 		this->~Array();
 		this->PrivateInit(arraySize);
 	};

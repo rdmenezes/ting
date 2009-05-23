@@ -35,18 +35,20 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "types.hpp"
+#include "utils.hpp"
 #include "Thread.hpp"
 #include "Exc.hpp"
 #include "Array.hpp"
 
 //#define M_ENABLE_POOL_TRACE
 #ifdef M_ENABLE_POOL_TRACE
-#define M_POOL_TRACE(x) TRACE(x)
+#define M_POOL_TRACE(x) TRACE(<<"[POOL] ") TRACE(x)
 #else
 #define M_POOL_TRACE(x)
 #endif
 
 namespace ting{
+
 
 template <class T> class PoolStored{
 	
@@ -54,13 +56,19 @@ template <class T> class PoolStored{
 		struct BufHolder{
 			ting::byte buf[ElemSize];
 		};
+
+		STATIC_ASSERT(false)//TODO: why doesn't it trigger?
 		
 		struct PoolElem : public BufHolder{
 			bool isFree;
 			PoolElem() :
 					isFree(true)
 			{}
-		};
+		}
+		//Align by sizeof(int) boundary, just to be more safe.
+		//I once had a problem with pthread mutex when it was not aligned by 4 byte bounday,
+		//so I resolved this by declaring PoolElem struct as aligned by sizeof(int).
+		M_DECLARE_ALIGNED(sizeof(int));
 
 		struct Chunk : public ting::Array<PoolElem>{
 			ting::uint numAllocated;
@@ -103,6 +111,7 @@ template <class T> class PoolStored{
 			}
 
 			ASSERT(chunk)
+			M_POOL_TRACE(<< "Alloc(): Free chunk = " << chunk << std::endl)
 
 			//find free cell
 			for(PoolElem* i = chunk->Begin(); i != chunk->End(); ++i){
@@ -110,13 +119,16 @@ template <class T> class PoolStored{
 					ASSERT(chunk->numAllocated < chunk->Size())
 					i->isFree = false;
 					++chunk->numAllocated;
+					M_POOL_TRACE(<< "Alloc(): Free cell found = " << i << " sizeof(PoolElem) = " << sizeof(PoolElem) << std::endl)
+					M_POOL_TRACE(<< "Alloc(): returning " << static_cast<BufHolder*>(i) << std::endl)
 					return reinterpret_cast<void*>(static_cast<BufHolder*>(i));
 				}
 			}
 			ASSERT(false)
 		}
 
-		static void Delete(void* p){
+		static void Free(void* p){
+			M_POOL_TRACE(<< "Free(): p = " << p << std::endl)
 			if(!p)
 				return;
 			
@@ -129,6 +141,7 @@ template <class T> class PoolStored{
 				ASSERT((*i).numAllocated != 0)
 				if((*i).End() > p && p >= (*i).Begin()){
 					Chunk *chunk = &(*i);
+					M_POOL_TRACE(<< "Free(): chunk found = " << chunk << std::endl)
 					--(chunk->numAllocated);
 					if(chunk->numAllocated == 0){
 						cl.chunks.erase(i);
@@ -157,6 +170,7 @@ typedef MemPool< \
 	> T_MemoryPool;
 
 	static void* operator new (size_t size){
+		M_POOL_TRACE(<< "new(): size = " << size << std::endl)
 		if(size != sizeof(T))
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
 
@@ -168,7 +182,7 @@ typedef MemPool< \
 	static void operator delete (void *p){
 		M_MEMPOOL_TYPEDEF
 		
-		T_MemoryPool::Delete(p);
+		T_MemoryPool::Free(p);
 	}
 	
 #undef M_MEMPOOL_TYPEDEF

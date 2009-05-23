@@ -65,6 +65,14 @@ THE SOFTWARE. */
 #endif
 
 
+//#define M_ENABLE_MUTEX_TRACE
+#ifdef M_ENABLE_MUTEX_TRACE
+#define M_MUTEX_TRACE(x) TRACE(<<"[MUTEX] ") TRACE(x)
+#else
+#define M_MUTEX_TRACE(x)
+#endif
+
+
 namespace ting{
 
 //forward declarations
@@ -99,26 +107,32 @@ class Mutex{
 public:
 
 	Mutex(){
+		M_MUTEX_TRACE(<< "Mutex::Mutex(): invoked " << this << std::endl)
 #ifdef __WIN32__
 		InitializeCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		if(this->m.CreateLocal() != KErrNone){
-			throw ting::Exc("Mutex::Mutex(): failed creating mutex");
+			throw ting::Exc("Mutex::Mutex(): failed creating mutex (CreateLocal() failed)");
 		}
 #elif defined(M_PTHREAD) //pthread
-		pthread_mutex_init(&this->m, NULL);
+		if(pthread_mutex_init(&this->m, NULL) != 0){
+			throw ting::Exc("Mutex::Mutex(): failed creating mutex (pthread_mutex_init() failed)");
+		}
 #else
 #error "unknown system"
 #endif
 	};
 
 	~Mutex(){
+		M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
 #ifdef __WIN32__
 		DeleteCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Close();
 #elif defined(M_PTHREAD) //pthread
-		pthread_mutex_destroy(&this->m);
+		if(pthread_mutex_destroy(&this->m) != 0){
+			ASSERT(false)
+		}
 #else
 #error "unknown system"
 #endif
@@ -131,6 +145,7 @@ public:
 	mutex lock will be released.
 	*/
 	void Lock(){
+		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #ifdef __WIN32__
 		EnterCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
@@ -146,6 +161,7 @@ public:
 	@brief Release mutex lock.
 	*/
 	void Unlock(){
+		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #ifdef __WIN32__
 		LeaveCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)

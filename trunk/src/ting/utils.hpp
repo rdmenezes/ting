@@ -38,6 +38,18 @@ THE SOFTWARE. */
 
 #include "types.hpp"
 
+//define macro used to align structures in memory
+#ifdef _MSC_VER //If Microsoft C++ compiler
+#define M_DECLARE_ALIGNED(x) __declspec(align(x))
+
+#elif defined(__GNUG__)//GNU g++ compiler
+#define M_DECLARE_ALIGNED(x) __attribute__ ((aligned(x)))
+
+#else
+#error "unknown compiler"
+#endif
+
+
 namespace ting{
 
 template <class T_Type> inline void Exchange( T_Type &a, T_Type &b){
