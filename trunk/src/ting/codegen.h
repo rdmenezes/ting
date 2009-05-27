@@ -73,6 +73,10 @@ THE SOFTWARE. */
 #define M_REPEAT1_11(x, ...)  M_REPEAT1_10(x, __VA_ARGS__) x(10, __VA_ARGS__)
 #define M_REPEAT1_12(x, ...)  M_REPEAT1_11(x, __VA_ARGS__) x(11, __VA_ARGS__)
 #define M_REPEAT1_13(x, ...)  M_REPEAT1_12(x, __VA_ARGS__) x(12, __VA_ARGS__)
+#define M_REPEAT1_14(x, ...)  M_REPEAT1_13(x, __VA_ARGS__) x(13, __VA_ARGS__)
+#define M_REPEAT1_15(x, ...)  M_REPEAT1_14(x, __VA_ARGS__) x(14, __VA_ARGS__)
+#define M_REPEAT1_16(x, ...)  M_REPEAT1_15(x, __VA_ARGS__) x(15, __VA_ARGS__)
+#define M_REPEAT1_17(x, ...)  M_REPEAT1_16(x, __VA_ARGS__) x(16, __VA_ARGS__)
 //extend this list if need more than 13 repeats
 
 #define M_REPEAT2_0(x, ...)

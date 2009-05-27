@@ -41,59 +41,63 @@ namespace ting{
 //======================
 template <typename T_Type> inline T_Type Sign(T_Type n){
 	return n > 0 ? (1) : (-1);
-};
+}
 
 template <typename T_Type> inline T_Type Abs(T_Type n){
 	return n > 0 ? n : (-n);
-};
+}
 
 template <typename T_Type> inline T_Type Min(T_Type a, T_Type b){
 	return a < b ? a : b;
-};
+}
 
 template <typename T_Type> inline T_Type Max(T_Type a, T_Type b){
 	return a > b ? a : b;
-};
+}
 
 template <typename T> inline T DEps(){
 	return T(1e-6f);
-};
+}
 
 template <typename T> inline T DPi(){
 	return T(3.14159f);
-};
+}
 
 template <typename T> inline T D2Pi(){
-	return T(2 * DPi<T>());
-};
+	return T(2) * DPi<T>();
+}
 
 /**
 @return natural logarithm of 2
 */
 template <typename T> inline T DLnOf2(){
 	return T(0.693147181);
-};
+}
 
 template <typename T> inline T DNaN(){
 	return std::numeric_limits<T>::quiet_NaN();
-};
+}
 
 template <typename T> inline T DInf(){
 	return std::numeric_limits<T>::infinity();
-};
+}
 
 //Power functions
 template <typename T_Type> inline T_Type Pow2(T_Type x){
 	return x * x;
-};
+}
 
 template <typename T_Type> inline T_Type Pow3(T_Type x){
 	return Pow2(x) * x;
-};
+}
 
 template <typename T_Type> inline T_Type Pow4(T_Type x){
 	return Pow2(Pow2(x));
-};
+}
+
+template <typename T_Type> inline T_Type Pow5(T_Type x){
+	return Pow2(x) * Pow3(x);
+}
 
 //Cubic root function
 template <typename T_Type> inline T_Type CubicRoot(T_Type x){
@@ -103,7 +107,7 @@ template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 		return 0;
 	else
 		return -exp(::log(-x) / 3);
-};
+}
 
 //argument of a complex number
 template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
@@ -119,7 +123,21 @@ template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
 		return a;
 	else
 		return -a;
-};
+}
+
+
+
+template <typename T> inline T Sin(T x){
+	return x.Sin();
+}
+
+
+
+template <> inline float Sin<float>(float x){
+	return sin(x);
+}
+
+
 
 }//~namespace ting
 #endif//~once

@@ -125,6 +125,7 @@ template <class T> class PoolStored{
 				}
 			}
 			ASSERT(false)
+			return 0;
 		}
 
 		static void Free(void* p){
