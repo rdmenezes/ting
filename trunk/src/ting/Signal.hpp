@@ -76,10 +76,10 @@ template <class T_Ob, class T_Ret> class C_MethodSlot##num_meth_params : public 
 	C_MethodSlot##num_meth_params(T_Ob* object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params))) : \
 			o(object), \
 			m(method) \
-	{}; \
+	{} \
 	void Execute(M_FUNC_PARAMS_FULL(num_sig_params)){ \
 		(this->o->*(this->m))(M_FUNC_PARAM_NAMES(num_meth_params)); \
-	}; \
+	} \
 };
 //#define M_METHOD_SLOT(num_meth_params, num_sig_params) M_METHOD_SLOT_I(num_meth_params, num_sig_params)
 
@@ -89,10 +89,10 @@ template <class T_Ret> class C_FuncSlot##num_func_params : public C_SlotLink{ \
   public: \
 	C_FuncSlot##num_func_params(T_Ret(*function)(M_FUNC_PARAM_TYPES(num_func_params))) : \
 			f(function) \
-	{}; \
+	{} \
 	void Execute(M_FUNC_PARAMS_FULL(num_sig_params)){ \
 		(*this->f)(M_FUNC_PARAM_NAMES(num_func_params)); \
-	}; \
+	} \
 };
 
 //output the template for method slot for C_WeakRef object with n parameters
@@ -101,36 +101,42 @@ template <class T_Ob, class T_Ret> class C_WeakRefMethodSlot##num_meth_params : 
 	WeakRef<T_Ob> o; \
 	T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)); \
   public: \
-	C_WeakRefMethodSlot##num_meth_params(WeakRef<T_Ob> object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params))) : \
+	C_WeakRefMethodSlot##num_meth_params(WeakRef<T_Ob>& object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params))) : \
 			o(object), \
 			m(method) \
-	{}; \
+	{} \
 	void Execute(M_FUNC_PARAMS_FULL(num_sig_params)){ \
 		if(Ref<T_Ob> r = this->o) \
 			(r.operator->()->*(this->m))(M_FUNC_PARAM_NAMES(num_meth_params)); \
-	}; \
+	} \
 };
 
 //method and pointer to object Connect
 #define M_CONNECT_METH(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> void Connect(T_Ob* o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
-	Ptr<C_SlotLink> sl = static_cast<C_SlotLink*>(new C_MethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)); \
+	Ptr<C_SlotLink> sl( \
+			static_cast<C_SlotLink*>(new C_MethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
+		); \
 	this->slotLink.push_back(sl); \
-};
+}
 
 //func Connect
 #define M_CONNECT_FUNC(num_func_params, unused) \
 template <class T_Ret> void Connect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params))){ \
-	Ptr<C_SlotLink> sl = static_cast<C_SlotLink*>( new C_FuncSlot##num_func_params<T_Ret>(f) ); \
+	Ptr<C_SlotLink> sl( \
+			static_cast<C_SlotLink*>( new C_FuncSlot##num_func_params<T_Ret>(f)) \
+		); \
 	this->slotLink.push_back(sl); \
-};
+}
 
 //Weak ref and method Connect
 #define M_CONNECT_METH_WEAKREF(num_meth_params, unused) \
-template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob> o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
-	Ptr<C_SlotLink> sl = static_cast<C_SlotLink*>(new C_WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)); \
+template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob>& o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
+	Ptr<C_SlotLink> sl( \
+			static_cast<C_SlotLink*>(new C_WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
+		); \
 	this->slotLink.push_back(sl); \
-};
+}
 
 //
 // M   M        SSSS IIIII  GGG  N   N  AAA  L
@@ -159,10 +165,14 @@ M_TEMPLATE(n) class Signal##n{ \
 	void Emit(M_FUNC_PARAMS_FULL(n)){ \
 		for(uint i = 0; i < this->slotLink.size(); ++i) \
 			this->slotLink[i]->Execute(M_FUNC_PARAM_NAMES(n)); \
-	}; \
+	} \
 	M_REPEAT2(M_INCREMENT(n), M_CONNECT_METH, ) \
 	M_REPEAT2(M_INCREMENT(n), M_CONNECT_FUNC, ) \
 	M_REPEAT2(M_INCREMENT(n), M_CONNECT_METH_WEAKREF, ) \
+\
+	void DisconnectAll(){ \
+		this->slotLink.clear(); \
+	} \
 };
 
 

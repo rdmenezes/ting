@@ -352,7 +352,7 @@ private:
 		ASSERT(Mantissa >= 9)
 		ting::uint index = ((v.n) >> (Mantissa - 9)); //take 3 bits from integer part and 9 from mantissa
 
-		ASSERT_INFO(index < M_SIN_BIG_TABLE_LENGTH * 9, "v = " << float(v) << " index = " << index << " 2pi = " << float(ting::D2Pi<Fixed>()))
+		ASSERT_INFO(index < M_SIN_BIG_TABLE_LENGTH * 16, "v = " << float(v) << " index = " << index << " 2pi = " << float(ting::D2Pi<Fixed>()))
 
 //		TRACE(<< "index = " << index << std::endl)
 //		TRACE(<< "sinTable[index] = " << sinTable[index] << std::endl)

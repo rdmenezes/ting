@@ -73,6 +73,14 @@ THE SOFTWARE. */
 #endif
 
 
+//#define M_ENABLE_QUEUE_TRACE
+#ifdef M_ENABLE_QUEUE_TRACE
+#define M_QUEUE_TRACE(x) TRACE(<<"[QUEUE] ") TRACE(x)
+#else
+#define M_QUEUE_TRACE(x)
+#endif
+
+
 namespace ting{
 
 //forward declarations
@@ -317,7 +325,6 @@ public:
 				else
 					throw ting::Exc("Semaphore::Wait(): error");
 			}
-			return true;
 		}
 #else
 #error "unknown system"
@@ -441,12 +448,12 @@ class Message{
 protected:
 	Message() :
 			next(0)
-	{};
+	{}
 
 public:
-	virtual ~Message(){};
+	virtual ~Message(){}
 
-	virtual void Handle()=0;
+	virtual void Handle() = 0;
 };
 
 class Queue{
@@ -466,7 +473,7 @@ class Queue{
 	Queue() :
 			first(0),
 			last(0)
-	{};
+	{}
 
 	~Queue(){
 		Mutex::Guard mutexLockerUnlocker(this->mut);
@@ -477,7 +484,7 @@ class Queue{
 			delete msg;
 			msg = nextMsg;
 		}
-	};
+	}
 
 	void PushMessage(Ptr<Message> msg){
 		{
@@ -490,49 +497,57 @@ class Queue{
 				ASSERT(msg.IsValid())
 				this->last = this->first = msg.Extract();
 			}
+			
+			//NOTE: must do signalling while mutex is locked!!!
+			this->sem.Signal();
 		}
-		this->sem.Signal();
-	};
+	}
 
 	Ptr<Message> PeekMsg(){
 		Mutex::Guard mutexLockerUnlocker(this->mut);
 		if(this->first){
-			//Decrement semaphore value, because we take one message from queue.
-			//The semaphore value should be > 0 here, so there will be no hang
-			//in Wait().
-			//The semaphore value actually reflects the number of Messages in
-			//the queue.
+			//NOTE: Decrement semaphore value, because we take one message from queue.
+			//      The semaphore value should be > 0 here, so there will be no hang
+			//      in Wait().
+			//      The semaphore value actually reflects the number of Messages in
+			//      the queue.
 			this->sem.Wait();
 			Message* ret = this->first;
 			this->first = this->first->next;
 			return Ptr<Message>(ret);
 		}
 		return Ptr<Message>();
-	};
+	}
 
 	Ptr<Message> GetMsg(){
-//		TRACE(<< "Queue::GetMsg(): enter" << std::endl)
+		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): enter" << std::endl)
 		{
-			Mutex::Guard mutexLockerUnlocker(this->mut);
+			Mutex::Guard mutexGuard(this->mut);
 			if(this->first){
+				//NOTE: Decrement semaphore value, because we take one message from queue.
+				//      The semaphore value should be > 0 here, so there will be no hang
+				//      in Wait().
+				//      The semaphore value actually reflects the number of Messages in
+				//      the queue.
+				this->sem.Wait();
 				Message* ret = this->first;
 				this->first = this->first->next;
-				TRACE(<< "Queue::GetMsg(): exit1" << std::endl)
+				M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit1" << std::endl)
 				return Ptr<Message>(ret);
 			}
 		}
-//		TRACE(<< "Queue::GetMsg(): waiting" << std::endl)
-		this->sem.Wait();
-//		TRACE(<< "Queue::GetMsg(): signalled" << std::endl)
+		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): waiting" << std::endl)
+		ASSERT_EXEC(this->sem.Wait())
+		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signalled" << std::endl)
 		{
-			Mutex::Guard mutexLockerUnlocker(this->mut);
+			Mutex::Guard mutexGuard(this->mut);
 			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
-//			TRACE(<< "Queue::GetMsg(): exit2" << std::endl)
+			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit2" << std::endl)
 			return Ptr<Message>(ret);
 		}
-	};
+	}
 };
 
 /**
