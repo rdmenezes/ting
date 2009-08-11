@@ -34,7 +34,7 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_PTR_PRINT
 #ifdef M_ENABLE_PTR_PRINT
-#define M_PTR_PRINT(x) LOG(x)
+#define M_PTR_PRINT(x) TRACE(x)
 #else
 #define M_PTR_PRINT(x)
 #endif
@@ -46,29 +46,29 @@ template <class T> class Ptr{
 public:
 	explicit inline Ptr(T* ptr = 0) :
 			p(ptr)
-	{};
+	{}
 	
 	//const copy constructor
 	inline Ptr(const Ptr& ptr){
 		M_PTR_PRINT(<<"Ptr::Ptr(copy): invoked, ptr.p="<<(ptr.p)<<std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
-	};
+	}
 
 	inline ~Ptr(){
 		M_PTR_PRINT(<<"Ptr::~Ptr(): delete invoked, p="<<this->p<<std::endl)
 		delete static_cast<T*>(p);
-	};
+	}
 
 	inline T* operator->(){
 		ASSERT_INFO(this->p, "Ptr::operator->(): this->p is zero")
 		return static_cast<T*>(p);
-	};
+	}
 
 	inline const T* operator->()const{
 		ASSERT_INFO(this->p, "const Ptr::operator->(): this->p is zero")
 		return static_cast<T*>(this->p);
-	};
+	}
 
 	inline Ptr& operator=(const Ptr& ptr){
 		M_PTR_PRINT(<<"Ptr::operator=(Ptr&): enter, this->p="<<(this->p)<<std::endl)
@@ -77,55 +77,62 @@ public:
 		const_cast<Ptr&>(ptr).p = 0;
 		M_PTR_PRINT(<<"Ptr::operator=(Ptr&): exit, this->p="<<(this->p)<<std::endl)
 		return (*this);
-	};
+	}
 
 	inline bool operator==(const T* ptr)const{
 		return this->p == ptr;
-	};
+	}
 
 	inline bool operator!=(const T* ptr)const{
 		return !( *this == ptr );
-	};
+	}
+
 	inline bool operator!()const{
 		return this->IsNotValid();
-	};
+	}
 
 	inline operator bool(){
 		return this->IsValid();
-	};
+	}
 
 	inline T* Extract(){
 		T* pp = static_cast<T*>(this->p);
 		this->p = 0;
 		return pp;
-	};
+	}
 
 	inline void Reset(){
 		this->~Ptr();
 		this->p = 0;
-	};
+	}
 
 	inline bool IsValid()const{
 		return this->p != 0;
-	};
+	}
 	
 	inline bool IsNotValid()const{
 		return !this->IsValid();
-	};
+	}
 
 	template <class TS> TS* StaticCast(){
 		return static_cast<TS*>(this->operator->());
-	};
-	
+	}
+
+	//for automatic type downcast
+	template <typename TBase> inline operator Ptr<TBase>(){
+		M_PTR_PRINT(<< "Ptr::downcast(): invoked, p = " << (this->p) << std::endl)
+		return Ptr<TBase>(this->Extract());
+	}
+
 private:
 	inline void* operator new(size_t){
 		ASSERT(false)//forbidden
 		return reinterpret_cast<void*>(0);
-	};
+	}
 
 	inline void operator delete(void*){
 		ASSERT(false)//forbidden
-	};
+	}
 };
 
 }//~namespace ting

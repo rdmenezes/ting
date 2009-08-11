@@ -47,6 +47,8 @@ template <typename T> class Quaternion;
 
 template <class T> inline const char* ParseNum(const char* str, T& out_Res);
 
+
+
 template <> inline const char* ParseNum<int>(const char* str, int& out_Res){
 	char buf[32];
 	const char *p = str;
@@ -66,7 +68,9 @@ template <> inline const char* ParseNum<int>(const char* str, int& out_Res){
 	
 	out_Res = atoi(buf);
 	return p;
-};
+}
+
+
 
 template <> inline const char* ParseNum<float>(const char* str, float& out_Res){
 	char buf[32];
@@ -87,7 +91,7 @@ template <> inline const char* ParseNum<float>(const char* str, float& out_Res){
 	
 	out_Res = atof(buf);
 	return p;
-};
+}
 
 //===============================
 //

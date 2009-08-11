@@ -200,7 +200,7 @@ inline void TimerLib::TimerThread::UpdateTimer(Timer* timer, u32 newTimeout){
 
 inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 	ASSERT(timer)
-	ting::Mutex::LockerUnlocker mutlock(this->mutex);
+	ting::Mutex::Guard mutexGuard(this->mutex);
 
 	if(!timer->isStarted)
 		return false;
@@ -228,7 +228,7 @@ inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 
 inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 	ASSERT(timer)
-	ting::Mutex::LockerUnlocker mutlock(this->mutex);
+	ting::Mutex::Guard mutexGuard(this->mutex);
 
 	ASSERT(!timer->isStarted)
 
@@ -251,7 +251,7 @@ inline void TimerLib::TimerThread::Run(){
 		this->warpFlag = true;
 	}
 
-	ting::Mutex::LockerUnlocker mutlock(this->mutex);
+	ting::Mutex::Guard mutexGuard(this->mutex);
 	while(!this->quitFlag){
 		//check warp
 		ting::u32 ticks = ting::GetTicks();

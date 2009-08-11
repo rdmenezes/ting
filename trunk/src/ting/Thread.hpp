@@ -108,9 +108,11 @@ class Mutex{
 #endif
 
 	//forbid copying
-	Mutex(const Mutex& ){};
-	Mutex(Mutex& ){};
-	Mutex& operator=(const Mutex& ){return *this;};
+	Mutex(const Mutex& ){}
+	Mutex(Mutex& ){}
+	Mutex& operator=(const Mutex& ){
+		return *this;
+	}
 
 public:
 
@@ -129,7 +131,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	~Mutex(){
 		M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
@@ -144,7 +146,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	/**
 	@brief Acquire mutex lock.
@@ -163,7 +165,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 	
 	/**
 	@brief Release mutex lock.
@@ -179,7 +181,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	/**
 	@brief Helper class which automatically Locks the given mutex.
@@ -254,7 +256,7 @@ public:
 			LOG(<<"Semaphore::Semaphore(): failed"<<std::endl)
 			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
 		}
-	};
+	}
 
 	~Semaphore(){
 #ifdef __WIN32__
@@ -266,7 +268,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 
 	/**
 	@brief Wait on semaphore.
@@ -351,7 +353,7 @@ public:
 #else
 #error "unknown system"
 #endif
-	};
+	}
 };
 
 class CondVar{
@@ -487,20 +489,18 @@ class Queue{
 	}
 
 	void PushMessage(Ptr<Message> msg){
-		{
-			Mutex::Guard mutexLockerUnlocker(this->mut);
-			if(this->first){
-				ASSERT(this->last && this->last->next == 0)
-				this->last = this->last->next = msg.Extract();
-				ASSERT(this->last->next == 0)
-			}else{
-				ASSERT(msg.IsValid())
-				this->last = this->first = msg.Extract();
-			}
-			
-			//NOTE: must do signalling while mutex is locked!!!
-			this->sem.Signal();
+		Mutex::Guard mutexLockerUnlocker(this->mut);
+		if(this->first){
+			ASSERT(this->last && this->last->next == 0)
+			this->last = this->last->next = msg.Extract();
+			ASSERT(this->last->next == 0)
+		}else{
+			ASSERT(msg.IsValid())
+			this->last = this->first = msg.Extract();
 		}
+
+		//NOTE: must do signalling while mutex is locked!!!
+		this->sem.Signal();
 	}
 
 	Ptr<Message> PeekMsg(){
@@ -757,12 +757,12 @@ class QuitMessage : public Message{
 	{
 		if(!this->thr)
 			throw ting::Exc("QuitMessage::QuitMessage(): thread pointer passed is 0");
-	};
+	}
 
 	//override
 	void Handle(){
 		this->thr->quitFlag = true;
-	};
+	}
 };
 
 inline void Thread::PushQuitMessage(){
@@ -776,12 +776,14 @@ inline Thread::Thread() :
 {
 #if defined(__WIN32__)
 	this->th = NULL;
-#elif defined(__SYMBIAN32__) || defined(M_PTHREAD)
+#elif defined(__SYMBIAN32__)
+	//do nothing
+#elif defined(M_PTHREAD)
 	//do nothing
 #else
 #error "unknown system"
 #endif
-};
+}
 
 }//~namespace ting
 
