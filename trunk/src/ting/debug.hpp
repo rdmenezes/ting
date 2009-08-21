@@ -52,11 +52,11 @@ namespace ting_debug{
 #ifdef __SYMBIAN32__
 #else
 inline std::ofstream& DebugLogger(){
-    //this allows to make debug output even if main() is not called yet and even if
-    //standard std::cout object is not created since static global variables initialization
-    //order is undetermined in C++ if these variables are located in separate cpp files!
-    static std::ofstream* logger = new std::ofstream("output.log");
-    return *logger;
+	//this allows to make debug output even if main() is not called yet and even if
+	//standard std::cout object is not created since static global variables initialization
+	//order is undetermined in C++ if these variables are located in separate cpp files!
+	static std::ofstream* logger = new std::ofstream("output.log");
+	return *logger;
 };
 #endif
 }//~namespace ting_debug
@@ -77,7 +77,7 @@ inline std::ofstream& DebugLogger(){
 #define TRACE(x) TRACE_ALWAYS(x)
 
 #define LOG_IF_TRUE(x, y) if(x){ LOG(y) }
-                   
+
 #define DEBUG_CODE(x) x
 
 #else//#ifdef DEBUG
@@ -108,9 +108,10 @@ inline std::ofstream& DebugLogger(){
 #include <cassert>
 
 #define ASSERT_ALWAYS_INFO(x, y) if(!(x)){ \
-                        LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
-                        assert(false); \
-                    }
+						LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
+						TRACE_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
+						assert(false); \
+					}
 #define ASSERT_ALWAYS(x) ASSERT_ALWAYS_INFO((x),"no additional info")
 
 #endif
@@ -148,14 +149,14 @@ inline void LogAssert(const char* file, int line){
 namespace ting{
 namespace ting_debug{
 template <bool b> struct C_StaticAssert{
-    virtual void STATIC_ASSERTION_FAILED() = 0;
-    virtual ~C_StaticAssert(){};
+	virtual void STATIC_ASSERTION_FAILED() = 0;
+	virtual ~C_StaticAssert(){};
 };
 template <> struct C_StaticAssert<true>{};
 }//~namespace ting_debug
 }//~namespace ting
 #define M_STATIC_ASSERT_II(x, l, c) struct C_StaticAssertInst_##l##_##c{ \
-    ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
+	ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
 };
 #define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
 #endif //~M_DOC_DONT_EXTRACT //for doxygen

@@ -741,6 +741,11 @@ public:
 	inline void PushQuitMessage();//see implementation below
 
 	/**
+	@brief Send 'no operation' message to thread's queue.
+	*/
+	inline void PushNopMessage();//see implementation below
+
+	/**
 	@brief Send a message to thread's queue.
 	@param msg - a message to send.
 	*/
@@ -765,9 +770,31 @@ class QuitMessage : public Message{
 	}
 };
 
+
+
+class NopMessage : public Message{
+  public:
+	NopMessage(){}
+
+	//override
+	void Handle(){
+		//Do nothing, nop
+	}
+};
+
+
+
+inline void Thread::PushNopMessage(){
+	this->PushMessage(Ptr<Message>(new NopMessage()));
+}
+
+
+
 inline void Thread::PushQuitMessage(){
 	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
 }
+
+
 
 inline Thread::Thread() :
 		preallocatedQuitMessage(new QuitMessage(this)),
