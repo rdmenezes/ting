@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	3d and 2d vector math classes
 
-#ifndef M_Vector3_hpp
-#define M_Vector3_hpp
+#pragma once
 
 #include <cmath>
 #include <cstdlib>
@@ -1220,4 +1219,3 @@ typedef Rectangle2<double> Rect2d;
 typedef Rectangle2<int> Rect2i;
 
 }//~namespace
-#endif//~once

@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Timer library
 
-#ifndef M_Timer_hpp
-#define M_Timer_hpp
+#pragma once
 
 //#define M_ENABLE_TIMER_TRACE
 #ifdef M_ENABLE_TIMER_TRACE
@@ -153,7 +152,7 @@ public:
 		if(millisec < 0)
 			throw ting::Exc("Timer::Start() negative timeout value is not allowed");
 
-		ASSERT(TimerLib::IsCreated())
+		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, need to create TimerLib singletone object")
 		
 		this->Stop();//make sure the timer is not running already
 		TimerLib::Inst().AddTimer(this, millisec);
@@ -341,6 +340,8 @@ inline void TimerLib::TimerThread::Run(){
 
 		this->mutex.Lock();
 	}//~while
+
+	TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
 }//~Run()
 
 
@@ -372,4 +373,3 @@ inline ting::u32 GetTicks(){
 
 
 }//~namespace
-#endif //~once

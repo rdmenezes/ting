@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Array class, it is an auto pointer for new[] / delete[]
 
-#ifndef M_Array_hpp
-#define M_Array_hpp
+#pragma once
 
 //#define M_ENABLE_ARRAY_PRINT
 #ifdef M_ENABLE_ARRAY_PRINT 
@@ -40,9 +39,19 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "types.hpp"
 #include "Buffer.hpp"
+#include "math.hpp"
 
 namespace ting{
 
+
+/**
+ * @brief wrapper above new[]/delete[].
+ * This template class is a wrapper above new[]/delete[] operators.
+ * Note that it behaves like auto-pointer. It defines operator=() and copy constructor and
+ * when one class instance is assigned (by operator=() or copy constructor) to another,
+ * the first one becomes invalid while the second becomes valid and acquires
+ * the memory buffer from first.
+ */
 template <class T> class Array : public ting::Buffer<T>{
 
 	inline void PrivateInit(uint arraySize){
@@ -62,91 +71,151 @@ template <class T> class Array : public ting::Buffer<T>{
 			throw;//rethrow the exception
 		}
 		M_ARRAY_PRINT(<< "Array::PrivateInit(): buf = " << static_cast<void*>(this->buf) << std::endl)
-	};
+	}
 
-  public:
 
-	//TODO: why is this constructor explicit?
+
+	inline void Destroy(){
+		delete[] this->buf;
+	}
+
+
+
+public:
+	/**
+	 * @brief Creates new array of requested size.
+	 * Creates new array of requested size. Note, that it will call new[], so
+	 * it will initialize all the elements by calling default constructor of
+	 * the element class for each element.
+	 * @param arraySize - number of elements this array should hold.
+	 *                    If 0 is supplied then memory is not allocated and the created
+	 *                    Array object is not valid (Array::IsValid() will return false).
+	 */
+	//NOTE: the constructor is explicit to avoid undesired automatic
+	//conversions from uint to Array.
 	explicit inline Array(uint arraySize = 0){
 		this->PrivateInit(arraySize);
-	};
+	}
 
-	//TODO: implement
-	//explicit inline Array(uint arraySize, const T& init)
 
-	//copy constructor
-	inline Array(const Array& a){
-		this->operator=(a);
-	};
 
-	inline Array& operator=(const Array& a){
-		//behavior similar to Ptr class
+private:
+	inline void CopyFrom(const Array& a){
 		this->size = a.size;
 		this->buf = a.buf;
 		const_cast<Array&>(a).size = 0;
 		const_cast<Array&>(a).buf = 0;
-		return (*this);
-	};
+	}
 
+
+
+public:
+	/**
+	 * @brief Copy constructor, works as auto-pointer.
+	 * Creates a copy of 'a'. This copy constructor works as auto-pointer.
+	 * This means that if creating Array object like this:
+	 *     Array<int> a(10);//create array 'a'
+	 *     Array<int> b(a);//create array 'b' using copy constructor
+	 * then 'a' will become invalid while 'b' will hold pointer to the memory
+	 * buffer which 'a' was holding before. I.e. when using copy constructor,
+	 * no memory allocation occurs, the memory buffer kept by 'a' is moved to 'b'
+	 * and 'a' is invalidated.
+	 * @param a - Array object to copy.
+	 */
+	//copy constructor
+	inline Array(const Array& a){
+		this->CopyFrom(a);
+	}
+
+
+
+	/**
+	 * @brief Assignment operator, works as auto-pointer.
+	 * This operator works the same way as copy constructor does.
+	 * That is, if assignng like this:
+	 *     Array<int> b(20), a(10);
+	 *     b = a;
+	 * then 'a' will become invalid and 'b' will hold the memory buffer owned by 'a' before.
+	 * Note, that memory buffer owned by 'b' prior to assignment is freed and destructors are
+	 * called on every element of the buffer (i.e. buffer is freed using delete[] operator).
+	 * Thus, no memory leak occurs.
+	 * @param a - Array object to assign from.
+	 */
+	inline Array& operator=(const Array& a){
+		//behavior similar to Ptr class
+		this->Destroy();
+		this->CopyFrom(a);
+		return (*this);
+	}
+
+
+	
 	~Array(){
 		M_ARRAY_PRINT(<< "Array::~Array(): invoked" << std::endl)
-		delete[] this->buf;
+		this->Destroy();
 		M_ARRAY_PRINT(<< "Array::~Array(): exit" << std::endl)
-	};
+	}
 
-	void Grow(uint deltaSize){
-		ASSERT(false)//TODO: test this method. it is untested so far
 
-		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
-		T* oldArr = this->buf;
-		uint oldSize = this->size;
-		try{
-			this->PrivateInit(oldSize + deltaSize);
-		}catch(...){
-			this->buf = oldArr;
-			this->size = oldSize;
-			throw;
-		}
-		memcpy(this->buf, oldArr, oldSize);
-		delete[] oldArr;
-	};
 
+	/**
+	 * @brief initialize array with new memory buffer of given size.
+	 * If array was already initialized then the memory buffer is freed (using delete[])
+	 * and new memory buffer of requested size is allocated.
+	 * @param arraySize - number of elements this array should hold.
+	 *                    If 0 is supplied then array will become invalid.
+	 */
 	void Init(uint arraySize){
 		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
-		this->~Array();
+		this->Destroy();
 		this->PrivateInit(arraySize);
-	};
+	}
 
+
+
+	/**
+	 * @brief returns true if Array is allocated.
+	 * @return true - if this Array object holds memory buffer of not zero size.
+	 * @return false - if this Array object does not hold any memory buffer.
+	 */
 	inline bool IsValid()const{
 		return this->buf != 0;
-	};
+	}
 
-	operator bool(){
+
+
+	/**
+	 * @brief inverse of Array::IsValid().
+	 * Inverse of Array::IsValid().
+	 * @return true - if Array is not valid.
+	 * @return false - if Array is valid.
+	 */
+	inline bool IsNotValid()const{
+		return !this->IsValid();
+	}
+
+
+
+	/**
+	 * @brief Converts to bool.
+	 * @return bool - value of Array::IsValid().
+	 */
+	inline operator bool(){
 		return this->IsValid();
-	};
+	}
 
-	void Reset(){
-		this->~Array();
+
+
+	/**
+	 * @brief free array memory buffer.
+	 * Frees memory buffer hold by Array object (if any).
+	 * After that the Array object becomes invalid.
+	 */
+	inline void Reset(){
+		this->Destroy();
 		this->buf = 0;
 		this->size = 0;
-	};
-
-	inline T* Begin(){
-		return this->buf;
 	}
-
-	inline T* End(){
-		return this->buf + this->size;
-	}
-
-	inline T* Buf(){
-		return this->buf;
-	};
-	
-	inline const T* Buf()const{
-		return this->buf;
-	};
-};
+};//~template class Array
 
 }//~namespace ting
-#endif //~once

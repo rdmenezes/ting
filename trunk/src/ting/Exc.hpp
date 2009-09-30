@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Basic Exception class
 
-#ifndef M_Exc_hpp
-#define M_Exc_hpp
+#pragma once
 
 #include <string.h>
 #include <exception>
@@ -37,8 +36,8 @@ THE SOFTWARE. */
 namespace ting{
 
 /**
-@brief Basic exception class
-*/
+ * @brief Basic exception class
+ */
 #ifdef __SYMBIAN32__ // we have symbian which does not have std c++ library
 class Exc
 #else
@@ -48,9 +47,11 @@ class Exc : public std::exception
 	char *msg;
 public:
 	/**
-	@brief Exception constructor.
-	@param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
-	*/
+	 * @brief Exception constructor.
+	 * @param message - Pointer to the exception message null-terminated string.
+	 *                  Constructor will copy the string into objects internal memory buffer.
+	 *                  It is legal to supply 0.
+	 */
 	Exc(const char* message = 0) throw(){//use throw() because base class (std::exception) uses it
 		if(!message)
 			message = "no exception info";
@@ -69,27 +70,34 @@ public:
 
 		memcpy(this->msg, message, len);
 		this->msg[len] = 0;//null-terminate
-	};
-	
+	}
+
+
+
 	virtual ~Exc() throw(){//use throw() because base class (std::exception) uses it
 		delete[] this->msg;
-	};
+	}
+
+
 
 	/**
-	@brief Returns a pointer to exception message.
-	@return a pointer to objects internal memory buffer holding the exception message null-terminated string.
-			Note, that after the exception object is destroyed the pointer returned by this method become invalid.
-	*/
+	 * @brief Returns a pointer to exception message.
+	 * @return a pointer to objects internal memory buffer holding
+	 *         the exception message null-terminated string.
+	 *         Note, that after the exception object is destroyed
+	 *         the pointer returned by this method become invalid.
+	 */
 	inline const char *What()const throw(){
 		return this->what();
-	};
+	}
+
+
 
 private:
 	//override from std::exception
 	const char *what()const throw(){//use throw() because base class (std::exception) uses it.
 		return this->msg;//this->msg is never 0 (see Exc constructor for more info).
-	};
+	}
 };
 
-};//~namespace ting
-#endif//~once
+}//~namespace ting

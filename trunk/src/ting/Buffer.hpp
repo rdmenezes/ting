@@ -29,8 +29,7 @@ THE SOFTWARE. */
 //	Static buffer wrapper
  
 
-#ifndef M_Buffer_hpp
-#define	M_Buffer_hpp
+#pragma once
 
 #include "types.hpp"
 #include "debug.hpp"
@@ -42,61 +41,102 @@ protected:
 	T* buf;
 	ting::uint size;
 
-	inline Buffer(){};
+
+	
+	inline Buffer(){}
+
+
 
 	inline Buffer(T* buf_ptr, ting::uint buf_size) :
 			buf(buf_ptr),
 			size(buf_size)
-	{};
+	{}
 
+
+
+	//forbid copying
 	inline Buffer(const Buffer& b){
-		ASSERT(false)//not implemented yet
-	};
+		ASSERT(false)
+	}
+
+
+
+	//forbid copying
 	inline Buffer(Buffer& b){
 		ASSERT(false)//not implemented yet
-	};
+	}
+
+
 
 public:
 	inline ting::uint Size()const{
 		return this->size;
 	}
 
-		//returns length of element in bytes
+
+
+	//returns length of element in bytes
 	inline ting::uint SizeOfElem()const{
 		return sizeof(*(this->buf));
-	};
+	}
+
+
 
 	//returns length of array in bytes
 	inline ting::uint SizeInBytes()const{
 		return this->Size() * this->SizeOfElem();
-	};
+	}
+
+
 
 	inline const T& operator[](uint i)const{
 		ASSERT(i < this->Size())
 		return this->buf[i];
-	};
+	}
+
+
 
 	inline T& operator[](uint i){
-		ASSERT(i < this->Size())
+		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
-	};
+	}
 
-//	inline operator const T*()const{
-//		return this->buf;
-//	};
-//
-//	inline operator T*(){
-//		return const_cast<T*>(this->operator const T*());
-//	};
-};
+
+
+	inline T* Begin(){
+		return this->buf;
+	}
+
+
+
+	inline T* End(){
+		ASSERT((this->buf + this->size) != 0)
+		return this->buf + this->size;
+	}
+
+
+
+	inline T* Buf(){
+		return this->buf;
+	}
+
+
+
+	inline const T* Buf()const{
+		return this->buf;
+	}
+};//~template class Buffer
+
+
 
 template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
 	T static_buffer[buf_size];
 public:
 	inline StaticBuffer() :
 			Buffer<T>(&this->static_buffer[0], buf_size)
-	{};
+	{}
 };
 
+
+
 }//~namespace
-#endif //~once

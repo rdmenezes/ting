@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Memory Pool
 
-#ifndef M_PoolStored_hpp
-#define M_PoolStored_hpp
+#pragma once
 
 #include <new>
 #include <vector>
@@ -50,6 +49,20 @@ THE SOFTWARE. */
 namespace ting{
 
 
+/**
+ * @brief Base class for pool-stored objects.
+ * If the class is derived from PoolStored it will override 'new' and 'delete'
+ * operators for that class so that the objects would be stored in the
+ * memory pool instead of using standard memory manager to allocate memory.
+ * Storing objects in memory pool allows to avoid memory fragmentation.
+ * PoolStored is only uiseful for systems with large ammount of small and
+ * simple objects which have to be allocated dynamically (i.e. using new/delete
+ * operators).
+ * For example, PoolStored is used in ting::Ref (reference counted objects)
+ * class to allocate reference counting objects which holds number of references  and
+ * pointer to reference counted object.
+ * NOTE: class derived from PoolStored SHALL NOT be used as a base class further.
+ */
 template <class T> class PoolStored{
 	
 	template <ting::uint ElemSize, ting::uint NumElemsInChunk> class MemPool{
@@ -57,8 +70,6 @@ template <class T> class PoolStored{
 			ting::byte buf[ElemSize];
 		};
 
-		STATIC_ASSERT(false)//TODO: why doesn't it trigger?
-		
 		struct PoolElem : public BufHolder{
 			bool isFree;
 			PoolElem() :
@@ -76,6 +87,10 @@ template <class T> class PoolStored{
 					ting::Array<PoolElem>(NumElemsInChunk),
 					numAllocated(0)
 			{}
+
+			~Chunk(){
+				ASSERT(this->numAllocated == 0)
+			}
 		};
 
 		struct ChunksList{
@@ -83,6 +98,10 @@ template <class T> class PoolStored{
 			typedef typename T_List::iterator T_Iter;
 			T_List chunks;
 			ting::Mutex mutex;
+
+			~ChunksList(){
+				ASSERT_INFO(this->chunks.size() == 0, "PoolStored: cannot destroy chunk list because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
+			}
 		};
 		
 		static ChunksList& Chunks(){
@@ -156,7 +175,7 @@ template <class T> class PoolStored{
 			}
 			ASSERT(false)
 		}
-	};
+	};//~template class MemPool
 
 protected:
 	//this should only be used as a base class
@@ -192,4 +211,3 @@ private:
 };
 
 }//~namespace ting
-#endif//~once

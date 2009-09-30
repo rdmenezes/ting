@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Debug utilities
 
-#ifndef M_debug_hpp
-#define M_debug_hpp
+#pragma once
 
 #ifdef __SYMBIAN32__
 #else
@@ -66,15 +65,18 @@ inline std::ofstream& DebugLogger(){
 #ifdef __SYMBIAN32__
 #define LOG_ALWAYS(x)
 #define TRACE_ALWAYS(x)
+#define TRACE_AND_LOG_ALWAYS(x)
 #else
 #define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
 #define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
+#define TRACE_AND_LOG_ALWAYS(x) LOG_ALWAYS(x) TRACE_ALWAYS(x)
 #endif
 
 #ifdef DEBUG
 
 #define LOG(x) LOG_ALWAYS(x)
 #define TRACE(x) TRACE_ALWAYS(x)
+#define TRACE_AND_LOG(x) TRACE_AND_LOG_ALWAYS(x)
 
 #define LOG_IF_TRUE(x, y) if(x){ LOG(y) }
 
@@ -84,6 +86,7 @@ inline std::ofstream& DebugLogger(){
 
 #define LOG(x)
 #define TRACE(x)
+#define TRACE_AND_LOG(x)
 #define LOG_IF_TRUE(x, y)
 #define DEBUG_CODE(x)
 
@@ -161,10 +164,9 @@ template <> struct C_StaticAssert<true>{};
 #define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
 
-#if defined(__GNUG__) || (_MSC_VER >= 7100)
+#if defined(__GNUG__) || (_MSC_VER >= 7100) //__COUNTER__ macro is only supported in these compilers
 #define STATIC_ASSERT(x) M_STATIC_ASSERT_I(x, __LINE__, __COUNTER__)
 #else
 #define STATIC_ASSERT(x)
 #endif
 
-#endif//~once

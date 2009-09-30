@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Templates to implement signal-slot callback technique
 
-#ifndef M_Signal_hpp
-#define M_Signal_hpp
+#pragma once
 
 #include <vector>
 #include "codegen.h"
@@ -269,4 +268,3 @@ M_REPEAT3(M_MAX_NUM_SIG_PARAMETERS, M_SIGNAL, )
 //};
 
 }//~namespace ting
-#endif//~once

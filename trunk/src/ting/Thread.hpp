@@ -27,13 +27,15 @@ THE SOFTWARE. */
 // File description:
 //	threads library
 
-#ifndef M_Thread_hpp
-#define M_Thread_hpp
+#pragma once
+
+#include <cstring>
 
 #include "debug.hpp"
 #include "Ptr.hpp"
 #include "types.hpp"
 #include "Exc.hpp"
+#include "WaitSet.hpp"
 
 #if defined(__WIN32__) || defined(WIN32)
 #ifndef __WIN32__
@@ -90,9 +92,9 @@ class Thread;
 class QuitMessage;
 
 /**
-@brief Mutex object class
-Mutex stands for "Mutual execution".
-*/
+ * @brief Mutex object class
+ * Mutex stands for "Mutual execution".
+ */
 class Mutex{
 	friend class CondVar;
 
@@ -115,7 +117,9 @@ class Mutex{
 	}
 
 public:
-
+	/**
+	 * @brief Creates initially unlocked mutex.
+	 */
 	Mutex(){
 		M_MUTEX_TRACE(<< "Mutex::Mutex(): invoked " << this << std::endl)
 #ifdef __WIN32__
@@ -133,6 +137,8 @@ public:
 #endif
 	}
 
+
+
 	~Mutex(){
 		M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
 #ifdef __WIN32__
@@ -148,12 +154,14 @@ public:
 #endif
 	}
 
+
+
 	/**
-	@brief Acquire mutex lock.
-	If one thread acquired the mutex lock then all other threads
-	attempting to acquire the lock on the same mutex will wait until the
-	mutex lock will be released.
-	*/
+	 * @brief Acquire mutex lock.
+	 * If one thread acquired the mutex lock then all other threads
+	 * attempting to acquire the lock on the same mutex will wait until the
+	 * mutex lock will be released with Mutex::Unlock().
+	 */
 	void Lock(){
 		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #ifdef __WIN32__
@@ -166,10 +174,12 @@ public:
 #error "unknown system"
 #endif
 	}
-	
+
+
+
 	/**
-	@brief Release mutex lock.
-	*/
+	 * @brief Release mutex lock.
+	 */
 	void Unlock(){
 		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #ifdef __WIN32__
@@ -183,13 +193,15 @@ public:
 #endif
 	}
 
+
+
 	/**
-	@brief Helper class which automatically Locks the given mutex.
-	This helper class automatically locks the given mutex in the constructor and
-	unlocks the mutex in destructor. This class is useful if the code between
-	mutex lock/unlock may return or throw an exception,
-	then the mutex will not remain locked in such case.
-	*/
+	 * @brief Helper class which automatically Locks the given mutex.
+	 * This helper class automatically locks the given mutex in the constructor and
+	 * unlocks the mutex in destructor. This class is useful if the code between
+	 * mutex lock/unlock may return or throw an exception,
+	 * then the mutex be automaticlly unlocked in such case.
+	 */
 	class Guard{
 		Mutex *mut;
 
@@ -208,19 +220,21 @@ public:
 		~Guard(){
 			this->mut->Unlock();
 		}
-	};
+	};//~class Guard
 };//~class Mutex
 
+
+
 /**
-@brief Semaphore class.
-The semaphore is actually an unsigned integer value which can be incremented
-(by Semaphore::Signal()) or decremented (by Semaphore::Wait()). If the value
-is 0 then any try to decrement it will result in the current thread stops
-execution until the value will be incremented so the thred will be able to
-decrement it. If there are several threads waiting for semaphore decrement and
-some other thread increments it then only one of the hanging threads will be
-resumed, other threads will remain waiting for next increment.
-*/
+ * @brief Semaphore class.
+ * The semaphore is actually an unsigned integer value which can be incremented
+ * (by Semaphore::Signal()) or decremented (by Semaphore::Wait()). If the value
+ * is 0 then any try to decrement it will result in execution blocking of the current thread
+ * until the value is incremented so the thread will be able to
+ * decrement it. If there are several threads waiting for semaphore decrement and
+ * some other thread increments it then only one of the hanging threads will be
+ * resumed, other threads will remain waiting for next increment.
+ */
 class Semaphore{
 	//system dependent handle
 #ifdef __WIN32__
@@ -240,8 +254,8 @@ class Semaphore{
 public:
 
 	/**
-	@breif Create the semaphore with given initial value.
-	*/
+	 * @breif Create the semaphore with given initial value.
+	 */
 	Semaphore(uint initialValue = 0){
 #ifdef __WIN32__
 		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
@@ -258,6 +272,8 @@ public:
 		}
 	}
 
+
+
 	~Semaphore(){
 #ifdef __WIN32__
 		CloseHandle(this->s);
@@ -270,21 +286,23 @@ public:
 #endif
 	}
 
+
+
 	/**
-	@brief Wait on semaphore.
-	Decrments semaphore value. If current value is 0 then this method will wait
-	until some other thread signalls the semaphore (i.e. increments the value)
-	by calling Semaphore::Signal() on that semaphore.
-	@param timeoutMillis - waiting timeout.
-	                       If timeoutMillis is 0 (the default value) then this
-	                       method will wait forever or until the semaphore is
-	                       signalled.
-	@return returns true if the semaphore value was decremented.
-	@return returns false if the timeout was hit.
-	*/
+	 * @brief Wait on semaphore.
+	 * Decrments semaphore value. If current value is 0 then this method will wait
+	 * until some other thread signalls the semaphore (i.e. increments the value)
+	 * by calling Semaphore::Signal() on that semaphore.
+	 * @param timeoutMillis - waiting timeout.
+	 *                        If timeoutMillis is 0 (the default value) then this
+	 *                        method will wait forever or until the semaphore is
+	 *                        signalled.
+	 * @return returns true if the semaphore value was decremented.
+	 * @return returns false if the timeout was hit.
+	 */
 	bool Wait(uint timeoutMillis = 0){
 #ifdef __WIN32__
-		switch( WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis)) ){
+		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis))){
 			case WAIT_OBJECT_0:
 //				LOG(<<"Semaphore::Wait(): exit"<<std::endl)
 				return true;
@@ -334,10 +352,12 @@ public:
 		return true;
 	}
 
+
+
 	/**
-	@brief Signal the semaphore.
-	Increments the semaphore value.
-	*/
+	 * @brief Signal the semaphore.
+	 * Increments the semaphore value.
+	 */
 	inline void Signal(){
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #ifdef __WIN32__
@@ -354,7 +374,9 @@ public:
 #error "unknown system"
 #endif
 	}
-};
+};//~class Semaphore
+
+
 
 class CondVar{
 #if defined(WIN32) || defined(__SYMBIAN32__)
@@ -442,6 +464,14 @@ public:
 	}
 };
 
+
+
+/**
+ * @brief Message abstract class.
+ * The messages are sent to message queues (see ting::Queue). One message instance cannot be sent to
+ * two or more message queues, but only to a single queue. When sent, the message is
+ * further owned by the queue (note the usage of ting::Ptr auto-pointers).
+ */
 class Message{
 	friend class Queue;
 
@@ -455,10 +485,29 @@ protected:
 public:
 	virtual ~Message(){}
 
+	/**
+	 * @brief message handler function.
+	 * This virtual method is called to handle the message. When deriving from ting::Message,
+	 * override this method to define the message handler procedure.
+	 */
 	virtual void Handle() = 0;
 };
 
-class Queue{
+
+
+/**
+ * @brief Message queue.
+ * Message queue is used for communication of separate threads by
+ * means of sending messages to each other. Thus, when one thread sends a message to another one,
+ * it asks that another thread to execute some code portion - handler code of the message.
+ * Each Thread object already contains its own queue object (Thread::queue), but one is free to
+ * create his/her own Queue objects when they are needed.
+ * NOTE: Queue implements Waitable interface which means that it can be used in conjunction
+ * with ting::WaitSet API. But, note, that the implementation of the Waitable is that it
+ * shall only be used to wait for READ. If you are trying to wait for WRITE the behavior will be
+ * undefined.
+ */
+class Queue : public Waitable{
 	Semaphore sem;
 
 	Mutex mut;
@@ -466,30 +515,94 @@ class Queue{
 	Message *first,
 			*last;
 
-	//forbid copying
-	Queue(const Queue& ){};
-	Queue(Queue& ){};
-	Queue& operator=(const Queue& ){return *this;};
+#if defined(__WIN32__)
+	//use additional semaphore to implement Waitable on Windows
+	HANDLE eventForWaitable;
+#else
+	//use pipe to implement Waitable in *nix systems
+	int pipeEnds[2];
+#endif
 
-  public:
+	//forbid copying
+	Queue(const Queue&){
+		ASSERT(false)
+	}
+
+	Queue(Queue&){
+		ASSERT(false)
+	}
+
+	Queue& operator=(const Queue&){
+		ASSERT(false)
+		return *this;
+	}
+
+public:
+	/**
+	 * @brief Constructor, creates empty message queue.
+	 */
 	Queue() :
 			first(0),
 			last(0)
-	{}
+	{
+		//can write will always be set because it is always possible to post a message to the queue
+		this->SetCanWriteFlag();
 
-	~Queue(){
-		Mutex::Guard mutexLockerUnlocker(this->mut);
-		Message *msg = this->first;
-		Message	*nextMsg;
-		while(msg){
-			nextMsg = msg->next;
-			delete msg;
-			msg = nextMsg;
+#if defined(__WIN32__)
+		this->eventForWaitable = CreateEvent(
+				NULL,
+				TRUE, //manual-reset
+				FALSE, //not signalled initially
+				NULL //no name
+			);
+		if(this->eventForWaitable == NULL){
+			throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
 		}
+#else // assume *nix
+		if(::pipe(&this->pipeEnds[0]) < 0){
+			throw ting::Exc("Queue::Queue(): could not create pipe (*nix) for implementing Waitable");
+		}
+#endif
 	}
 
+
+
+	/**
+	 * @brief Destructor.
+	 * When called, it also destroys all messages on the queue.
+	 */
+	~Queue(){
+		//destroy messages which are currently on the queue
+		{
+			Mutex::Guard mutexGuard(this->mut);
+			Message *msg = this->first;
+			Message	*nextMsg;
+			while(msg){
+				nextMsg = msg->next;
+				//use Ptr to kill messages instead of "delete msg;" because
+				//the messages are passed to PushMessage() as Ptr, and thus, it is better
+				//to use Ptr to delete them.
+				{Ptr<Message> killer(msg);}
+
+				msg = nextMsg;
+			}
+		}
+#if defined(__WIN32__)
+		CloseHandle(this->eventForWaitable);
+#else // assume *nix
+		close(this->pipeEnds[0]);
+		close(this->pipeEnds[1]);
+#endif
+	}
+
+
+
+	/**
+	 * @brief Pushes a new message to the queue.
+	 * @param msg - the message to push into the queue.
+	 */
 	void PushMessage(Ptr<Message> msg){
-		Mutex::Guard mutexLockerUnlocker(this->mut);
+		Mutex::Guard mutexGuard(this->mut);
 		if(this->first){
 			ASSERT(this->last && this->last->next == 0)
 			this->last = this->last->next = msg.Extract();
@@ -497,14 +610,34 @@ class Queue{
 		}else{
 			ASSERT(msg.IsValid())
 			this->last = this->first = msg.Extract();
+
+#if defined(__WIN32__)
+			if(SetEvent(this->eventForWaitable) == 0){
+				throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
+			}
+#else
+			{
+				byte oneByteBuf[1];
+				write(this->pipeEnds[1], oneByteBuf, 1);
+			}
+#endif
 		}
 
 		//NOTE: must do signalling while mutex is locked!!!
 		this->sem.Signal();
 	}
 
+
+
+	/**
+	 * @brief Get message from queue, does not block if no messages queued.
+	 * This method gets a message from message queue. If there are no messages on the queue
+	 * it will return invalid auto pointer.
+	 * @return auto-pointer to Message instance.
+	 * @return invalid auto-pointer if there are no messares in the queue.
+	 */
 	Ptr<Message> PeekMsg(){
-		Mutex::Guard mutexLockerUnlocker(this->mut);
+		Mutex::Guard mutexGuard(this->mut);
 		if(this->first){
 			//NOTE: Decrement semaphore value, because we take one message from queue.
 			//      The semaphore value should be > 0 here, so there will be no hang
@@ -514,11 +647,39 @@ class Queue{
 			this->sem.Wait();
 			Message* ret = this->first;
 			this->first = this->first->next;
+
+			if(this->first == 0){
+#if defined(__WIN32__)
+				if(ResetEvent(this->eventForWaitable) == 0){
+					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
+				}
+#else
+				byte oneByteBuf[1];
+				read(this->pipeEnds[0], oneByteBuf, 1);
+#endif
+			}
+
+			if(!this->first) //clear 'can read' flag if no messages left on the queue
+				this->ClearCanReadFlag();
+
 			return Ptr<Message>(ret);
 		}
 		return Ptr<Message>();
 	}
 
+
+
+	/**
+	 * @brief Get message from queue, blocks if no messages queued.
+	 * This method gets a message from message queue. If there are no messages on the queue
+	 * it will wait until any message is posted to the queue.
+	 * Note, that this method, due to its implementation, is not intended to be called from
+	 * multiple threads simultaneously (unlike Queue::PeekMsg()).
+	 * If it is called from multiple threads the behavior will be undefined.
+	 * It is also forbidden to call GetMsg() from one thread and PeekMsg() from another
+	 * thread on the same Queue instance, because it will also lead to undefined behavior.
+	 * @return auto-pointer to Message instance.
+	 */
 	Ptr<Message> GetMsg(){
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): enter" << std::endl)
 		{
@@ -532,7 +693,22 @@ class Queue{
 				this->sem.Wait();
 				Message* ret = this->first;
 				this->first = this->first->next;
-				M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit1" << std::endl)
+
+				if(this->first == 0){
+#if defined(__WIN32__)
+					if(ResetEvent(this->eventForWaitable) == 0){
+						throw ting::Exc("Queue::Wait(): ResetEvent() failed");
+					}
+#else
+					byte oneByteBuf[1];
+					read(this->pipeEnds[0], oneByteBuf, 1);
+#endif
+				}
+
+				if(!this->first) //clear 'can read' flag if no messages left on the queue
+					this->ClearCanReadFlag();
+
+				M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit without waiting on semaphore" << std::endl)
 				return Ptr<Message>(ret);
 			}
 		}
@@ -544,17 +720,52 @@ class Queue{
 			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
-			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit2" << std::endl)
+
+			if(this->first == 0){
+#if defined(__WIN32__)
+				if(ResetEvent(this->eventForWaitable) == 0){
+					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
+				}
+#else
+				byte oneByteBuf[1];
+				read(this->pipeEnds[0], oneByteBuf, 1);
+#endif
+			}
+
+			if(!this->first) //clear 'can read' flag if no messages left on the queue
+				this->ClearCanReadFlag();
+
+			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit after waiting on semaphore" << std::endl)
 			return Ptr<Message>(ret);
 		}
 	}
-};
+
+private:
+#ifdef __WIN32__
+	//override
+	HANDLE GetHandle(){
+		//return event handle
+		return this->eventForWaitable;
+	}
+
+
+
+#else
+	//override
+	int GetHandle(){
+		//return read end of pipe
+		return this->pipeEnds[0];
+	}
+#endif
+};//~class Queue
+
+
 
 /**
-@brief a base class for threads.
-This class should be used as a base class for thread objects, one should override the
-Thread::Run() method.
-*/
+ * @brief a base class for threads.
+ * This class should be used as a base class for thread objects, one should override the
+ * Thread::Run() method.
+ */
 class Thread{
 	friend class QuitMessage;
 
@@ -572,12 +783,16 @@ class Thread{
 		ting::Thread *thr = reinterpret_cast<ting::Thread*>(data);
 		try{
 			thr->Run();
+		}catch(ting::Exc& e){
+			ASSERT_INFO(false, "uncaught ting::Exc exception in Thread::Run(): " << e.What())
+		}catch(std::exception& e){
+			ASSERT_INFO(false, "uncaught std::exception exception in Thread::Run(): " << e.what())
 		}catch(...){
-			ASSERT_INFO(false, "uncaught exception in Thread::Run()")
+			ASSERT_INFO(false, "uncaught unknown exception in Thread::Run()")
 		}
 
 		thr->state = STOPPED;
-		
+
 #ifdef M_PTHREAD
 		pthread_exit(0);
 #endif
@@ -586,12 +801,11 @@ class Thread{
 
 	ting::Mutex mutex;
 
-	Ptr<ting::Message> preallocatedQuitMessage;
-
 	enum E_State{
 		NEW,
 		RUNNING,
-		STOPPED
+		STOPPED,
+		JOINED
 	} state;
 
 	//system dependent handle
@@ -609,7 +823,7 @@ class Thread{
 	Thread(const Thread& ){}
 
 	Thread(Thread& ){}
-	
+
 	Thread& operator=(const Thread& ){
 		return *this;
 	}
@@ -622,20 +836,38 @@ public:
 	inline Thread();//see implementation below as inline method
 
 	virtual ~Thread(){
-		ASSERT(this->state != RUNNING)
+		ASSERT_INFO(
+				this->state == JOINED,
+				"~Thread() destructor is called while the thread was not joined before. "
+				<< "Make sure the thread is joined by calling Thread::Join() "
+				<< "before destroying the thread object."
+			)
+
+		//NOTE: it is incorrect to put this->Join() to this destructor, because
+		//thread shall already be stopped at the moment when this destructor
+		//is called. If it is not, then the thread will be still running
+		//when part of the thread object is already destroyed, since thread object is
+		//usually a derived object from Thread class and the destructor of this derived
+		//object will be called before ~Thread() destructor.
 	}
 
-	/**
-	@brief This should be overriden, this is what to be run in new thread.
-	Pure virtual method, it is called in new thread when thread runs.
-	*/
-	virtual void Run() = 0;
+
 
 	/**
-	@brief Start thread execution.
-	@param stackSize - size of the stack in bytes which should be allocated for this thread.
-					   If stackSize is 0 then system default stack size is used.
-	*/
+	 * @brief This should be overriden, this is what to be run in new thread.
+	 * Pure virtual method, it is called in new thread when thread runs.
+	 */
+	virtual void Run() = 0;
+
+
+
+	/**
+	 * @brief Start thread execution.
+	 * Starts execution of the thread. Thread's Thread::Run() method will
+	 * be run as separate thread of execution.
+	 * @param stackSize - size of the stack in bytes which should be allocated for this thread.
+	 *                    If stackSize is 0 then system default stack size is used.
+	 */
 	//0 stacksize stands for default stack size (platform dependent)
 	void Start(uint stackSize = 0){
 		//protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
@@ -665,8 +897,14 @@ public:
 			pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 			pthread_attr_setstacksize(&attr, static_cast<size_t>(stackSize));
 
-			if(pthread_create(&this->th, &attr, &RunThread, this) != 0){
+			int res = pthread_create(&this->th, &attr, &RunThread, this);
+			if(res != 0){
 				pthread_attr_destroy(&attr);
+				TRACE_AND_LOG(<< "Thread::Start(): pthread_create() failed, error code = " << res
+						<< " meaning: " << strerror(res) << std::endl)
+				LOG_IF_TRUE(res == EAGAIN, << "res = EAGAIN" << std::endl)
+				LOG_IF_TRUE(res == EINVAL, << "res = EINVAL" << std::endl)
+				LOG_IF_TRUE(res == EPERM, << "res = EPERM" << std::endl)
 				throw ting::Exc("Thread::Start(): starting thread failed");
 			}
 			pthread_attr_destroy(&attr);
@@ -677,21 +915,24 @@ public:
 		this->state = RUNNING;
 	}
 
+
+
 	/**
-	@brief Wait for thread finish its execution.
-	*/
+	 * @brief Wait for thread to finish its execution.
+	 * This functon waits for the thread finishes its execution,
+	 * i.e. until the thread returns from its Thread::Run() method.
+	 */
 	void Join(){
+//		TRACE(<< "Thread::Join(): enter" << std::endl)
+		//set quit flag if it is not already set
 		this->quitFlag = true;
+
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
 		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
 
-		if(this->state != RUNNING)
-			return;
-
-		//send preallocated quit message to threads message
-		//queue to unblock possible waiting GetMsg() call.
-		ASSERT(this->preallocatedQuitMessage.IsValid())
-		this->PushMessage(this->preallocatedQuitMessage);
+		if(this->state == JOINED){
+			throw ting::Exc("Thread::Join(): thread is already joined");
+		}
 
 #ifdef __WIN32__
 		WaitForSingleObject(this->th, INFINITE);
@@ -708,13 +949,24 @@ public:
 #error "unknown system"
 #endif
 
-		this->state = STOPPED;
+		//NOTE: at this point the thread's Run() method should already exit and state
+		//should be set to STOPPED
+		ASSERT(this->state == STOPPED)
+
+		this->state = JOINED;
+
+//		TRACE(<< "Thread::Join(): exit" << std::endl)
 	}
 
+
+
 	/**
-	@brief Suspend the thread for a given number of milliseconds.
-	@param msec - number of milliseconds the thread should be suspended.
-	*/
+	 * @brief Suspend the thread for a given number of milliseconds.
+	 * Suspends the thread which called this function for a given number of milliseconds.
+	 * This function guarantees that the calling thread will be suspended for
+	 * AT LEAST 'msec' milliseconds.
+	 * @param msec - number of milliseconds the thread should be suspended.
+	 */
 	static void Sleep(uint msec = 0){
 #ifdef __WIN32__
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
@@ -722,11 +974,11 @@ public:
 		User::After(msec * 1000);
 #elif defined(M_PTHREAD)
 		if(msec == 0){
-#	if defined(sun) || defined(__sun)
+	#if defined(sun) || defined(__sun)
 			sched_yield();
-#	else
+	#else
 			pthread_yield();
-#	endif
+	#endif
 		}else{
 			usleep(msec * 1000);
 		}
@@ -735,25 +987,38 @@ public:
 #endif
 	}
 
+
+
 	/**
-	@brief Send 'Quit' message to thread's queue.
-	*/
+	 * @brief Send 'Quit' message to thread's queue.
+	 */
 	inline void PushQuitMessage();//see implementation below
 
-	/**
-	@brief Send 'no operation' message to thread's queue.
-	*/
-	inline void PushNopMessage();//see implementation below
+
 
 	/**
-	@brief Send a message to thread's queue.
-	@param msg - a message to send.
-	*/
+	 * @brief Send 'no operation' message to thread's queue.
+	 */
+	inline void PushNopMessage();//see implementation below
+
+
+
+	/**
+	 * @brief Send a message to thread's queue.
+	 * @param msg - a message to send.
+	 */
 	void PushMessage(Ptr<ting::Message> msg){
 		this->queue.PushMessage(msg);
 	}
 };
 
+
+
+/**
+ * @brief Tells the thread that it should quit its execution.
+ * The handler of this message sets the quit flag (Thread::quitFlag)
+ * of the thread which this message is sent to.
+ */
 class QuitMessage : public Message{
 	Thread *thr;
   public:
@@ -772,6 +1037,11 @@ class QuitMessage : public Message{
 
 
 
+/**
+ * @brief do nothing message.
+ * The handler of this message dos nothing when the message is handled. This message
+ * can be used to unblock thread which is waiting infinitely on its message queue.
+ */
 class NopMessage : public Message{
   public:
 	NopMessage(){}
@@ -791,13 +1061,13 @@ inline void Thread::PushNopMessage(){
 
 
 inline void Thread::PushQuitMessage(){
+	//TODO: post preallocated quit message
 	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
 }
 
 
 
 inline Thread::Thread() :
-		preallocatedQuitMessage(new QuitMessage(this)),
 		state(Thread::NEW),
 		quitFlag(false)
 {
@@ -816,4 +1086,3 @@ inline Thread::Thread() :
 
 //NOTE: do not put semicolon after namespace, some compilers issue a warning on this thinking that it is a declaration.
 
-#endif//~once

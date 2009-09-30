@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	main header file of the ting library
 
-#ifndef M_ting_hpp
-#define M_ting_hpp
+#pragma once
 
 #include "Array.hpp"
 #include "debug.hpp"
@@ -40,4 +39,3 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "utils.hpp"
 
-#endif//~once

@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Singleton base class (template)
 
-#ifndef M_Singleton_hpp
-#define M_Singleton_hpp
+#pragma once
 
 #include "Exc.hpp"
 #include "debug.hpp"
@@ -67,4 +66,3 @@ public:
 };
 
 }//~namespace ting
-#endif//~once

@@ -28,10 +28,9 @@ THE SOFTWARE. */
 //	Math utilities
 
 
-#ifndef M_math_hpp
-#define M_math_hpp
+#pragma once
 
-#include <math.h>
+#include <cmath>
 #include <limits> //this is for std::numeric_limits<float>::quiet_NaN(); etc.
 
 namespace ting{
@@ -68,8 +67,9 @@ template <typename T> inline T D2Pi(){
 }
 
 /**
-@return natural logarithm of 2
-*/
+ * @brief Definition of ln(2).
+ * @return natural logarithm of 2
+ */
 template <typename T> inline T DLnOf2(){
 	return T(0.693147181);
 }
@@ -134,10 +134,31 @@ template <typename T> inline T Sin(T x){
 
 
 template <> inline float Sin<float>(float x){
-	return sin(x);
+	return ::sin(x);
 }
 
 
 
+template <typename T> inline T Cos(T x){
+	return x.Cos();
+}
+
+
+
+template <> inline float Cos<float>(float x){
+	return ::cos(x);
+}
+
+
+
+template <typename T> inline T Exp(T x){
+	return x.Exp();
+}
+
+
+
+template <> inline float Exp<float>(float x){
+	return ::exp(x);
+}
+
 }//~namespace ting
-#endif//~once

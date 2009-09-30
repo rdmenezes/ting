@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Pointer wrapper
 
-#ifndef M_Ptr_hpp
-#define M_Ptr_hpp
+#pragma once
 
 #include "debug.hpp"
 
@@ -41,23 +40,41 @@ THE SOFTWARE. */
 
 namespace ting{
 
+
+/**
+ * @brief Auto-pointer template class.
+ * Auto-pointer class is a wrapper above ordinary pointer.
+ * It holds a pointer to an object and it will 'delete'
+ * that object when pointer goes out of scope.
+ */
 template <class T> class Ptr{
 	void* p;
 public:
 	explicit inline Ptr(T* ptr = 0) :
 			p(ptr)
 	{}
-	
+
+	/**
+	 * @brief Copy constructor.
+	 * Creates a copy of 'ptr' and invalidates it.
+	 * This means that if creating Ptr object like this:
+	 *     Ptr<SomeClass> a(new SomeClass());//create pointer 'a'
+	 *     Ptr<SomeClass> b(a);//create pointer 'b' using copy constructor
+	 * then 'a' will become invalid while 'b' will hold pointer to the object
+	 * of class 'SomeClass' which 'a' was holding before.
+	 * I.e. when using copy constructor, no memory allocation occurs,
+	 * object kept by 'a' is moved to 'b' and 'a' is invalidated.
+	 * @param ptr - pointer to copy.
+	 */
 	//const copy constructor
 	inline Ptr(const Ptr& ptr){
-		M_PTR_PRINT(<<"Ptr::Ptr(copy): invoked, ptr.p="<<(ptr.p)<<std::endl)
+		M_PTR_PRINT(<< "Ptr::Ptr(copy): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
 	}
 
 	inline ~Ptr(){
-		M_PTR_PRINT(<<"Ptr::~Ptr(): delete invoked, p="<<this->p<<std::endl)
-		delete static_cast<T*>(p);
+		this->Destroy();
 	}
 
 	inline T* operator->(){
@@ -70,12 +87,25 @@ public:
 		return static_cast<T*>(this->p);
 	}
 
+
+
+	/**
+	 * @brief Assignment operator.
+	 * This operator works the same way as copy constructor does.
+	 * That is, if assignng like this:
+	 *     Ptr<SomeClass> b(new SomeClass()), a(new SomeClass());
+	 *     b = a;
+	 * then 'a' will become invalid and 'b' will hold the object owned by 'a' before.
+	 * Note, that object owned by 'b' prior to assignment is deleted.
+	 * Thus, no memory leak occurs.
+	 * @param ptr - pointer to assign from.
+	 */
 	inline Ptr& operator=(const Ptr& ptr){
-		M_PTR_PRINT(<<"Ptr::operator=(Ptr&): enter, this->p="<<(this->p)<<std::endl)
-		this->~Ptr();
+		M_PTR_PRINT(<< "Ptr::operator=(Ptr&): enter, this->p = " << (this->p) << std::endl)
+		this->Destroy();
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
-		M_PTR_PRINT(<<"Ptr::operator=(Ptr&): exit, this->p="<<(this->p)<<std::endl)
+		M_PTR_PRINT(<< "Ptr::operator=(Ptr&): exit, this->p = " << (this->p) << std::endl)
 		return (*this);
 	}
 
@@ -95,6 +125,16 @@ public:
 		return this->IsValid();
 	}
 
+
+
+	/**
+	 * @brief Extract pointer to object invalidating the Ptr.
+	 * Extract the pointer to object from this Ptr instance and invalidate
+	 * the Ptr instance. After that, when this Ptr instance goes out of scope
+	 * the object will not be deleted because Ptr instance is already invalid
+	 * at this point.
+	 * @return pointer to object previously owned by that Ptr instance.
+	 */
 	inline T* Extract(){
 		T* pp = static_cast<T*>(this->p);
 		this->p = 0;
@@ -102,7 +142,7 @@ public:
 	}
 
 	inline void Reset(){
-		this->~Ptr();
+		this->Destroy();
 		this->p = 0;
 	}
 
@@ -114,7 +154,15 @@ public:
 		return !this->IsValid();
 	}
 
-	template <class TS> TS* StaticCast(){
+	/**
+	 * @brief Static cast.
+	 * NOTE: use this method very carefully!!! It returns ordinary pointer
+	 * to the object while the object itself is still owned by Ptr.
+	 * Do not create other Ptr instances using that returned value!!! As it
+	 * will cause double 'delete' when both Ptr instances go out of scope.
+	 * @returns pointer to casted class.
+	 */
+	template <class TS> inline TS* StaticCast(){
 		return static_cast<TS*>(this->operator->());
 	}
 
@@ -125,6 +173,11 @@ public:
 	}
 
 private:
+	inline void Destroy(){
+		M_PTR_PRINT(<< "Ptr::~Ptr(): delete invoked, this->p = " << this->p << std::endl)
+		delete static_cast<T*>(this->p);
+	}
+
 	inline void* operator new(size_t){
 		ASSERT(false)//forbidden
 		return reinterpret_cast<void*>(0);
@@ -136,4 +189,3 @@ private:
 };
 
 }//~namespace ting
-#endif//~once

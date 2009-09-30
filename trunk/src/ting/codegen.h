@@ -27,8 +27,7 @@ THE SOFTWARE. */
 // File description:
 //	Code generation with preprocessor
 
-#ifndef M_codegen_h
-#define M_codegen_h
+#pragma once
 
 #define M_EMPTY()
 #define M_CAT(a,b) a##b
@@ -409,4 +408,3 @@ THE SOFTWARE. */
 
 //#define M_LEFT_PARENTHESIS() (
 
-#endif//~once
