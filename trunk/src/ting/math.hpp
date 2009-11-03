@@ -99,6 +99,16 @@ template <typename T_Type> inline T_Type Pow5(T_Type x){
 	return Pow2(x) * Pow3(x);
 }
 
+/**
+ * @brief Calculates x^p.
+ * @param x - value
+ * @param p - power
+ * @return x^p
+ */
+template <typename T> inline T Pow(T x, T p){
+	return ::pow(x, p);
+}
+
 //Cubic root function
 template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 	if(x > 0)
