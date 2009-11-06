@@ -254,7 +254,7 @@ class Semaphore{
 public:
 
 	/**
-	 * @breif Create the semaphore with given initial value.
+	 * @brief Create the semaphore with given initial value.
 	 */
 	Semaphore(uint initialValue = 0){
 #ifdef __WIN32__
