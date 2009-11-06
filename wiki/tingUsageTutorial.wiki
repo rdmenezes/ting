@@ -4,7 +4,7 @@
 =Creating a Thread=
 first of all we need to include *ting* header to use the library
 {{{
-#include <ting/ting.hpp>
+#include <ting/Thread.hpp>
 }}}
 
 After that we can start using the library. To create a thread one needs to derive a new class representing her thread from ting::Thread base class and override its ting::Thread::Run() method
