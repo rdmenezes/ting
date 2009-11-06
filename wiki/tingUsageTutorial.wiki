@@ -2,7 +2,7 @@
 #labels Featured
 
 =Debugging=
-For debug build one needs to define the DEBUG macro. When DEBUG macro is defined ting will do additional checks and assertions which slightly decrease the performance, but for that you will be warned if something goes wrong meaning that there is some bug in the program.
+For debug builds one needs to define the DEBUG macro. When DEBUG macro is defined ting will do additional checks and assertions which slightly decrease the performance, but for that you will be warned if something goes wrong meaning that there is some bug in the program.
 For release builds just do not define the DEBUG macro.
 
 Note: for g++ compiler macro can be defined by supplying the -DDEBUG key to the g++.
