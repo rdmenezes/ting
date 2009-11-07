@@ -1,0 +1,158 @@
+#ting Sockets usage examples
+
+= Server side =
+
+first of all we need to include corresponding header file
+{{{
+#include <ting/Socket.hpp>
+}}}
+
+After that we can start using the library
+{{{
+//In case of errors the ting::Socket::Exc exception is thrown
+//So, enclose the network code into try/catch.
+try{
+    //Initialize the library by creating a singletone object.
+    //It will deinitialize the library when the object
+    //will be destroyed due to going out of scope.
+    ting::SocketLib socketsLib;
+    
+    //create TCP server socket for listening
+    ting::TCPServerSocket listenSock;
+    
+    //open listening socket and start listening
+    listenSock.Open(80);//start listening on 80th port
+    
+    //Accept some connection
+    ting::TCPSocket sock;
+    while(!sock.IsValid()){
+        sock = listenSock.Accept();
+    }
+    
+    //if we get here then new connection is accepted.
+    
+    //send some data
+    ting::byte data[] = {'0', '1', '2', '4'};
+    sock.Send(data, sizeof(data));
+}catch(ting::Socket::Exc &e){
+    std::cout << "Network error: " << e.What() << std::endl;
+}
+}}}
+
+
+= Client side =
+
+{{{
+try{
+    ting::SocketLib socketsLib;
+    
+    //create IP address for connecting
+    ting::IPAddress ip("127.0.0.1", 80);//we will connect to localhost 80th port
+    
+    ting::TCPSocket sock;
+    
+    //connect to remote listening socket
+    sock.Open(ip);
+    
+    //receive some data (note that it is a blocking call)
+    ting::byte buf[1024];
+    sock.Recv(buf, sizeof(buf));
+}catch(ting::Socket::Exc &e){
+    std::cout << "Network error: " << e.What() << std::endl;
+}
+}}}
+
+= Wait Sets =
+
+note that it is also possible to use wait sets (ting::WaitSet) to check one or more sockets for activity. Using the wait sets is analogous to using the select() function from BSD sockets API.
+
+First of all, include the wait set header file:
+{{{
+#include <ting/WaitSet.hpp>
+}}}
+
+To use wait set one needs to create the ting::WaitSet object:
+{{{
+//create a socket set for 10 sockets at maximum
+ting::WaitSet waitSet(10);
+}}}
+
+After creating the object one needs to add some sockets to the wait set:
+{{{
+ting::TCPSocket s1, s2, s3;
+
+waitSet.Add(&s1, ting::Waitable::READ);
+waitSet.Add(&s2, ting::Waitable::READ);
+waitSet.Add(&s3, ting::Waitable::READ);
+}}}
+
+Now we can check the sockets from socket set for read activity. To do this we use ting::WaitSet::Wait() function. It will return true if there are some sockets with activity or false if there is no any activity on sockets from socket set.
+{{{
+waitSet.Wait();
+//There are some active sockets.
+//This means that there are data available for reading from socket
+//or remote socket has disconnected.
+
+//... handle socket activity
+}}}
+
+After ting::WaitSet::Wait() returned we can check every socket for activity with ting::Socket::CanRead() function:
+{{{
+if(s1.CanRead()){
+    //try to read some data from socket
+    ting::byte buf[1024];
+
+    //after calling Recv() the read ready flag will be cleared
+    ting::uint len = sock.Recv(buf, sizeof(buf));
+    if(len == 0){
+       //0 received length means remote socket disconnection
+       //Handle disconnection
+       //...
+    }
+}
+
+if(s2.CanRead()){
+    //...
+}
+//etc.
+}}}
+
+= Error Handling =
+
+Note that in case of errors a ting::Socket::Exc exception is thrown. Some of the examples above do not catch any exceptions just for code simplicity. In real life it is a good practice to catch exceptions ;-).
+
+
+=UDP Socket server side=
+{{{
+#include <ting/Socket.hpp>
+
+try {
+    ting::SocketLib socketsLib;
+    ting::UDPSocket rcvSock;
+    ting::IPAddress ip("127.0.0.1", 5060);
+    rcvSock.Open(5060);
+    while(1){
+        ting::byte buf[1024];
+        rcvSock.Recv(buf, sizeof(buf), ip); 
+    }
+}catch(ting::Socket::Exc &e){
+    std::cout << "Network error: " << e.What() << std::endl;
+}
+}}}
+
+=UDP Sending side=
+
+{{{
+#include <ting/Socket.hpp>
+
+try {
+    ting::SocketLib socketsLib;
+    ting::UDPSocket sendSock;
+    ting::IPAddress ip("127.0.0.1", 5060);
+    sendSock.Open();
+    ting::byte data[] = {'0', '1', '2', '4'};
+    sendSock.Send(data, sizeof(data), ip);
+}catch(ting::Socket::Exc &e){
+    std::cout << "Network error: " << e.What() << std::endl;
+}
+}}}
