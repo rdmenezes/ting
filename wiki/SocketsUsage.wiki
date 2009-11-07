@@ -73,7 +73,7 @@ First of all, include the wait set header file:
 
 To use wait set one needs to create the ting::WaitSet object:
 {{{
-//create a socket set for 10 sockets at maximum
+//create a wait set for 10 objects at maximum
 ting::WaitSet waitSet(10);
 }}}
 
