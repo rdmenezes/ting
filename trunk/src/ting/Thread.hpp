@@ -793,7 +793,10 @@ class Thread{
 
 		thr->state = STOPPED;
 
-#ifdef M_PTHREAD
+#ifdef __WIN32__
+		//Do nothing, _endthreadex() will be called   automatically
+		//upon returning from the thread routine.
+#elif defined(M_PTHREAD) //pthread
 		pthread_exit(0);
 #endif
 		return 0;
@@ -877,7 +880,16 @@ public:
 			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
 
 #ifdef __WIN32__
-		this->th = CreateThread(NULL, static_cast<size_t>(stackSize), &RunThread, reinterpret_cast<void*>(this), 0, NULL);
+		this->th = reinterpret_cast<HANDLE>(
+				_beginthreadex(
+						NULL,
+						static_cast<size_t>(stackSize),
+						&RunThread,
+						reinterpret_cast<void*>(this),
+						0,
+						NULL
+					)
+			);
 		if(this->th == NULL)
 			throw ting::Exc("Thread::Start(): starting thread failed");
 #elif defined(__SYMBIAN32__)
