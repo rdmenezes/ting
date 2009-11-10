@@ -49,6 +49,7 @@ THE SOFTWARE. */
 #define WIN32
 #endif
 
+#include <winsock2.h>
 #include <windows.h>
 
 #else //assume *nix
