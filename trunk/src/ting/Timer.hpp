@@ -341,7 +341,7 @@ inline void TimerLib::TimerThread::Run(){
 		this->mutex.Lock();
 	}//~while
 
-	TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
+	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
 }//~Run()
 
 

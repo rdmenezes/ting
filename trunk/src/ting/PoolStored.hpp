@@ -88,8 +88,21 @@ template <class T> class PoolStored{
 					numAllocated(0)
 			{}
 
+			Chunk(const Chunk& c) :
+					ting::Array<PoolElem>(c),
+					numAllocated(c.numAllocated)
+			{
+				const_cast<Chunk&>(c).numAllocated = 0;//to prevent assert in destructor
+				M_POOL_TRACE(<< "Chunk::Chunk(copy): invoked" << std::endl)
+			}
+
+			Chunk& operator=(const Chunk& c){
+				M_POOL_TRACE(<< "Chunk::operator=(): invoked" << std::endl)
+				ASSERT(false)
+			}
+
 			~Chunk(){
-				ASSERT(this->numAllocated == 0)
+				ASSERT_INFO(this->numAllocated == 0, "this->numAllocated = " << this->numAllocated << " should be 0")
 			}
 		};
 
