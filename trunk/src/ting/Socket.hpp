@@ -348,8 +348,8 @@ private:
 
 
 /**
-@brief a structure which holds IP address
-*/
+ * @brief a structure which holds IP address
+ */
 class IPAddress{
 public:
 	u32 host;///< IP address
@@ -371,54 +371,51 @@ public:
 	{}
 
 	/**
-	@brief Create IP address specifying exact ip address as 4 bytes and port number.
-	The ip adress can be specified as 4 separate byte values, for example:
-	@code
-	ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
-	@endcode
-	@param h1 - 1st triplet of IP address.
-	@param h2 - 2nd triplet of IP address.
-	@param h3 - 3rd triplet of IP address.
-	@param h4 - 4th triplet of IP address.
-	@param p - IP port number.
-	*/
+	 * @brief Create IP address specifying exact ip address as 4 bytes and port number.
+	 * The ip adress can be specified as 4 separate byte values, for example:
+	 * @code
+	 * ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
+	 * @endcode
+	 * @param h1 - 1st triplet of IP address.
+	 * @param h2 - 2nd triplet of IP address.
+	 * @param h3 - 3rd triplet of IP address.
+	 * @param h4 - 4th triplet of IP address.
+	 * @param p - IP port number.
+	 */
 	inline IPAddress(byte h1, byte h2, byte h3, byte h4, u16 p) :
 			host(u32(h1) + (u32(h2) << 8) + (u32(h3) << 16) + (u32(h4) << 24)),
 			port(p)
 	{}
 
 	/**
-	@brief Create IP address specifying ip address as string and port number.
-	@param ip - IP address null-terminated string. Example: "127.0.0.1".
-	@param p - IP port number.
-	*/
+	 * @brief Create IP address specifying ip address as string and port number.
+	 * @param ip - IP address null-terminated string. Example: "127.0.0.1".
+	 * @param p - IP port number.
+	 */
 	inline IPAddress(const char* ip, u16 p) throw(Socket::Exc) :
 			host(IPAddress::ParseString(ip)),
 			port(p)
 	{}
 
 	/**
-	@brief compares two IP addresses for equality.
-	@param ip - IP address to compare with.
-	@return true if hosts and ports of the two IP addresses are equal accordingly.
-	@return false otherwise.
-	*/
+	 * @brief compares two IP addresses for equality.
+	 * @param ip - IP address to compare with.
+	 * @return true if hosts and ports of the two IP addresses are equal accordingly.
+	 * @return false otherwise.
+	 */
 	inline bool operator==(const IPAddress& ip){
 		return (this->host == ip.host) && (this->port == ip.port);
 	}
 private:
+	static inline void ThrowInvalidIP(){
+		throw Socket::Exc("IPAddress::ParseString(): string is not a valid IP address");
+	}
+
 	//parse IP address from string
 	static u32 ParseString(const char* ip) throw(Socket::Exc){
 		//TODO: there already is a IP parsing function in BSD sockets, consider using it here
 		if(!ip)
 			throw Socket::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
-
-		//subfunctions
-		struct sf{
-			static void ThrowInvalidIP(){
-				throw Socket::Exc("IPAddress::ParseString(): string is not a valid IP address");
-			}
-		};
 
 		u32 h = 0;//parsed host
 		const char *curp = ip;
@@ -428,20 +425,20 @@ private:
 			for(numDgts = 0; numDgts < 3; ++numDgts){
 				if( *curp == '.' || *curp == 0 ){
 					if(numDgts==0)
-						sf::ThrowInvalidIP();
+						ThrowInvalidIP();
 					break;
 				}else{
 					if(*curp < '0' || *curp > '9')
-						sf::ThrowInvalidIP();
+						ThrowInvalidIP();
 					digits[numDgts] = uint(*curp) - uint('0');
 				}
 				++curp;
 			}
 
 			if(t < 3 && *curp != '.')//unexpected delimiter or unexpected end of string
-				sf::ThrowInvalidIP();
+				ThrowInvalidIP();
 			else if(t == 3 && *curp != 0)
-				sf::ThrowInvalidIP();
+				ThrowInvalidIP();
 
 			uint xxx = 0;
 			for(uint i = 0; i < numDgts; ++i){
@@ -451,7 +448,7 @@ private:
 				xxx += digits[i] * ord;
 			}
 			if(xxx > 255)
-				sf::ThrowInvalidIP();
+				ThrowInvalidIP();
 
 			h |= (xxx << (8 * t));
 
@@ -464,13 +461,13 @@ private:
 
 
 /**
-@brief Socket library singletone class.
-This is a Socket library singletone class. Creating an object of this class initializes the library
-while destroying this object deinitializes it. So, the convenient way of initializing the library
-is to create an object of this class on the stack. Thus, when the object goes out of scope its
-destructor will be called and the library will be deinitialized automatically.
-This is what C++ RAII is all about ;-).
-*/
+ * @brief Socket library singletone class.
+ * This is a Socket library singletone class. Creating an object of this class initializes the library
+ * while destroying this object deinitializes it. So, the convenient way of initializing the library
+ * is to create an object of this class on the stack. Thus, when the object goes out of scope its
+ * destructor will be called and the library will be deinitialized automatically.
+ * This is what C++ RAII is all about ;-).
+ */
 class SocketLib : public Singleton<SocketLib>{
 public:
 	SocketLib() throw(Socket::Exc){
@@ -507,12 +504,12 @@ public:
 
 
 	/**
-	@brief Resolve host IP by its name.
-	This function resolves host IP address by its name. If it fails resolving the IP address it will throw Socket::Exc.
-	@param hostName - null-terminated string representing host name. Example: "www.somedomain.com".
-	@param port - IP port number which will be placed in the resulting IPAddress structure.
-	@return filled IPAddress structure.
-	*/
+	 * @brief Resolve host IP by its name.
+	 * This function resolves host IP address by its name. If it fails resolving the IP address it will throw Socket::Exc.
+	 * @param hostName - null-terminated string representing host name. Example: "www.somedomain.com".
+	 * @param port - IP port number which will be placed in the resulting IPAddress structure.
+	 * @return filled IPAddress structure.
+	 */
 	IPAddress GetHostByName(const char *hostName, u16 port) throw(Socket::Exc){
 		if(!hostName)
 			throw Socket::Exc("SocketLib::GetHostByName(): pointer passed as argument is 0");
@@ -535,25 +532,25 @@ public:
 
 
 /**
-@brief a class which represents a TCP socket.
-*/
+ * @brief a class which represents a TCP socket.
+ */
 class TCPSocket : public Socket{
 	friend class TCPServerSocket;
 public:
 	/**
-	@brief Constructs an invalid TCP socket object.
-	*/
+	 * @brief Constructs an invalid TCP socket object.
+	 */
 	TCPSocket(){
 //		TRACE(<< "TCPSocket::TCPSocket(): invoked " << this << std::endl)
 	};
 
 	/**
-	@brief A copy constructor.
-	Copy constructor creates a new socket object which refers to the same socket as s.
-	After constructor completes the s becomes invalid.
-	In other words, the behavior of copy constructor is similar to one of std::auto_ptr class from standard C++ library.
-	@param s - other TCP socket to make a copy from.
-	*/
+	 * @brief A copy constructor.
+	 * Copy constructor creates a new socket object which refers to the same socket as s.
+	 * After constructor completes the s becomes invalid.
+	 * In other words, the behavior of copy constructor is similar to one of std::auto_ptr class from standard C++ library.
+	 * @param s - other TCP socket to make a copy from.
+	 */
 	//copy constructor
 	TCPSocket(const TCPSocket& s) :
 			Socket(s)
@@ -562,33 +559,33 @@ public:
 	}
 
 	/**
-	@brief A constructor which automatically calls TCPSocket::Open() method.
-	This constructor creates a socket and calls its TCPSocket::Open() method.
-	So, it creates an already opened socket.
-	@param ip - IP address to 'connect to/listen on'.
-	@param disableNaggle - enable/disable Naggle algorithm.
-	*/
+	 * @brief A constructor which automatically calls TCPSocket::Open() method.
+	 * This constructor creates a socket and calls its TCPSocket::Open() method.
+	 * So, it creates an already opened socket.
+	 * @param ip - IP address to 'connect to/listen on'.
+	 * @param disableNaggle - enable/disable Naggle algorithm.
+	 */
 	TCPSocket(const IPAddress& ip, bool disableNaggle = false) throw(Socket::Exc){
 		this->Open(ip, disableNaggle);
 	}
 
 	/**
-	@brief Assignment operator, works similar to std::auto_ptr::operator=().
-	After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
-	It works similar to std::auto_ptr::operator=() from standard C++ library.
-	@param s - socket to assign from.
-	*/
+	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
+	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
+	 * @param s - socket to assign from.
+	 */
 	TCPSocket& operator=(const TCPSocket& s){
 		this->Socket::operator=(s);
 		return *this;
 	}
 
 	/**
-	@brief Connects the socket.
-	This method connects the socket to remote TCP server socket.
-	@param ip - IP address.
-	@param disableNaggle - enable/disable Naggle algorithm.
-	*/
+	 * @brief Connects the socket.
+	 * This method connects the socket to remote TCP server socket.
+	 * @param ip - IP address.
+	 * @param disableNaggle - enable/disable Naggle algorithm.
+	 */
 	void Open(const IPAddress& ip, bool disableNaggle = false) throw(Socket::Exc){
 		if(this->IsValid())
 			throw Socket::Exc("TCPSocket::Open(): socket already opened");
