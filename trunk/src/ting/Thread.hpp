@@ -840,7 +840,7 @@ public:
 
 	virtual ~Thread(){
 		ASSERT_INFO(
-				this->state == JOINED,
+				this->state == JOINED || this->state == NEW,
 				"~Thread() destructor is called while the thread was not joined before. "
 				<< "Make sure the thread is joined by calling Thread::Join() "
 				<< "before destroying the thread object."
@@ -933,6 +933,8 @@ public:
 	 * @brief Wait for thread to finish its execution.
 	 * This functon waits for the thread finishes its execution,
 	 * i.e. until the thread returns from its Thread::Run() method.
+	 * Note: it is safe to call Join() on not started threads,
+	 *       in that case it will return immediately.
 	 */
 	void Join(){
 //		TRACE(<< "Thread::Join(): enter" << std::endl)
@@ -942,9 +944,16 @@ public:
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
 		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
 
+		if(this->state == NEW){
+			//thread was not started, do nothing
+			return;
+		}
+
 		if(this->state == JOINED){
 			throw ting::Exc("Thread::Join(): thread is already joined");
 		}
+
+		ASSERT(this->state == RUNNING || this->state == STOPPED)
 
 #ifdef __WIN32__
 		WaitForSingleObject(this->th, INFINITE);
