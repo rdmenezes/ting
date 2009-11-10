@@ -1,14 +1,47 @@
-test: PoolStored_test Timer_test
+platform := linux
+
+ifeq ($(platform),linux)
+ext :=
+endif
+ifeq ($(platform),win32)
+ext := .exe
+endif
 
 
-PoolStored_test: src/PoolStored_test.cpp
-	@g++ -o $@ -I../src -DDEBUG -lpthread -lrt $<
-	@./$@
+ifeq ($(platform),win32)
+    remove := del /Q /F 
+else
+    remove := rm -rf
+endif
 
-Timer_test: src/Timer_test.cpp
-	@g++ -o $@ -I../src -DDEBUG -lpthread -lrt $<
-	@./$@
+
+
+#libs
+ifeq ($(platform),linux)
+threadlib := -lpthread
+rtlib := -lrt
+endif
+ifeq ($(platform),win32)
+threadlib := 
+rtlib :=
+endif
+
+
+test: PoolStored_test$(ext) Timer_test$(ext)
+	@echo running PoolStored_Test...
+	@./PoolStored_test$(ext)
+	@echo running Timer_test...
+	@./Timer_test$(ext)
+
+
+PoolStored_test$(ext): src/PoolStored_test.cpp
+	@echo Building $@...
+	@g++ -o $@ -I../src -DDEBUG $(threadlib) $(rtlib) $<
+
+Timer_test$(ext): src/Timer_test.cpp
+	@echo Building $@...
+	@g++ -o $@ -I../src -DDEBUG $(threadlib) $(rtlib) $<
 
 clean:
-	@rm PoolStored_test
-	@rm Timer_test
+	@$(remove) PoolStored_test$(ext)
+	@$(remove) Timer_test$(ext)
