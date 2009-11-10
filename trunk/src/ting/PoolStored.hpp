@@ -99,6 +99,7 @@ template <class T> class PoolStored{
 			Chunk& operator=(const Chunk& c){
 				M_POOL_TRACE(<< "Chunk::operator=(): invoked" << std::endl)
 				ASSERT(false)
+				return *this;
 			}
 
 			~Chunk(){

@@ -26,6 +26,10 @@ threadlib :=
 rtlib :=
 endif
 
+#compiler flags
+cf := -Wall -I../src
+cf += -DDEBUG
+
 
 test: PoolStored_test$(ext) Timer_test$(ext)
 	@echo running PoolStored_Test...
@@ -36,11 +40,11 @@ test: PoolStored_test$(ext) Timer_test$(ext)
 
 PoolStored_test$(ext): src/PoolStored_test.cpp
 	@echo Building $@...
-	@g++ -o $@ -I../src -DDEBUG $(threadlib) $(rtlib) $<
+	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 Timer_test$(ext): src/Timer_test.cpp
 	@echo Building $@...
-	@g++ -o $@ -I../src -DDEBUG $(threadlib) $(rtlib) $<
+	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 clean:
 	@$(remove) PoolStored_test$(ext)
