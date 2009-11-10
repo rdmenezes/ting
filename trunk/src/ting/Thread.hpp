@@ -46,6 +46,7 @@ THE SOFTWARE. */
 #endif
 
 #include <windows.h>
+#include <process.h>
 
 #elif defined(__SYMBIAN32__)
 #include <string.h>
@@ -771,7 +772,7 @@ class Thread{
 
 //Tread Run function
 #ifdef __WIN32__
-	static DWORD __stdcall RunThread(void *data)
+	static unsigned int __stdcall RunThread(void *data)
 #elif defined(__SYMBIAN32__)
 	static TInt RunThread(TAny *data)
 #elif defined(M_PTHREAD) //pthread
