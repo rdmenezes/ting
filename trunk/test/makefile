@@ -31,11 +31,13 @@ cf := -Wall -I../src
 cf += -DDEBUG
 
 
-test: PoolStored_test$(ext) Timer_test$(ext)
+test: PoolStored_test$(ext) Timer_test$(ext) Thread_test$(ext)
 	@echo running PoolStored_Test...
 	@./PoolStored_test$(ext)
 	@echo running Timer_test...
 	@./Timer_test$(ext)
+	@echo running Thread_test...
+	@./Thread_test$(ext)
 
 
 PoolStored_test$(ext): src/PoolStored_test.cpp
@@ -45,6 +47,11 @@ PoolStored_test$(ext): src/PoolStored_test.cpp
 Timer_test$(ext): src/Timer_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+
+Thread_test$(ext): src/Thread_test.cpp
+	@echo Building $@...
+	@g++ -o $@ $(cf) $(threadlib) $<
+
 
 clean:
 	@$(remove) PoolStored_test$(ext)
