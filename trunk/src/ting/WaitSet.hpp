@@ -48,18 +48,18 @@ THE SOFTWARE. */
 
 #include <windows.h>
 
-
-//if MSVC compiler, then disable warning about throw specification is ignored.
-#ifdef _MSC_VER
-#pragma warning( disable : 4290)
-#endif
-
-
 #else //assume *nix
 #include <sys/epoll.h>
 
 #endif
 
+
+//if Microsoft MSVC compiler,
+//then disable warning about throw specification is ignored.
+#ifdef _MSC_VER
+#pragma warning(push) //push warnings state
+#pragma warning( disable : 4290)
+#endif
 
 
 namespace ting{
@@ -458,3 +458,10 @@ private:
 
 
 }//~namespace ting
+
+
+//if Microsoft MSVC compiler, restore warnings state
+#ifdef _MSC_VER
+#pragma warning(pop) //pop warnings state
+#endif
+
