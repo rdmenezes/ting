@@ -111,8 +111,9 @@ class Mutex{
 #endif
 
 	//forbid copying
-	Mutex(const Mutex& ){}
-	Mutex(Mutex& ){}
+	Mutex(const Mutex& ){
+		ASSERT(false)
+	}
 	Mutex& operator=(const Mutex& ){
 		return *this;
 	}
@@ -207,8 +208,9 @@ public:
 		Mutex *mut;
 
 		//forbid copying
-		Guard(const Guard& ){}
-		Guard(Guard& ){}
+		Guard(const Guard& ){
+			ASSERT(false)
+		}
 		Guard& operator=(const Guard& ){
 			return *this;
 		}
@@ -249,9 +251,12 @@ class Semaphore{
 #endif
 
 	//forbid copying
-	Semaphore(const Semaphore& ){};
-	Semaphore(Semaphore& ){};
-	Semaphore& operator=(const Semaphore& ){return *this;};
+	Semaphore(const Semaphore& ){
+		ASSERT(false)
+	}
+	Semaphore& operator=(const Semaphore& ){
+		return *this;
+	}
 public:
 
 	/**
@@ -394,9 +399,13 @@ class CondVar{
 #endif
 
 	//forbid copying
-	CondVar(const CondVar& ){};
-	CondVar(CondVar& ){};
-	CondVar& operator=(const CondVar& ){return *this;};
+	CondVar(const CondVar& ){
+		ASSERT(false)
+	}
+	CondVar& operator=(const CondVar& ){
+		return *this;
+	}
+	
 public:
 
 	CondVar(){
@@ -526,10 +535,6 @@ class Queue : public Waitable{
 
 	//forbid copying
 	Queue(const Queue&){
-		ASSERT(false)
-	}
-
-	Queue(Queue&){
 		ASSERT(false)
 	}
 
@@ -824,10 +829,9 @@ class Thread{
 #endif
 
 	//forbid copying
-	Thread(const Thread& ){}
-
-	Thread(Thread& ){}
-
+	Thread(const Thread& ){
+		ASSERT(false)
+	}
 	Thread& operator=(const Thread& ){
 		return *this;
 	}

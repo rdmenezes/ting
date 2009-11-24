@@ -48,6 +48,13 @@ THE SOFTWARE. */
 
 #include <windows.h>
 
+
+//if MSVC compiler, then disable warning about throw specification is ignored.
+#ifdef _MSC_VER
+#pragma warning( disable : 4290)
+#endif
+
+
 #else //assume *nix
 #include <sys/epoll.h>
 
@@ -219,7 +226,7 @@ public:
 
 	~WaitSet(){
 		//assert the wait set is empty
-		ASSERT(this->numWaitables == 0)
+		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
 #if defined(__WIN32__)
 		//do nothing
 #else //assume *nix
