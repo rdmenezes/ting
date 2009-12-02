@@ -255,11 +255,19 @@ public:
 
 
 
-	inline operator bool()const{
-		return this->IsValid();
+	//Safe conversion to bool type.
+	//Because if using simple "operator bool()" it may result in chained automatic
+	//conversion to undesired types such as int.
+	typedef void (Ref::*unspecified_bool_type)() const;
+	inline operator unspecified_bool_type() const{
+		return this->IsValid() ? reinterpret_cast<unspecified_bool_type>(1) : 0;
 	}
 
+//	inline operator bool(){
+//		return this->IsValid();
+//	}
 
+	
 
 	void Reset(){
 		this->Destroy();
