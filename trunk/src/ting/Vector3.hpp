@@ -660,7 +660,7 @@ public:
 		if(mag != 0){
 			Vector3<T> a = axis;
 			a /= mag;//normalize axis
-			this->InitRot( a.x, a.y, a.Z(), mag);
+			this->InitRot( a.x, a.y, a.z, mag);
 		}else
 			this->Identity();
 	};
