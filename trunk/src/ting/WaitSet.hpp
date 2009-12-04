@@ -95,7 +95,7 @@ protected:
 			isAdded(false),
 			readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
 	{
-		//cannot copy from waitable which is adde to WaitSet
+		//cannot copy from waitable which is added to WaitSet
 		if(w.isAdded)
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
 

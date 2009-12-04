@@ -37,13 +37,27 @@ typedef unsigned char u8;    STATIC_ASSERT(sizeof(u8) == 1)
 
 STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
 
-typedef signed char s8;					STATIC_ASSERT(sizeof(s8) == 1)
-typedef unsigned short int u16;			STATIC_ASSERT(sizeof(u16) == 2)
-typedef signed short int s16;			STATIC_ASSERT(sizeof(s16) == 2)
-typedef unsigned int u32;				STATIC_ASSERT(sizeof(u32) == 4)
-typedef signed int s32;					STATIC_ASSERT(sizeof(s32) == 4)
-typedef unsigned long long int u64;		STATIC_ASSERT(sizeof(u64) == 8 && u64(-1) == 0xffffffffffffffffLL)
-typedef long long int s64;				STATIC_ASSERT(sizeof(u64) == 8)
+typedef signed char s8;
+typedef unsigned short int u16;
+typedef signed short int s16;
+typedef unsigned int u32;
+typedef signed int s32;
+typedef unsigned long long int u64;
+typedef long long int s64;
+
+
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
+
+STATIC_ASSERT(sizeof(s8) == 1)
+STATIC_ASSERT(sizeof(u16) == 2)
+STATIC_ASSERT(sizeof(s16) == 2)
+STATIC_ASSERT(sizeof(u32) == 4)
+STATIC_ASSERT(sizeof(s32) == 4)
+STATIC_ASSERT(sizeof(u64) == 8)
+STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
+
+#endif //~M_DOC_DONT_EXTRACT //for doxygen
+
 
 typedef unsigned int uint;
 typedef u8 byte;

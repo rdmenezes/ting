@@ -888,7 +888,7 @@ public:
 		this->th = reinterpret_cast<HANDLE>(
 				_beginthreadex(
 						NULL,
-						static_cast<size_t>(stackSize),
+						unsigned int(stackSize),
 						&RunThread,
 						reinterpret_cast<void*>(this),
 						0,
@@ -912,7 +912,7 @@ public:
 
 			pthread_attr_init(&attr);
 			pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-			pthread_attr_setstacksize(&attr, static_cast<size_t>(stackSize));
+			pthread_attr_setstacksize(&attr, size_t(stackSize));
 
 			int res = pthread_create(&this->th, &attr, &RunThread, this);
 			if(res != 0){

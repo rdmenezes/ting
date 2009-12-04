@@ -126,9 +126,9 @@ public:
 	//Safe conversion to bool type.
 	//Because if using simple "operator bool()" it may result in chained automatic
 	//conversion to undesired types such as int.
-	typedef void (Ptr::*unspecified_bool_type)() const;
+	typedef void (Ptr::*unspecified_bool_type)();
 	inline operator unspecified_bool_type() const{
-		return this->IsValid() ? reinterpret_cast<unspecified_bool_type>(1) : 0;
+		return this->IsValid() ? &Ptr::Reset : 0; //Ptr::Reset is taken just because it has matching signature
 	}
 
 //	inline operator bool(){
