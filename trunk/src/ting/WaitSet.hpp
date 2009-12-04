@@ -34,6 +34,7 @@ THE SOFTWARE. */
 #include "Exc.hpp"
 #include "Array.hpp"
 
+
 #include <vector>
 
 
@@ -367,20 +368,46 @@ public:
 
 
 
-	inline uint Wait(){
-		return this->Wait(true, 0);
+	/**
+	 * @brief wait for event.
+	 * This function blocks calling thread exectution until one of the Waitable objects in the WaitSet
+	 * triggers. Upon return from the function, pointers to triggered objects are placed in the
+	 * 'out_events' buffer and the return value from the function indicates number of these objects
+	 * which have triggered.
+	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
+	 *                     The buffer will not be initialize to 0's by this function.
+	 *                     The buffer shall be large enough to hold maxmimum number of Waitables
+	 *                     this WaitSet can hold.
+	 *                     It is valid to pass 0 pointer, in that case this argument will not be used.
+	 * @return number of objects triggered.
+	 */
+	inline uint Wait(Buffer<Waitable*>* out_events = 0){
+		return this->Wait(true, 0, out_events);
 	}
 
 
-
-	inline uint Wait(u32 timeout){
-		return this->Wait(false, timeout);
+	/**
+	 * @brief wait for event with timeout.
+	 * An overloaded version of Wait() function which takes wait timeout as parameter.
+	 * @param timeout - maximum time in milliseconds to wait for event.
+	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
+	 *                     Can be 0.
+	 * @return number of objects triggered. If 0 then timeout was hit.
+	 */
+	inline uint Wait(u32 timeout, Buffer<Waitable*>* out_events = 0){
+		return this->Wait(false, timeout, out_events);
 	}
 
 
 
 private:
-	uint Wait(bool waitInfinitly, u32 timeout){
+	uint Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
+		if(out_events){
+			if(out_events->Size() < this->numWaitables){
+				throw ting::Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
+			}
+		}
+
 #if defined(__WIN32__)
 		if(timeout == INFINITE)
 			timeout -= 1;
@@ -407,6 +434,10 @@ private:
 		uint numEvents = 0;
 		for(uint i = 0; i < this->numWaitables; ++i){
 			if(this->waitables[i]->CheckSignalled()){
+				if(out_events){
+					ASSERT(numEvents < out_events.Size())
+					out_events->operator[](numEvents) = w;
+				}
 				++numEvents;
 			}
 		}
@@ -433,6 +464,7 @@ private:
 
 		ASSERT(uint(res) <= this->revents.Size())
 
+		ting::uint numEvents = 0;
 		for(
 				epoll_event *e = this->revents.Begin();
 				e < this->revents.Begin() + res;
@@ -446,6 +478,12 @@ private:
 			}
 			if((e->events & EPOLLOUT) != 0){
 				w->SetCanWriteFlag();
+			}
+			ASSERT(w->CanRead() || w->CanWrite())
+			if(out_events){
+				ASSERT(numEvents < out_events.Size())
+				out_events->operator[](numEvents) = w;
+				++numEvents;
 			}
 		}
 
