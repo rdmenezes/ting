@@ -499,20 +499,45 @@ public:
 //===============================
 template <typename T> class Matrix4{
 	//OpenGL compatible matrix elements array in case T = float/double
-	T m[ 4 * 4 ]; //matrix components 0-3 1st column, 4-7 2nd column, 8-11 3rd column, 12-15 4th column
-  public:
-	inline Matrix4(){};//Default constructor.
+	T m[4 * 4]; //matrix components 0-3 1st column, 4-7 2nd column, 8-11 3rd column, 12-15 4th column
+public:
+	inline Matrix4(){}//Default constructor.
 
 	//copy constructor must be trivial.
 	//Let's allow compiler to make it for us.
-	//Matrix4(const Matrix4& matr){};
+	//Matrix4(const Matrix4& matr){}
 
-	//~Matrix4(){};//destructor
+	//~Matrix4(){}//destructor
 
-	inline T* operator[](u32 i){
-		ASSERT(i < 4)
-		return &m[i*4];
-	};
+	/**
+	 * @brief returns pointer to specified column.
+	 * Returns pointer to array of 4 elements which forms a matrix column specified by argument.
+	 * Thus, it is possible to access matrix elements using double [] operator as follows:
+	 * @code
+	 * Matrix4 m;
+	 * m[0][0] = 1;//assign 1 to element at row 0 column 0
+	 * m[3][2] = 3;//assign 3 to element at row 2 column 3
+	 * float elem = m[4][3];//assign value at row 3 column 4 of the matrix to variable 'elem'
+	 * @endcode
+	 * @param col - column number.
+	 * @return pointer to array of 4 elements which forms the requested column of the matirx.
+	 */
+	inline T* operator[](uint col){
+		ASSERT(col < 4)
+		return &this->m[col * 4];
+	}
+
+	/**
+	 * @grief get element at given row and column.
+	 * @param row - row of element.
+	 * @param col - column of element.
+	 * @return reference to the element at specified row and column.
+	 */
+	inline T& E(uint row, uint col){
+		ASSERT(row < 4)
+		ASSERT(col < 4)
+		return this->m[col * 4 + row];
+	}
 
 	//Multiply by Vector3 (M * V). i.e. transform vector with transformation matrix
 	Vector3<T> operator*(const Vector3<T>& vec){
@@ -521,12 +546,12 @@ template <typename T> class Matrix4{
 					this->m[1] * vec[0] + this->m[5] * vec[1] + this->m[9] * vec[2] + this->m[13],
 					this->m[2] * vec[0] + this->m[6] * vec[1] + this->m[10] * vec[2] + this->m[14]
 				);
-	};
+	}
 
 	inline Matrix4& operator=(const Matrix4& matr){
 		memcpy(this->m, matr.m, sizeof(this->m));
 		return (*this);
-	};
+	}
 
 	//Transpose matrix
 	Matrix4& Transpose(){
@@ -537,7 +562,7 @@ template <typename T> class Matrix4{
 		Exchange(this->m[7], this->m[13]);
 		Exchange(this->m[11], this->m[14]);
 		return (*this);
-	};
+	}
 
 	//Multipply by matrix from the right m  = m * M
 	Matrix4& RightMultMatrix(const Matrix4 &M){
@@ -552,7 +577,7 @@ template <typename T> class Matrix4{
 		memcpy(this->m, tmpM, sizeof(this->m));
 		//*this=tmp;
 		return (*this);
-	};
+	}
 
 	//Multiply by matrix from the left m = M * m
 	Matrix4& LeftMultMatrix(const Matrix4& M){
@@ -566,7 +591,7 @@ template <typename T> class Matrix4{
 		}
 		memcpy(this->m, tmpM, sizeof(this->m));
 		return (*this);
-	};
+	}
 
 	Matrix4& Identity(){
 		this->m[0] = 1;    this->m[4] = 0;    this->m[8] = 0;    this->m[12] = 0;
@@ -574,7 +599,7 @@ template <typename T> class Matrix4{
 		this->m[2] = 0;    this->m[6] = 0;    this->m[10] = 1;   this->m[14] = 0;
 		this->m[3] = 0;    this->m[7] = 0;    this->m[11] = 0;   this->m[15] = 1;
 		return (*this);
-	};
+	}
 
 	//multiplies this matrix by Scale matrix from the left (M = S * M)
 	Matrix4& Scale(const Vector3<T>& scale){
@@ -602,7 +627,7 @@ template <typename T> class Matrix4{
 		
 		//NOTE: 4th row remains unchanged
 		return (*this);
-	};
+	}
 
 	//multiplies this matrix by Translation matrix from the left (M = T * M)
 	Matrix4& Translate(const Vector3<T>& t){
@@ -628,7 +653,7 @@ template <typename T> class Matrix4{
 
 		//note: 4th row remain unchanged
 		return (*this);
-	};
+	}
 
 	//multiplies this matrix by Rotation matrix from the left, rotation given by quaternion.
 	inline Matrix4& Rotate(const Quaternion<T>& q);//implementation see below
@@ -810,28 +835,28 @@ public:
 		//   \  0               0               0               1   /
 
 		//First column
-		m.m[0] = T(1) - T(2) * ( Pow2(this->y) + Pow2(this->z) );
-		m.m[1] = T(2) * (this->x * this->y + this->z * this->w);
-		m.m[2] = T(2) * (this->x * this->z - this->y * this->w);
-		m.m[3] = T(0);
+		m[0][0] = T(1) - T(2) * ( Pow2(this->y) + Pow2(this->z) );
+		m[1][0] = T(2) * (this->x * this->y + this->z * this->w);
+		m[2][0] = T(2) * (this->x * this->z - this->y * this->w);
+		m[3][0] = T(0);
 
 		//Second column
-		m.m[4] = T(2) * (this->x * this->y - this->z * this->w);
-		m.m[5] = T(1) - T(2) * ( Pow2(this->x) + Pow2(this->z) );
-		m.m[6] = T(2) * (this->z * this->y + this->x * this->w);
-		m.m[7] = T(0);
+		m[0][1] = T(2) * (this->x * this->y - this->z * this->w);
+		m[1][1] = T(1) - T(2) * ( Pow2(this->x) + Pow2(this->z) );
+		m[2][1] = T(2) * (this->z * this->y + this->x * this->w);
+		m[3][1] = T(0);
 
 		//Third column
-		m.m[8] = T(2) * (this->x * this->z + this->y * this->w);
-		m.m[9] = T(2) * (this->y * this->z - this->x * this->w);
-		m.m[10] = T(1) - T(2) * ( Pow2(this->x) + Pow2(this->y) );
-		m.m[11] = T(0);
+		m[0][2] = T(2) * (this->x * this->z + this->y * this->w);
+		m[1][2] = T(2) * (this->y * this->z - this->x * this->w);
+		m[2][2] = T(1) - T(2) * ( Pow2(this->x) + Pow2(this->y) );
+		m[3][2] = T(0);
 
 		//Fourth column
-		m.m[12] = T(0);
-		m.m[13] = T(0);
-		m.m[14] = T(0);
-		m.m[15] = T(1);
+		m[0][3] = T(0);
+		m[1][3] = T(0);
+		m[2][3] = T(0);
+		m[3][3] = T(1);
 		return m;
 	}
 
@@ -1002,51 +1027,51 @@ public:
 
 template <class T> inline Vector2<T>::Vector2(const Vector3<T>& vec){
 	this->operator=(vec);
-};
+}
 
 template <class T> inline Vector2<T>& Vector2<T>::operator=(const Vector3<T>& vec){
 	this->x = vec.x;
 	this->y = vec.y;
 	return (*this);
-};
+}
 
 template <class T> inline Vector3<T>& Vector3<T>::operator=(const Vector2<T>& vec){
 	this->x = vec.x;
 	this->y = vec.y;
 	return (*this);
-};
+}
 
 template <class T> inline Vector3<T>& Vector3<T>::operator+=(const Vector2<T>& vec){
 	this->x += vec.x;
 	this->y += vec.y;
 	return (*this);
-};
+}
 
 template <class T> inline Vector2<T> Vector2<T>::operator+(const Vector3<T>& vec)const{
 	return Vector2<T>(
 				this->x + vec.x,
 				this->y + vec.y
 			);
-};
+}
 
 template <class T> inline Vector2<T> Vector2<T>::operator-(const Vector3<T>& vec)const{
 	return Vector2<T>(
 				this->x - vec.x,
 				this->y - vec.y
 			);
-};
+}
 
 template <class T> inline Matrix4<T>& Matrix4<T>::Rotate(const Quaternion<T>& q){
 	Matrix4<T> rm;
 	q.CreateMatrix4(rm);
 	this->LeftMultMatrix(rm);
 	return (*this);
-};
+}
 
 template <class T> inline Vector3<T>& Vector3<T>::Rotate(const Quaternion<T>& q){
 	*this = q.ToMatrix4() * (*this);
 	return *this;
-};
+}
 
 
 template <class T> class Rectangle2{
