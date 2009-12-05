@@ -76,9 +76,10 @@ class Waitable{
 
 public:
 	enum EReadinessFlags{
-		NOT_READY = 0,  // bin: 00000000
-		READ = 1,       // bin: 00000001
-		WRITE = 2       // bin: 00000010
+		NOT_READY = 0,      // bin: 00000000
+		READ = 1,           // bin: 00000001
+		WRITE = 2,          // bin: 00000010
+		READ_AND_WRITE = 3  // bin: 00000011
 	};
 	
 protected:
@@ -237,7 +238,7 @@ public:
 
 
 
-	inline void Add(Waitable* w, u32 flagsToWaitFor){
+	inline void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 //		TRACE(<< "WaitSet::Add(): enter" << std::endl)
 		ASSERT(w)
 		
@@ -260,8 +261,8 @@ public:
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
-		e.events = (flagsToWaitFor & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
-				(flagsToWaitFor & Waitable::WRITE ? EPOLLOUT : 0);
+		e.events = (u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
+				(u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0);
 		int res = epoll_ctl(
 				this->epollSet,
 				EPOLL_CTL_ADD,
@@ -280,7 +281,7 @@ public:
 
 
 
-	inline void Change(Waitable* w, u32 flagsToWaitFor){
+	inline void Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		ASSERT(w)
 
 		ASSERT(w->isAdded)
@@ -306,8 +307,8 @@ public:
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
-		e.events = (flagsToWaitFor & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
-				(flagsToWaitFor & Waitable::WRITE ? EPOLLOUT : 0);
+		e.events = (u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
+				(u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0);
 		int res = epoll_ctl(
 				this->epollSet,
 				EPOLL_CTL_MOD,
@@ -436,7 +437,7 @@ private:
 			if(this->waitables[i]->CheckSignalled()){
 				if(out_events){
 					ASSERT(numEvents < out_events->Size())
-					out_events->operator[](numEvents) = w;
+					out_events->operator[](numEvents) = this->waitables[i];
 				}
 				++numEvents;
 			}
