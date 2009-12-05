@@ -4,7 +4,7 @@
 #include <ting/Timer.hpp>
 
 int main(int argc, char *argv[]){
-	TRACE(<<"Timer test "<<std::endl)
+//	TRACE(<<"Timer test "<<std::endl)
 	ting::TimerLib timerLib;
 
 	bool exit = false;
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
 
 		//override
 		ting::u32 OnExpire(){
-			TRACE(<<"\t- timer1 fired!"<<std::endl)
+			TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
 			*this->e = true;
 			return 0;
 		}
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
 	struct TestTimer2 : public ting::Timer{
 		//override
 		ting::u32 OnExpire(){
-			TRACE(<<"\t- timer2 fired!"<<std::endl)
+			TRACE_ALWAYS(<<"\t- timer2 fired!"<<std::endl)
 			return 1000;
 		}
 	} timer2;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
 
 	while(!exit){}
 
-	TRACE(<<"[PASSED]: Timer test"<<std::endl)
+	TRACE_ALWAYS(<<"[PASSED]: Timer test"<<std::endl)
 
 	return 0;
 }

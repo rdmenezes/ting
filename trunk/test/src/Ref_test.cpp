@@ -13,7 +13,7 @@ public:
 
 
 int main(int argc, char *argv[]){
-	TRACE(<< "Ref test" << std::endl)
+//	TRACE(<< "Ref test" << std::endl)
 
 	ting::Ref<TestClass> a;
 	ting::Ref<TestClass> b(new TestClass());
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 
 
 
-	TRACE(<< "[PASSED]: Ref test" << std::endl)
+	TRACE_ALWAYS(<< "[PASSED]: Ref test" << std::endl)
 
 	return 0;
 }

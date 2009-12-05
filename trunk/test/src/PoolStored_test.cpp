@@ -19,7 +19,7 @@ public:
 
 
 int main(int argc, char *argv[]){
-	TRACE(<< "PoolStored test" << std::endl)
+//	TRACE(<< "PoolStored test" << std::endl)
 
 	std::vector<ting::Ptr<TestClass> > vec;
 
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
 		vec.pop_back();
 	}
 
-	TRACE(<< "[PASSED]: PoolStored test" << std::endl)
+	TRACE_ALWAYS(<< "[PASSED]: PoolStored test" << std::endl)
 
 	return 0;
 }

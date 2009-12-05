@@ -388,13 +388,13 @@ public:
 
 	/**
 	 * @brief wait for event with timeout.
-	 * An overloaded version of Wait() function which takes wait timeout as parameter.
+	 * The same as Wait() function, but takes wait timeout as parameter.
 	 * @param timeout - maximum time in milliseconds to wait for event.
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
 	 *                     Can be 0.
 	 * @return number of objects triggered. If 0 then timeout was hit.
 	 */
-	inline uint Wait(u32 timeout, Buffer<Waitable*>* out_events = 0){
+	inline uint WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
 	}
 
@@ -481,7 +481,7 @@ private:
 			}
 			ASSERT(w->CanRead() || w->CanWrite())
 			if(out_events){
-				ASSERT(numEvents < out_events.Size())
+				ASSERT(numEvents < out_events->Size())
 				out_events->operator[](numEvents) = w;
 				++numEvents;
 			}

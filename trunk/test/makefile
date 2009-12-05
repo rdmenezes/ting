@@ -31,32 +31,59 @@ cf := -Wall -I../src
 cf += -DDEBUG
 
 
-test: PoolStored_test$(ext) Timer_test$(ext) Thread_test$(ext) Ref_test$(ext)
+test: run_PoolStored_test run_Timer_test run_Thread_test run_Ref_test run_WaitSet_test
+
+
+
+
+run_PoolStored_test: PoolStored_test$(ext)
 	@echo running PoolStored_Test...
 	@./PoolStored_test$(ext)
-	@echo running Timer_test...
-	@./Timer_test$(ext)
-	@echo running Thread_test...
-	@./Thread_test$(ext)
-	@echo running Ref_test...
-	@./Ref_test$(ext)
-
 
 PoolStored_test$(ext): src/PoolStored_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
 
+
+
+run_Timer_test: Timer_test$(ext)
+	@echo running Timer_test...
+	@./Timer_test$(ext)
+
 Timer_test$(ext): src/Timer_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+
+
+
+run_Thread_test: Thread_test$(ext)
+	@echo running Thread_test...
+	@./Thread_test$(ext)
 
 Thread_test$(ext): src/Thread_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $(threadlib) $<
 
+
+
+run_Ref_test: Ref_test$(ext)
+	@echo running Ref_test...
+	@./Ref_test$(ext)
+
 Ref_test$(ext): src/Ref_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $<
+
+
+
+run_WaitSet_test: WaitSet_test$(ext)
+	@echo running WaitSet_test...
+	@./WaitSet_test$(ext)
+
+WaitSet_test$(ext): src/WaitSet_test.cpp
+	@echo Building $@...
+	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+
 
 
 clean:
@@ -64,3 +91,5 @@ clean:
 	@$(remove) Timer_test$(ext)
 	@$(remove) Thread_test$(ext)
 	@$(remove) Ref_test$(ext)
+	@$(remove) WaitSet_test$(ext)
+

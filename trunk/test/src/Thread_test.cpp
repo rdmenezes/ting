@@ -40,13 +40,13 @@ static void TestJoinBeforeThreadHasFinished(){
 
 
 int main(int argc, char *argv[]){
-	TRACE(<< "Thread test" << std::endl)
+//	TRACE(<< "Thread test" << std::endl)
 
 	TestJoinAfterThreadHasFinished();
 	
 	TestJoinBeforeThreadHasFinished();
 
-	TRACE(<< "[PASSED]: Thread test" << std::endl)
+	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
 
 	return 0;
 }
