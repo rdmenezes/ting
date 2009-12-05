@@ -528,7 +528,7 @@ public:
 	}
 
 	/**
-	 * @grief get element at given row and column.
+	 * @brief get element at given row and column.
 	 * @param row - row of element.
 	 * @param col - column of element.
 	 * @return reference to the element at specified row and column.

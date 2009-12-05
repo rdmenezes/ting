@@ -381,6 +381,7 @@ public:
 	 *                     this WaitSet can hold.
 	 *                     It is valid to pass 0 pointer, in that case this argument will not be used.
 	 * @return number of objects triggered.
+	 * @throw ting::Exc - in case of errors.
 	 */
 	inline uint Wait(Buffer<Waitable*>* out_events = 0){
 		return this->Wait(true, 0, out_events);
@@ -394,6 +395,7 @@ public:
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
 	 *                     Can be 0.
 	 * @return number of objects triggered. If 0 then timeout was hit.
+	 * @throw ting::Exc - in case of errors.
 	 */
 	inline uint WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
