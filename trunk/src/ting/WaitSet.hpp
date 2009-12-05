@@ -435,7 +435,7 @@ private:
 		for(uint i = 0; i < this->numWaitables; ++i){
 			if(this->waitables[i]->CheckSignalled()){
 				if(out_events){
-					ASSERT(numEvents < out_events.Size())
+					ASSERT(numEvents < out_events->Size())
 					out_events->operator[](numEvents) = w;
 				}
 				++numEvents;
