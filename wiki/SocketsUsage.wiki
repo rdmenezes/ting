@@ -34,7 +34,7 @@ try{
     
     //send some data
     ting::byte data[] = {'0', '1', '2', '4'};
-    sock.Send(data, sizeof(data));
+    sock.SendAll(data, sizeof(data));
 }catch(ting::Socket::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
 }
