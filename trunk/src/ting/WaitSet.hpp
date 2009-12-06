@@ -72,7 +72,7 @@ class Waitable{
 
 	bool isAdded;
 
-
+	void* userData;
 
 public:
 	enum EReadinessFlags{
@@ -87,6 +87,7 @@ protected:
 
 	inline Waitable() :
 			isAdded(false),
+			userData(0),
 			readinessFlags(NOT_READY)
 	{}
 
@@ -95,6 +96,7 @@ protected:
 	//TODO: write doxygen comments
 	inline Waitable(const Waitable& w) :
 			isAdded(false),
+			userData(w.userData),
 			readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
 	{
 		//cannot copy from waitable which is added to WaitSet
@@ -102,6 +104,7 @@ protected:
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
 
 		const_cast<Waitable&>(w).ClearAllReadinessFlags();
+		const_cast<Waitable&>(w).userData = 0;
 	}
 
 
@@ -122,6 +125,9 @@ protected:
 		//Will need to wait for readiness again, using the WaitSet.
 		this->ClearAllReadinessFlags();
 		const_cast<Waitable&>(w).ClearAllReadinessFlags();
+
+		this->userData = w.userData;
+		const_cast<Waitable&>(w).userData = 0;
 		return *this;
 	}
 
@@ -158,6 +164,14 @@ public:
 
 	inline bool CanWrite()const{
 		return (this->readinessFlags & WRITE) != 0;
+	}
+
+	inline void* GetUserData(){
+		return this->userData;
+	}
+
+	inline void SetUserData(void* data){
+		this->userData = data;
 	}
 
 #ifdef __WIN32__
