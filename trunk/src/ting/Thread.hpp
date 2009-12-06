@@ -774,7 +774,7 @@ private:
 	virtual void SetWaitingEvents(u32 flagsToWaitFor){
 		//It is not allowed to wait on queue for write,
 		//because it is always possible to push new message to queue.
-		ASSERT(flagsToWaitFor & Waitable::WRITE == 0)
+		ASSERT((flagsToWaitFor & Waitable::WRITE) == 0)
 		
 		this->flagsMask = flagsToWaitFor;
 	}
