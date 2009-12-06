@@ -618,6 +618,15 @@ public:
 			ASSERT(msg.IsValid())
 			this->last = this->first = msg.Extract();
 
+			//Set CanRead flag.
+			//NOTE: in linux imlementation with epoll(), the CanRead
+			//flag will also be set in WaitSet::Wait() method.
+			//NOTE: set CanRead flag before event notification/pipe write, because
+			//if do it after then some other thread which was witing on the WaitSet
+			//may read the CanRead flag while it was not set yet.
+			ASSERT(!this->CanRead())
+			this->SetCanReadFlag();
+			
 #if defined(__WIN32__)
 			if(SetEvent(this->eventForWaitable) == 0){
 				throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
@@ -628,11 +637,6 @@ public:
 				write(this->pipeEnds[1], oneByteBuf, 1);
 			}
 #endif
-			//Set CanRead flag.
-			//NOTE: in linux imlementation with epoll(), the CanRead
-			//flag will also be set in Wait() method.
-			ASSERT(!this->CanRead())
-			this->SetCanReadFlag();
 		}
 
 		ASSERT(this->CanRead())

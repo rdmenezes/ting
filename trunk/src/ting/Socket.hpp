@@ -911,12 +911,13 @@ public:
 	}
 
 	/**
-	@brief Connects the socket or starts listening on it.
-	This method starts listening on the socket for incoming connections.
-	@param port - IP port number to listen on.
-	@param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
-	*/
-	void Open(u16 port, bool disableNaggle = false) throw(Socket::Exc){
+	 * @brief Connects the socket or starts listening on it.
+	 * This method starts listening on the socket for incoming connections.
+	 * @param port - IP port number to listen on.
+	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
+	 * @param queueLength - the maximum length of the queue of pending connections.
+	 */
+	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50) throw(Socket::Exc){
 		if(this->IsValid())
 			throw Socket::Exc("TCPServerSocket::Open(): socket already opened");
 
@@ -957,7 +958,7 @@ public:
 			throw Socket::Exc("TCPServerSocket::Open(): Couldn't bind to local port");
 		}
 
-		if(listen(this->socket, 5) == DSocketError()){
+		if(listen(this->socket, int(queueLength)) == DSocketError()){
 			this->Close();
 			throw Socket::Exc("TCPServerSocket::Open(): Couldn't listen to local port");
 		}

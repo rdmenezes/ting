@@ -41,6 +41,7 @@ int main(int argc, char *argv[]){
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 1)
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q1)
+	ASSERT_ALWAYS(!q2.CanRead())
 	
 	//check that no objects trigger after reading from queue
 	q1.GetMsg();//should not block since one message was pushed before
