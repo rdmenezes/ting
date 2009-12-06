@@ -772,6 +772,10 @@ private:
 
 	//override
 	virtual void SetWaitingEvents(u32 flagsToWaitFor){
+		//It is not allowed to wait on queue for write,
+		//because it is always possible to push new message to queue.
+		ASSERT(flagsToWaitFor & Waitable::WRITE == 0)
+		
 		this->flagsMask = flagsToWaitFor;
 	}
 
@@ -1032,6 +1036,26 @@ public:
 		}else{
 			usleep(msec * 1000);
 		}
+#else
+#error "unknown system"
+#endif
+	}
+
+
+
+	/**
+	 * @brief get current thread ID.
+	 * Returns unique identifier of the currently executing thread. This ID can further be used
+	 * to make assertions to make sure that some code is executed in a specific thread. E.g.
+	 * assert that methods of some object are executed in the same thread where this object was
+	 * creatged.
+	 * @return uniqie thread identifier.
+	 */
+	static inline uint GetCurrentThreadID(){
+#ifdef __WIN32__
+		return uint(GetCurrentThreadId());
+#elif defined(M_PTHREAD)
+		return uint(pthread_self());
 #else
 #error "unknown system"
 #endif
