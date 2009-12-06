@@ -722,11 +722,13 @@ public:
 	/**
 	 * @brief Receive data from connected socket.
 	 * Receives data available on the socket.
-	 * If there is no data available this function blocks until some data arrives.
+	 * If there is no data available this function does not block, instead it returns 0,
+	 * indicating that 0 bytes were received.
+	 * If previous WaitSet::Wait() indicated that socket is ready for reading
+	 * and TCPSocket::Recv() returns 0, then connection was reset by peer.
 	 * @param buf - pointer to the buffer where to put received data.
 	 * @param maxSize - maximal number of bytes which can be put to the buffer.
-	 * @return if returned value is not 0 then it represents the number of bytes written to the buffer.
-	 * @return 0 returned value indicates disconnection of remote socket.
+	 * @return the number of bytes written to the buffer.
 	 */
 	//returns 0 if connection was closed by peer
 	uint Recv(byte* buf, uint maxSize) throw(Socket::Exc){
