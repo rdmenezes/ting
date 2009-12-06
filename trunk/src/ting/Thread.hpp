@@ -608,6 +608,7 @@ public:
 	 * @param msg - the message to push into the queue.
 	 */
 	void PushMessage(Ptr<Message> msg){
+		ASSERT(msg.IsValid())
 		Mutex::Guard mutexGuard(this->mut);
 		if(this->first){
 			ASSERT(this->last && this->last->next == 0)
@@ -627,8 +628,14 @@ public:
 				write(this->pipeEnds[1], oneByteBuf, 1);
 			}
 #endif
+			//Set CanRead flag.
+			//NOTE: in linux imlementation with epoll(), the CanRead
+			//flag will also be set in Wait() method.
+			ASSERT(!this->CanRead())
+			this->SetCanReadFlag();
 		}
 
+		ASSERT(this->CanRead())
 		//NOTE: must do signalling while mutex is locked!!!
 		this->sem.Signal();
 	}
@@ -657,6 +664,7 @@ public:
 			if(this->first == 0){
 #if defined(__WIN32__)
 				if(ResetEvent(this->eventForWaitable) == 0){
+					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
 #else
@@ -703,6 +711,7 @@ public:
 				if(this->first == 0){
 #if defined(__WIN32__)
 					if(ResetEvent(this->eventForWaitable) == 0){
+						ASSERT(false)
 						throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 					}
 #else
@@ -730,6 +739,7 @@ public:
 			if(this->first == 0){
 #if defined(__WIN32__)
 				if(ResetEvent(this->eventForWaitable) == 0){
+					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
 #else
@@ -754,7 +764,17 @@ private:
 		return this->eventForWaitable;
 	}
 
+	u32 flagsMask;//flags to wait for
 
+	//override
+	virtual void SetWaitingEvents(u32 flagsToWaitFor){
+		this->flagsMask = flagsToWaitFor;
+	}
+
+	//returns true if signalled
+	virtual bool CheckSignalled() throw(ting::Exc){
+		return this->readinessFlags & this->flagsMask != 0;
+	}
 
 #else
 	//override
@@ -888,7 +908,7 @@ public:
 		this->th = reinterpret_cast<HANDLE>(
 				_beginthreadex(
 						NULL,
-						unsigned int(stackSize),
+						unsigned(stackSize),
 						&RunThread,
 						reinterpret_cast<void*>(this),
 						0,

@@ -425,7 +425,7 @@ private:
 				FALSE
 			);
 
-		ASSERT(res != WAIT_IO_COMPLETION)//it is impossible becaus we supplied FALSE as last parameter to WaitForMultipleObjectsEx()
+		ASSERT(res != WAIT_IO_COMPLETION)//it is impossible because we supplied FALSE as last parameter to WaitForMultipleObjectsEx()
 
 		if(res == WAIT_FAILED)
 			throw ting::Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");

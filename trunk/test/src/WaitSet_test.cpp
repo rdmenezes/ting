@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
 	ws.Remove(&q1);
 	ws.Remove(&q2);
 
-	TRACE_ALWAYS(<< "[PASSED]: Ref test" << std::endl)
+	TRACE_ALWAYS(<< "[PASSED]: WaitSet test" << std::endl)
 
 	return 0;
 }
