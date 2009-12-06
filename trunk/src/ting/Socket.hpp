@@ -171,15 +171,15 @@ protected:
 
 public:
 	/**
-	@brief Basic exception class.
-	This is a basic exception class of the library. All other exception classes are derived from it.
-	*/
+	 * @brief Basic exception class.
+	 * This is a basic exception class of the library. All other exception classes are derived from it.
+	 */
 	class Exc : public ting::Exc{
 	public:
 		/**
-		@brief Exception constructor.
-		@param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
-		*/
+		 * @brief Exception constructor.
+		 * @param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
+		 */
 		Exc(const std::string& message = std::string()) :
 				ting::Exc((std::string("[Socket::Exc] ") + message).c_str())
 		{}
@@ -205,9 +205,9 @@ public:
 
 
 	/**
-	@brief Tells whether the socket is opened or not.
-	@return Returns true if the socket is opened or false otherwise.
-	*/
+	 * @brief Tells whether the socket is opened or not.
+	 * @return Returns true if the socket is opened or false otherwise.
+	 */
 	inline bool IsValid()const{
 		return this->socket != DInvalidSocket();
 	}
@@ -215,9 +215,9 @@ public:
 
 
 	/**
-	@brief Tells whether the socket is opened or not.
-	@return inverse of IsValid().
-	*/
+	 * @brief Tells whether the socket is opened or not.
+	 * @return inverse of IsValid().
+	 */
 	inline bool IsNotValid()const{
 		return !this->IsValid();
 	}
@@ -248,10 +248,10 @@ public:
 
 
 	/**
-	@brief Returns local port this socket is bound to.
-	@return local port number to which this socket is bound,
-	        0 means that the socket is not bound.
-	*/
+	 * @brief Returns local port this socket is bound to.
+	 * @return local port number to which this socket is bound,
+	 *         0 means that the socket is not bound.
+	 */
 	u16 GetLocalPort() throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
@@ -323,7 +323,7 @@ protected:
 	inline void SetWaitingEventsForWindows(long flags) throw(Socket::Exc){
 		ASSERT(this->eventForWaitable != WSA_INVALID_EVENT)
 		ASSERT(this->IsValid())
-		
+
 		if(WSAEventSelect(
 				this->socket,
 				this->eventForWaitable,
@@ -356,8 +356,8 @@ public:
 	u16 port;///< IP port number
 
 	inline IPAddress() :
-		host(0),
-		port(0)
+			host(0),
+			port(0)
 	{}
 
 	/**
@@ -519,10 +519,11 @@ public:
 		if(addr.host == INADDR_NONE){
 			struct hostent *hp;
 			hp = gethostbyname(hostName);
-			if(hp)
+			if(hp){
 				memcpy(&(addr.host), hp->h_addr, sizeof(addr.host)/* hp->h_length */);
-			else
+			}else{
 				throw Socket::Exc("SocketLib::GetHostByName(): gethostbyname() failed");
+			}
 		}
 		addr.port = port;
 		return addr;
@@ -643,13 +644,13 @@ public:
 	}
 
 	/**
-	@brief Send data to connected socket.
-	Sends data on connected socket. This method does not guarantee that the whole
-	buffer will be sent completely, it will return the number of bytes actually sent.
-	@param data - pointer to the buffer with data to send.
-	@param size - number of bytes to send.
-	@return the number of bytes actually sent.
-	*/
+	 * @brief Send data to connected socket.
+	 * Sends data on connected socket. This method does not guarantee that the whole
+	 * buffer will be sent completely, it will return the number of bytes actually sent.
+	 * @param data - pointer to the buffer with data to send.
+	 * @param size - number of bytes to send.
+	 * @return the number of bytes actually sent.
+	 */
 	uint Send(const byte* data, uint size) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
@@ -689,11 +690,11 @@ public:
 
 
 	/**
-	@brief Send data to connected socket.
-	Sends data on connected socket. This method blocks until all data is completely sent.
-	@param data - pointer to the buffer with data to send.
-	@param size - number of bytes to send.
-	*/
+	 * @brief Send data to connected socket.
+	 * Sends data on connected socket. This method blocks until all data is completely sent.
+	 * @param data - pointer to the buffer with data to send.
+	 * @param size - number of bytes to send.
+	 */
 	void SendAll(const ting::byte* data, uint size) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
@@ -719,14 +720,14 @@ public:
 
 
 	/**
-	@brief Receive data from connected socket.
-	Receives data available on the socket.
-	If there is no data available this function blocks until some data arrives.
-	@param buf - pointer to the buffer where to put received data.
-	@param maxSize - maximal number of bytes which can be put to the buffer.
-	@return if returned value is not 0 then it represents the number of bytes written to the buffer.
-	@return 0 returned value indicates disconnection of remote socket.
-	*/
+	 * @brief Receive data from connected socket.
+	 * Receives data available on the socket.
+	 * If there is no data available this function blocks until some data arrives.
+	 * @param buf - pointer to the buffer where to put received data.
+	 * @param maxSize - maximal number of bytes which can be put to the buffer.
+	 * @return if returned value is not 0 then it represents the number of bytes written to the buffer.
+	 * @return 0 returned value indicates disconnection of remote socket.
+	 */
 	//returns 0 if connection was closed by peer
 	uint Recv(byte* buf, uint maxSize) throw(Socket::Exc){
 		//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
@@ -768,9 +769,9 @@ public:
 	}
 
 	/**
-	@brief Get local IP address and port.
-	@return IP address and port of the local socket.
-	*/
+	 * @brief Get local IP address and port.
+	 * @return IP address and port of the local socket.
+	 */
 	IPAddress GetLocalAddress() throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
@@ -799,9 +800,9 @@ public:
 	}
 
 	/**
-	@brief Get remote IP address and port.
-	@return IP address and port of the peer socket.
-	*/
+	 * @brief Get remote IP address and port.
+	 * @return IP address and port of the peer socket.
+	 */
 	IPAddress GetRemoteAddress() throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
@@ -860,16 +861,16 @@ private:
 
 
 /**
-@brief a class which represents a TCP server socket.
-TCP server socket is the socket which can listen for new connections
-and accept them creating an ordinary TCP socket for it.
-*/
+ * @brief a class which represents a TCP server socket.
+ * TCP server socket is the socket which can listen for new connections
+ * and accept them creating an ordinary TCP socket for it.
+ */
 class TCPServerSocket : public Socket{
 	bool disableNaggle;//this flag indicates if accepted sockets should be created with disabled Naggle
 public:
 	/**
-	@brief Creates an invalid (unopened) TCP server socket.
-	*/
+	 * @brief Creates an invalid (unopened) TCP server socket.
+	 */
 	TCPServerSocket() :
 			disableNaggle(false)
 	{}
@@ -888,11 +889,11 @@ public:
 	{}
 
 	/**
-	@brief Assignment operator, works similar to std::auto_ptr::operator=().
-	After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
-	It works similar to std::auto_ptr::operator=() from standard C++ library.
-	@param s - socket to assign from.
-	*/
+	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
+	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
+	 * @param s - socket to assign from.
+	 */
 	TCPServerSocket& operator=(const TCPServerSocket& s){
 		this->disableNaggle = s.disableNaggle;
 		this->Socket::operator=(s);
@@ -900,12 +901,12 @@ public:
 	}
 
 	/**
-	@brief A constructor which automatically calls TCPServerSocket::Open() method.
-	This constructor creates a socket and calls its TCPServerSocket::Open() method.
-	So, it creates an already opened socket listening on the specified port.
-	@param port - IP port number to listen on.
-	@param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
-	*/
+	 * @brief A constructor which automatically calls TCPServerSocket::Open() method.
+	 * This constructor creates a socket and calls its TCPServerSocket::Open() method.
+	 * So, it creates an already opened socket listening on the specified port.
+	 * @param port - IP port number to listen on.
+	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
+	 */
 	TCPServerSocket(u16 port, bool disableNaggle = false) throw(Socket::Exc){
 		this->Open(port, disableNaggle);
 	}
@@ -979,16 +980,16 @@ public:
 	}
 
 	/**
-	@brief Accepts one of the pending connections, non-blocking.
-	Accepts one of the pending connections and returns a TCP socket object which represents
-	either a valid connected socket or an invalid socket object.
-	This function does not block if there is no any pending connections, it just returns invalid
-	socket object in this case. One can periodically check for incoming connections by calling this method.
-	@return TCPSocket object. One can later check if the returned socket object
-		is valid or not by calling Socket::IsValid() method on that object.
-		- if the socket is valid then it is a newly connected socket, further it can be used to send or receive data.
-		- if the socket is invalid then there was no any connections pending, so no connection was accepted.
-	*/
+	 * @brief Accepts one of the pending connections, non-blocking.
+	 * Accepts one of the pending connections and returns a TCP socket object which represents
+	 * either a valid connected socket or an invalid socket object.
+	 * This function does not block if there is no any pending connections, it just returns invalid
+	 * socket object in this case. One can periodically check for incoming connections by calling this method.
+	 * @return TCPSocket object. One can later check if the returned socket object
+	 *         is valid or not by calling Socket::IsValid() method on that object.
+	 *         - if the socket is valid then it is a newly connected socket, further it can be used to send or receive data.
+	 *         - if the socket is invalid then there was no any connections pending, so no connection was accepted.
+	 */
 	TCPSocket Accept() throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPServerSocket::Accept(): the socket is not opened");
@@ -1021,7 +1022,7 @@ public:
 #ifdef __WIN32__
 		sock.CreateEventForWaitable();
 #endif
-		
+
 		//set blocking mode
 #ifdef __WIN32__
 		{
@@ -1071,8 +1072,8 @@ public:
 			Socket(s)
 	{}
 
-	
-	
+
+
 	UDPSocket& operator=(const UDPSocket& s){
 		this->Socket::operator=(s);
 		return *this;
@@ -1080,15 +1081,15 @@ public:
 
 
 	/**
-	@brief Open the socket.
-	This mthod opens the socket, this socket can further be used to send or receive data.
-	After the socket is opened it becomes a valid socket and Socket::IsValid() will return true for such socket.
-	After the socket is closed it becomes invalid.
-	In other words, a valid socket is an opened socket.
-	In case of errors this method throws Socket::Exc.
-	@param port - IP port number on which the socket will listen for incoming datagrams.
-		This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
-	*/
+	 * @brief Open the socket.
+	 * This mthod opens the socket, this socket can further be used to send or receive data.
+	 * After the socket is opened it becomes a valid socket and Socket::IsValid() will return true for such socket.
+	 * After the socket is closed it becomes invalid.
+	 * In other words, a valid socket is an opened socket.
+	 * In case of errors this method throws Socket::Exc.
+	 * @param port - IP port number on which the socket will listen for incoming datagrams.
+	 * This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
+	 */
 	void Open(u16 port) throw(Socket::Exc){
 		if(this->IsValid())
 			throw Socket::Exc("UDPSocket::Open(): the socket is already opened");
@@ -1172,7 +1173,7 @@ public:
 	uint Recv(byte* buf, u16 maxSize, IPAddress &out_SenderIP) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
-		
+
 		//the flag shall be cleared even if this function fails to avoid subsequent
 		//calls to Recv() because it indicates that there's activity.
 		//So, do it at the beginning of the function.
@@ -1227,19 +1228,17 @@ private:
 
 
 /**
-
-@mainpage ting::Socket library
-
-@section sec_about About
-<b>tin::Socket</b> is a simple cross platfrom C++ wrapper above sockets networking API designed for games.
-
-@section sec_getting_started Getting started
-@ref page_usage_tutorial "library usage tutorial" - quickstart tutorial
-*/
+ * @mainpage ting::Socket library
+ *
+ * @section sec_about About
+ * <b>tin::Socket</b> is a simple cross platfrom C++ wrapper above sockets networking API designed for games.
+ *
+ * @section sec_getting_started Getting started
+ * @ref page_usage_tutorial "library usage tutorial" - quickstart tutorial
+ */
 
 /**
-@page page_usage_tutorial ting::Socket usage tutorial
-
-TODO: write usage tutorial
-
-*/
+ * @page page_usage_tutorial ting::Socket usage tutorial
+ *
+ * TODO: write usage tutorial
+ */
