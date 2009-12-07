@@ -953,10 +953,10 @@ public:
 				pthread_attr_destroy(&attr);
 				TRACE_AND_LOG(<< "Thread::Start(): pthread_create() failed, error code = " << res
 						<< " meaning: " << strerror(res) << std::endl)
-				LOG_IF_TRUE(res == EAGAIN, << "res = EAGAIN" << std::endl)
-				LOG_IF_TRUE(res == EINVAL, << "res = EINVAL" << std::endl)
-				LOG_IF_TRUE(res == EPERM, << "res = EPERM" << std::endl)
-				throw ting::Exc("Thread::Start(): starting thread failed");
+				std::stringstream ss;
+				ss << "Thread::Start(): starting thread failed,"
+						<< " error code = " << res << ": " << strerror(res);
+				throw ting::Exc(ss.str().c_str());
 			}
 			pthread_attr_destroy(&attr);
 		}
