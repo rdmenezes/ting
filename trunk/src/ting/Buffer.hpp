@@ -20,13 +20,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.3
+// ting 0.4
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
 
 // Created on January 31, 2009, 11:04 PM
-// File description:
-//	Static buffer wrapper
+
+/**
+ * @file Buffer.hpp
+ * @brief buffer abstract class and static buffer wrapper.
+ */
  
 
 #pragma once
@@ -36,6 +39,11 @@ THE SOFTWARE. */
 
 namespace ting{
 
+
+/**
+ * @brief abstract buffer template class.
+ * This class is supposed to be ancestor of all buffer-like objects.
+ */
 template <class T> class Buffer{
 protected:
 	T* buf;
@@ -69,26 +77,42 @@ protected:
 
 
 public:
+	/**
+	 * @brief get buffer size.
+	 * @return number of elements in buffer.
+	 */
 	inline ting::uint Size()const{
 		return this->size;
 	}
 
 
 
-	//returns length of element in bytes
+	/**
+	 * @brief get size of element.
+	 * @return size of element in bytes.
+	 */
 	inline ting::uint SizeOfElem()const{
 		return sizeof(*(this->buf));
 	}
 
 
 
-	//returns length of array in bytes
+	/**
+	 * @brief get size of buffer in bytes.
+	 * @return size of array in bytes.
+	 */
 	inline ting::uint SizeInBytes()const{
 		return this->Size() * this->SizeOfElem();
 	}
 
 
 
+	/**
+	 * @brief access specified element of the buffer.
+	 * Const version of Buffer::operator[].
+	 * @param i - element index.
+	 * @return const reference to i'th element of the buffer.
+	 */
 	inline const T& operator[](uint i)const{
 		ASSERT(i < this->Size())
 		return this->buf[i];
@@ -96,6 +120,11 @@ public:
 
 
 
+	/**
+	 * @brief access specified element of the buffer.
+	 * @param i - element index.
+	 * @return reference to i'th element of the buffer.
+	 */
 	inline T& operator[](uint i){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
@@ -103,12 +132,20 @@ public:
 
 
 
+	/**
+	 * @brief get pointer to first element of the buffer.
+	 * @return pointer to first element of the buffer.
+	 */
 	inline T* Begin(){
 		return this->buf;
 	}
 
 
 
+	/**
+	 * @brief get pointer to "after last" element of the buffer.
+	 * @return pointer to "after last" element of the buffer.
+	 */
 	inline T* End(){
 		ASSERT((this->buf + this->size) != 0)
 		return this->buf + this->size;
@@ -116,12 +153,21 @@ public:
 
 
 
+	/**
+	 * @brief get pointer to first element of the buffer.
+	 * @return pointer to first element of the buffer.
+	 */
 	inline T* Buf(){
 		return this->buf;
 	}
 
 
 
+	/**
+	 * @brief get pointer to first element of the buffer.
+	 * Const version of Buffer::Buf().
+	 * @return pointer to first element of the buffer.
+	 */
 	inline const T* Buf()const{
 		return this->buf;
 	}
@@ -129,6 +175,11 @@ public:
 
 
 
+
+/**
+ * @brief static buffer class template.
+ * The static buffer template.
+ */
 template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
 	T static_buffer[buf_size];
 public:

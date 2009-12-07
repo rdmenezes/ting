@@ -20,18 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.3
+// ting 0.4
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
-
-// File description:
-//	cross platfrom C++ Sockets wrapper
-
 
 /**
  * @file Socket.hpp
  * @brief Main header file of the socket network library.
- * This is the main header file of socket network library.
+ * This is the main header file of socket network library, cross platfrom C++ Sockets wrapper.
  */
 
 #pragma once

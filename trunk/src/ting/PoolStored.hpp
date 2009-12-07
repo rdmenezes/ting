@@ -20,12 +20,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.3
+// ting 0.4
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
 
-// File description:
-//	Memory Pool
+/**
+ * @file PoolStored.hpp
+ * @brief Memory Pool.
+ * Alternative memory allocation functions for simple objects.
+ * The main purpose of this facilities is to prevent memory fragmentation.
+ */
 
 #pragma once
 

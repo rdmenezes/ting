@@ -62,7 +62,7 @@ run_Thread_test: Thread_test$(ext)
 
 Thread_test$(ext): src/Thread_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $<
+	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 

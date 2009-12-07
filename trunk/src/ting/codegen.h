@@ -20,12 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.3
+// ting 0.4
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
 
-// File description:
-//	Code generation with preprocessor
+/**
+ * @file codegen.h
+ * @brief Code generation with preprocessor.
+ */
 
 #pragma once
 

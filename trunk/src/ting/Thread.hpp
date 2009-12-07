@@ -20,16 +20,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.3
+// ting 0.4
 // Homepage: http://code.google.com/p/ting
 // Author: Ivan Gagis <igagis@gmail.com>
 
-// File description:
-//	threads library
+/**
+ * @file Thread.hpp
+ * @brief Multithreading library.
+ */
 
 #pragma once
 
 #include <cstring>
+#include <sstream>
 
 #include "debug.hpp"
 #include "Ptr.hpp"
@@ -566,7 +569,10 @@ public:
 		}
 #else // assume *nix
 		if(::pipe(&this->pipeEnds[0]) < 0){
-			throw ting::Exc("Queue::Queue(): could not create pipe (*nix) for implementing Waitable");
+			std::stringstream ss;
+			ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
+					<< " error code = " << errno << ": " << strerror(errno);
+			throw ting::Exc(ss.str().c_str());
 		}
 #endif
 	}

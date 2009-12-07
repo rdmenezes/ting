@@ -1,5 +1,6 @@
 #include <ting/debug.hpp>
 #include <ting/Thread.hpp>
+#include <ting/Buffer.hpp>
 
 
 class TestThread : public ting::Thread{
@@ -39,12 +40,48 @@ static void TestJoinBeforeThreadHasFinished(){
 
 
 
+
+//Test many threads
+
+class TestThread1 : public ting::Thread{
+public:
+	int a, b;
+
+	//override
+	void Run(){
+		while(!this->quitFlag){
+			this->queue.GetMsg()->Handle();
+		}
+	}
+};
+
+
+
+static void TestManyThreads(){
+	//TODO: make sure it runs with 1000 threads
+	ting::StaticBuffer<TestThread1, 500> thr;
+
+	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
+		i->Start();
+	}
+
+	ting::Thread::Sleep(1000);
+
+	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
+		i->PushQuitMessage();
+		i->Join();
+	}
+}
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Thread test" << std::endl)
 
 	TestJoinAfterThreadHasFinished();
 	
 	TestJoinBeforeThreadHasFinished();
+
+	TestManyThreads();
 
 	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
 
