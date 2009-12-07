@@ -29,13 +29,14 @@ THE SOFTWARE. */
 
 #pragma once
 
+#include <vector>
+#include <sstream>
+#include <cerrno>
+
 #include "types.hpp"
 #include "debug.hpp"
 #include "Exc.hpp"
 #include "Array.hpp"
-
-
-#include <vector>
 
 
 
@@ -476,8 +477,11 @@ private:
 
 //		TRACE(<< "epoll_wait() returned " << res << std::endl)
 
-		if(res < 0)
-			throw ting::Exc("WaitSet::Wait(): epoll_wait() failed");
+		if(res < 0){
+			std::stringstream ss;
+			ss << "WaitSet::Wait(): epoll_wait() failed, error code = " << errno << ": " << strerror(errno);
+			throw ting::Exc(ss.str().c_str());
+		}
 
 		ASSERT(uint(res) <= this->revents.Size())
 
