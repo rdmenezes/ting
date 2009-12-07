@@ -405,7 +405,11 @@ public:
 
 	/**
 	 * @brief wait for event with timeout.
-	 * The same as Wait() function, but takes wait timeout as parameter.
+	 * The same as Wait() function, but takes wait timeout as parameter. Thus,
+	 * this function will wait for any event or timeout. Note, that it guarantees that
+	 * it will wait AT LEAST for specified number of milliseconds, or more. This is because of
+	 * implementation for linux, if wait is interrupted by signal it will start waiting again,
+	 * and so on.
 	 * @param timeout - maximum time in milliseconds to wait for event.
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
 	 *                     Can be 0.
@@ -468,20 +472,30 @@ private:
 
 //		TRACE(<< "going to epoll_wait() with timeout = " << epollTimeout << std::endl)
 
-		int res = epoll_wait(
-				this->epollSet,
-				this->revents.Begin(),
-				this->revents.Size(),
-				epollTimeout
-			);
+		int res;
 
-//		TRACE(<< "epoll_wait() returned " << res << std::endl)
+		while(true){
+			res = epoll_wait(
+					this->epollSet,
+					this->revents.Begin(),
+					this->revents.Size(),
+					epollTimeout
+				);
 
-		if(res < 0){
-			std::stringstream ss;
-			ss << "WaitSet::Wait(): epoll_wait() failed, error code = " << errno << ": " << strerror(errno);
-			throw ting::Exc(ss.str().c_str());
-		}
+	//		TRACE(<< "epoll_wait() returned " << res << std::endl)
+
+			if(res < 0){
+				//if interrupted by signal, try waiting again.
+				if(errno == EINTR){
+					continue;
+				}
+
+				std::stringstream ss;
+				ss << "WaitSet::Wait(): epoll_wait() failed, error code = " << errno << ": " << strerror(errno);
+				throw ting::Exc(ss.str().c_str());
+			}
+			break;
+		};
 
 		ASSERT(uint(res) <= this->revents.Size())
 
