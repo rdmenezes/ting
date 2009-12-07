@@ -153,15 +153,30 @@ public:
 		return pp;
 	}
 
+	/**
+	 * @brief reset pointer, destroying object it point to.
+	 * This will destroy the object this pointer points to if any.
+	 * After that the pointer becomes invalid.
+	 */
 	inline void Reset(){
 		this->Destroy();
 		this->p = 0;
 	}
 
+	/**
+	 * @brief tells if the pointer is valid or not.
+	 * @return true if pointer is valid and holding some object.
+	 * @return false otherwise.
+	 */
 	inline bool IsValid()const{
 		return this->p != 0;
 	}
-	
+
+	/**
+	 * @brief tells if the pointer is valid or not.
+	 * @return false if object is valid.
+	 * @return true otherwise.
+	 */
 	inline bool IsNotValid()const{
 		return !this->IsValid();
 	}
