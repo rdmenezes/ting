@@ -36,6 +36,25 @@ THE SOFTWARE. */
 
 namespace ting{
 
+/**
+ * @brief singleton base class.
+ * This is a basic singleton template.
+ * Usage as follows:
+ * @code
+ *	class MySingleton : public ting::Singleton<MySingleton>{
+ *	public:
+ *		void DoSomething(){
+ *			//...
+ *		}
+ *  };
+ *
+ *	int main(int, char**){
+ *		MySingleton mySingleton;
+ *
+ *		MySingleton::Inst().DoSomething();
+ *	}
+ * @endcode
+ */
 template <class T> class Singleton{
 	
 	inline static T*& StaticMemoryBlock(){
@@ -52,10 +71,20 @@ protected://use only as a base class
 	}
 
 public:
+	/**
+	 * @brief tells if singleton object is created or not.
+	 * Note, this function is not thread safe.
+	 * @return true if object is created.
+	 * @return false otherwise.
+	 */
 	inline static bool IsCreated(){
 		return Singleton::StaticMemoryBlock() != 0;
 	}
 
+	/**
+	 * @brief get singleton instance.
+	 * @return reference to singleton object instance.
+	 */
 	inline static T& Inst(){
 		ASSERT(Singleton::IsCreated())
 		return *(Singleton::StaticMemoryBlock());

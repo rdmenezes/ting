@@ -43,7 +43,7 @@ static void TestJoinBeforeThreadHasFinished(){
 
 //Test many threads
 
-class TestThread1 : public ting::Thread{
+class TestThread1 : public ting::MsgThread{
 public:
 	int a, b;
 

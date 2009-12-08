@@ -807,8 +807,6 @@ private:
  * Thread::Run() method.
  */
 class Thread{
-	friend class QuitMessage;
-
 //Tread Run function
 #ifdef __WIN32__
 	static unsigned int __stdcall RunThread(void *data)
@@ -866,14 +864,11 @@ class Thread{
 	Thread(const Thread& ){
 		ASSERT(false)
 	}
+	
 	Thread& operator=(const Thread& ){
 		return *this;
 	}
 
-protected:
-	volatile bool quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
-
-	Queue queue;
 public:
 	inline Thread();//see implementation below as inline method
 
@@ -913,7 +908,7 @@ public:
 	//0 stacksize stands for default stack size (platform dependent)
 	void Start(uint stackSize = 0){
 		//protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
+		ting::Mutex::Guard mutexGuard(this->mutex);
 
 		if(this->state != NEW)
 			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
@@ -977,11 +972,9 @@ public:
 	 */
 	void Join(){
 //		TRACE(<< "Thread::Join(): enter" << std::endl)
-		//set quit flag if it is not already set
-		this->quitFlag = true;
 
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexLockerUnlocker(this->mutex);
+		ting::Mutex::Guard mutexGuard(this->mutex);
 
 		if(this->state == NEW){
 			//thread was not started, do nothing
@@ -1066,8 +1059,26 @@ public:
 #error "unknown system"
 #endif
 	}
+};
 
 
+
+/**
+ * @brief a thread with message queue.
+ * This is just a facility class which already contains message queue and boolean 'quit' flag.
+ */
+class MsgThread : public Thread{
+	friend class QuitMessage;
+	
+protected:
+	volatile bool quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
+
+	Queue queue;
+
+public:
+	MsgThread() :
+			quitFlag(false)
+	{}
 
 	/**
 	 * @brief Send 'Quit' message to thread's queue.
@@ -1100,9 +1111,9 @@ public:
  * of the thread which this message is sent to.
  */
 class QuitMessage : public Message{
-	Thread *thr;
+	MsgThread *thr;
   public:
-	QuitMessage(Thread* thread) :
+	QuitMessage(MsgThread* thread) :
 			thr(thread)
 	{
 		if(!this->thr)
@@ -1134,22 +1145,21 @@ class NopMessage : public Message{
 
 
 
-inline void Thread::PushNopMessage(){
+inline void MsgThread::PushNopMessage(){
 	this->PushMessage(Ptr<Message>(new NopMessage()));
 }
 
 
 
-inline void Thread::PushQuitMessage(){
-	//TODO: post preallocated quit message
+inline void MsgThread::PushQuitMessage(){
+	//TODO: post preallocated quit message?
 	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
 }
 
 
 
 inline Thread::Thread() :
-		state(Thread::NEW),
-		quitFlag(false)
+		state(Thread::NEW)
 {
 #if defined(__WIN32__)
 	this->th = NULL;

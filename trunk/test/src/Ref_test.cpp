@@ -1,5 +1,3 @@
-#include <vector>
-
 #include <ting/debug.hpp>
 #include <ting/Ref.hpp>
 

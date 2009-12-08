@@ -77,6 +77,8 @@ class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
 
 	struct TimerThread : public ting::Thread{
+		bool quitFlag;
+		
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 

@@ -35,10 +35,7 @@ THE SOFTWARE. */
 
 namespace ting{
 
-typedef unsigned char u8;    STATIC_ASSERT(sizeof(u8) == 1)
-
-STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
-
+typedef unsigned char u8;
 typedef signed char s8;
 typedef unsigned short int u16;
 typedef signed short int s16;
@@ -50,6 +47,8 @@ typedef long long int s64;
 
 #ifndef M_DOC_DONT_EXTRACT //for doxygen
 
+STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
+STATIC_ASSERT(sizeof(u8) == 1)
 STATIC_ASSERT(sizeof(s8) == 1)
 STATIC_ASSERT(sizeof(u16) == 2)
 STATIC_ASSERT(sizeof(s16) == 2)
