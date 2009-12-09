@@ -223,6 +223,7 @@ public:
 	 * @return invalid reference otherwise, i. e. if the object cannot be cast to requested class.
 	 */
 	template <class TS> inline Ref<TS> DynamicCast(){
+		ASSERT(this->IsValid())
 		TS* t = dynamic_cast<TS*>(this->operator->());
 		if(t)
 			return Ref<TS>(t);
