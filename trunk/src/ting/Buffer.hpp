@@ -183,9 +183,10 @@ public:
 template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
 	T static_buffer[buf_size];
 public:
-	inline StaticBuffer() :
-			Buffer<T>(&this->static_buffer[0], buf_size)
-	{}
+	inline StaticBuffer(){
+		this->buf = &this->static_buffer[0];
+		this->size = buf_size;
+	}
 };
 
 
