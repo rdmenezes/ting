@@ -680,7 +680,7 @@ public:
 //===============================
 template <typename T> class Quaternion{
 public:
-	T x,y,z,w; //Quaternion components
+	T x, y, z, w; //Quaternion components
 	
 	// This is our constructor that allows us to initialize our data upon creating an instance
 	Quaternion(T qx, T qy, T qz, T qw) :
@@ -688,7 +688,7 @@ public:
 			y(qy),
 			z(qz),
 			w(qw)
-	{};
+	{}
 
 	//this constructor creates unit quaternion of a rotation around the axis by |axis| radians
 	Quaternion(const Vector3<T>& axis){
@@ -699,19 +699,19 @@ public:
 			this->InitRot( a.x, a.y, a.z, mag);
 		}else
 			this->Identity();
-	};
+	}
 
 	// A default constructor
-	inline Quaternion(){};
+	inline Quaternion(){}
 
 	//"complex conjugate of" operator
 	inline Quaternion operator!()const{
 		return Quaternion(-this->x, -this->y, -this->z, this->w);
-	};
+	}
 
 	inline Quaternion operator+(const Quaternion& q)const{
 		return Quaternion(this->x + q.x, this->y + q.y, this->z + q.z, this->w + q.w);
-	};
+	}
 
 	inline Quaternion& operator+=(const Quaternion& q){
 		this->x += q.x;
@@ -719,7 +719,7 @@ public:
 		this->z += q.z;
 		this->w += q.w;
 		return (*this);
-	};
+	}
 
 	inline Quaternion& operator=(const Quaternion& q){
 		this->x = q.x;
@@ -727,7 +727,7 @@ public:
 		this->z = q.z;
 		this->w = q.w;
 		return (*this);
-	};
+	}
 
 	inline Quaternion& operator*=(T s){
 		this->x *= s;
@@ -735,11 +735,11 @@ public:
 		this->z *= s;
 		this->w *= s;
 		return (*this);
-	};
+	}
 
 	inline Quaternion operator*(T s)const{
 		return (Quaternion(*this) *= s);
-	};
+	}
 
 	inline Quaternion& operator/=(T s){
 		this->x /= s;
@@ -747,16 +747,16 @@ public:
 		this->z /= s;
 		this->w /= s;
 		return (*this);
-	};
+	}
 
 	inline Quaternion operator/(T s)const{
 		return (Quaternion(*this) /= s);
-	};
+	}
 
 	//dot product of quaternions
 	inline T operator*(const Quaternion& q)const{
 		return this->x * q.x + this->y * q.y + this->z * q.z + this->w * q.w;
-	};
+	}
 
 	//multiplication of quaternions
 	Quaternion& operator%=(const Quaternion& q){
@@ -774,12 +774,12 @@ public:
 		this->z = -d + (e - f - g + h) * 0.5f;
 		this->w = b + (-e - f + g + h) * 0.5f;
 		return (*this);
-	};
+	}
 
 	//multiplication of quaternions
 	inline Quaternion operator%(const Quaternion& q)const{
 		return (Quaternion(*this) %= q);
-	};
+	}
 
 	inline Quaternion& Identity(){
 		this->x = T(0);
@@ -787,13 +787,13 @@ public:
 		this->z = T(0);
 		this->w = T(1);
 		return *this;
-	};
+	}
 
 	//Complex conjugate
 	inline Quaternion& Conjugate(){
 		*this = !(*this);
 		return *this;
-	};
+	}
 
 	inline Quaternion& Negate(){
 		this->x = -this->x;
@@ -801,20 +801,20 @@ public:
 		this->z = -this->z;
 		this->w = -this->w;
 		return *this;
-	};
+	}
 
 	//returns the magnitude^2 of this quaternion
 	inline T MagPow2()const{
 		return (*this) * (*this);
-	};
+	}
 
 	inline T Magnitude()const{
 		return T( sqrt(this->MagPow2()) );
-	};
+	}
 
 	inline Quaternion& Normalize(){
 		return (*this) /= Magnitude();
-	};
+	}
 
 	//Initialize this with rotation unit quaternion from axis (normalized) and an angle
 	inline void InitRot(T xx, T yy, T zz, T angle){
@@ -823,7 +823,7 @@ public:
 		this->x = xx * sina2;
 		this->y = yy * sina2;
 		this->z = zz * sina2;
-	};
+	}
 
 	//multiply this quaternion by unit rotation quaternion
 	//from the left
@@ -831,7 +831,7 @@ public:
 		Quaternion r;
 		r.InitRot(axis.x, axis.y, axis.Z(), angle);
 		return (*this) = r % (*this);
-	};
+	}
 
 	//create 4x4 OpenGL like rotation matrix from this quaternion
 	//ARGS: m - matrix to fill
@@ -876,7 +876,7 @@ public:
 		Matrix4<T> m;
 		this->CreateMatrix4(m);
 		return m;
-	};
+	}
 
 	//TODO: make ToMatrix4 a template
 	Matrix4<float> ToMatrix4f()const{
@@ -884,7 +884,7 @@ public:
 		Quaternion<float> qq((float)this->x,(float)this->y,(float)this->z,(float)this->w);
 		qq.CreateMatrix4(m);
 		return m;
-	};
+	}
 
 	//Spherical linear interpolation.
 	//This quaternion = SLERP(q1,q2,t), t from [0;1].
@@ -931,15 +931,15 @@ public:
 
 		// Calculate the x, y, z and w values for the interpolated quaternion.
 		(*this) = q1 * sc1 + q2 * sc2;
-	};
+	}
 
 #ifdef DEBUG  
 	friend std::ostream& operator<<(std::ostream& s, const Quaternion<T>& quat){
 		s<<"("<<quat.x<<", "<<quat.y<<", "<<quat.z<<", "<<quat.w<<")";
 		return s;
-	};
+	}
 #endif  
-};
+};//~class Quaterion
 
 //template <> class Vector2<uint>{
 //	uint v[2]; //Vector components
