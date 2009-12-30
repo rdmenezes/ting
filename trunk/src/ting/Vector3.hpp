@@ -431,7 +431,7 @@ public:
 	}
 
 	inline Vector3 operator/(T num){
-		ASSERT(num != 0)
+		ASSERT_INFO(num != 0, "Vector3::operator/(): division by 0")
 		return (Vector3(*this) /= num);
 	}
 

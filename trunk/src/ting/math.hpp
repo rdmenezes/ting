@@ -163,6 +163,18 @@ template <> inline float Cos<float>(float x){
 
 
 
+template <typename T> inline T Acos(T x){
+	return T(::acos(x));
+}
+
+
+
+template <typename T> inline T Sqrt(T x){
+	return T(::sqrt(x));
+}
+
+
+
 template <typename T> inline T Exp(T x){
 	return x.Exp();
 }
