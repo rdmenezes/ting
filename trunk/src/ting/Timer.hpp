@@ -42,7 +42,7 @@ THE SOFTWARE. */
 #pragma warning(disable:4290)
 #endif
 
-//  ==System dependen headers inclusion==
+//  ==System dependent headers inclusion==
 #if defined(__WIN32__) || defined(WIN32)
 #ifndef __WIN32__
 #define __WIN32__
@@ -67,11 +67,17 @@ THE SOFTWARE. */
 
 namespace ting{
 
+
+
 //forward declarations
 class Timer;
 
+
+
 //function prototypes
 inline ting::u32 GetTicks();
+
+
 
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
@@ -163,16 +169,16 @@ public:
 	}
 
 	/**
-	@brief stop the timer.
-	Stops the timer if it was started before. In case it was not started
-	or it is already expired this method does nothing.
-	@return true - if the timer was successfuly interrupted. I.e. it was
-	               in running state and has not expired at the time this
-	               method was called.
-	@return false - if the timer was not in running state (either not
-	                started or already expired) at the moment this method
-	                was called.
-	*/
+	 * @brief Stop the timer.
+	 * Stops the timer if it was started before. In case it was not started
+	 * or it is already expired this method does nothing.
+	 * @return true - if the timer was successfuly interrupted. I.e. it was
+	 *                in running state and has not expired at the time this
+	 *                method was called.
+	 * @return false - if the timer was not in running state (either not
+	 *                 started or already expired) at the moment this method
+	 *                 was called.
+	 */
 	inline bool Stop(){
 		ASSERT(TimerLib::IsCreated())
 		return TimerLib::Inst().RemoveTimer(this);
@@ -350,6 +356,10 @@ inline void TimerLib::TimerThread::Run(){
 
 
 
+/**
+ * @brief Returns number of milliseconds since system start.
+ * @return number of milliseconds passed since system start.
+ */
 inline ting::u32 GetTicks(){
 #ifdef __WIN32__
 	static LARGE_INTEGER perfCounterFreq = {0};

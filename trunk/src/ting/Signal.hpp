@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 /**
  * @file Signal.hpp
- * @brief Templates to implement signal-slot callback technique
+ * @brief Templates to implement signal-slot callback technique.
  */
 
 #pragma once

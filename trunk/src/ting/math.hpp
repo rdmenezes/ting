@@ -40,63 +40,153 @@ namespace ting{
 //======================
 //Utility math functions
 //======================
+
+/**
+ * @brief Get sign of a number.
+ * Template function which returns the sign of a number.
+ * General implementation of this template is as easy as:
+ * @code
+ * template <typename T_Type> inline T_Type Sign(T_Type n){
+ *     return n > 0 ? (1) : (-1);
+ * }
+ * @endcode
+ * @param n - number to get sign of.
+ * @return -1 if the argument is negative.
+ * @return 1 if the number is positive.
+ */
 template <typename T_Type> inline T_Type Sign(T_Type n){
 	return n > 0 ? (1) : (-1);
 }
 
+
+
+/**
+ * @brief Get absolute value of a number.
+ * General implementation of this function is as follows:
+ * @code
+ * template <typename T_Type> inline T_Type Abs(T_Type n){
+ *     return n > 0 ? n : (-n);
+ * }
+ * @endcode
+ * @param n - number to get absolute value of.
+ * @return absolute value of the passed argument.
+ */
 template <typename T_Type> inline T_Type Abs(T_Type n){
 	return n > 0 ? n : (-n);
 }
 
+
+
+/**
+ * @brief Get minimal of two given values.
+ * @param a - 1st value.
+ * @param b - 2nd value.
+ * @return value 'a' if a is less than b.
+ * @return value 'b' if b is less or equal to a.
+ */
 template <typename T_Type> inline T_Type Min(T_Type a, T_Type b){
 	return a < b ? a : b;
 }
 
+
+
+/**
+ * @brief Get maximal of two given values.
+ * @param a - 1st value.
+ * @param b - 2nd value.
+ * @return value 'a' if a is greater than b.
+ * @return value 'b' if b is greater or equal to a.
+ */
 template <typename T_Type> inline T_Type Max(T_Type a, T_Type b){
 	return a > b ? a : b;
 }
 
+
+//TODO: remove this???
 template <typename T> inline T DEps(){
 	return T(1e-6f);
 }
 
+
+
+/**
+ * @brief Get number Pi.
+ * @return number Pi.
+ */
 template <typename T> inline T DPi(){
 	return T(3.14159f);
 }
 
+
+
+/**
+ * @brief Get 2 * Pi.
+ * @return 2 * Pi.
+ */
 template <typename T> inline T D2Pi(){
 	return T(2) * DPi<T>();
 }
 
+
+
 /**
- * @brief Definition of ln(2).
- * @return natural logarithm of 2
+ * @brief Get natural logarithm of 2, i.e. ln(2).
+ * @return natural logarithm of 2.
  */
 template <typename T> inline T DLnOf2(){
 	return T(0.693147181);
 }
 
+
+
+/**
+ * @brief Get Not-A-Number.
+ * @return Not-A-Number value.
+ */
 template <typename T> inline T DNaN(){
 	return std::numeric_limits<T>::quiet_NaN();
 }
 
+
+
+/**
+ * @brief Get infinity value.
+ * @return infinity value.
+ */
 template <typename T> inline T DInf(){
 	return std::numeric_limits<T>::infinity();
 }
 
+
+
 //Power functions
+
+/**
+ * @brief Calculate x^2.
+ * @param x - value.
+ * @return x * x.
+ */
 template <typename T_Type> inline T_Type Pow2(T_Type x){
 	return x * x;
 }
 
+/**
+ * @brief Calculate x^3.
+ */
 template <typename T_Type> inline T_Type Pow3(T_Type x){
 	return Pow2(x) * x;
 }
 
+/**
+ * @brief Calculate x^4.
+ */
 template <typename T_Type> inline T_Type Pow4(T_Type x){
 	return Pow2(Pow2(x));
 }
 
+/**
+ * @brief Calculate x^5.
+ */
 template <typename T_Type> inline T_Type Pow5(T_Type x){
 	return Pow2(x) * Pow3(x);
 }
@@ -111,7 +201,9 @@ template <typename T> inline T Pow(T x, T p){
 	return ::pow(x, p);
 }
 
-//Cubic root function
+/**
+ * @brief Calculate cubic root of a number.
+ */
 template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 	if(x > 0)
 		return exp(::log(x) / 3);
@@ -121,15 +213,21 @@ template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 		return -exp(::log(-x) / 3);
 }
 
-//argument of a complex number
+
+/**
+ * @brief Calculate argument of a complex number.
+ * @param x - real part of a complex number.
+ * @param y - imaginary part of a complex number.
+ * @return argument of a complex number.
+ */
 template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
 	T_Type a;
 	if(x == 0)
 		a = DPi<T_Type>() / 2;
 	else if(x > 0)
-		a = T_Type(atan(Abs(y / x)));
+		a = T_Type(::atan(Abs(y / x)));
 	else
-		a = DPi<T_Type>() - T_Type(atan(Abs(y / x)));
+		a = DPi<T_Type>() - T_Type(::atan(Abs(y / x)));
 
 	if(y >= 0)
 		return a;
@@ -138,7 +236,9 @@ template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
 }
 
 
-
+/**
+ * @brief Calculate sine of an angle.
+ */
 template <typename T> inline T Sin(T x){
 	return x.Sin();
 }
@@ -150,7 +250,9 @@ template <> inline float Sin<float>(float x){
 }
 
 
-
+/**
+ * @brief Calculate cosine of an angle.
+ */
 template <typename T> inline T Cos(T x){
 	return x.Cos();
 }
@@ -163,18 +265,26 @@ template <> inline float Cos<float>(float x){
 
 
 
+/**
+ * @brief Calculate arccosine of a number.
+ */
 template <typename T> inline T Acos(T x){
 	return T(::acos(x));
 }
 
 
 
+/**
+ * @brief Calculate square root of a number.
+ */
 template <typename T> inline T Sqrt(T x){
 	return T(::sqrt(x));
 }
 
 
-
+/**
+ * @brief Calculate e^x.
+ */
 template <typename T> inline T Exp(T x){
 	return x.Exp();
 }

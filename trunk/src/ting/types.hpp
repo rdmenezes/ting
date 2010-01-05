@@ -35,13 +35,44 @@ THE SOFTWARE. */
 
 namespace ting{
 
+/**
+ * @brief Unsigned 8 bit type.
+ */
 typedef unsigned char u8;
+
+/**
+ * @brief Signed 8 bit type.
+ */
 typedef signed char s8;
+
+/**
+ * @brief Unsigned 16 bit type.
+ */
 typedef unsigned short int u16;
+
+/**
+ * @brief Signed 16 bit type.
+ */
 typedef signed short int s16;
+
+/**
+ * @brief Unsigned 32 bit type.
+ */
 typedef unsigned int u32;
+
+/**
+ * @brief Signed 32 bit type.
+ */
 typedef signed int s32;
+
+/**
+ * @brief Unsigned 64 bit type.
+ */
 typedef unsigned long long int u64;
+
+/**
+ * @brief Signed 64 bit type.
+ */
 typedef long long int s64;
 
 
@@ -60,7 +91,14 @@ STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
 
 
+/**
+ * @brief Unsigned int type.
+ */
 typedef unsigned int uint;
+
+/**
+ * @brief Unsigned 8 bit type.
+ */
 typedef u8 byte;
 
 }//~namespace ting

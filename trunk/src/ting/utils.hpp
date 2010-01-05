@@ -57,6 +57,9 @@ namespace ting{
 
 
 
+/**
+ * @brief Exchange two values.
+ */
 template <class T> inline void Exchange(T &a, T &b){
 	T tmp = a;
 	a = b;
@@ -86,6 +89,31 @@ template <> inline void Exchange<float>(float& x, float& y){
 
 
 
+/**
+ * @brief Clamp value top.
+ * This inline template function can be used to clamp the top of the value.
+ * Example:
+ * @code
+ * int a = 30;
+ *
+ * //Clamp to 40. Value of 'a' remains unchanged,
+ * //since it is already less than 40.
+ * ting::ClampTop(a, 40);
+ * std::cout << a << std::endl;
+ *
+ * //Clamp to 27. Value of 'a' is changed to 27,
+ * //since it is 30 which is greater than 27.
+ * ting::ClampTop(a, 27);
+ * std::cout << a << std::endl;
+ * @endcode
+ * As a result, this will print:
+ * @code
+ * 30
+ * 27
+ * @endcode
+ * @param v - reference to the value which top is to be clamped.
+ * @param top - value to clamp the top to.
+ */
 template <class T> inline void ClampTop(T& v, const T top){
 	if(v > top){
 		v = top;
@@ -93,7 +121,10 @@ template <class T> inline void ClampTop(T& v, const T top){
 }
 
 
-
+/**
+ * @brief Clamp value bottom.
+ * Usage is analogous to ting::ClampTop.
+ */
 template <class T> inline void ClampBottom(T& v, const T bottom){
 	if(v < bottom){
 		v = bottom;
@@ -102,12 +133,22 @@ template <class T> inline void ClampBottom(T& v, const T bottom){
 
 
 
+/**
+ * @brief convert byte order of 16 bit value to network format.
+ * @param value - the value.
+ * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
+ */
 inline void ToNetworkFormat16(u16 value, byte* out_buf){
 	*reinterpret_cast<u16*>(out_buf) = value;//assume little-endian
 }
 
 
 
+/**
+ * @brief convert byte order of 32 bit value to network format.
+ * @param value - the value.
+ * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
+ */
 inline void ToNetworkFormat32(u32 value, byte* out_buf){
 	*reinterpret_cast<u32*>(out_buf) = value;//assume little-endian
 }
@@ -115,7 +156,7 @@ inline void ToNetworkFormat32(u32 value, byte* out_buf){
 
 
 /**
- * @brief Convert 16bit value from network byte order to native byte order.
+ * @brief Convert 16 bit value from network byte order to native byte order.
  * @param buf - pointer to buffer containig 2 bytes to convert from network format.
  * @return 16 bit unsigned integer converted from network byte order to native byte order.
  */
@@ -125,6 +166,11 @@ inline u16 FromNetworkFormat16(const byte* buf){
 
 
 
+/**
+ * @brief Convert 32 bit value from network byte order to native byte order.
+ * @param buf - pointer to buffer containig 4 bytes to convert from network format.
+ * @return 32 bit unsigned integer converted from network byte order to native byte order.
+ */
 inline u32 FromNetworkFormat32(const byte* buf){
 	return *reinterpret_cast<const u32*>(buf);//assume little-endian
 }

@@ -269,6 +269,8 @@ public:
 		return Vector2(*this).Rotate(angle);
 	}
 
+
+	//TODO: make this method static, returning new Vector2 object.
 	//Parse string of form "xxx, yyy" where xxx and yyy are positive decimal numbers
 	Vector2& ParseXY(const char* str) throw(Exc){
 		ASSERT(str)
@@ -279,25 +281,25 @@ public:
 		//TODO: allow first '-' character
 		while(*p < 0x30 || *p > 0x39){
 			if(*p == 0)
-				throw Exc("CResManHGE::ParseXY(): no number found");
+				throw Exc("Vector2::ParseXY(): no number found");
 			++p;
 		}
 		
 		p = ParseNum<T>(p, this->x);
 		if(!p)
-			throw Exc("CResManHGE::ParseXY(): input string should start with dight");
+			throw Exc("Vector2::ParseXY(): input string should start with dight");
 
 		//search next number
 		//TODO: allow first '-' character
 		while(*p < 0x30 || *p > 0x39){
 			if(*p == 0)
-				throw Exc("CResManHGE::ParseXY(): second number not found");
+				throw Exc("Vector2::ParseXY(): second number not found");
 			++p;
 		}
 
 		p = ParseNum<T>(p, this->y);
 		if(!p)
-			throw Exc("CResManHGE::ParseXY(): second number parsing failed");
+			throw Exc("Vector2::ParseXY(): second number parsing failed");
 
 		return *this;
 	}
@@ -309,6 +311,7 @@ public:
 	}
 #endif
 };//~class Vector2
+
 
 
 //===============================

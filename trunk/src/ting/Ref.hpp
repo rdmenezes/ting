@@ -274,6 +274,8 @@ public:
 	 * Note, that it is supposed that first reference will be constructed
 	 * right after object creation, and further work with object will only be done
 	 * via ting::Ref references, not ordinary pointers.
+	 * Note, that this constructor is explicit, this is done to prevent undesired
+	 * automatic conversions from ordinary pointers to Ref.
 	 * @param rc - ordinary pointer to ting::RefCounted object.
 	 */
 	//NOTE: this constructor should be explicit to prevent undesired conversions from T* to Ref<T>
@@ -296,6 +298,11 @@ public:
 
 
 
+	/**
+	 * @brief Copy constructor.
+	 * Creates new reference object which referes to the same object as 'r'.
+	 * @param r - existing Ref object to make copy of.
+	 */
 	//copy constructor
 	Ref(const Ref& r){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
@@ -363,6 +370,10 @@ public:
 
 
 
+	typedef void (Ref::*unspecified_bool_type)();
+	
+
+
 	/**
 	 * @brief tells if the reference is valid.
 	 * This operator is a more type-safe version of conversion-to-bool operator.
@@ -383,7 +394,6 @@ public:
 	//Safe conversion to bool type.
 	//Because if using simple "operator bool()" it may result in chained automatic
 	//conversion to undesired types such as int.
-	typedef void (Ref::*unspecified_bool_type)();
 	inline operator unspecified_bool_type() const{
 		return this->IsValid() ? &Ref::Reset : 0;//Ref::Reset is taken just because it has matching signature
 	}
@@ -490,10 +500,11 @@ private:
 
 
 
+	//Ref objects can only be created on stack
+	//or as a member of other object or array,
+	//thus, make operator-new private.
 	inline static void* operator new(size_t size){
 		ASSERT_ALWAYS(false)//forbidden
-		//Ref objects can only be created on stack
-		//or as a member of other object or array
 		return 0;
 	}
 };//~class Ref
@@ -637,6 +648,11 @@ public:
 
 
 
+	/**
+	 * @brief Reset this reference.
+	 * After calling this method the reference becomes invalid, i.e. it
+	 * does not refer to any object.
+	 */
 	inline void Reset(){
 		this->Destroy();
 		this->counter = 0;

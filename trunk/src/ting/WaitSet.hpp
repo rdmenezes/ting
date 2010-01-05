@@ -203,9 +203,6 @@ protected:
 
 class WaitSet{
 	uint numWaitables;//number of Waitables added
-//	typedef std::vector<Waitable*> T_WaitablesList;
-//	typedef T_WaitablesList::iterator T_WaitablesIter;
-//	T_WaitablesList waitables;
 
 #if defined(__WIN32__)
 	Array<Waitable*> waitables;
