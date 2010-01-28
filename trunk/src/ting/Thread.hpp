@@ -829,7 +829,13 @@ class Thread{
 			ASSERT_INFO(false, "uncaught unknown exception in Thread::Run()")
 		}
 
-		thr->state = STOPPED;
+		{
+			//protect by mutex to avoid changing the
+			//this->state variable before Join() or Start() has finished.
+			ting::Mutex::Guard mutexGuard(Thread::Mutex2());
+			
+			thr->state = STOPPED;
+		}
 
 #ifdef __WIN32__
 		//Do nothing, _endthreadex() will be called   automatically
@@ -840,7 +846,14 @@ class Thread{
 		return 0;
 	}
 
-	ting::Mutex mutex;
+	static inline ting::Mutex& Mutex1(){
+		static ting::Mutex m;
+		return m;
+	}
+	static inline ting::Mutex& Mutex2(){
+		static ting::Mutex m;
+		return m;
+	}
 
 	enum E_State{
 		NEW,
@@ -907,8 +920,13 @@ public:
 	 */
 	//0 stacksize stands for default stack size (platform dependent)
 	void Start(uint stackSize = 0){
-		//protect by mutex to avoid several Start() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexGuard(this->mutex);
+		//Protect by mutex to avoid several Start() methods to be called
+		//by concurrent threads simultaneously and to protect call to Join() before Start()
+		//has returned.
+		ting::Mutex::Guard mutexGuard1(Thread::Mutex1());
+		//Protect by mutex to avoid incorrect state changing in case when thread
+		//exits before the Start() method retruned.
+		ting::Mutex::Guard mutexGuard2(Thread::Mutex2());
 
 		if(this->state != NEW)
 			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
@@ -974,7 +992,7 @@ public:
 //		TRACE(<< "Thread::Join(): enter" << std::endl)
 
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexGuard(this->mutex);
+		ting::Mutex::Guard mutexGuard(Thread::Mutex1());
 
 		if(this->state == NEW){
 			//thread was not started, do nothing

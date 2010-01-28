@@ -40,8 +40,9 @@ static void TestJoinBeforeThreadHasFinished(){
 
 
 
-
+//====================
 //Test many threads
+//====================
 
 class TestThread1 : public ting::MsgThread{
 public:
@@ -74,6 +75,32 @@ static void TestManyThreads(){
 }
 
 
+
+
+//==========================
+//Test immediate thread exit
+//==========================
+
+class ImmediateExitThread : public ting::Thread{
+public:
+
+	//override
+	void Run(){
+		return;
+	}
+};
+
+
+static void TestImmediateExitThread(){
+	for(unsigned i = 0; i < 100; ++i){
+		ImmediateExitThread t;
+		t.Start();
+		t.Join();
+	}
+}
+
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Thread test" << std::endl)
 
@@ -82,6 +109,8 @@ int main(int argc, char *argv[]){
 	TestJoinBeforeThreadHasFinished();
 
 	TestManyThreads();
+
+	TestImmediateExitThread();
 
 	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
 
