@@ -35,6 +35,7 @@ THE SOFTWARE. */
 #else
 #include <iostream>
 #include <fstream>
+#include <typeinfo>
 #endif
 
 #if defined(_DEBUG) && !defined(DEBUG)

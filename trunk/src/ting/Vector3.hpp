@@ -189,7 +189,7 @@ public:
 
 	inline Vector2 operator*(T num)const{
 		return (Vector2(*this) *= num);
-	};
+	}
 
 	//operator num * vec
 	inline friend Vector2 operator*(T num, const Vector2& vec){
@@ -329,7 +329,7 @@ template <class T> class Vector3{
 public:
 	T x, y, z;
 	
-	inline Vector3(){};//default constructor
+	inline Vector3(){}//default constructor
 	
 	Vector3(T vecX, T vecY, T vecZ){
 		this->x = vecX;

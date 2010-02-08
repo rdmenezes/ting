@@ -187,7 +187,7 @@ public:
 	 * to the object while the object itself is still owned by Ptr.
 	 * Do not create other Ptr instances using that returned value!!! As it
 	 * will cause double 'delete' when both Ptr instances go out of scope.
-	 * @returns pointer to casted class.
+	 * @return pointer to casted class.
 	 */
 	template <class TS> inline TS* StaticCast(){
 		return static_cast<TS*>(this->operator->());

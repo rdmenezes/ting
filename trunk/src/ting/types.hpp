@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008 Ivan Gagis
+Copyright (c) 2008-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -89,16 +89,5 @@ STATIC_ASSERT(sizeof(u64) == 8)
 STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
 
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
-
-
-/**
- * @brief Unsigned int type.
- */
-typedef unsigned int uint;
-
-/**
- * @brief Unsigned 8 bit type.
- */
-typedef u8 byte;
 
 }//~namespace ting
