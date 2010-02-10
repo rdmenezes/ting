@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -378,7 +378,7 @@ public:
 	 * @param h4 - 4th triplet of IP address.
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(byte h1, byte h2, byte h3, byte h4, u16 p) :
+	inline IPAddress(u8 h1, u8 h2, u8 h3, u8 h4, u16 p) :
 			host(u32(h1) + (u32(h2) << 8) + (u32(h3) << 16) + (u32(h4) << 24)),
 			port(p)
 	{}
@@ -415,9 +415,9 @@ private:
 
 		u32 h = 0;//parsed host
 		const char *curp = ip;
-		for(uint t = 0; t < 4; ++t){
-			uint digits[3];
-			uint numDgts;
+		for(unsigned t = 0; t < 4; ++t){
+			unsigned digits[3];
+			unsigned numDgts;
 			for(numDgts = 0; numDgts < 3; ++numDgts){
 				if( *curp == '.' || *curp == 0 ){
 					if(numDgts==0)
@@ -426,7 +426,7 @@ private:
 				}else{
 					if(*curp < '0' || *curp > '9')
 						ThrowInvalidIP();
-					digits[numDgts] = uint(*curp) - uint('0');
+					digits[numDgts] = unsigned(*curp) - unsigned('0');
 				}
 				++curp;
 			}
@@ -436,10 +436,10 @@ private:
 			else if(t == 3 && *curp != 0)
 				ThrowInvalidIP();
 
-			uint xxx = 0;
-			for(uint i = 0; i < numDgts; ++i){
-				uint ord = 1;
-				for(uint j = 1; j < numDgts - i; ++j)
+			unsigned xxx = 0;
+			for(unsigned i = 0; i < numDgts; ++i){
+				unsigned ord = 1;
+				for(unsigned j = 1; j < numDgts - i; ++j)
 				   ord *= 10;
 				xxx += digits[i] * ord;
 			}
@@ -647,7 +647,7 @@ public:
 	 * @param size - number of bytes to send.
 	 * @return the number of bytes actually sent.
 	 */
-	uint Send(const byte* data, uint size) throw(Socket::Exc){
+	unsigned Send(const u8* data, unsigned size) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
@@ -680,7 +680,7 @@ public:
 		}//~while
 
 		ASSERT(res >= 0)
-		return uint(res);
+		return unsigned(res);
 	}
 
 
@@ -691,7 +691,7 @@ public:
 	 * @param data - pointer to the buffer with data to send.
 	 * @param size - number of bytes to send.
 	 */
-	void SendAll(const ting::byte* data, uint size) throw(Socket::Exc){
+	void SendAll(const u8* data, unsigned size) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
@@ -727,7 +727,7 @@ public:
 	 * @return the number of bytes written to the buffer.
 	 */
 	//returns 0 if connection was closed by peer
-	uint Recv(byte* buf, uint maxSize) throw(Socket::Exc){
+	unsigned Recv(u8* buf, unsigned maxSize) throw(Socket::Exc){
 		//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 		//calls to Recv() because it indicates that there's activity.
 		//So, do it at the beginning of the function.
@@ -763,7 +763,7 @@ public:
 		}//~while
 
 		ASSERT(len >= 0)
-		return uint(len);
+		return unsigned(len);
 	}
 
 	/**
@@ -1140,7 +1140,7 @@ public:
 	}
 
 	//returns number of bytes sent, should be less or equal to size.
-	uint Send(const byte* buf, u16 size, IPAddress destinationIP) throw(Socket::Exc){
+	unsigned Send(const u8* buf, u16 size, IPAddress destinationIP) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Send(): socket is not opened");
 
@@ -1168,7 +1168,7 @@ public:
 	}
 
 	//returns number of bytes received
-	uint Recv(byte* buf, u16 maxSize, IPAddress &out_SenderIP) throw(Socket::Exc){
+	unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP) throw(Socket::Exc){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
 

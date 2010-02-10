@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -69,9 +69,9 @@ namespace ting{
  */
 template <class T> class PoolStored{
 	
-	template <ting::uint ElemSize, ting::uint NumElemsInChunk> class MemPool{
+	template <unsigned ElemSize, unsigned NumElemsInChunk> class MemPool{
 		struct BufHolder{
-			ting::byte buf[ElemSize];
+			u8 buf[ElemSize];
 		};
 
 		struct PoolElem : public BufHolder{
@@ -86,7 +86,7 @@ template <class T> class PoolStored{
 		M_DECLARE_ALIGNED(sizeof(int));
 
 		struct Chunk : public ting::Array<PoolElem>{
-			ting::uint numAllocated;
+			unsigned numAllocated;
 			Chunk() :
 					ting::Array<PoolElem>(NumElemsInChunk),
 					numAllocated(0)

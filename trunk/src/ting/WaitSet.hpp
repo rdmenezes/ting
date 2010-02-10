@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -353,7 +353,7 @@ public:
 			if(i == this->numWaitables)
 				throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
 
-			ting::uint numObjects = this->numWaitables - 1;//decrease number of objects before shifting the object handles in the array
+			unsigned numObjects = this->numWaitables - 1;//decrease number of objects before shifting the object handles in the array
 			//shift object handles in the array
 			for(; i < numObjects; ++i){
 				this->handles[i] = this->handles[i + 1];
@@ -498,7 +498,7 @@ private:
 
 		ASSERT(uint(res) <= this->revents.Size())
 
-		ting::uint numEvents = 0;
+		unsigned numEvents = 0;
 		for(
 				epoll_event *e = this->revents.Begin();
 				e < this->revents.Begin() + res;

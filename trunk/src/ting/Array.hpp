@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008 Ivan Gagis
+Copyright (c) 2008-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ namespace ting{
  */
 template <class T> class Array : public ting::Buffer<T>{
 
-	inline void PrivateInit(uint arraySize){
+	inline void PrivateInit(unsigned arraySize){
 		this->size = arraySize;
 		if(this->size == 0){
 			this->buf = 0;
@@ -95,8 +95,8 @@ public:
 	 *                    Array object is not valid (Array::IsValid() will return false).
 	 */
 	//NOTE: the constructor is explicit to avoid undesired automatic
-	//conversions from uint to Array.
-	explicit inline Array(uint arraySize = 0){
+	//conversions from unsigned to Array.
+	explicit inline Array(unsigned arraySize = 0){
 		this->PrivateInit(arraySize);
 	}
 
@@ -168,7 +168,7 @@ public:
 	 * @param arraySize - number of elements this array should hold.
 	 *                    If 0 is supplied then array will become invalid.
 	 */
-	void Init(uint arraySize){
+	void Init(unsigned arraySize){
 		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
 		this->Destroy();
 		this->PrivateInit(arraySize);

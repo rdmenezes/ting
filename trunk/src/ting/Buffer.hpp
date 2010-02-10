@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ namespace ting{
 template <class T> class Buffer{
 protected:
 	T* buf;
-	ting::uint size;
+	unsigned size;
 
 
 	
@@ -55,7 +55,7 @@ protected:
 
 
 
-	inline Buffer(T* buf_ptr, ting::uint buf_size) :
+	inline Buffer(T* buf_ptr, unsigned buf_size) :
 			buf(buf_ptr),
 			size(buf_size)
 	{}
@@ -81,7 +81,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	inline ting::uint Size()const{
+	inline unsigned Size()const{
 		return this->size;
 	}
 
@@ -91,7 +91,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	inline ting::uint SizeOfElem()const{
+	inline unsigned SizeOfElem()const{
 		return sizeof(*(this->buf));
 	}
 
@@ -101,7 +101,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	inline ting::uint SizeInBytes()const{
+	inline unsigned SizeInBytes()const{
 		return this->Size() * this->SizeOfElem();
 	}
 
@@ -113,7 +113,7 @@ public:
 	 * @param i - element index.
 	 * @return const reference to i'th element of the buffer.
 	 */
-	inline const T& operator[](uint i)const{
+	inline const T& operator[](unsigned i)const{
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -125,7 +125,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline T& operator[](uint i){
+	inline T& operator[](unsigned i){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -180,7 +180,7 @@ public:
  * @brief static buffer class template.
  * The static buffer template.
  */
-template <class T, ting::uint buf_size> class StaticBuffer : public Buffer<T>{
+template <class T, unsigned buf_size> class StaticBuffer : public Buffer<T>{
 	T static_buffer[buf_size];
 public:
 	inline StaticBuffer(){

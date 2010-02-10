@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008 Ivan Gagis
+Copyright (c) 2008-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -334,7 +334,7 @@ inline void TimerLib::TimerThread::Run(){
 			}
 		}
 
-		ting::uint millis = minEndTime - ticks;
+		unsigned millis = minEndTime - ticks;
 
 		//make sure we will update warpFlag at least 4 times
 		//per ticks cycle (ticks cycle = 0xffffffffff ticks)

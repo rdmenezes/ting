@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -138,7 +138,7 @@ template <class T> inline void ClampBottom(T& v, const T bottom){
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void ToNetworkFormat16(u16 value, byte* out_buf){
+inline void ToNetworkFormat16(u16 value, u8* out_buf){
 	*reinterpret_cast<u16*>(out_buf) = value;//assume little-endian
 }
 
@@ -149,7 +149,7 @@ inline void ToNetworkFormat16(u16 value, byte* out_buf){
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void ToNetworkFormat32(u32 value, byte* out_buf){
+inline void ToNetworkFormat32(u32 value, u8* out_buf){
 	*reinterpret_cast<u32*>(out_buf) = value;//assume little-endian
 }
 
@@ -160,7 +160,7 @@ inline void ToNetworkFormat32(u32 value, byte* out_buf){
  * @param buf - pointer to buffer containig 2 bytes to convert from network format.
  * @return 16 bit unsigned integer converted from network byte order to native byte order.
  */
-inline u16 FromNetworkFormat16(const byte* buf){
+inline u16 FromNetworkFormat16(const u8* buf){
 	return *reinterpret_cast<const u16*>(buf);//assume little-endian
 }
 
@@ -171,7 +171,7 @@ inline u16 FromNetworkFormat16(const byte* buf){
  * @param buf - pointer to buffer containig 4 bytes to convert from network format.
  * @return 32 bit unsigned integer converted from network byte order to native byte order.
  */
-inline u32 FromNetworkFormat32(const byte* buf){
+inline u32 FromNetworkFormat32(const u8* buf){
 	return *reinterpret_cast<const u32*>(buf);//assume little-endian
 }
 
@@ -181,7 +181,7 @@ class Listener{
 	template <class T> friend class ListenersList;
 	friend class ListenersListInternal;
 
-	ting::uint numTimesAdded;
+	unsigned numTimesAdded;
 protected:
 	Listener() :
 			numTimesAdded(0)
