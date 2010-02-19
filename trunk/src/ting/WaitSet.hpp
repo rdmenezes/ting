@@ -202,7 +202,7 @@ protected:
 
 
 class WaitSet{
-	uint numWaitables;//number of Waitables added
+	unsigned numWaitables;//number of Waitables added
 
 #if defined(__WIN32__)
 	Array<Waitable*> waitables;
@@ -304,7 +304,7 @@ public:
 #if defined(__WIN32__)
 		//check if the Waitable object is added to this wait set
 		{
-			uint i;
+			unsigned i;
 			for(i = 0; i < this->numWaitables; ++i){
 				if(this->waitables[i] == w)
 					break;
@@ -344,7 +344,7 @@ public:
 #if defined(__WIN32__)
 		//remove object from array
 		{
-			uint i;
+			unsigned i;
 			for(i = 0; i < this->numWaitables; ++i){
 				if(this->waitables[i] == w)
 					break;
@@ -397,7 +397,7 @@ public:
 	 * @return number of objects triggered.
 	 * @throw ting::Exc - in case of errors.
 	 */
-	inline uint Wait(Buffer<Waitable*>* out_events = 0){
+	inline unsigned Wait(Buffer<Waitable*>* out_events = 0){
 		return this->Wait(true, 0, out_events);
 	}
 
@@ -415,14 +415,14 @@ public:
 	 * @return number of objects triggered. If 0 then timeout was hit.
 	 * @throw ting::Exc - in case of errors.
 	 */
-	inline uint WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
+	inline unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
 	}
 
 
 
 private:
-	uint Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
+	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
 		if(out_events){
 			if(out_events->Size() < this->numWaitables){
 				throw ting::Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
@@ -452,8 +452,8 @@ private:
 			return 0;
 
 		//check for activities
-		uint numEvents = 0;
-		for(uint i = 0; i < this->numWaitables; ++i){
+		unsigned numEvents = 0;
+		for(unsigned i = 0; i < this->numWaitables; ++i){
 			if(this->waitables[i]->CheckSignalled()){
 				if(out_events){
 					ASSERT(numEvents < out_events->Size())
@@ -496,7 +496,7 @@ private:
 			break;
 		};
 
-		ASSERT(uint(res) <= this->revents.Size())
+		ASSERT(unsigned(res) <= this->revents.Size())
 
 		unsigned numEvents = 0;
 		for(
@@ -522,7 +522,7 @@ private:
 		}
 
 		ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
-		return uint(res);
+		return unsigned(res);
 #endif
 	}
 };//~class WaitSet

@@ -401,7 +401,7 @@ M_REPEAT3(M_MAX_NUM_SIG_PARAMETERS, M_SIGNAL, )
 //
 //  public:
 //    void Emit(M_FUNC_PARAMS_FULL(1)){
-//        for(uint i=0; i<slotLink.Size(); ++i)
+//        for(unsigned i=0; i<slotLink.Size(); ++i)
 //            slotLink[i]->execute(M_FUNC_PARAM_NAMES(1));
 //    };
 //

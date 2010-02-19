@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
 
 	std::vector<ting::Ptr<TestClass> > vec;
 
-	for(ting::uint i = 0; i < 10000; ++i){
+	for(unsigned i = 0; i < 10000; ++i){
 		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
 		vec.back()->a = int(i);
 		vec.back()->b = -int(i);

@@ -265,7 +265,7 @@ public:
 	/**
 	 * @brief Create the semaphore with given initial value.
 	 */
-	Semaphore(uint initialValue = 0){
+	Semaphore(unsigned initialValue = 0){
 #ifdef __WIN32__
 		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
 #elif defined(__SYMBIAN32__)
@@ -309,7 +309,7 @@ public:
 	 * @return returns true if the semaphore value was decremented.
 	 * @return returns false if the timeout was hit.
 	 */
-	bool Wait(uint timeoutMillis = 0){
+	bool Wait(unsigned timeoutMillis = 0){
 #ifdef __WIN32__
 		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis))){
 			case WAIT_OBJECT_0:
@@ -392,8 +392,8 @@ class CondVar{
 	Mutex cvMutex;
 	Semaphore semWait;
 	Semaphore semDone;
-	uint numWaiters;
-	uint numSignals;
+	unsigned numWaiters;
+	unsigned numSignals;
 #elif defined(M_PTHREAD)
 	//A pointer to store system dependent handle
 	pthread_cond_t cond;
@@ -919,7 +919,7 @@ public:
 	 *                    If stackSize is 0 then system default stack size is used.
 	 */
 	//0 stacksize stands for default stack size (platform dependent)
-	void Start(uint stackSize = 0){
+	void Start(unsigned stackSize = 0){
 		//Protect by mutex to avoid several Start() methods to be called
 		//by concurrent threads simultaneously and to protect call to Join() before Start()
 		//has returned.
@@ -1038,7 +1038,7 @@ public:
 	 * AT LEAST 'msec' milliseconds.
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
-	static void Sleep(uint msec = 0){
+	static void Sleep(unsigned msec = 0){
 #ifdef __WIN32__
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
 #elif defined(__SYMBIAN32__)
@@ -1068,11 +1068,11 @@ public:
 	 * creatged.
 	 * @return uniqie thread identifier.
 	 */
-	static inline uint GetCurrentThreadID(){
+	static inline unsigned GetCurrentThreadID(){
 #ifdef __WIN32__
-		return uint(GetCurrentThreadId());
+		return unsigned(GetCurrentThreadId());
 #elif defined(M_PTHREAD)
-		return uint(pthread_self());
+		return unsigned(pthread_self());
 #else
 #error "unknown system"
 #endif

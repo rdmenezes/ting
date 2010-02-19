@@ -95,7 +95,7 @@ class RefCounted{
 
 	
 private:
-	inline uint AddRef()throw(){
+	inline unsigned AddRef()throw(){
 		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
 		Mutex::Guard mutexGuard(this->counter->mutex);
@@ -105,11 +105,11 @@ private:
 
 
 
-	inline uint RemRef()throw(){
+	inline unsigned RemRef()throw(){
 		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
 		this->counter->mutex.Lock();
 		M_REF_PRINT(<< "RefCounted::RemRef(): mutex locked" << std::endl)
-		uint n = --(this->counter->numHardRefs);
+		unsigned n = --(this->counter->numHardRefs);
 
 		if(n == 0){//if no more references to the RefCounted
 			if(this->counter->numWeakRefs > 0){
@@ -135,8 +135,8 @@ private:
 	struct Counter : public PoolStored<Counter>{
 		RefCounted *p;
 		Mutex mutex;
-		uint numHardRefs;
-		uint numWeakRefs;
+		unsigned numHardRefs;
+		unsigned numWeakRefs;
 		inline Counter(RefCounted *ptr) :
 				p(ptr),
 				numHardRefs(0),

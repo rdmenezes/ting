@@ -53,7 +53,7 @@ template <class T> inline const char* ParseNum(const char* str, T& out_Res);
 template <> inline const char* ParseNum<int>(const char* str, int& out_Res){
 	char buf[32];
 	const char *p = str;
-	ting::uint i = 0;
+	unsigned i = 0;
 	
 	//TODO: allow '-' character in front of number
 	while(*p >= 0x30 && *p <= 0x39 && i < sizeof(buf)){
@@ -76,7 +76,7 @@ template <> inline const char* ParseNum<int>(const char* str, int& out_Res){
 template <> inline const char* ParseNum<float>(const char* str, float& out_Res){
 	char buf[32];
 	const char *p = str;
-	ting::uint i = 0;
+	unsigned i = 0;
 	
 	//TODO: allow one '.' character in the number
 	while(*p >= 0x30 && *p <= 0x39 && i < sizeof(buf)){
@@ -130,14 +130,14 @@ public:
 	//create Vector2 from Vector3
 	Vector2(const Vector3<T>& vec);
 
-	inline T& operator[](ting::uint i){
+	inline T& operator[](unsigned i){
 		ASSERT(i < 2)
 		ASSERT( &((&this->x)[0]) == &this->x)
 		ASSERT( &((&this->x)[1]) == &this->y)
 		return (&this->x)[i];
 	}
 
-	inline const T& operator[](ting::uint i)const{
+	inline const T& operator[](unsigned i)const{
 		ASSERT(i < 2)
 		ASSERT( &((&this->x)[0]) == &this->x)
 		ASSERT( &((&this->x)[1]) == &this->y)
@@ -349,7 +349,7 @@ public:
 		this->z = 0;
 	}
 
-	inline T& operator[](ting::uint i){
+	inline T& operator[](unsigned i){
 		ASSERT(i < 3)
 		ASSERT( &((&this->x)[0]) == &this->x)
 		ASSERT( &((&this->x)[1]) == &this->y)
@@ -357,7 +357,7 @@ public:
 		return (&this->x)[i];
 	}
 
-	inline const T& operator[](ting::uint i)const{
+	inline const T& operator[](unsigned i)const{
 		ASSERT(i < 3)
 		ASSERT( &((&this->x)[0]) == &this->x)
 		ASSERT( &((&this->x)[1]) == &this->y)
@@ -536,7 +536,7 @@ public:
 	 * @param col - column number.
 	 * @return pointer to array of 4 elements which forms the requested column of the matirx.
 	 */
-	inline T* operator[](uint col){
+	inline T* operator[](unsigned col){
 		ASSERT(col < 4)
 		return &this->m[col * 4];
 	}
@@ -547,7 +547,7 @@ public:
 	 * @param col - column number.
 	 * @return pointer to array of 4 elements which forms the requested column of the matirx.
 	 */
-	inline const T* operator[](uint col)const{
+	inline const T* operator[](unsigned col)const{
 		ASSERT(col < 4)
 		return &this->m[col * 4];
 	}
@@ -558,7 +558,7 @@ public:
 	 * @param col - column of element.
 	 * @return reference to the element at specified row and column.
 	 */
-	inline T& E(uint row, uint col){
+	inline T& E(unsigned row, unsigned col){
 		ASSERT(row < 4)
 		ASSERT(col < 4)
 		return this->m[col * 4 + row];
@@ -593,7 +593,7 @@ public:
 	Matrix4& RightMultMatrix(const Matrix4 &M){
 		//TODO: rewrite to use Matrix4 instead of T tmpM[16]
 		T tmpM[16];
-		for(ting::uint i = 0; i < 4; ++i){
+		for(unsigned i = 0; i < 4; ++i){
 			tmpM[4*i]  =m[0]*M.m[4*i]+m[4]*M.m[4*i+1]+m[8]*M.m[4*i+2]+ m[12]*M.m[4*i+3];
 			tmpM[4*i+1]=m[1]*M.m[4*i]+m[5]*M.m[4*i+1]+m[9]*M.m[4*i+2]+ m[13]*M.m[4*i+3];
 			tmpM[4*i+2]=m[2]*M.m[4*i]+m[6]*M.m[4*i+1]+m[10]*M.m[4*i+2]+m[14]*M.m[4*i+3];
@@ -608,7 +608,7 @@ public:
 	Matrix4& LeftMultMatrix(const Matrix4& M){
 		//TODO: rewrite to use Matrix4 instead of T tmpM[16]
 		T tmpM[16];
-		for(ting::uint i = 0; i < 4; ++i){
+		for(unsigned i = 0; i < 4; ++i){
 			tmpM[4*i]  =m[4*i]*M.m[0]+m[4*i+1]*M.m[4]+m[4*i+2]*M.m[8]+ m[4*i+3]*M.m[12];
 			tmpM[4*i+1]=m[4*i]*M.m[1]+m[4*i+1]*M.m[5]+m[4*i+2]*M.m[9]+ m[4*i+3]*M.m[13];
 			tmpM[4*i+2]=m[4*i]*M.m[2]+m[4*i+1]*M.m[6]+m[4*i+2]*M.m[10]+m[4*i+3]*M.m[14];
@@ -961,38 +961,38 @@ public:
 #endif  
 };//~class Quaterion
 
-//template <> class Vector2<uint>{
-//	uint v[2]; //Vector components
+//template <> class Vector2<unsigned>{
+//	unsigned v[2]; //Vector components
 //  public:
 //	inline Vector2(){};//default constructor
 //
-//	Vector2(uint x, uint y){
+//	Vector2(unsigned x, unsigned y){
 //		this->v[0] = x;
 //		this->v[1] = y;
 //	};
 //
-//	inline uint& X(){
+//	inline unsigned& X(){
 //		return this->v[0];
 //	};
 //
-//	inline const uint& X()const{
+//	inline const unsigned& X()const{
 //		return this->v[0];
 //	};
 //
-//	inline uint& Y(){
+//	inline unsigned& Y(){
 //		return this->v[1];
 //	};
 //
-//	inline const uint& Y()const{
+//	inline const unsigned& Y()const{
 //		return this->v[1];
 //	};
 //
-//	inline uint& operator[](uint i){
+//	inline unsigned& operator[](unsigned i){
 //		ASSERT(i < 2)
 //		return this->v[i];
 //	};
 //
-//	inline const uint& operator[](uint i)const{
+//	inline const unsigned& operator[](unsigned i)const{
 //		ASSERT(i < 2)
 //		return this->v[i];
 //	};
@@ -1001,7 +1001,7 @@ public:
 //		return this->v[0] == vec.v[0] && this->v[1] == vec.v[1];
 //	};
 //
-//	inline Vector2& operator=(const Vector2<uint>& vec){
+//	inline Vector2& operator=(const Vector2<unsigned>& vec){
 //		this->v[0] = vec.v[0];
 //		this->v[1] = vec.v[1];
 //		return (*this);
@@ -1043,7 +1043,7 @@ public:
 //	};
 //
 //#ifdef DEBUG
-//	friend std::ostream& operator<<(std::ostream& s, const Vector2<uint>& vec){
+//	friend std::ostream& operator<<(std::ostream& s, const Vector2<unsigned>& vec){
 //		s<<"("<<vec.X()<<", "<<vec.Y()<<")";
 //		return s;
 //	};
@@ -1257,7 +1257,7 @@ public:
 //
 
 typedef Vector2<int> Vec2i;
-typedef Vector2<ting::uint> Vec2ui;
+typedef Vector2<unsigned> Vec2ui;
 typedef Vector2<float> Vec2f;
 typedef Vector2<double> Vec2d;
 
