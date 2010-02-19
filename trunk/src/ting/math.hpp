@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008 Ivan Gagis
+Copyright (c) 2008-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -250,6 +250,22 @@ template <> inline float Sin<float>(float x){
 }
 
 
+
+template <> inline double Sin<double>(double x){
+	return ::sin(x);
+}
+
+
+
+/*
+//TODO:
+template <> inline long double Sin<long double>(long double x){
+	return ::sin(x);
+}
+*/
+
+
+
 /**
  * @brief Calculate cosine of an angle.
  */
@@ -262,6 +278,21 @@ template <typename T> inline T Cos(T x){
 template <> inline float Cos<float>(float x){
 	return ::cos(x);
 }
+
+
+
+template <> inline double Cos<double>(double x){
+	return ::cos(x);
+}
+
+
+
+/*
+//TODO:
+template <> inline long double Cos<long double>(long double x){
+	return ::cos(x);
+}
+*/
 
 
 
@@ -294,5 +325,22 @@ template <typename T> inline T Exp(T x){
 template <> inline float Exp<float>(float x){
 	return ::exp(x);
 }
+
+
+
+template <> inline double Exp<double>(double x){
+	return ::exp(x);
+}
+
+
+
+/*
+//TODO:
+template <> inline long double Exp<long double>(long double x){
+	return ::exp(x);
+}
+*/
+
+
 
 }//~namespace ting
