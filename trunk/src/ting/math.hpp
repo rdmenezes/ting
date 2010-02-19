@@ -114,7 +114,7 @@ template <typename T> inline T DEps(){
  * @return number Pi.
  */
 template <typename T> inline T DPi(){
-	return T(3.14159f);
+	return T(3.14159265358979323846264338327950288);
 }
 
 
