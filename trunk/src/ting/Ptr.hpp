@@ -89,7 +89,15 @@ public:
 		return static_cast<T*>(this->p);
 	}
 
+	inline T& operator*(){
+		ASSERT_INFO(this->p, "Ptr::operator*(): this->p is zero")
+		return *(this->operator->());
+	}
 
+	inline const T& operator*()const{
+		ASSERT_INFO(this->p, "const Ptr::operator*(): this->p is zero")
+		return *(this->operator->());
+	}
 
 	/**
 	 * @brief Assignment operator.

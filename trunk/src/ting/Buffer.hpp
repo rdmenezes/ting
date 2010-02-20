@@ -143,10 +143,31 @@ public:
 
 
 	/**
+	 * @brief get const pointer to first element of the buffer.
+	 * @return const pointer to first element of the buffer.
+	 */
+	inline const T* Begin()const{
+		return this->buf;
+	}
+
+
+
+	/**
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
 	inline T* End(){
+		ASSERT((this->buf + this->size) != 0)
+		return this->buf + this->size;
+	}
+
+
+
+	/**
+	 * @brief get const pointer to "after last" element of the buffer.
+	 * @return const pointer to "after last" element of the buffer.
+	 */
+	inline const T* End()const{
 		ASSERT((this->buf + this->size) != 0)
 		return this->buf + this->size;
 	}
