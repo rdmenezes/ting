@@ -1262,7 +1262,9 @@ typedef Vector2<float> Vec2f;
 typedef Vector2<double> Vec2d;
 
 typedef Vector3<float> Vec3f;
+STATIC_ASSERT(sizeof(Vec3f) == sizeof(float) * 3)
 typedef Vector3<double> Vec3d;
+STATIC_ASSERT(sizeof(Vec3d) == sizeof(double) * 3)
 
 typedef Matrix4<float> Matr4f;
 typedef Matrix4<double> Matr4d;
