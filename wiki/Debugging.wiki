@@ -1,4 +1,5 @@
 #summary ting debugging facilities
+#labels Featured
 
 
 
@@ -49,8 +50,9 @@ TRACE(<< "Hello world!" << std::endl); // incorrect
 Following assertion macros are available:
 
 *ASSERT(x)*
+*ASSERT_ALWAYS(x)*
 
-where x is a boolean expression.
+where *x* is a boolean expression.
 
 Example:
 {{{
@@ -59,3 +61,15 @@ ASSERT(a == 13)
 ASSERT(sizeof(int) == 4)
 ASSERT(sizeof(a) == 4 && sizeof(a) == sizeof(int))
 }}}
+
+*ASSERT_INFO(x, y)*
+*ASSERT_INFO_ALWAYS(x, y)*
+
+where *x* is a boolean expression. *y* is a logging which needs to be done in case of assertion failure.
+
+Example:
+{{{
+int a = 13;
+ASSERT_INFO(a == 14, "a is not 14, a is " << a)
+}}}
+Note, that std::endl is not required as well as leading operator <<.
