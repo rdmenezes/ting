@@ -1,4 +1,4 @@
-#summary ting library usage tutorial
+#summary ting::Thread usage tutorial
 #labels Featured
 
 =Debugging=
