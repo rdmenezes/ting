@@ -1,0 +1,10 @@
+* update ting version number in every .hpp file header
+
+* add new entry to debian/changelog file
+
+* update version number in debian/control file
+
+* update version number in the create_deb.sh file in the pakage name
+
+* generate doxygen docs
+

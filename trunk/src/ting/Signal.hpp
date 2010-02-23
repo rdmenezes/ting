@@ -22,10 +22,10 @@ THE SOFTWARE. */
 
 // ting 0.4
 // Homepage: http://code.google.com/p/ting
-// Author: Ivan Gagis <igagis@gmail.com>
 
 /**
  * @file Signal.hpp
+ * @author Ivan Gagis <igagis@gmail.com>
  * @brief Templates to implement signal-slot callback technique.
  */
 
@@ -34,6 +34,7 @@ THE SOFTWARE. */
 #include <vector>
 #include "codegen.h"
 #include "Ref.hpp"
+#include "Thread.hpp"
 #include "debug.hpp"
 
 #define M_MAX_NUM_SIG_PARAMETERS 10
@@ -131,6 +132,7 @@ template <class T_Ret> void Connect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>( new FuncSlot##num_func_params<T_Ret>(f)) \
 		); \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 }
 
@@ -142,6 +144,7 @@ template <class T_Ob, class T_Ret> void Connect(T_Ob* o, T_Ret(T_Ob::*m)(M_FUNC_
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new MethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
 		); \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 }
 
@@ -152,6 +155,7 @@ template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob>& o, T_Ret(T_Ob::*m
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
 		); \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 }
 
@@ -231,6 +235,7 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 #define M_DISCONNECT_FUNC(num_func_params, unused) \
 template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params))){ \
 	ASSERT(f) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchFuncSlot(f); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -248,6 +253,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -264,6 +270,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 	) \
 { \
 	ASSERT(m) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchWeakRefMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -305,8 +312,11 @@ M_TEMPLATE(n) class Signal##n{ \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT, n) \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT_WEAKREF, n) \
 \
+	ting::Mutex mutex; \
+\
 public: \
 	void Emit(M_FUNC_PARAMS_FULL(n)){ \
+		ting::Mutex::Guard mutexGuard(this->mutex); \
 		for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end();){ \
 			if((*i)->Execute(M_FUNC_PARAM_NAMES(n))){ \
 				i = this->slotLink.erase(i); \
@@ -325,6 +335,7 @@ public: \
 	M_REPEAT2(M_INCREMENT(n), M_DISCONNECT_METH_WEAKREF, ) \
 \
 	void DisconnectAll(){ \
+		ting::Mutex::Guard mutexGuard(this->mutex); \
 		this->slotLink.clear(); \
 	} \
 \
@@ -337,95 +348,6 @@ public: \
 
 namespace ting{
 
-
-
 M_REPEAT3(M_MAX_NUM_SIG_PARAMETERS, M_SIGNAL, )
-
-
-//M_SIGNAL(1)
-//signal with 1 parameter
-//template <class T_P0> class C_Signal1{
-//M_TEMPLATE(1) class C_Signal1{
-//    class SlotLink{
-//      public:
-//        virtual void Execute(M_FUNC_PARAMS_FULL(1))=0;
-//        virtual ~SlotLink(){};
-//    };
-//    
-//    M_REPEAT2(M_INCREMENT(1), M_METHOD_SLOT, 1)
-//    //M_METHOD_SLOT(0, 1)
-//    //M_METHOD_SLOT(1, 1)
-////    template <class T_Ob, class T_Ret> class MethodSlot0 : public SlotLink{
-////        T_Ob* o;
-////        T_Ret(T_Ob::*m)();
-////      public:
-////        MethodSlot0(T_Ob* object, T_Ret(T_Ob::*method)()) : o(object), m(method) {};
-////
-////        //override
-////        void Execute(){ (o->*m)(); };
-////    };
-//    
-////    template <class T_Ob, class T_Ret> class MethodSlot1 : public SlotLink{
-////        T_Ob* o;
-////        T_Ret(T_Ob::*m)(T_P0);
-////      public:
-////        MethodSlot1(T_Ob* object, T_Ret(T_Ob::*method)(T_P0)) : o(object), m(method) {};
-////
-////        //override
-////        void Execute(T_P0 p0){ (o->*m)(p0); };
-////    };
-//
-//    //M_FUNC_SLOT(0, 1)
-//    //M_FUNC_SLOT(1, 1)
-//    M_REPEAT2(2, M_FUNC_SLOT, 1)
-//    
-////    template <class T_Ret> class FuncSlot0 : public SlotLink{
-////        T_Ret(*f)();
-////      public:
-////        FuncSlot0(T_Ret(*function)()) : f(function) {};
-////
-////        //override
-////        void Execute(T_P0 p0){ (*f)(); };
-////    };
-////    
-////    template <class T_Ret> class FuncSlot1 : public SlotLink{
-////        T_Ret(*f)(T_P0);
-////      public:
-////        FuncSlot1(T_Ret(*function)(T_P0)) : f(function) {};
-////
-////        //override
-////        void Execute(T_P0 p0){ (*f)(p0); };
-////    };
-//
-//    C_VecCntnr<SlotLink*> slotLink;
-//
-//  public:
-//    void Emit(M_FUNC_PARAMS_FULL(1)){
-//        for(unsigned i=0; i<slotLink.Size(); ++i)
-//            slotLink[i]->execute(M_FUNC_PARAM_NAMES(1));
-//    };
-//
-//    M_REPEAT2(2, M_CONNECT_METH, )
-//    //M_CONNECT_METH(0)
-//    //M_CONNECT_METH(1)
-////    template <class T_Ob, class T_Ret> void Connect(T_Ob& o, T_Ret(T_Ob::*m)()){
-////        slotLink.PushBack(new MethodSlot0<T_Ob, T_Ret>(&o, m));
-////    };
-////    
-////    template <class T_Ob, class T_Ret> void Connect(T_Ob& o, T_Ret(T_Ob::*m)(T_P0)){
-////        slotLink.PushBack(new MethodSlot1<T_Ob, T_Ret>(&o, m));
-////    };
-//
-//    M_CONNECT_FUNC(0, )
-//    M_CONNECT_FUNC(1, )
-//    
-////    template <class T_Ret> void Connect(T_Ret(*f)()){
-////        slotLink.PushBack(new FuncSlot0<T_Ret>(f));
-////    };
-////    
-////    template <class T_Ret> void Connect(T_Ret(*f)(T_P0)){
-////        slotLink.PushBack(new FuncSlot1<T_Ret>(f));
-////    };
-//};
 
 }//~namespace ting
