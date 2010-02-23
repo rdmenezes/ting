@@ -49,6 +49,7 @@ TRACE(<< "Hello world!" << std::endl); // incorrect
 
 Following assertion macros are available:
 
+
 *ASSERT(x)*<br>
 *ASSERT_ALWAYS(x)*<br>
 where *x* is a boolean expression.
@@ -61,6 +62,7 @@ ASSERT(sizeof(int) == 4)
 ASSERT(sizeof(a) == 4 && sizeof(a) == sizeof(int))
 }}}
 
+
 *ASSERT_INFO(x, y)*<br>
 *ASSERT_INFO_ALWAYS(x, y)*<br>
 where *x* is a boolean expression.<br>
@@ -72,3 +74,14 @@ int a = 13;
 ASSERT_INFO(a == 14, "a is not 14, a is " << a)
 }}}
 Note, that std::endl is not required as well as leading operator <<.
+
+
+*ASSERT_EXEC(x)*<br>
+where *x* is a boolean expression.
+
+This assertion type guarantees that the expression will be executed. In debug build the expression value will be checked for true, in release build it will not be checked.
+
+Example:
+{{{
+ASSERT_EXEC(DoSomethingAndReturnTrueOnSuccess())
+}}}
