@@ -107,24 +107,24 @@ inline std::ofstream& DebugLogger(){
 #include <e32std.h>
 
 #define ASSERT_ALWAYS(x) __ASSERT_ALWAYS((x),User::Panic(_L("ASSERTION FAILED!"),3));
-#define ASSERT_ALWAYS_INFO(x, y) ASSERT_ALWAYS(x)
+#define ASSERT_INFO_ALWAYS(x, y) ASSERT_ALWAYS(x)
 
 #else //Non symbian
 
 #include <cassert>
 
-#define ASSERT_ALWAYS_INFO(x, y) if(!(x)){ \
+#define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
 						LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
 						TRACE_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
 						assert(false); \
 					}
-#define ASSERT_ALWAYS(x) ASSERT_ALWAYS_INFO((x),"no additional info")
+#define ASSERT_ALWAYS(x) ASSERT_INFO_ALWAYS((x),"no additional info")
 
 #endif
 
 
 #ifdef DEBUG
-#define ASSERT_INFO(x, y) ASSERT_ALWAYS_INFO((x), y)
+#define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
 #define ASSERT(x) ASSERT_ALWAYS(x)
 #define ASSERT_EXEC(x) ASSERT(x)
 namespace ting{

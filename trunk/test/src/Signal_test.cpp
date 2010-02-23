@@ -264,14 +264,14 @@ void Test(){
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 87)
-		ASSERT_ALWAYS_INFO(tc.b == 376, "tc.b = " << tc.b)
+		ASSERT_INFO_ALWAYS(tc.b == 376, "tc.b = " << tc.b)
 
 		sig.Connect(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB);
 		ASSERT_ALWAYS(sig.NumConnections() == 4)
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 87)
-		ASSERT_ALWAYS_INFO(tc.b == 37642, "tc.b = " << tc.b)
+		ASSERT_INFO_ALWAYS(tc.b == 37642, "tc.b = " << tc.b)
 
 
 		//
@@ -293,7 +293,7 @@ void Test(){
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 0)
-		ASSERT_ALWAYS_INFO(tc.b == 37642, "tc.b = " << tc.b)
+		ASSERT_INFO_ALWAYS(tc.b == 37642, "tc.b = " << tc.b)
 
 
 
