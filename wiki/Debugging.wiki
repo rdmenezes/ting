@@ -50,6 +50,7 @@ TRACE(<< "Hello world!" << std::endl); // incorrect
 Following assertion macros are available:
 
 *ASSERT(x)*
+
 *ASSERT_ALWAYS(x)*
 
 where *x* is a boolean expression.
@@ -63,6 +64,7 @@ ASSERT(sizeof(a) == 4 && sizeof(a) == sizeof(int))
 }}}
 
 *ASSERT_INFO(x, y)*
+
 *ASSERT_INFO_ALWAYS(x, y)*
 
 where *x* is a boolean expression. *y* is a logging which needs to be done in case of assertion failure.
