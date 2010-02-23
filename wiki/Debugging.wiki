@@ -1,0 +1,61 @@
+#summary ting debugging facilities
+
+
+
+= Introduction =
+
+*ting* provides some useful debugging instruments like assertions, tracing and logging.
+All the debugging functions are wrapped into macros in order to be able to turn them off in the release builds and turn them on in the debug builds.
+
+For debug builds one needs to define the DEBUG macro. When DEBUG macro is defined ting will do additional checks and assertions which slightly decrease the performance, but for that you will be warned if something goes wrong meaning that there is some bug in the program.
+All the ting debug facilities you use in your program will be turned on as well.
+
+For release builds just do not define the DEBUG macro and all debug macros will be turned off.
+
+Note: for g++ compiler macro can be defined by supplying the -DDEBUG key to the g++.
+
+Note: some debug macros are always turned on, regardless of DEBUG macro defined or not. All such macros have `_`ALWAYS suffix in their names.
+
+
+
+= Header file =
+
+In order to use ting debugging facilities, include the following header file:
+{{{
+#include <ting/debug.hpp>
+}}}
+
+
+
+= Semicolons after macros =
+
+Note, that semicolons after ting debugging macros are not required. Semicolons are already included inside of the macros. This is because macros can be turned off in release builds, in which case there will be redundant semicolons in your program since macros are evaluated to nothing.
+
+For example
+{{{
+int a = 35;
+
+ASSERT(a == 35)  // correct
+TRACE(<< "Hello world!" << std::endl) // correct
+
+ASSERT(a == 35); // incorrect
+TRACE(<< "Hello world!" << std::endl); // incorrect
+}}}
+
+
+
+= ASSERTIONS =
+
+Following assertion macros are available:
+
+*ASSERT(x)*
+
+where x is a boolean expression.
+
+Example:
+{{{
+int a = 13;
+ASSERT(a == 13)
+ASSERT(sizeof(int) == 4)
+ASSERT(sizeof(a) == 4 && sizeof(a) == sizeof(int))
+}}}
