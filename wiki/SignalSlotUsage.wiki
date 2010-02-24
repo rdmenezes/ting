@@ -9,7 +9,7 @@
 <br>
 = Concept =
 
-Signal-slot is a technique of calling callback functions. The callback function may be an ordinary C-like function or function-member of some class. In latter case, it should be used in conjunction with object, for which the function-member should be called.
+Signal-slot is a technique of calling callback functions. The callback function may be an ordinary C-like function or function-member of some class. In latter case, it should be used in conjunction with object, for which the function-member is to be called.
 
 The _*signal*_ is an object which holds list of callbacks it should call when needed.
 
