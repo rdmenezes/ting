@@ -142,3 +142,38 @@ void MyFunction(TestClass& arg){
     //...
 }
 }}}
+
+
+
+
+<br>
+= TRACEs and LOGs =
+
+Macros for tracing and logging are available. Traceing macros output info into standard output. Logging macros output info into _output.log_ file.
+
+Following macros are available:
+
+<br>
+*LOG(x)*<br>
+*TRACE(x)*<br>
+*TRACE_AND_LOG(x)*<br>
+*LOG_ALWAYS(x)*<br>
+*TRACE_ALWAYS(x)*<br>
+*TRACE_AND_LOG_ALWAYS(x)*<br>
+where *x* is a std::cout like output.
+
+Example:
+{{{
+LOG(<< "Hello World!" << std::endl)
+
+TRACE(<< "sizeof(int) = " << sizeof(int))
+TRACE(<< " and sizeof(short) = " << sizeof(short) << std::endl)
+
+TRACE_AND_LOG(
+        << "Here is some more info about type sizes:" << std::endl
+        << "sizeof(void*) = " << sizeof(void) << std::endl
+        << "sizeof(char) = " << sizeof(char) << std::endl
+        << "sizeof(float) = " << sizeof(float) << std::endl
+        << "sizeof(double) = " << sizeof(double) << std::endl
+    )
+}}}
