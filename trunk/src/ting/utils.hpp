@@ -83,9 +83,9 @@ template <> inline void Exchange<u32>(u32& x, u32& y){
 //quick exchange two floats
 template <> inline void Exchange<float>(float& x, float& y){
 //	TRACE(<<"Exchange<float>(): invoked"<<std::endl)
-	STATIC_ASSERT(sizeof(float) == sizeof(u32))
 	Exchange<u32>(reinterpret_cast<u32&>(x), reinterpret_cast<u32&>(y));
 }
+STATIC_ASSERT(sizeof(float) == sizeof(u32))
 
 
 
@@ -174,125 +174,6 @@ inline u16 FromNetworkFormat16(const u8* buf){
 inline u32 FromNetworkFormat32(const u8* buf){
 	return *reinterpret_cast<const u32*>(buf);//assume little-endian
 }
-
-
-
-class Listener{
-	template <class T> friend class ListenersList;
-	friend class ListenersListInternal;
-
-	unsigned numTimesAdded;
-protected:
-	Listener() :
-			numTimesAdded(0)
-	{}
-
-public:
-	virtual ~Listener(){
-//		TRACE(<< "~Listener(): enter" << std::endl)
-		ASSERT(this->numTimesAdded == 0)
-//		TRACE(<< "~Listener(): exit" << std::endl)
-	}
-
-private:
-	class ListenersListInternal{
-		//Network state listeners can be added and removed from different threads,
-		//so, protect the list of listeners by mutex.
-		ting::Mutex mutex;
-
-		typedef std::vector<Listener*> T_ListenerList;
-		typedef T_ListenerList::iterator T_ListenerIter;
-		T_ListenerList listeners;
-
-		T_ListenerIter iter;
-	protected:
-		ListenersListInternal(){
-//			this->iter = this->listeners.end();
-		}
-
-		inline bool HasNext()const{
-			return this->iter != this->listeners.end();
-		}
-
-		inline Listener* Next(){
-			ASSERT_INFO(this->HasNext(), "Next() called when there is no next listener")
-			Listener* l = (*this->iter);
-			++this->iter;
-			return l;
-		}
-		
-		virtual void NotificationRoutine() = 0;
-
-	public:
-
-		virtual ~ListenersListInternal(){
-			ASSERT(this->listeners.size() == 0)
-//			ASSERT(this->iter == this->listeners.end())
-		}
-
-		inline void Notify_ts(){
-			ting::Mutex::Guard mutexGuard(this->mutex);
-//			TRACE(<< "Notify_ts(): enter" << std::endl)
-//			ASSERT(this->iter == this->listeners.end())//NOTE: do this ASSERT() after mutex is locked!!!
-			this->iter = this->listeners.begin();
-			this->NotificationRoutine();
-			ASSERT(this->iter == this->listeners.end())
-//			TRACE(<< "Notify_ts(): exit" << std::endl)
-		}
-
-		inline void Add_ts(Listener* listener){
-			ASSERT(listener)
-			ting::Mutex::Guard mutexGuard(this->mutex);
-//			TRACE(<< "Add_ts(): enter" << std::endl)
-//			ASSERT(this->iter == this->listeners.end())//NOTE: do this ASSERT() after mutex is locked!!!
-			this->listeners.push_back(listener);
-//			this->iter = this->listeners.end();
-			++listener->numTimesAdded;
-//			TRACE(<< "Add_ts(): exit" << std::endl)
-		}
-
-		inline void Remove_ts(Listener* listener){
-			ASSERT(listener)
-			ting::Mutex::Guard mutexGuard(this->mutex);
-//			TRACE(<< "Remove_ts(): enter" << std::endl)
-//			ASSERT(this->iter == this->listeners.end())//NOTE: do this ASSERT() after mutex is locked!!!
-
-			for(T_ListenerIter i = this->listeners.begin();
-					i != this->listeners.end();
-					++i
-				)
-			{
-				if((*i) == listener){
-					this->listeners.erase(i);
-					--listener->numTimesAdded;
-//					TRACE(<< "Remove_ts(): exit" << std::endl)
-					return;
-				}
-			}//~for
-
-			ASSERT_INFO(false, "requested to remove listener which was not added to that list before")
-		}
-		
-	};//~class ListenersListInternal
-};//~class Listener
-
-
-
-template <class T> class ListenersList : public Listener::ListenersListInternal{
-protected:
-	inline T* Next(){
-		return static_cast<T*>(this->ListenersListInternal::Next());
-	}
-
-public:
-	inline void Add_ts(T* listener){
-		this->ListenersListInternal::Add_ts(listener);
-	}
-
-	inline void Remove_ts(T* listener){
-		this->ListenersListInternal::Remove_ts(listener);
-	}
-};
 
 
 
