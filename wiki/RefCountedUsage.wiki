@@ -50,7 +50,9 @@ Note, that constructor of the class is intentionally made private and a static N
 <br>
 = Referencing objects with ting::Ref =
 
-_ting::Ref_ is a template class representing a hard reference to reference counted object (derived from ting::RefCounted). It's usage is quite simple:
+_ting::Ref_ is a template class representing a hard reference to reference counted object (derived from ting::RefCounted). Note, that it is not allowed to create references using *new* operator (the *new* operator is private anyway).
+
+The usage is quite simple:
 
 {{{
 //create first object
@@ -76,3 +78,15 @@ glomalMC.Reset();//Reset this reference, it will no longer point to any object.
 }}}
 
 
+
+<br>
+= Referencing objects with ting::WeakRef =
+
+_ting::WeakRef_ is a template class representing a weak reference. Weak reference does not guarantee that the object is still alive. Actually, if there are several hard references to the object and there are several weak references to the same object, then, after all hard references go out of scope the object will be destroyed immediately, despite the fact that some weak references still exist.
+
+Note, that it is not allowed to access the object through weak reference directly. In order to access the object, one needs to construct a hard reference from the weak reference and then check that the constructed hard reference is valid. If the constructed hard reference is not valid, then the object was deleted before because all hard references to it have ceased to exist.
+
+The usage is as follows:
+{{{
+
+}}}
