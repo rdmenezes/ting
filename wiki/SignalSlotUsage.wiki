@@ -2,14 +2,28 @@
 
 = Introduction =
 
-*ting* offers implementation of a signal-slot callback mechanism.
+*ting* offers implementation of a signal-slot callback mechanism. The implementation is based on C++ templates and C preprocessor. No additional tools or code generators needed.
 
 
 
 <br>
 = Concept =
 
-TODO
+Signal-slot is a technique of calling callback functions. The callback function may be an ordinary C-like function of function-member of some class. In latter case, it should be used in conjunction with object, for which the function-member should be called.
+
+The _*signal*_ is an object which holds list of callbacks it should call when needed.
+
+The _*slot*_ is actually a callback function which is to be called.
+
+When adding a pointer to callback function to the callbacks list of a signal it is said that one connects a signal to a slot.
+
+When signal starts calling all the callbacks it has in its list, it is said that the signal is emitted.
+
+Signal is emitted by someone who wants to call the callbacks. In *ting* it is done by calling the Emit() method of Signal object.
+
+Signal may have arguments. The arguments are passed to the signal by callee as arguments to signal's Emit() method. Then, these arguments will be passed to every callback function (to every slot) in the signal's list.
+
+Signal can only be connected to those slots whose arguments match the ones of the signal. Although, it is also possible to connect the signal to slots with shorter list of arguments, in which case the rest of the signal arguments will not be passed to the slot function when the signal is emitted.
 
 
 
