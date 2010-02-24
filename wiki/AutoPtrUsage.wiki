@@ -1,4 +1,5 @@
 #summary Usage of the ting auto pointer
+#labels Featured
 
 = Introduction =
 
