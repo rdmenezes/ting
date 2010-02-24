@@ -31,7 +31,17 @@ cf := -Wall -I../src
 cf += -DDEBUG
 
 
-test: run_PoolStored_test run_Timer_test run_Thread_test run_Ref_test run_WaitSet_test run_Signal_test
+test: run_debug_test run_PoolStored_test run_Timer_test run_Thread_test run_Ref_test run_WaitSet_test run_Signal_test
+
+
+
+run_debug_test: debug_test$(ext)
+	@echo running debug_test...
+	@./debug_test$(ext)
+
+debug_test$(ext): src/debug_test.cpp
+	@echo Building $@...
+	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -97,6 +107,7 @@ WaitSet_test$(ext): src/WaitSet_test.cpp
 
 
 clean:
+	@$(remove) debug_test$(ext)
 	@$(remove) PoolStored_test$(ext)
 	@$(remove) Timer_test$(ext)
 	@$(remove) Thread_test$(ext)

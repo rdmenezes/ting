@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008 Ivan Gagis
+Copyright (c) 2008-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,10 @@ THE SOFTWARE. */
 
 // ting 0.4
 // Homepage: http://code.google.com/p/ting
-// Author: Ivan Gagis <igagis@gmail.com>
 
 /**
  * @file debug.hpp
+ * @author Ivan Gagis <igagis@gmail.com>
  * @brief Debug utilities.
  */
 
@@ -106,7 +106,7 @@ inline std::ofstream& DebugLogger(){
 
 #include <e32std.h>
 
-#define ASSERT_ALWAYS(x) __ASSERT_ALWAYS((x),User::Panic(_L("ASSERTION FAILED!"),3));
+#define ASSERT_ALWAYS(x) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 #define ASSERT_INFO_ALWAYS(x, y) ASSERT_ALWAYS(x)
 
 #else //Non symbian
@@ -118,7 +118,7 @@ inline std::ofstream& DebugLogger(){
 						TRACE_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
 						assert(false); \
 					}
-#define ASSERT_ALWAYS(x) ASSERT_INFO_ALWAYS((x),"no additional info")
+#define ASSERT_ALWAYS(x) ASSERT_INFO_ALWAYS((x), "no additional info")
 
 #endif
 
