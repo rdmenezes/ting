@@ -112,3 +112,33 @@ TestClass *c = new TestClass();
 ASS(c)->a = 13;
 int b = ASS(c)->a;
 }}}
+
+
+<br>
+*STATIC_ASSERT(x)*<br>
+where *x* is a boolean expression which can be evaluated at compile time.
+
+Static assertion is used to check some conditions in compile time. For example, check size of some class to have a certain value.
+STATIC_ASSERT() macro can be used in global scope, inside of a function, inside of a class declaration. It is ok to put STATIC_ASSERT() to template declaration but it will not be checked in that case, i.e. it will not have any effect when using inside of a template.
+
+Example:
+{{{
+STATIC_ASSERT(sizeof(int) == 4)
+
+
+class TestClass{
+public:
+    int a;
+
+    //make sure that unsigned char type and signed char type are 8 bit wide.
+    STATIC_ASSERT(unsigned char(-1) == 0xFF)
+    STATIC_ASSERT(signed char(0xFF) == -1)
+    STATIC_ASSERT(sizeof(unsigned char) == sizeof(signed char))
+};
+
+
+void MyFunction(TestClass& arg){
+    STATIC_ASSERT(sizeof(TestClass) == sizeof(int))
+    //...
+}
+}}}
