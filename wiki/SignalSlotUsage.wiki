@@ -1,0 +1,26 @@
+#summary Signal-slot callback mechanism usage
+
+= Introduction =
+
+*ting* offers implementation of a signal-slot callback mechanism.
+
+
+
+<br>
+= Concept =
+
+TODO
+
+
+
+<br>
+= Header file =
+In order to use ting signal-slot, one needs to include this header file:
+{{{
+#include <ting/Signal.hpp>
+}}}
+
+
+
+<br>
+= TODO =
