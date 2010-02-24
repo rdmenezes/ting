@@ -51,24 +51,28 @@ Note, that constructor of the class is intentionally made private and a static N
 = Referencing objects with ting::Ref =
 
 _ting::Ref_ is a template class representing a hard reference to reference counted object (derived from ting::RefCounted). It's usage is quite simple:
+
 {{{
+//create first object
 ting::Ref<MyClass> globalMC = MyClass::New(0, 1);;
+
 {
+    //create second object
     ting::Ref<MyClass> mc = MyClass::New(13, 14);
 
     mc->a = 15;
     int k = mc->b;
 
     globalMC = mc;
-    //at this point, the object,
-    //referenced by "globalMC" before "mc" was assigned to it,
-    //will be deleted. And "globalRC" reference will point
-    //to the same object as "mc" does.
+    //At this point, the first object will be deleted.
+    //And "globalRC" reference is pointing to second object as "mc" does.
 }
-//at this point the "mc" reference is destroyed as it went out of scope.
-//But "globalMC" still references to the object of MyClass.
+//At this point the "mc" reference is destroyed as it went out of scope.
+//But "globalMC" still references to the second object.
 
 glomalMC.Reset();//Reset this reference, it will no longer point to any object.
-//At this point, the object will be deleted, as the last hard reference
+//At this point, the second object will be deleted, as the last hard reference
 //to it was destroyed, or reset.
 }}}
+
+
