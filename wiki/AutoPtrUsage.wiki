@@ -1,0 +1,20 @@
+#summary Usage of the ting auto pointer
+
+= Introduction =
+
+*ting* offers its own implementation of auto pointer. It is very similar to std::auto_ptr, but have some improvements, like automatic conversion to bool-like type.
+Intention of auto pointers is to prevent possible memory leaks and automatically free memory occupied by object when auto pointer goes out of scope.
+
+*ting* auto pointer is implemented as ting::Ptr class.
+
+
+
+<br>
+= Header file =
+
+In order to use ting::Ptr one needs to include the following header file:
+{{{
+#include <ting/Ptr.hpp>
+}}}
+
+
