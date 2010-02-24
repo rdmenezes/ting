@@ -1,5 +1,4 @@
 #summary ting::Thread usage tutorial
-#labels Featured
 
 =Creating a Thread=
 first of all we need to include *ting* header to use the library
