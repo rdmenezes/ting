@@ -1,5 +1,9 @@
 #summary ting usage main page
+#labels Featured
 
 Following tutorials are available:
- * [Debugging] - ting debugging facilities
- * [AutoPtrUsage ting::Ptr] - ting auto pointer
+ * [Debugging] - debugging facilities
+ * [AutoPtrUsage ting::Ptr] - auto pointer
+ * [RefCountedUsage ting::RefCounted] - reference counting pointer
+ * [tingUsageTutorial ting::Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
+ * [SocketsUsage ting::SocketLib] - network sockets wrapper
