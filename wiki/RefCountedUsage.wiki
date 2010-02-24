@@ -1,5 +1,4 @@
 #summary Using the ting reference counting pointers.
-#labels Featured
 
 
 = Introduction =
