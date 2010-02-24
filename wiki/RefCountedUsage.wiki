@@ -5,6 +5,11 @@
 
 *ting* provides facilities for creating reference counted objects and use reference counting pointers to these objects. This allows free the object memory automatically whenever no active references to that object left.
 
+Hard references and weak references are supported.
+
+Reference counted object may be referenced from different threads. _ting::RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold hard reference to the object and in both of them the hard reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
+
+Whenever there is a hard reference to the object, on can be assured that the object will exist and will not be deleted. The object is deleted when there are no hard references left.
 
 
 <br>
@@ -39,3 +44,8 @@ public:
 };
 }}}
 Note, that constructor of the class is intentionally made private and a static New() method introduced to construct the object. This is not a mandatory technique but it is a good practice, and using this with ting::RefCounted objects is encouraged. As of current version (ting-0.4) the constructor of ting::RefCounted class is public, but it is possible that in later versions of ting it will be made protected, so it will only be possible to construct the object from within its own method, e.g. New(). Also, using this practice will help you assure that the object of your class will only be accessed through ting::Ref references, and not via traditional C pointers, whose usage with ting::RefCounted, if not forbidden, then, at least, strongly _not_ recommended.
+
+
+
+<br>
+= Referencing objects with ting::Ref =
