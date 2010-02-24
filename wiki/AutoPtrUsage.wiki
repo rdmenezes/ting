@@ -49,6 +49,24 @@ public:
     //and "p1" is invalid (does not point to any object).
     //I.e. the owning of the object is transferred to "p2".
 }
-//
+//Here, the object will be deleted, because auto pointer
+//which owns the object went out of scope.
 
 }}}
+
+
+
+<br>
+= No "delete" concept =
+
+Ideally, one should use only auto pointers in their programs, and should not use traditional C pointers. And it will significantly reduce the program memory leak proneness.
+
+*ting* offers 3 kinds of automatic "pointers":
+ * *ting::Ptr*
+ * *ting::Array*
+ * *ting::Ref*
+
+Proper use of these facilities in your program will reduce the memory leaks proneness significantly.
+
+*Rule of thumb*<br>
+The keywords _*delete*_ and _*delete[]*_ should not be resent in your programs. If they are then you might be not using automatic pointers somewhere.
