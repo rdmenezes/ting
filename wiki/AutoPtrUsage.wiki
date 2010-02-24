@@ -69,4 +69,8 @@ Ideally, one should use only auto pointers in their programs, and should not use
 Proper use of these facilities in your program will reduce the memory leaks proneness significantly.
 
 *Rule of thumb*<br>
-The keywords _*delete*_ and _*delete[]*_ should not be resent in your programs. If they are then you might be not using automatic pointers somewhere.
+The keywords
+{{{delete}}}
+and
+{{{delete[]}}}
+should not be resent in your programs. If they are then you might be not using automatic pointers somewhere.
