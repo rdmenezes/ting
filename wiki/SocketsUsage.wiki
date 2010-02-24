@@ -1,4 +1,3 @@
-#labels Featured
 #ting Sockets usage examples
 
 = Server side =
