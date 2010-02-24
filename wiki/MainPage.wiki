@@ -3,7 +3,7 @@
 
 Following tutorials are available:
  * [Debugging] - debugging facilities
- * [AutoPtrUsage ting::Ptr] - auto pointer
- * [RefCountedUsage ting::RefCounted] - reference counting pointer
- * [tingUsageTutorial ting::Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
- * [SocketsUsage ting::SocketLib] - network sockets wrapper
+ * [AutoPtrUsage Ptr] - auto pointer
+ * [RefCountedUsage RefCounted] - reference counting pointer
+ * [tingUsageTutorial Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
+ * [SocketsUsage SocketLib] - network sockets wrapper
