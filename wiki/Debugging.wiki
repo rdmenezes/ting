@@ -19,6 +19,7 @@ Note: some debug macros are always turned on, regardless of DEBUG macro defined 
 
 
 
+<br>
 = Header file =
 
 In order to use ting debugging facilities, include the following header file:
@@ -28,6 +29,7 @@ In order to use ting debugging facilities, include the following header file:
 
 
 
+<br>
 = Semicolons after macros =
 
 Note, that semicolons after ting debugging macros are not required. Semicolons are already included inside of the macros. This is because macros can be turned off in release builds, in which case there will be redundant semicolons in your program since macros are evaluated to nothing.
@@ -45,11 +47,13 @@ TRACE(<< "Hello world!" << std::endl); // incorrect
 
 
 
+<br>
 = ASSERTIONS =
 
 Following assertion macros are available:
 
 
+<br>
 *ASSERT(x)*<br>
 *ASSERT_ALWAYS(x)*<br>
 where *x* is a boolean expression.
@@ -63,6 +67,7 @@ ASSERT(sizeof(a) == 4 && sizeof(a) == sizeof(int))
 }}}
 
 
+<br>
 *ASSERT_INFO(x, y)*<br>
 *ASSERT_INFO_ALWAYS(x, y)*<br>
 where *x* is a boolean expression.<br>
@@ -76,6 +81,7 @@ ASSERT_INFO(a == 14, "a is not 14, a is " << a)
 Note, that std::endl is not required as well as leading operator <<.
 
 
+<br>
 *ASSERT_EXEC(x)*<br>
 where *x* is a boolean expression.
 
@@ -87,4 +93,22 @@ ASSERT_EXEC(DoSomethingAndReturnTrueOnSuccess())
 }}}
 
 
-= TODO... =
+<br>
+*ASS(x)*<br>
+where *x* is a *pointer* or *ting::Ref* or *ting::Ptr*. Generally speaking, *x* is any value which can be automatically converted to bool-like type and which has operator->() defined.
+
+This assertion is used to check pointer value for 0 before dereferencing it with *operator->()*.
+
+Example:
+{{{
+class TestClass{
+public:
+    int a;
+};
+
+TestClass *c = new TestClass();
+
+//make sure, "c" is not 0 before accessing member a.
+ASS(c)->a = 13;
+int b = ASS(c)->a;
+}}}
