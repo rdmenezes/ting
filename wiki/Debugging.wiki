@@ -95,7 +95,7 @@ ASSERT_EXEC(DoSomethingAndReturnTrueOnSuccess())
 
 <br>
 *ASS(x)*<br>
-where *x* is a *pointer* or *ting::Ref* or *ting::Ptr*. Generally speaking, *x* is any value which can be automatically converted to bool-like type and which has operator->() defined.
+where *x* is a *pointer* or _ting::Ref_, or _ting::Ptr_. Generally speaking, *x* is any value which can be automatically converted to bool-like type and which has operator->() defined.
 
 This assertion is used to check pointer value for 0 before dereferencing it with *operator->()*.
 
