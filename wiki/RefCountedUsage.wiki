@@ -111,3 +111,14 @@ if(ting::Ref<MyClass> hmc = wmc){
    //weak reference in not valid anymore
 }
 }}}
+
+
+
+<br>
+= Memory leaks =
+
+The purpose of the reference counting mechanism is to avoid memory leaks, but, nevertheless, memory leaks are still possible. The scenario of memory leaking when using reference counting is called a cycling references.
+
+If there are two objects which hold hard references to each other then these two objects will never be destroyed, even if all hard references to them from "outside" world have went out of scope. Because there are still at least 1 hard reference to each of the object exists (reference being held by another object).
+
+To avoid such situations, one needs to do a proper design of his/her classes and use weak reference in one of such objects and hard reference in another one. This is the _main_ reason why weak references are introduced.
