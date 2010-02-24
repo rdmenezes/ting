@@ -1,4 +1,5 @@
 #summary Using the ting reference counting pointers.
+#labels Featured
 
 
 = Introduction =
@@ -88,5 +89,25 @@ Note, that it is not allowed to access the object through weak reference directl
 
 The usage is as follows:
 {{{
+//create object
+ting::Ref<MyClass> mc = MyClass::New(13, 14);
 
+//create weak reference to the object
+ting::WeakRef<MyClass> wmc = mc;
+
+//access some object member using the weak reference
+if(ting::Ref<MyClass> hmc = wmc){
+    hmc->a = 35;
+    int k = hmc->b;
+    //...
+}
+
+//destroy last hard reference to the object
+mc.Reset();//the object will be deleted
+
+//try accessing some object member using the weak reference
+if(ting::Ref<MyClass> hmc = wmc){
+   //Will never get there as the object is destroyed and
+   //weak reference in not valid anymore
+}
 }}}
