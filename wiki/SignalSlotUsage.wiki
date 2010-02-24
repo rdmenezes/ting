@@ -25,6 +25,10 @@ Signal may have arguments. The arguments are passed to the signal by callee as a
 
 Signal can only be connected to those slots whose arguments match the ones of the signal. Although, it is also possible to connect the signal to slots with shorter list of arguments, in which case the rest of the signal arguments will not be passed to the slot function when the signal is emitted.
 
+It is possible to disconnect a signal from particular slot or from all slots it is currently connected to.
+
+*ting* signal-slot implementation is thread-safe in the sense that it is safe to connect, disconnect and emit signals from different threads. E.g. if one thread emits the signal and the other one tries to connect it to some slot.
+
 
 
 <br>
