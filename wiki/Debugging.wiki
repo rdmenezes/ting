@@ -177,3 +177,27 @@ TRACE_AND_LOG(
         << "sizeof(double) = " << sizeof(double) << std::endl
     )
 }}}
+
+
+
+<br>
+= Debug code =
+
+There is a *DEBUG_CODE(x)* macro which allows you to define some piece of code which will be present only in debug build and will be excluded from release build (the one created without DEBUG macro defined).
+
+Example:
+{{{
+DEBUG_CODE(int a = ) DoSomethingAndReturnMinusOneOnFailure();
+
+ASSERT(a != -1)
+}}}
+
+The macro is useful for defining one-line code pieces. Whenever multiple lines of debugging code needs to be defined, one should use
+{{{
+#ifdef DEBUG
+
+//Do some checks required only in debug builds
+//...
+
+#endif//~DEBUG
+}}}
