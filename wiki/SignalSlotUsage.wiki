@@ -142,3 +142,47 @@ As a result, the following will be printed:
 }}}
 
 Note, that the above function slots have different types of return value. This is intentionally made to demonstrate that the return value does not matter and is ignored.
+
+
+
+= Connecting signal to a Function-member slot =
+{{{
+class MyClass{
+    int classData;
+public:
+    MyClass(int data) :
+            classData(data)
+    {}
+
+    void MemberSlotWith_3_Args(int a, char c, int* ia){
+        std::cout << "3 arg method called, classData = " << classData << std::endl;
+    }
+
+    int OverloadedMemberSlot(int a){
+        std::cout << "1 arg overloaded method called, a = " << a << std::endl;
+        return 3544;
+    }
+
+    bool OverloadedMemberSlot(int a, char c){
+        std::cout << "2 arg overloaded method called, a = " << a << std::endl;
+        return false;
+    }
+};
+
+MyClass obj;
+
+mySignalWithArgs.Connect(&obj, &MyClass::MemberSlotWith_3_Args);
+
+//when connecting overloaded methods it is necessary to
+//indicate which one exactly you are connecting by using C-style cast
+mySignalWithArgs.Connect(
+        &obj,
+        (int(MyClass::*)(int)) &MyClass::OverloadedMemberSlot
+    );
+mySignalWithArgs.Connect(
+        &obj,
+        (bool(MyClass::*)(int, char)) &MyClass::OverloadedMemberSlot
+    );
+
+mySignalWithArgs.Emit(13, 'G', 0);//3rd argument is just a 0 pointer to int.
+}}}
