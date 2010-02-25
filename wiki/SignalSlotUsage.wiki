@@ -72,7 +72,7 @@ mySignalWithArgs.Emit(10, 'f', intArray);
 
 
 <br>
-= Connecting simple Function slot to a signal =
+= Connecting signal to a simple Function slot =
 
 It is possible to connect the signal to any function (function slot) which matches its arguments list with signal's arguments list or has shorter
 arguments list than signal has but with matching argument types.
