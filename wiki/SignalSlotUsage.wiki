@@ -90,7 +90,7 @@ mySignal.Emit();
 }}}
 As a result, the following will be printed:
 {{{
-"Hello World!"
+Hello World!
 }}}
 
 
