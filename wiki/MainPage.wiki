@@ -7,3 +7,4 @@ Following tutorials are available:
  * [RefCountedUsage RefCounted] - reference counting pointer
  * [tingUsageTutorial Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
  * [SocketsUsage SocketLib] - network sockets wrapper
+ * [SignalSlotUsage Signal-Slot] - signal-slot callback technique
