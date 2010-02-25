@@ -197,9 +197,9 @@ As a result, the following will be printed:
 
 
 <br>
-= Connecting signal to a Function-member slot using ting::WeakRef =
+= Connecting signal to a Function-member slot using !ting::WeakRef =
 
-It is possible to connect signal to function-members slot using the ting::WeakRef instead of traditional C-like pointer. It is done in a very similar way, just pass a WeakRef to the object instead of traditional pointer to the object as a first argument of Connect().
+It is possible to connect signal to function-members slot using the !_ting::WeakRef_ instead of traditional C-like pointer. It is done in a very similar way, just pass a !_ting::WeakRef_ to the object instead of traditional pointer to the object as a first argument of Connect().
 
 
 
