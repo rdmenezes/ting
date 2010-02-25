@@ -41,4 +41,29 @@ In order to use ting signal-slot, one needs to include this header file:
 
 
 <br>
-= TODO =
+= Signal objects =
+
+There is a _ting::Signal0_ class which represents a signal with 0 arguments.<br>
+And, there are template classes like:<br>
+_ting::Signal1_<br>
+_ting::Signal2_<br>
+...<br>
+_ting::Signal10_<br>
+
+which represent a signals with different number of arguments (from 1 to 10).
+
+To create a signal object with 0 arguments just do this:
+{{{
+ting::Signla0 mySignal;
+}}}
+
+To create a signal, for example, with 3 arguments of types {{{int}}}, {{{char}}} and {{{int*}}}, do the following:
+{{{
+ting::Signal3<int, char, int*> mySignalWithArgs;
+}}}
+
+
+
+<br>
+= Connecting simple Function slot =
+TODO:
