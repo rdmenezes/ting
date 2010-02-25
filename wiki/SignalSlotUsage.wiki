@@ -124,8 +124,21 @@ bool MyOverloadedFunctionSlot(int a, char c){
 mySignalWithArgs.Connect(&MyFunctionSlotWith_0_Args);
 mySignalWithArgs.Connect(&MyFunctionSlotWith_1_Arg);
 mySignalWithArgs.Connect(&MyFunctionSlotWith_3_Args);
-mySignalWithArgs.Connect(&MyOverloadedFunctionSlot);
-mySignalWithArgs.Connect(&MyOverloadedFunctionSlot);
+
+//when connecting overloaded functions, it is necessary to indicate which one
+//you are exactly connecting by using C-style cast.
+mySignalWithArgs.Connect((int(*)(int)) &MyOverloadedFunctionSlot);
+mySignalWithArgs.Connect((bool(*)(int, char)) &MyOverloadedFunctionSlot);
 
 mySignalWithArgs.Emit(13, 'G', 0);//3rd argument is just a 0 pointer to int.
 }}}
+As a result, the following will be printed:
+{{{
+0 args func called
+1 arg func called, a = 13
+3 arg func called
+1 arg overloaded func called, a = 13
+2 arg overloaded func called, a = 13
+}}}
+
+Note, that the above function slots have different types of return value. This is intentionally made to demonstrate that the return value does not matter and is ignored.
