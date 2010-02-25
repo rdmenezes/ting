@@ -626,7 +626,12 @@ public:
 		return (*this);
 	}
 
-	//multiplies this matrix by Scale matrix from the left (M = S * M)
+	/**
+	 * @brief Multiply current matrix by scale matrix.
+	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * @param scale - vector of scaling factors in x, y and z directons.
+	 * @return reference to this Matrix instance.
+	 */
 	Matrix4& Scale(const Vector3<T>& scale){
 		//TODO:rewrite it using the *= operator
 		
@@ -653,6 +658,31 @@ public:
 		//NOTE: 4th row remains unchanged
 		return (*this);
 	}
+
+
+	/**
+	 * @brief Multiply current matrix by scale matrix.
+	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * @param x - scaling factor in x directon.
+	 * @param y - scaling factor in y directon.
+	 * @param z - scaling factor in z directon.
+	 * @return reference to this Matrix instance.
+	 */
+	Matrix4& Scale(T x, T y, T z){
+		return this->Scale(Vector3<T>(x, y, z));
+	}
+
+
+	/**
+	 * @brief Multiply current matrix by scale matrix.
+	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * @param scale - scaling factor to be applied in all 3 directon (x, y and z).
+	 * @return reference to this Matrix instance.
+	 */
+	Matrix4& Scale(T scale){
+		return this->Scale(Vector3<T>(scale, scale, scale));
+	}
+
 
 	//multiplies this matrix by Translation matrix from the left (M = T * M)
 	Matrix4& Translate(const Vector3<T>& t){
@@ -708,7 +738,6 @@ template <typename T> class Quaternion{
 public:
 	T x, y, z, w; //Quaternion components
 	
-	// This is our constructor that allows us to initialize our data upon creating an instance
 	Quaternion(T qx, T qy, T qz, T qw) :
 			x(qx),
 			y(qy),
