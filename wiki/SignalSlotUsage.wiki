@@ -197,6 +197,15 @@ As a result, the following will be printed:
 
 
 <br>
-= Connecting signal to a Function-member slot =
+= Connecting signal to a Function-member slot using ting::WeakRef =
 
-TODO
+It is possible to connect signal to function-members slot using the ting::WeakRef instead of traditional C-like pointer. It is done in a very similar way, just pass a WeakRef to the object instead of traditional pointer to the object as a first argument of Connect().
+
+
+
+<br>
+= Disconnecting =
+
+Disconnecting a signal from a particular slot is done similarly to connecting. Just use Disconnect() instead of Connect().
+
+Note, the Disconnect() method returns bool value indicating that the slot was actually disconnected or not. If it is {{{true}}} then the slot was disconnected. If it is {{{false}}} then the slot was not disconnected, possibly, due to it was not connected before to this signal.
