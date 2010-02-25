@@ -1,4 +1,4 @@
-#ting Sockets usage examples
+#summary Sockets usage examples
 
 = Server side =
 
