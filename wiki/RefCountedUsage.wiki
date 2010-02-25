@@ -5,11 +5,11 @@
 
 *ting* provides facilities for creating reference counted objects and use reference counting pointers to these objects. This allows free the object memory automatically whenever no active references to that object left.
 
-Hard references and weak references are supported.
+Strong references and weak references are supported.
 
-Reference counted object may be referenced from different threads. _ting::RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold hard reference to the object and in both of them the hard reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
+Reference counted object may be referenced from different threads. _ting::RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold strong reference to the object and in both of them the strong reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
 
-Whenever there is a hard reference to the object, on can be assured that the object will exist and will not be deleted. The object is deleted when there are no hard references left.
+Whenever there is a strong reference to the object, on can be assured that the object will exist and will not be deleted. The object is deleted when there are no strong references left.
 
 
 <br>
@@ -50,7 +50,7 @@ Note, that constructor of the class is intentionally made private and a static N
 <br>
 = Referencing objects with ting::Ref =
 
-_ting::Ref_ is a template class representing a hard reference to reference counted object (derived from ting::RefCounted). Note, that it is not allowed to create references using *new* operator (the *new* operator is private anyway).
+_ting::Ref_ is a template class representing a strong reference to reference counted object (derived from ting::RefCounted). Note, that it is not allowed to create references using *new* operator (the *new* operator is private anyway).
 
 The usage is quite simple:
 
@@ -73,7 +73,7 @@ ting::Ref<MyClass> globalMC = MyClass::New(0, 1);;
 //But "globalMC" still references to the second object.
 
 glomalMC.Reset();//Reset this reference, it will no longer point to any object.
-//At this point, the second object will be deleted, as the last hard reference
+//At this point, the second object will be deleted, as the last strong reference
 //to it was destroyed, or reset.
 }}}
 
@@ -82,9 +82,9 @@ glomalMC.Reset();//Reset this reference, it will no longer point to any object.
 <br>
 = Referencing objects with ting::WeakRef =
 
-_ting::WeakRef_ is a template class representing a weak reference. Weak reference does not guarantee that the object is still alive. Actually, if there are several hard references to the object and there are several weak references to the same object, then, after all hard references go out of scope the object will be destroyed immediately, despite the fact that some weak references still exist.
+_ting::WeakRef_ is a template class representing a weak reference. Weak reference does not guarantee that the object is still alive. Actually, if there are several strong references to the object and there are several weak references to the same object, then, after all strong references go out of scope the object will be destroyed immediately, despite the fact that some weak references still exist.
 
-Note, that it is not allowed to access the object through weak reference directly. In order to access the object, one needs to construct a hard reference from the weak reference and then check that the constructed hard reference is valid. If the constructed hard reference is not valid, then the object was deleted before because all hard references to it have ceased to exist.
+Note, that it is not allowed to access the object through weak reference directly. In order to access the object, one needs to construct a strong reference from the weak reference and then check that the constructed strong reference is valid. If the constructed strong reference is not valid, then the object was deleted before because all strong references to it have ceased to exist.
 
 The usage is as follows:
 {{{
@@ -101,7 +101,7 @@ if(ting::Ref<MyClass> hmc = wmc){
     //...
 }
 
-//destroy last hard reference to the object
+//destroy last strong reference to the object
 mc.Reset();//the object will be deleted
 
 //try accessing some object member using the weak reference
@@ -118,6 +118,6 @@ if(ting::Ref<MyClass> hmc = wmc){
 
 The purpose of the reference counting mechanism is to avoid memory leaks, but, nevertheless, memory leaks are still possible. The scenario of memory leaking when using reference counting is called a cycling references.
 
-If there are two objects which hold hard references to each other then these two objects will never be destroyed, even if all hard references to them from "outside" world have went out of scope. Because there are still at least 1 hard reference to each of the object exists (reference being held by another object).
+If there are two objects which hold strong references to each other then these two objects will never be destroyed, even if all strong references to them from "outside" world have went out of scope. Because there are still at least 1 strong reference to each of the object exists (reference being held by another object).
 
-To avoid such situations, one needs to do a proper design of his/her classes and use weak reference in one of such objects and hard reference in another one. This is the _main_ reason why weak references are introduced.
+To avoid such situations, one needs to do a proper design of his/her classes and use weak reference in one of such objects and strong reference in another one. This is the _main_ reason why weak references are introduced.
