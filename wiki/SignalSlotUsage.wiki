@@ -145,6 +145,7 @@ Note, that the above function slots have different types of return value. This i
 
 
 
+<br>
 = Connecting signal to a Function-member slot =
 {{{
 class MyClass{
@@ -169,7 +170,7 @@ public:
     }
 };
 
-MyClass obj;
+MyClass obj(14);
 
 mySignalWithArgs.Connect(&obj, &MyClass::MemberSlotWith_3_Args);
 
@@ -186,3 +187,16 @@ mySignalWithArgs.Connect(
 
 mySignalWithArgs.Emit(13, 'G', 0);//3rd argument is just a 0 pointer to int.
 }}}
+
+As a result, the following will be printed:
+{{{
+3 arg method called, classData = 14
+1 arg overloaded method called, a = 13
+2 arg overloaded method called, a = 13
+}}}
+
+
+<br>
+= Connecting signal to a Function-member slot =
+
+TODO
