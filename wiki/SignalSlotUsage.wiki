@@ -62,8 +62,61 @@ To create a signal, for example, with 3 arguments of types {{{int}}}, {{{char}}}
 ting::Signal3<int, char, int*> mySignalWithArgs;
 }}}
 
+The signal can then be emitted, whenever needed:
+{{{
+mySignal.Emit();
+
+int intArray[2] = {13, 14};
+mySignalWithArgs.Emit(10, 'f', intArray);
+}}}
 
 
 <br>
-= Connecting simple Function slot =
-TODO:
+= Connecting simple Function slot to a signal =
+
+It is possible to connect the signal to any function (function slot) which matches its arguments list with signal's arguments list or has shorter
+arguments list than signal has but with matching argument types.
+
+Note, it is not important which value the function returns, return values are ignored when emitting the signal.
+
+Connecting slots without arguments:
+{{{
+void MyFunctionSlotWith_0_Args(){
+    std::cout << "Hello World!" << std::endl;
+}
+
+mySignal.Connect(&MyFunctionSlotWith_0_Args);
+mySignal.Emit();
+}}}
+As a result, the following will be printed:
+{{{
+"Hello World!"
+}}}
+
+
+Connecting slots with arguments:
+{{{
+void MyFunctionSlotWith_0_Args(){
+    std::cout << "0 args func called" << std::endl;
+}
+
+void MyFunctionSlotWith_1_Arg(int a){
+    std::cout << "1 arg func called, a = " << a << std::endl;
+}
+
+void MyFunctionSlotWith_3_Args(int a, char c, int* ia){
+    std::cout << "3 arg func called" << std::endl;
+}
+
+void MyOverloadedFunctionSlot(int a){
+    std::cout << "1 arg overloaded func called, a = " << a << std::endl;
+}
+
+void MyOverloadedFunctionSlot(int a, char c){
+    std::cout << "2 arg overloaded func called, a = " << a << std::endl;
+}
+
+
+
+
+}}}
