@@ -1225,7 +1225,7 @@ private:
 }//~namespace
 
 
-/**
+/*
  * @mainpage ting::Socket library
  *
  * @section sec_about About
@@ -1235,7 +1235,7 @@ private:
  * @ref page_usage_tutorial "library usage tutorial" - quickstart tutorial
  */
 
-/**
+/*
  * @page page_usage_tutorial ting::Socket usage tutorial
  *
  * TODO: write usage tutorial

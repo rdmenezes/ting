@@ -1,3 +1,11 @@
+libting-dev (0.4.0-1) stable; urgency=low
+
+  * some improvements
+  * some bugfixes
+
+ -- Ivan Gagis <igagis@gmail.com>  Fri, 25 Feb 2010 15:52:00 +0200
+
+
 libting-dev (0.3.0-1) stable; urgency=low
 
   * Initial release

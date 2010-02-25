@@ -85,6 +85,7 @@ template <class T> class PoolStored{
 		//so I resolved this by declaring PoolElem struct as aligned by sizeof(int).
 		M_DECLARE_ALIGNED(sizeof(int));
 
+
 		struct Chunk : public ting::Array<PoolElem>{
 			unsigned numAllocated;
 			Chunk() :
@@ -111,6 +112,7 @@ template <class T> class PoolStored{
 			}
 		};
 
+		
 		struct ChunksList{
 			typedef std::vector<Chunk> T_List;
 			typedef typename T_List::iterator T_Iter;

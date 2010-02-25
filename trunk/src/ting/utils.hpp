@@ -68,6 +68,7 @@ template <class T> inline void Exchange(T &a, T &b){
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 //quick exchange two unsigned 32bit integers
 template <> inline void Exchange<u32>(u32& x, u32& y){
 //	TRACE(<<"Exchange<u32>(): invoked"<<std::endl)
@@ -77,15 +78,18 @@ template <> inline void Exchange<u32>(u32& x, u32& y){
 	x ^= y;
 	y ^= x;
 }
+#endif
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 //quick exchange two floats
 template <> inline void Exchange<float>(float& x, float& y){
 //	TRACE(<<"Exchange<float>(): invoked"<<std::endl)
 	Exchange<u32>(reinterpret_cast<u32&>(x), reinterpret_cast<u32&>(y));
 }
 STATIC_ASSERT(sizeof(float) == sizeof(u32))
+#endif
 
 
 

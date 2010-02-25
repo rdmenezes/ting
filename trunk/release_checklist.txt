@@ -6,5 +6,7 @@
 
 * update version number in the create_deb.sh file in the pakage name
 
+* update the PROJECT_NUMBER variable in the doxygen.cfg file to latest version number
+
 * generate doxygen docs
 
