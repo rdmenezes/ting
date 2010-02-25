@@ -100,23 +100,32 @@ void MyFunctionSlotWith_0_Args(){
     std::cout << "0 args func called" << std::endl;
 }
 
-void MyFunctionSlotWith_1_Arg(int a){
+char MyFunctionSlotWith_1_Arg(int a){
     std::cout << "1 arg func called, a = " << a << std::endl;
+    return 'J';
 }
 
 void MyFunctionSlotWith_3_Args(int a, char c, int* ia){
     std::cout << "3 arg func called" << std::endl;
 }
 
-void MyOverloadedFunctionSlot(int a){
+int MyOverloadedFunctionSlot(int a){
     std::cout << "1 arg overloaded func called, a = " << a << std::endl;
+    return 3544;
 }
 
-void MyOverloadedFunctionSlot(int a, char c){
+bool MyOverloadedFunctionSlot(int a, char c){
     std::cout << "2 arg overloaded func called, a = " << a << std::endl;
+    return false;
 }
 
+//connect slots to signal
 
+mySignalWithArgs.Connect(&MyFunctionSlotWith_0_Args);
+mySignalWithArgs.Connect(&MyFunctionSlotWith_1_Arg);
+mySignalWithArgs.Connect(&MyFunctionSlotWith_3_Args);
+mySignalWithArgs.Connect(&MyOverloadedFunctionSlot);
+mySignalWithArgs.Connect(&MyOverloadedFunctionSlot);
 
-
+mySignalWithArgs.Emit(13, 'G', 0);//3rd argument is just a 0 pointer to int.
 }}}
