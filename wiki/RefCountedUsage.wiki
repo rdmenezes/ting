@@ -7,7 +7,7 @@
 
 Strong references and weak references are supported.
 
-Reference counted object may be referenced from different threads. _ting::RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold strong reference to the object and in both of them the strong reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
+Reference counted object may be referenced from different threads. _ting::!RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold strong reference to the object and in both of them the strong reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
 
 Whenever there is a strong reference to the object, on can be assured that the object will exist and will not be deleted. The object is deleted when there are no strong references left.
 
@@ -25,7 +25,7 @@ In order to use the ting::Ref one needs to include the file:
 <br>
 = Creating reference counted class =
 
-To create a class for your reference counted object just derive from ting::RefCounted, as follows:
+To create a class for your reference counted object just derive from _ting::!RefCounted_, as follows:
 {{{
 class MyClass : public ting::RefCounted{
     MyClass(int valueA, int valueB) :
@@ -43,14 +43,14 @@ public:
     }
 };
 }}}
-Note, that constructor of the class is intentionally made private and a static New() method introduced to construct the object. This is not a mandatory technique but it is a good practice, and using this with ting::RefCounted objects is encouraged. As of current version (ting-0.4) the constructor of ting::RefCounted class is public, but it is possible that in later versions of ting it will be made protected, so it will only be possible to construct the object from within its own method, e.g. New(). Also, using this practice will help you assure that the object of your class will only be accessed through ting::Ref references, and not via traditional C pointers, whose usage with ting::RefCounted, if not forbidden, then, at least, strongly _not_ recommended.
+Note, that constructor of the class is intentionally made private and a static New() method introduced to construct the object. This is not a mandatory technique but it is a good practice, and using this with _ting::!RefCounted_ objects is encouraged. As of current version (ting-0.4) the constructor of _ting::!RefCounted_ class is public, but it is possible that in later versions of ting it will be made protected, so it will only be possible to construct the object from within its own method, e.g. New(). Also, using this practice will help you assure that the object of your class will only be accessed through _ting::Ref_ references, and not via traditional C pointers, whose usage with _ting::!RefCounted_, if not forbidden, then, at least, strongly _not_ recommended.
 
 
 
 <br>
-= Referencing objects with ting::Ref =
+= Referencing objects with _ting::Ref_ =
 
-_ting::Ref_ is a template class representing a strong reference to reference counted object (derived from ting::RefCounted). Note, that it is not allowed to create references using *new* operator (the *new* operator is private anyway).
+_ting::Ref_ is a template class representing a strong reference to reference counted object (derived from _ting::!RefCounted_). Note, that it is not allowed to create references using *new* operator (the *new* operator is private anyway).
 
 The usage is quite simple:
 
@@ -80,9 +80,9 @@ glomalMC.Reset();//Reset this reference, it will no longer point to any object.
 
 
 <br>
-= Referencing objects with ting::WeakRef =
+= Referencing objects with _ting::!WeakRef_ =
 
-_ting::WeakRef_ is a template class representing a weak reference. Weak reference does not guarantee that the object is still alive. Actually, if there are several strong references to the object and there are several weak references to the same object, then, after all strong references go out of scope the object will be destroyed immediately, despite the fact that some weak references still exist.
+_ting::!WeakRef_ is a template class representing a weak reference. Weak reference does not guarantee that the object is still alive. Actually, if there are several strong references to the object and there are several weak references to the same object, then, after all strong references go out of scope the object will be destroyed immediately, despite the fact that some weak references still exist.
 
 Note, that it is not allowed to access the object through weak reference directly. In order to access the object, one needs to construct a strong reference from the weak reference and then check that the constructed strong reference is valid. If the constructed strong reference is not valid, then the object was deleted before because all strong references to it have ceased to exist.
 
