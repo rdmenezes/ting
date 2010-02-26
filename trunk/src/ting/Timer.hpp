@@ -82,7 +82,8 @@ inline ting::u32 GetTicks();
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
 
-	struct TimerThread : public ting::Thread{
+	class TimerThread : public ting::Thread{
+	public:
 		bool quitFlag;
 		
 		ting::Mutex mutex;
