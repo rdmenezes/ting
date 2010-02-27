@@ -43,7 +43,7 @@ public:
     }
 };
 }}}
-Note, that constructor of the class is intentionally made private and a static New() method introduced to construct the object. This is not a mandatory technique but it is a good practice, and using this with _ting::!RefCounted_ objects is encouraged. As of current version (ting-0.4) the constructor of _ting::!RefCounted_ class is public, but it is possible that in later versions of ting it will be made protected, so it will only be possible to construct the object from within its own method, e.g. New(). Also, using this practice will help you assure that the object of your class will only be accessed through _ting::Ref_ references, and not via traditional C pointers, whose usage with _ting::!RefCounted_, if not forbidden, then, at least, strongly _not_ recommended.
+Note, that constructor of the class is intentionally made private and a static New() method introduced to construct the object. This is not a mandatory technique but it is a good practice, and using this with _ting::!RefCounted_ objects is encouraged. As of current version (ting-0.4) the operator *new* of _ting::!RefCounted_ class is public, but it is possible that in later versions of ting it will be made protected, so it will only be possible to construct the object from within its own method, e.g. New(). Also, using this practice will help you assure that the object of your class will only be accessed through _ting::Ref_ references, and not via traditional C pointers, whose usage with _ting::!RefCounted_, if not forbidden, then, at least, strongly _not_ recommended.
 
 
 
