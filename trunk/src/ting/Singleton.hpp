@@ -86,7 +86,7 @@ public:
 	 * @return reference to singleton object instance.
 	 */
 	inline static T& Inst(){
-		ASSERT(Singleton::IsCreated())
+		ASSERT_INFO(Singleton::IsCreated(), "Singleton::Inst(): Singleton object is not created")
 		return *(Singleton::StaticMemoryBlock());
 	}
 
