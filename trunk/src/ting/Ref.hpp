@@ -177,7 +177,9 @@ public:
 	//destructor shall be virtual!!!
 	virtual ~RefCounted(){}
 
-
+	inline unsigned NumRefs()const{
+		return ASS(this->counter)->numHardRefs;
+	}
 
 private:
 	//copy constructor is private, no copying
