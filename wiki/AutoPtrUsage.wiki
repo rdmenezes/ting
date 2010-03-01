@@ -2,19 +2,20 @@
 
 = Introduction =
 
-*ting* offers its own implementation of auto pointer. It is very similar to std::auto_ptr, but have some improvements, like automatic conversion to bool-like type.
+*ting* offers its own implementation of auto pointer. It is very similar to _std::auto_ptr_, but have some improvements, like automatic conversion to bool-like type.
 Intention of auto pointers is to prevent possible memory leaks and automatically free memory occupied by object when auto pointer goes out of scope.
 
-*ting* auto pointer is implemented as ting::Ptr class.
+*ting* auto pointer is implemented as _ting::Ptr_ class. Array auto pointer implemented as _ting::Array_ class.
 
 
 
 <br>
 = Header file =
 
-In order to use ting::Ptr one needs to include the following header file:
+In order to use _ting::Ptr_ or _ting::Array_ one needs to include the following header file:
 {{{
-#include <ting/Ptr.hpp>
+#include <ting/Ptr.hpp> //for ting::Ptr
+#include <ting/Array.hpp> //for ting::Array
 }}}
 
 
@@ -52,6 +53,41 @@ public:
 //Here, the object will be deleted, because auto pointer
 //which owns the object went out of scope.
 
+}}}
+
+
+
+<br>
+= ting::Array usage =
+
+While _ting::Ptr_ is a wrapper above {{{new}}}/{{{delete}}} operators, the _ting::Array_ is a wrapper above {{{new[]}}}/{{{delete[]}}} operators. Its behavior is similar to _ting::Ptr_.
+
+Example:
+{{{
+class MyClass{
+public:
+    int a;
+};
+
+{
+    ting::Array<MyClass> a1(10);//create array of 10 instances of MyClass
+
+    ting::Array<MyClass> a2; //create empty array
+
+    //access 4th object (numeration starts from 0)
+    a1[3].a = 30;
+
+    //Here, the "a1" is an array of 10 objects,
+    //while "a2" is invalid (empty array).
+    
+    //assign "a1" to "a2"
+    a2 = a1;
+
+    //Here, the "a2" is an array of 10 objects,
+    //while "a1" is invalid (empty array).
+}
+//Here, the memory occupied by array will be freed,
+//and objects will destroyed.
 }}}
 
 
