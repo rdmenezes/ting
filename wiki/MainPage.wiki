@@ -3,7 +3,7 @@
 
 Following tutorials are available:
  * [Debugging] - debugging facilities
- * [AutoPtrUsage Ptr] - auto pointer
+ * [AutoPtrUsage Ptr/Array] - auto pointer
  * [RefCountedUsage RefCounted] - reference counting pointer
  * [tingUsageTutorial Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
  * [SocketsUsage SocketLib] - network sockets wrapper
