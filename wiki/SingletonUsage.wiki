@@ -2,7 +2,7 @@
 
 = Introduction =
 
-It is often required to create a singleton objects in the program, i.e. use the singleton pattern.
+It is often required to create singleton objects in the program, i.e. use the singleton pattern.
 
 *ting* provides a template for quick creation of singleton classes.
 
