@@ -1,0 +1,48 @@
+#summary Singleton template usage
+
+= Introduction =
+
+It is often required to create a singleton objects in the program, i.e. use the singleton pattern.
+
+*ting* provides a template for quick creation of singleton classes.
+
+
+
+<br>
+= Header file =
+In order to use _ting::Singleton_ one needs to include the following header file:
+{{{
+#include <ting/Singleton.hpp>
+}}}
+
+
+
+<br>
+= Usage =
+The usage is simple:
+
+{{{
+class MySingletonClass : public ting::Singleton<MySingletonClass>{
+public:
+    int a;
+    int b;
+};
+
+
+
+int main(int argc, char** argv){
+    //create singleton object.
+    MySingletonClass mySingletonObject;
+
+    //NOTE: since this is a singleton class, creating other
+    //      instances of this class will cause an exception to be thrown.
+
+    //access the members of singleton object
+    MySingletonClass::Inst().a = 355;
+    MySingletonClass::Inst().b = 13;
+
+    int k = MySingletonClass::Inst().b;
+}
+}}}
+
+Note, that we create a singleton object inside of the main() function. Though it is not forbidden to create singleton objects in a global scope, it is not recommended and considered a bad practice. This is because when defining objects in global scope and in different files their order of construction is undetermined. Creating objects inside of the main() function allows you to strictly define the order of objects construction.
