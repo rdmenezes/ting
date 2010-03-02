@@ -148,7 +148,7 @@ void MyFunction(TestClass& arg){
 <br>
 = TRACEs and LOGs =
 
-Macros for tracing and logging are available. Traceing macros output info into standard output. Logging macros output info into _output.log_ file.
+Macros for tracing and logging are available. Tracing macros output info into standard output. Logging macros output info into _output.log_ file.
 
 Following macros are available:
 
