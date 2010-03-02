@@ -8,3 +8,4 @@ Following tutorials are available:
  * [tingUsageTutorial Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
  * [SocketsUsage SocketLib] - network sockets wrapper
  * [SignalSlotUsage Signal-Slot] - signal-slot callback technique
+ * [SingletonUsage Singleton] - template for singleton pattern
