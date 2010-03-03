@@ -22,12 +22,12 @@ THE SOFTWARE. */
 
 // ting 0.4
 // Homepage: http://code.google.com/p/ting
-// Author: Ivan Gagis <igagis@gmail.com>
 
 // Created on January 31, 2009, 11:04 PM
 
 /**
  * @file Buffer.hpp
+ * @author Ivan Gagis <igagis@gmail.com>
  * @brief buffer abstract class and static buffer wrapper.
  */
  
@@ -55,13 +55,6 @@ protected:
 
 
 
-	inline Buffer(T* buf_ptr, unsigned buf_size) :
-			buf(buf_ptr),
-			size(buf_size)
-	{}
-
-
-
 	//forbid copying
 	inline Buffer(const Buffer& b){
 		ASSERT(false)
@@ -77,6 +70,20 @@ protected:
 
 
 public:
+	/**
+	 * @brief Create a Buffer object.
+	 * Creates a Buffer object which wraps given memory buffer of specified size.
+	 * Note, the memory will not be freed upon this Buffer object destruction.
+	 * @param bufPtr - pointer to the memory buffer.
+	 * @param bufSize - size of the memory buffer.
+	 */
+	inline Buffer(T* bufPtr, unsigned bufSize) :
+			buf(bufPtr),
+			size(bufSize)
+	{}
+
+
+
 	/**
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
@@ -201,13 +208,12 @@ public:
  * @brief static buffer class template.
  * The static buffer template.
  */
-template <class T, unsigned buf_size> class StaticBuffer : public Buffer<T>{
-	T static_buffer[buf_size];
+template <class T, unsigned bufSize> class StaticBuffer : public ting::Buffer<T>{
+	T staticBuffer[bufSize];
 public:
-	inline StaticBuffer(){
-		this->buf = &this->static_buffer[0];
-		this->size = buf_size;
-	}
+	inline StaticBuffer() :
+			ting::Buffer<T>(&staticBuffer[0], bufSize)
+	{}
 };
 
 
