@@ -22,10 +22,10 @@ THE SOFTWARE. */
 
 // ting 0.4
 // Homepage: http://code.google.com/p/ting
-// Author: Ivan Gagis <igagis@gmail.com>
 
 /**
  * @file Timer.hpp
+ * @author Ivan Gagis <igagis@gmail.com>
  * @brief Timer library.
  */
 
@@ -95,7 +95,8 @@ class TimerLib : public Singleton<TimerLib>{
 
 		bool warpFlag;//false if last call to GetTicks() returned value in first half
 
-		TimerThread()
+		TimerThread() :
+				quitFlag(false)
 		{}
 
 		~TimerThread(){
@@ -254,6 +255,7 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 
 //override
 inline void TimerLib::TimerThread::Run(){
+	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
 	//init warp flag
 	if(ting::GetTicks() < ting::u32(-1) / 2){
 		this->warpFlag = false;
@@ -261,7 +263,9 @@ inline void TimerLib::TimerThread::Run(){
 		this->warpFlag = true;
 	}
 
+	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): creating mutex guard" << std::endl)
 	ting::Mutex::Guard mutexGuard(this->mutex);
+	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): entering while()" << std::endl)
 	while(!this->quitFlag){
 		//check warp
 		ting::u32 ticks = ting::GetTicks();

@@ -4,7 +4,7 @@
 #include <ting/Timer.hpp>
 
 int main(int argc, char *argv[]){
-//	TRACE(<<"Timer test "<<std::endl)
+//	TRACE_ALWAYS(<<"Timer test "<<std::endl)
 	ting::TimerLib timerLib;
 
 	bool exit = false;
@@ -35,6 +35,7 @@ int main(int argc, char *argv[]){
 	timer1.Start(5000);
 	timer2.Start(2500);
 
+//	TRACE_ALWAYS(<< "loop " << std::endl)
 	while(!exit){}
 
 	TRACE_ALWAYS(<<"[PASSED]: Timer test"<<std::endl)

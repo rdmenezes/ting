@@ -43,10 +43,12 @@ THE SOFTWARE. */
 
 //define macro used to align structures in memory
 #ifdef _MSC_VER //If Microsoft C++ compiler
-#define M_DECLARE_ALIGNED(x) __declspec(align(x))
+#define M_DECLARE_ALIGNED(x)
+#define M_DECLARE_ALIGNED_MSVC(x) __declspec(align(x))
 
 #elif defined(__GNUG__)//GNU g++ compiler
 #define M_DECLARE_ALIGNED(x) __attribute__ ((aligned(x)))
+#define M_DECLARE_ALIGNED_MSVC(x)
 
 #else
 #error "unknown compiler"

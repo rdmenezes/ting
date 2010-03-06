@@ -52,6 +52,9 @@ THE SOFTWARE. */
 
 namespace ting{
 
+//make sure theat we align PoolElem by int size when using MSVC compiler.
+STATIC_ASSERT(sizeof(int) == 4)
+
 
 /**
  * @brief Base class for pool-stored objects.
@@ -74,7 +77,7 @@ template <class T> class PoolStored{
 			u8 buf[ElemSize];
 		};
 
-		struct PoolElem : public BufHolder{
+		M_DECLARE_ALIGNED_MSVC(4) struct PoolElem : public BufHolder{
 			bool isFree;
 			PoolElem() :
 					isFree(true)

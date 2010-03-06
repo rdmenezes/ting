@@ -1,0 +1,108 @@
+threadlib := 
+rtlib :=
+
+ext = .exe
+remove = del
+
+#compiler flags
+cf := /EHsc -I../src
+cf += /D"DEBUG"
+cf += /D"WIN32"
+
+
+test: run_Timer_test run_debug_test run_utils_test run_PoolStored_test run_Thread_test run_Ref_test run_WaitSet_test run_Signal_test
+
+
+
+run_utils_test: utils_test$(ext)
+	@echo running $^...
+	@./$^
+
+utils_test$(ext): src/utils_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+
+run_debug_test: debug_test$(ext)
+	@echo running  $^...
+	@./$^
+
+debug_test$(ext): src/debug_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+
+run_PoolStored_test: PoolStored_test$(ext)
+	@echo running $^...
+	@./$^
+
+PoolStored_test$(ext): src/PoolStored_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+run_Timer_test: Timer_test$(ext)
+	@echo running $^...
+	@./$^
+
+Timer_test$(ext): src/Timer_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+run_Thread_test: Thread_test$(ext)
+	@echo running $^...
+	@./$^
+
+Thread_test$(ext): src/Thread_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+run_Ref_test: Ref_test$(ext)
+	@echo running $^...
+	@./$^
+
+Ref_test$(ext): src/Ref_test.cpp
+	@echo Building $@...
+	@cl $(cf) $<
+
+
+
+run_Signal_test: Signal_test$(ext)
+	@echo running $^...
+	@./$^
+
+Signal_test$(ext): src/Signal_test.cpp
+	@echo Building $@...
+	@cl $(cf) $<
+
+
+
+run_WaitSet_test: WaitSet_test$(ext)
+	@echo running $^...
+	@./$^
+
+WaitSet_test$(ext): src/WaitSet_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+
+
+clean:
+	@$(remove) debug_test$(ext) debug_test.obj
+	@$(remove) utils_test$(ext) utils_test.obj
+	@$(remove) PoolStored_test$(ext) PoolStored_test.obj
+	@$(remove) Timer_test$(ext) Timer_test.obj
+	@$(remove) Thread_test$(ext) Thread_test.obj
+	@$(remove) Ref_test$(ext) Ref_test.obj
+	@$(remove) Signal_test$(ext) Signal_test.obj
+	@$(remove) WaitSet_test$(ext) WaitSet_test.obj
+

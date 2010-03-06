@@ -159,9 +159,11 @@ private:
 protected:
 	//only base classes can construct this class
 	//i.e. use of this class is allowed only as a base class
-	inline RefCounted() throw() :
-			counter(new Counter(this))
-	{
+	inline RefCounted() throw(){
+		//NOTE: do not create Counter object in RefCounted constructor
+		//      initializer list because MSVC complains about usage of "this"
+		//      keyword in initializer list.
+		this->counter = new Counter(this);
 		ASSERT(this->counter)
 	}
 
