@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009 Ivan Gagis
+Copyright (c) 2009-2010 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.4
+// ting 0.4.1
 // Homepage: http://code.google.com/p/ting
-// Author: Ivan Gagis <igagis@gmail.com>
 
 /**
  * @file Singleton.hpp
+ * @author Ivan Gagis <igagis@gmail.com>
  * @brief Singleton base class (template).
  */
 

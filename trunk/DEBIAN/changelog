@@ -1,3 +1,10 @@
+libting-dev (0.4.1-1) stable; urgency=low
+
+  * bug fix in ting/Timer.hpp
+
+ -- Ivan Gagis <igagis@gmail.com>  Sat, 6 Mar 2010 21:41:00 +0200
+
+
 libting-dev (0.4.0-1) stable; urgency=low
 
   * some improvements
