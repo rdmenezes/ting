@@ -181,7 +181,7 @@ public:
 protected:
 	virtual HANDLE GetHandle() = 0;
 
-	virtual void SetWaitingEvents(u32 flagsToWaitFor){}
+	virtual void SetWaitingEvents(u32 /*flagsToWaitFor*/){}
 
 	//returns true if signalled
 	virtual bool CheckSignalled() throw(ting::Exc){

@@ -5,7 +5,7 @@ ext = .exe
 remove = del
 
 #compiler flags
-cf := /EHsc -I../src
+cf := /EHsc /W3 -I../src
 cf += /D"DEBUG"
 cf += /D"WIN32"
 

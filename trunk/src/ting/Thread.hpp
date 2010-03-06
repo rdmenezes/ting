@@ -71,6 +71,16 @@ THE SOFTWARE. */
 #endif
 
 
+
+//if Microsoft MSVC compiler,
+//then disable warning about throw specification is ignored.
+#ifdef _MSC_VER
+#pragma warning(push) //push warnings state
+#pragma warning( disable : 4290)
+#endif
+
+
+
 //#define M_ENABLE_MUTEX_TRACE
 #ifdef M_ENABLE_MUTEX_TRACE
 #define M_MUTEX_TRACE(x) TRACE(<<"[MUTEX] ") TRACE(x)
@@ -1193,4 +1203,12 @@ inline Thread::Thread() :
 }//~namespace ting
 
 //NOTE: do not put semicolon after namespace, some compilers issue a warning on this thinking that it is a declaration.
+
+
+
+//if Microsoft MSVC compiler, restore warnings state
+#ifdef _MSC_VER
+#pragma warning(pop) //pop warnings state
+#endif
+
 

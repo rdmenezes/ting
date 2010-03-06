@@ -62,13 +62,6 @@ protected:
 
 
 
-	//forbid copying
-	inline Buffer(Buffer& b){
-		ASSERT(false)//not implemented yet
-	}
-
-
-
 public:
 	/**
 	 * @brief Create a Buffer object.
