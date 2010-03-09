@@ -70,6 +70,16 @@ protected://use only as a base class
 		Singleton::StaticMemoryBlock() = static_cast<T*>(this);
 	}
 
+private:
+
+	//copying is not allowed
+	Singleton(const Singleton&){
+		ASSERT(false)
+	}
+	Singleton& operator=(const Singleton&){
+		ASSERT(false)
+	}
+
 public:
 	/**
 	 * @brief tells if singleton object is created or not.
