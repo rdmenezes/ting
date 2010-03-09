@@ -272,7 +272,7 @@ public:
 
 	//TODO: make this method static, returning new Vector2 object.
 	//Parse string of form "xxx, yyy" where xxx and yyy are positive decimal numbers
-	Vector2& ParseXY(const char* str) throw(Exc){
+	Vector2& ParseXY(const char* str){
 		ASSERT(str)
 
 		const char *p = str;

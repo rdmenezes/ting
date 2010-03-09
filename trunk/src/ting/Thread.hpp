@@ -796,7 +796,7 @@ private:
 	}
 
 	//returns true if signalled
-	virtual bool CheckSignalled() throw(ting::Exc){
+	virtual bool CheckSignalled(){
 		return (this->readinessFlags & this->flagsMask) != 0;
 	}
 

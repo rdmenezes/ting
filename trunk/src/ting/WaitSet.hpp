@@ -184,7 +184,7 @@ protected:
 	virtual void SetWaitingEvents(u32 /*flagsToWaitFor*/){}
 
 	//returns true if signalled
-	virtual bool CheckSignalled() throw(ting::Exc){
+	virtual bool CheckSignalled(){
 		return this->readinessFlags != 0;
 	}
 

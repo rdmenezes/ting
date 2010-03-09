@@ -54,7 +54,7 @@ public:
 	 *                  Constructor will copy the string into objects internal memory buffer.
 	 *                  It is legal to supply 0.
 	 */
-	Exc(const char* message = 0) throw(){//use throw() because base class (std::exception) uses it
+	Exc(const char* message = 0){
 		if(!message)
 			message = "no exception info";
 
@@ -76,7 +76,7 @@ public:
 
 
 
-	virtual ~Exc() throw(){//use throw() because base class (std::exception) uses it
+	virtual ~Exc()throw(){//use throw() because base class (std::exception) uses it.
 		delete[] this->msg;
 	}
 
@@ -89,7 +89,7 @@ public:
 	 *         Note, that after the exception object is destroyed
 	 *         the pointer returned by this method become invalid.
 	 */
-	inline const char *What()const throw(){
+	inline const char *What()const{
 		return this->what();
 	}
 

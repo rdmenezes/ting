@@ -95,7 +95,7 @@ class RefCounted{
 
 	
 private:
-	inline unsigned AddRef()throw(){
+	inline unsigned AddRef(){
 		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
 		Mutex::Guard mutexGuard(this->counter->mutex);
@@ -105,7 +105,7 @@ private:
 
 
 
-	inline unsigned RemRef()throw(){
+	inline unsigned RemRef(){
 		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
 		this->counter->mutex.Lock();
 		M_REF_PRINT(<< "RefCounted::RemRef(): mutex locked" << std::endl)
@@ -159,7 +159,7 @@ private:
 protected:
 	//only base classes can construct this class
 	//i.e. use of this class is allowed only as a base class
-	inline RefCounted() throw(){
+	inline RefCounted(){
 		//NOTE: do not create Counter object in RefCounted constructor
 		//      initializer list because MSVC complains about usage of "this"
 		//      keyword in initializer list.

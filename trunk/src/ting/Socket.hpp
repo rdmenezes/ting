@@ -223,7 +223,7 @@ public:
 	/**
 	 * @brief Closes the socket disconnecting it if necessary.
 	 */
-	void Close() throw(){
+	void Close(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 		if(this->IsValid()){
 #ifdef __WIN32__
@@ -248,7 +248,7 @@ public:
 	 * @return local port number to which this socket is bound,
 	 *         0 means that the socket is not bound.
 	 */
-	u16 GetLocalPort() throw(Socket::Exc){
+	u16 GetLocalPort(){
 		if(!this->IsValid())
 			throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
 
@@ -283,7 +283,7 @@ private:
 	}
 
 	//override
-	bool CheckSignalled() throw(Socket::Exc){
+	bool CheckSignalled(){
 		WSANETWORKEVENTS events;
 		memset(&events, 0, sizeof(events));
 		if(WSAEnumNetworkEvents(this->socket, this->eventForWaitable, &events) != 0){
@@ -302,7 +302,7 @@ private:
 	}
 
 protected:
-	inline void CreateEventForWaitable() throw(Socket::Exc){
+	inline void CreateEventForWaitable(){
 		ASSERT(this->eventForWaitable == WSA_INVALID_EVENT)
 		this->eventForWaitable = WSACreateEvent();
 		if(this->eventForWaitable == WSA_INVALID_EVENT){
@@ -310,13 +310,13 @@ protected:
 		}
 	}
 
-	inline void CloseEventForWaitable() throw(){
+	inline void CloseEventForWaitable(){
 		ASSERT(this->eventForWaitable != WSA_INVALID_EVENT)
 		WSACloseEvent(this->eventForWaitable);
 		this->eventForWaitable = WSA_INVALID_EVENT;
 	}
 
-	inline void SetWaitingEventsForWindows(long flags) throw(Socket::Exc){
+	inline void SetWaitingEventsForWindows(long flags){
 		ASSERT(this->eventForWaitable != WSA_INVALID_EVENT)
 		ASSERT(this->IsValid())
 
@@ -388,7 +388,7 @@ public:
 	 * @param ip - IP address null-terminated string. Example: "127.0.0.1".
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(const char* ip, u16 p) throw(Socket::Exc) :
+	inline IPAddress(const char* ip, u16 p) :
 			host(IPAddress::ParseString(ip)),
 			port(p)
 	{}
@@ -408,7 +408,7 @@ private:
 	}
 
 	//parse IP address from string
-	static u32 ParseString(const char* ip) throw(Socket::Exc){
+	static u32 ParseString(const char* ip){
 		//TODO: there already is a IP parsing function in BSD sockets, consider using it here
 		if(!ip)
 			throw Socket::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
@@ -466,7 +466,7 @@ private:
  */
 class SocketLib : public Singleton<SocketLib>{
 public:
-	SocketLib() throw(Socket::Exc){
+	SocketLib(){
 #ifdef __WIN32__
 		WORD versionWanted = MAKEWORD(2,2);
 		WSADATA wsaData;
@@ -506,7 +506,7 @@ public:
 	 * @param port - IP port number which will be placed in the resulting IPAddress structure.
 	 * @return filled IPAddress structure.
 	 */
-	IPAddress GetHostByName(const char *hostName, u16 port) throw(Socket::Exc){
+	IPAddress GetHostByName(const char *hostName, u16 port){
 		if(!hostName)
 			throw Socket::Exc("SocketLib::GetHostByName(): pointer passed as argument is 0");
 
@@ -562,7 +562,7 @@ public:
 	 * @param ip - IP address to 'connect to/listen on'.
 	 * @param disableNaggle - enable/disable Naggle algorithm.
 	 */
-	TCPSocket(const IPAddress& ip, bool disableNaggle = false) throw(Socket::Exc){
+	TCPSocket(const IPAddress& ip, bool disableNaggle = false){
 		this->Open(ip, disableNaggle);
 	}
 
@@ -583,7 +583,7 @@ public:
 	 * @param ip - IP address.
 	 * @param disableNaggle - enable/disable Naggle algorithm.
 	 */
-	void Open(const IPAddress& ip, bool disableNaggle = false) throw(Socket::Exc){
+	void Open(const IPAddress& ip, bool disableNaggle = false){
 		if(this->IsValid())
 			throw Socket::Exc("TCPSocket::Open(): socket already opened");
 
@@ -647,7 +647,7 @@ public:
 	 * @param size - number of bytes to send.
 	 * @return the number of bytes actually sent.
 	 */
-	unsigned Send(const u8* data, unsigned size) throw(Socket::Exc){
+	unsigned Send(const u8* data, unsigned size){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
@@ -691,7 +691,7 @@ public:
 	 * @param data - pointer to the buffer with data to send.
 	 * @param size - number of bytes to send.
 	 */
-	void SendAll(const u8* data, unsigned size) throw(Socket::Exc){
+	void SendAll(const u8* data, unsigned size){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
@@ -727,7 +727,7 @@ public:
 	 * @return the number of bytes written to the buffer.
 	 */
 	//returns 0 if connection was closed by peer
-	unsigned Recv(u8* buf, unsigned maxSize) throw(Socket::Exc){
+	unsigned Recv(u8* buf, unsigned maxSize){
 		//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 		//calls to Recv() because it indicates that there's activity.
 		//So, do it at the beginning of the function.
@@ -770,7 +770,7 @@ public:
 	 * @brief Get local IP address and port.
 	 * @return IP address and port of the local socket.
 	 */
-	IPAddress GetLocalAddress() throw(Socket::Exc){
+	IPAddress GetLocalAddress(){
 		if(!this->IsValid())
 			throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
 
@@ -801,7 +801,7 @@ public:
 	 * @brief Get remote IP address and port.
 	 * @return IP address and port of the peer socket.
 	 */
-	IPAddress GetRemoteAddress() throw(Socket::Exc){
+	IPAddress GetRemoteAddress(){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
 
@@ -829,7 +829,7 @@ public:
 	}
 
 private:
-	void DisableNaggle() throw(Socket::Exc){
+	void DisableNaggle(){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::DisableNaggle(): socket is not opened");
 
@@ -905,7 +905,7 @@ public:
 	 * @param port - IP port number to listen on.
 	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
 	 */
-	TCPServerSocket(u16 port, bool disableNaggle = false) throw(Socket::Exc){
+	TCPServerSocket(u16 port, bool disableNaggle = false){
 		this->Open(port, disableNaggle);
 	}
 
@@ -916,7 +916,7 @@ public:
 	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
 	 * @param queueLength - the maximum length of the queue of pending connections.
 	 */
-	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50) throw(Socket::Exc){
+	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50){
 		if(this->IsValid())
 			throw Socket::Exc("TCPServerSocket::Open(): socket already opened");
 
@@ -988,7 +988,7 @@ public:
 	 *         - if the socket is valid then it is a newly connected socket, further it can be used to send or receive data.
 	 *         - if the socket is invalid then there was no any connections pending, so no connection was accepted.
 	 */
-	TCPSocket Accept() throw(Socket::Exc){
+	TCPSocket Accept(){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPServerSocket::Accept(): the socket is not opened");
 
@@ -1088,7 +1088,7 @@ public:
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
 	 * This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
 	 */
-	void Open(u16 port) throw(Socket::Exc){
+	void Open(u16 port){
 		if(this->IsValid())
 			throw Socket::Exc("UDPSocket::Open(): the socket is already opened");
 
@@ -1135,12 +1135,12 @@ public:
 	}
 
 
-	inline void Open() throw(Socket::Exc){
+	inline void Open(){
 		this->Open(0);
 	}
 
 	//returns number of bytes sent, should be less or equal to size.
-	unsigned Send(const u8* buf, u16 size, IPAddress destinationIP) throw(Socket::Exc){
+	unsigned Send(const u8* buf, u16 size, IPAddress destinationIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Send(): socket is not opened");
 
@@ -1168,7 +1168,7 @@ public:
 	}
 
 	//returns number of bytes received
-	unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP) throw(Socket::Exc){
+	unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
 
