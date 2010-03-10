@@ -9,7 +9,7 @@ Strong references and weak references are supported.
 
 Reference counted object may be referenced from different threads. _ting::!RefCounted_ referencing mechanism is thread safe in the sense that if two threads hold strong reference to the object and in both of them the strong reference cease to exist, then the object will not be deleted twice, but only once, as required to avoid application crash.
 
-Whenever there is a strong reference to the object, on can be assured that the object will exist and will not be deleted. The object is deleted when there are no strong references left.
+Whenever there is a strong reference to the object, one can be assured that the object will exist and will not be deleted. The object is deleted when there are no strong references left.
 
 
 <br>
