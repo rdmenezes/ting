@@ -200,3 +200,24 @@ The macro is useful for defining one-line code pieces. Whenever multiple lines o
 
 #endif//~DEBUG
 }}}
+
+
+
+<br>
+= Checking the code is executed in correct thread =
+
+In multi-threaded applications, sometimes, there are some constraints regarding in which thread the particular code should be executed. For example, you create some object in one thread and this object requires that its methods would be called from exactly the same thread where it was created. To avoid errors, it is good to put assertions n the methods of that object to check that the method is called from correct thread.
+
+To achieve that, one can use the _ting::Thread::!GetCurrentThreadID()_ function.
+
+Example:
+{{{
+//save thread ID, we are interested in it only in DEBUG builds,
+//so use the DEBUG_CODE macro to exclude the threadID variable from release build.
+DEBUG_CODE(unsigned threadID = ting::Thread::GetCurrentThreadID();)
+
+//...
+
+//make sure we are in correct thread
+ASSERT(threadID == ting::Thread::GetCurrentThreadID())
+}}}
