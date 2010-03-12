@@ -647,7 +647,24 @@ public:
 	 * @param size - number of bytes to send.
 	 * @return the number of bytes actually sent.
 	 */
+	//TODO:remove this deprecated function
 	unsigned Send(const u8* data, unsigned size){
+		TRACE_ALWAYS(<< "TCPSocket::Send(const u8* data, unsigned size) is DEPRECATED, use Send(ting::Buffer<u8>& buf) instead" << std::endl)
+		ting::Buffer<u8> wrap(data, size);
+		return this->Send(wrap);
+	}
+
+
+
+	/**
+	 * @brief Send data to connected socket.
+	 * Sends data on connected socket. This method does not guarantee that the whole
+	 * buffer will be sent completely, it will return the number of bytes actually sent.
+	 * @param buf - pointer to the buffer with data to send.
+	 * @param offset - offset inside the buffer from where to start sending the data.
+	 * @return the number of bytes actually sent.
+	 */
+	unsigned Send(const ting::Buffer<u8>& buf, unsigned offset = 0){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
@@ -658,8 +675,8 @@ public:
 		while(true){
 			res = send(
 					this->socket,
-					reinterpret_cast<const char*>(data),
-					size,
+					reinterpret_cast<const char*>(&buf[offset]),
+					buf.Size() - offset,
 					0
 				);
 			if(res == DSocketError()){
@@ -691,19 +708,35 @@ public:
 	 * @param data - pointer to the buffer with data to send.
 	 * @param size - number of bytes to send.
 	 */
+	//TODO:remove this deprecated function
 	void SendAll(const u8* data, unsigned size){
+		TRACE_ALWAYS(<< "TCPSocket::SendAll(const u8* data, unsigned size) is DEPRECATED, use SendAll(const ting::Buffer<u8>& buf) instead" << std::endl)
+		ting::Buffer<u8> wrap(data, size);
+		this->SendAll(wrap);
+	}
+
+
+
+	/**
+	 * @brief Send data to connected socket.
+	 * Sends data on connected socket. This method blocks until all data is completely sent.
+	 * @param buf - the buffer with data to send.
+	 */
+	void SendAll(const ting::Buffer<u8>& buf){
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
-		int left = int(size);
+		DEBUG_CODE(int left = int(buf.Size());)
 		ASSERT(left >= 0)
 
+		unsigned offset = 0;
+
 		while(true){
-			int res = this->Send(data, left);
-			left -= res;
-			data += res;
+			int res = this->Send(buf, offset);
+			DEBUG_CODE(left -= res;)
 			ASSERT(left >= 0)
-			if(left == 0){
+			offset += res;
+			if(offset == buf.Size()){
 				break;
 			}
 			//give 30ms to allow data from send buffer to be sent
@@ -727,7 +760,25 @@ public:
 	 * @return the number of bytes written to the buffer.
 	 */
 	//returns 0 if connection was closed by peer
-	unsigned Recv(u8* buf, unsigned maxSize){
+	//TODO:remove this deprecated function
+	inline unsigned Recv(u8* buf, unsigned maxSize){
+		TRACE_ALWAYS(<< "TCPSocket::Recv(u8* buf, unsigned maxSize) is DEPRECATED, use Recv(ting::Buffer<u8>& buf) instead" << std::endl)
+		ting::Buffer<u8> wrap(buf, maxSize);
+		return this->Recv(wrap);
+	}
+
+	/**
+	 * @brief Receive data from connected socket.
+	 * Receives data available on the socket.
+	 * If there is no data available this function does not block, instead it returns 0,
+	 * indicating that 0 bytes were received.
+	 * If previous WaitSet::Wait() indicated that socket is ready for reading
+	 * and TCPSocket::Recv() returns 0, then connection was closed by peer.
+	 * @param buf - pointer to the buffer where to put received data.
+	 * @param offset - offset inside the buffer where to start putting data from.
+	 * @return the number of bytes written to the buffer.
+	 */
+	unsigned Recv(ting::Buffer<u8>& buf, unsigned offset = 0){
 		//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 		//calls to Recv() because it indicates that there's activity.
 		//So, do it at the beginning of the function.
@@ -741,8 +792,8 @@ public:
 		while(true){
 			len = recv(
 					this->socket,
-					reinterpret_cast<char*>(buf),
-					maxSize,
+					reinterpret_cast<char*>(&buf[offset]),
+					buf.Size() - offset,
 					0
 				);
 			if(len == DSocketError()){
@@ -1140,7 +1191,15 @@ public:
 	}
 
 	//returns number of bytes sent, should be less or equal to size.
-	unsigned Send(const u8* buf, u16 size, IPAddress destinationIP){
+	//TODO: remove this deprecated function
+	unsigned Send(const u8* buf, u16 size, const IPAddress& destinationIP){
+		TRACE(<< "UDPSocket::Send(const u8* buf, u16 size, IPAddress destinationIP) is DEPRECATED, use Send(const ting::Buffer<u8>& buf, IPAddress destinationIP) instead" << std::endl)
+		ting::Buffer<u8> wrap(buf, size);
+		return this->Recv(wrap, destinationIP);
+	}
+
+	//returns number of bytes sent, should be less or equal to size.
+	unsigned Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Send(): socket is not opened");
 
@@ -1154,8 +1213,8 @@ public:
 		sockAddr.sin_family = AF_INET;
 		int res = ::sendto(
 				this->socket,
-				reinterpret_cast<const char*>(buf),
-				size,
+				reinterpret_cast<const char*>(buf.Buf()),
+				buf.Size(),
 				0,
 				reinterpret_cast<struct sockaddr*>(&sockAddr),
 				sockLen
@@ -1164,11 +1223,22 @@ public:
 		if(res == DSocketError())
 			throw Socket::Exc("UDPSocket::Send(): sendto() failed");
 
+		ASSERT_INFO(res <= buf.Size(), "res = " << res)
+
 		return res;
 	}
 
+
 	//returns number of bytes received
-	unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP){
+	//TODO: remove this deprecated function
+	inline unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP){
+		TRACE(<< "UDPSocket::Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP) is DEPRECATED, use Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP) insted" << std::endl)
+		ting::Buffer<u8> wrap(buf, maxSize);
+		return this->Recv(wrap, out_SenderIP);
+	}
+
+	//returns number of bytes received
+	unsigned Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
 
@@ -1187,8 +1257,8 @@ public:
 
 		int res = ::recvfrom(
 				this->socket,
-				reinterpret_cast<char*>(buf),
-				maxSize,
+				reinterpret_cast<char*>(buf.Buf()),
+				buf.Size(),
 				0,
 				reinterpret_cast<sockaddr*>(&sockAddr),
 				&sockLen
@@ -1196,6 +1266,8 @@ public:
 
 		if(res == DSocketError())
 			throw Socket::Exc("UDPSocket::Recv(): recvfrom() failed");
+
+		ASSERT_INFO(res <= buf.Size(), "res = " << res)
 
 		out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
 		out_SenderIP.port = ntohs(sockAddr.sin_port);
