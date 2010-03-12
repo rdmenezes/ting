@@ -650,7 +650,7 @@ public:
 	//TODO:remove this deprecated function
 	unsigned Send(const u8* data, unsigned size){
 		TRACE_ALWAYS(<< "TCPSocket::Send(const u8* data, unsigned size) is DEPRECATED, use Send(ting::Buffer<u8>& buf) instead" << std::endl)
-		ting::Buffer<u8> wrap(data, size);
+		ting::Buffer<u8> wrap(const_cast<u8*>(data), size);
 		return this->Send(wrap);
 	}
 
@@ -711,7 +711,7 @@ public:
 	//TODO:remove this deprecated function
 	void SendAll(const u8* data, unsigned size){
 		TRACE_ALWAYS(<< "TCPSocket::SendAll(const u8* data, unsigned size) is DEPRECATED, use SendAll(const ting::Buffer<u8>& buf) instead" << std::endl)
-		ting::Buffer<u8> wrap(data, size);
+		ting::Buffer<u8> wrap(const_cast<u8*>(data), size);
 		this->SendAll(wrap);
 	}
 
@@ -1194,8 +1194,8 @@ public:
 	//TODO: remove this deprecated function
 	unsigned Send(const u8* buf, u16 size, const IPAddress& destinationIP){
 		TRACE(<< "UDPSocket::Send(const u8* buf, u16 size, IPAddress destinationIP) is DEPRECATED, use Send(const ting::Buffer<u8>& buf, IPAddress destinationIP) instead" << std::endl)
-		ting::Buffer<u8> wrap(buf, size);
-		return this->Recv(wrap, destinationIP);
+		ting::Buffer<u8> wrap(const_cast<u8*>(buf), size);
+		return this->Send(wrap, destinationIP);
 	}
 
 	//returns number of bytes sent, should be less or equal to size.
