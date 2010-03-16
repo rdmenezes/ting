@@ -206,9 +206,9 @@ The macro is useful for defining one-line code pieces. Whenever multiple lines o
 <br>
 = Checking the code is executed in correct thread =
 
-In multi-threaded applications, sometimes, there are some constraints regarding in which thread the particular code should be executed. For example, you create some object in one thread and this object requires that its methods would be called from exactly the same thread where it was created. To avoid errors, it is good to put assertions n the methods of that object to check that the method is called from correct thread.
+In multi-threaded applications, sometimes, there are some constraints regarding in which thread the particular code should be executed. For example, you create some object in one thread and this object requires that its methods would be called from exactly the same thread where it was created. To avoid errors, it is good to put assertions in the methods of that object to check that the method is called from correct thread.
 
-To achieve that, one can use the _ting::Thread::GetCurrentThreadID()_ function.
+To achieve that, one can use the _ting::Thread::GetCurrentThreadID()_ static function.
 
 Example:
 {{{
