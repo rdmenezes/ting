@@ -74,6 +74,9 @@ THE SOFTWARE. */
 #include "WaitSet.hpp"
 #include "debug.hpp"
 #include "Thread.hpp"
+#include "utils.hpp"
+
+
 
 /**
  * @brief the main namespace of ting library.
@@ -1223,7 +1226,8 @@ public:
 		if(res == DSocketError())
 			throw Socket::Exc("UDPSocket::Send(): sendto() failed");
 
-		ASSERT_INFO(res <= buf.Size(), "res = " << res)
+		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
+		ASSERT_INFO(res <= int(buf.Size()), "res = " << res)
 
 		return res;
 	}
@@ -1267,7 +1271,8 @@ public:
 		if(res == DSocketError())
 			throw Socket::Exc("UDPSocket::Recv(): recvfrom() failed");
 
-		ASSERT_INFO(res <= buf.Size(), "res = " << res)
+		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
+		ASSERT_INFO(res <= int(buf.Size()), "res = " << res)
 
 		out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
 		out_SenderIP.port = ntohs(sockAddr.sin_port);

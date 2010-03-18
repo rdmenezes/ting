@@ -183,5 +183,35 @@ inline u32 FromNetworkFormat32(const u8* buf){
 
 
 
+/**
+ * @brief Maximal value of unsigned integer type.
+ * @return Maximal value an unsigned integer type can represent on the current platform.
+ */
+inline unsigned DMaxUint(){
+	return unsigned(-1);
+}
+
+
+
+/**
+ * @brief Maximal value of integer type.
+ * @return Maximal value an integer type can represent on the current platform.
+ */
+inline int DMaxInt(){
+	return int(DMaxUint() >> 1);
+}
+
+
+
+/**
+ * @brief Minimal value of integer type.
+ * @return Minimal value an integer type can represent on the current platform.
+ */
+inline int DMinInt(){
+	return ~DMaxInt();
+}
+
+
+
 }//~namespace ting
 
