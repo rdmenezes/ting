@@ -706,9 +706,35 @@ public:
 		this->m[13] = this->m[13] + this->m[15] * t[1];
 		this->m[14] = this->m[14] + this->m[15] * t[2];
 
-		//note: 4th row remain unchanged
+		//note: 4th row remains unchanged
 		return (*this);
 	}
+
+
+
+	//multiplies this matrix by Translation matrix from the left (M = T * M)
+	Matrix4& Translate(const Vector2<T>& t){
+		//calculate first column
+		this->m[0] = this->m[0] + this->m[3] * t[0];
+		this->m[1] = this->m[1] + this->m[3] * t[1];
+
+		//calculate second column
+		this->m[4] = this->m[4] + this->m[7] * t[0];
+		this->m[5] = this->m[5] + this->m[7] * t[1];
+
+		//calculate third column
+		this->m[8] = this->m[8] + this->m[11] * t[0];
+		this->m[9] = this->m[9] + this->m[11] * t[1];
+
+		//calculate fourth column
+		this->m[12] = this->m[12] + this->m[15] * t[0];
+		this->m[13] = this->m[13] + this->m[15] * t[1];
+
+		//note: 3rd and 4th rows remain unchanged
+		return (*this);
+	}
+
+	
 
 	//multiplies this matrix by Rotation matrix from the left, rotation given by quaternion.
 	inline Matrix4& Rotate(const Quaternion<T>& q);//implementation see below
