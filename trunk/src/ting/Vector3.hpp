@@ -626,43 +626,67 @@ public:
 		return (*this);
 	}
 
+
+
 	/**
 	 * @brief Multiply current matrix by scale matrix.
-	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * Multiplies this matrix by Scale matrix from the right (M = M * S).
 	 * @param scale - vector of scaling factors in x, y and z directons.
 	 * @return reference to this Matrix instance.
 	 */
 	Matrix4& Scale(const Vector3<T>& scale){
-		//TODO:rewrite it using the *= operator
-		
 		//calculate first column
-		this->m[0] = this->m[0] * scale[0];
-		this->m[1] = this->m[1] * scale[1];
-		this->m[2] = this->m[2] * scale[2];
-		
+		this->m[0] *= scale[0];
+		this->m[1] *= scale[0];
+		this->m[2] *= scale[0];
+		this->m[3] *= scale[0];
+
 		//calculate second column
-		this->m[4] = this->m[4] * scale[0];
-		this->m[5] = this->m[5] * scale[1];
-		this->m[6] = this->m[6] * scale[2];
-		
+		this->m[4] *= scale[1];
+		this->m[5] *= scale[1];
+		this->m[6] *= scale[1];
+		this->m[7] *= scale[1];
+
 		//calculate third column
-		this->m[8] = this->m[8] * scale[0];
-		this->m[9] = this->m[9] * scale[1];
-		this->m[10] = this->m[10] * scale[2];
-		
-		//calculate fourth column
-		this->m[12] = this->m[12] * scale[0];
-		this->m[13] = this->m[13] * scale[1];
-		this->m[14] = this->m[14] * scale[2];
-		
-		//NOTE: 4th row remains unchanged
+		this->m[8] *= scale[2];
+		this->m[9] *= scale[2];
+		this->m[10] *= scale[2];
+		this->m[11] *= scale[2];
+
+		//NOTE: 4th column remains unchanged
 		return (*this);
 	}
 
 
+
 	/**
 	 * @brief Multiply current matrix by scale matrix.
-	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * Multiplies this matrix by Scale matrix from the right (M = M * S).
+	 * @param scale - vector of scaling factors in x and y directions, scaing factor in z direction is 1.
+	 * @return reference to this Matrix instance.
+	 */
+	Matrix4& Scale(const Vector2<T>& scale){
+		//calculate first column
+		this->m[0] *= scale[0];
+		this->m[1] *= scale[0];
+		this->m[2] *= scale[0];
+		this->m[3] *= scale[0];
+
+		//calculate second column
+		this->m[4] *= scale[1];
+		this->m[5] *= scale[1];
+		this->m[6] *= scale[1];
+		this->m[7] *= scale[1];
+
+		//NOTE: 3rd and 4th columns remain unchanged
+		return (*this);
+	}
+
+
+
+	/**
+	 * @brief Multiply current matrix by scale matrix.
+	 * Multiplies this matrix by Scale matrix from the right (M = M * S).
 	 * @param x - scaling factor in x directon.
 	 * @param y - scaling factor in y directon.
 	 * @param z - scaling factor in z directon.
@@ -673,9 +697,24 @@ public:
 	}
 
 
+
 	/**
 	 * @brief Multiply current matrix by scale matrix.
-	 * Multiplies this matrix by Scale matrix from the left (M = S * M).
+	 * Multiplies this matrix by Scale matrix from the right (M = M * S).
+	 * Scaling factor in z direction is 1.
+	 * @param x - scaling factor in x directon.
+	 * @param y - scaling factor in y directon.
+	 * @return reference to this Matrix instance.
+	 */
+	Matrix4& Scale(T x, T y){
+		return this->Scale(Vector2<T>(x, y));
+	}
+
+
+
+	/**
+	 * @brief Multiply current matrix by scale matrix.
+	 * Multiplies this matrix by Scale matrix from the right (M = M * S).
 	 * @param scale - scaling factor to be applied in all 3 directon (x, y and z).
 	 * @return reference to this Matrix instance.
 	 */
@@ -684,59 +723,55 @@ public:
 	}
 
 
-	//multiplies this matrix by Translation matrix from the left (M = T * M)
+
+	/**
+	 * @brief Multiply this matrix by translation matrix.
+	 * Multiplies this matrix by Translation matrix from the right (M = M * T)
+	 * @param t - translation vector.
+	 * @return reference to this matrix object.
+	 */
 	Matrix4& Translate(const Vector3<T>& t){
-		//calculate first column
-		this->m[0] = this->m[0] + this->m[3] * t[0];
-		this->m[1] = this->m[1] + this->m[3] * t[1];
-		this->m[2] = this->m[2] + this->m[3] * t[2];
-
-		//calculate second column
-		this->m[4] = this->m[4] + this->m[7] * t[0];
-		this->m[5] = this->m[5] + this->m[7] * t[1];
-		this->m[6] = this->m[6] + this->m[7] * t[2];
-
-		//calculate third column
-		this->m[8] = this->m[8] + this->m[11] * t[0];
-		this->m[9] = this->m[9] + this->m[11] * t[1];
-		this->m[10] = this->m[10] + this->m[11] * t[2];
+		//NOTE: 1st, 2nd and 3rd columns remain unchanged
 
 		//calculate fourth column
-		this->m[12] = this->m[12] + this->m[15] * t[0];
-		this->m[13] = this->m[13] + this->m[15] * t[1];
-		this->m[14] = this->m[14] + this->m[15] * t[2];
+		this->m[12] = this->m[0] * t[0] + this->m[4] * t[1] + this->m[8] * t[2] + this->m[12];
+		this->m[13] = this->m[1] * t[0] + this->m[5] * t[1] + this->m[9] * t[2] + this->m[13];
+		this->m[14] = this->m[2] * t[0] + this->m[6] * t[1] + this->m[10] * t[2] + this->m[14];
+		this->m[15] = this->m[3] * t[0] + this->m[7] * t[1] + this->m[11] * t[2] + this->m[15];
 
-		//note: 4th row remains unchanged
 		return (*this);
 	}
 
 
 
-	//multiplies this matrix by Translation matrix from the left (M = T * M)
+	/**
+	 * @brief Multiply this matrix by translation matrix.
+	 * Multiplies this matrix by Translation matrix from the right (M = M * T).
+	 * Translation only occurs in x-y plane, no translation in z direction,
+	 * i.e. z component of translation vector is assumed being 0.
+	 * @param t - translation vector.
+	 * @return reference to this matrix object.
+	 */
 	Matrix4& Translate(const Vector2<T>& t){
-		//calculate first column
-		this->m[0] = this->m[0] + this->m[3] * t[0];
-		this->m[1] = this->m[1] + this->m[3] * t[1];
-
-		//calculate second column
-		this->m[4] = this->m[4] + this->m[7] * t[0];
-		this->m[5] = this->m[5] + this->m[7] * t[1];
-
-		//calculate third column
-		this->m[8] = this->m[8] + this->m[11] * t[0];
-		this->m[9] = this->m[9] + this->m[11] * t[1];
+		//NOTE: 1st, 2nd and 3rd columns remain unchanged
 
 		//calculate fourth column
-		this->m[12] = this->m[12] + this->m[15] * t[0];
-		this->m[13] = this->m[13] + this->m[15] * t[1];
+		this->m[12] = this->m[0] * t[0] + this->m[4] * t[1] + this->m[12];
+		this->m[13] = this->m[1] * t[0] + this->m[5] * t[1] + this->m[13];
+		this->m[14] = this->m[2] * t[0] + this->m[6] * t[1] + this->m[14];
+		this->m[15] = this->m[3] * t[0] + this->m[7] * t[1] + this->m[15];
 
-		//note: 3rd and 4th rows remain unchanged
 		return (*this);
 	}
 
-	
 
-	//multiplies this matrix by Rotation matrix from the left, rotation given by quaternion.
+
+	/**
+	 * @brief Multiply this matrix by rotation matrix.
+	 * Multiplies this matrix by Rotation matrix from the right (M = M * R).
+	 * @param q - quaternion, representing the rotation.
+	 * @return reference to this matrix object.
+	 */
 	inline Matrix4& Rotate(const Quaternion<T>& q);//implementation see below
 
 
@@ -751,6 +786,7 @@ public:
 	};
 #endif
 };//~class Matrix4
+
 
 
 //===============================
@@ -908,9 +944,11 @@ public:
 
 	//multiply this quaternion by unit rotation quaternion
 	//from the left
-	Quaternion& Rotate(Vector3<T> axis, T angle){
+	//TODO: check how this function relates with rotation matrixes multiplication (left-right)
+	//      need only "mult from the right" function
+	Quaternion& RotateLeft(Vector3<T> axis, T angle){
 		Quaternion r;
-		r.InitRot(axis.x, axis.y, axis.Z(), angle);
+		r.InitRot(axis.x, axis.y, axis.z, angle);
 		return (*this) = r % (*this);
 	}
 
@@ -1115,11 +1153,15 @@ template <class T> inline Vector2<T>::Vector2(const Vector3<T>& vec){
 	this->operator=(vec);
 }
 
+
+
 template <class T> inline Vector2<T>& Vector2<T>::operator=(const Vector3<T>& vec){
 	this->x = vec.x;
 	this->y = vec.y;
 	return (*this);
 }
+
+
 
 template <class T> inline Vector3<T>& Vector3<T>::operator=(const Vector2<T>& vec){
 	this->x = vec.x;
@@ -1127,11 +1169,15 @@ template <class T> inline Vector3<T>& Vector3<T>::operator=(const Vector2<T>& ve
 	return (*this);
 }
 
+
+
 template <class T> inline Vector3<T>& Vector3<T>::operator+=(const Vector2<T>& vec){
 	this->x += vec.x;
 	this->y += vec.y;
 	return (*this);
 }
+
+
 
 template <class T> inline Vector2<T> Vector2<T>::operator+(const Vector3<T>& vec)const{
 	return Vector2<T>(
@@ -1140,6 +1186,8 @@ template <class T> inline Vector2<T> Vector2<T>::operator+(const Vector3<T>& vec
 			);
 }
 
+
+
 template <class T> inline Vector2<T> Vector2<T>::operator-(const Vector3<T>& vec)const{
 	return Vector2<T>(
 				this->x - vec.x,
@@ -1147,12 +1195,16 @@ template <class T> inline Vector2<T> Vector2<T>::operator-(const Vector3<T>& vec
 			);
 }
 
+
+
 template <class T> inline Matrix4<T>& Matrix4<T>::Rotate(const Quaternion<T>& q){
 	Matrix4<T> rm;
 	q.CreateMatrix4(rm);
-	this->LeftMultMatrix(rm);
+	this->RightMultMatrix(rm);
 	return (*this);
 }
+
+
 
 template <class T> inline Vector3<T>& Vector3<T>::Rotate(const Quaternion<T>& q){
 	*this = q.ToMatrix4() * (*this);
@@ -1160,36 +1212,37 @@ template <class T> inline Vector3<T>& Vector3<T>::Rotate(const Quaternion<T>& q)
 }
 
 
+
 template <class T> class Rectangle2{
 	Vector2<T> lb; //Left-Bottom
 	Vector2<T> rt; //Right-Top
 public:
 	
-	inline Rectangle2(){};
+	inline Rectangle2(){}
 	
 	Rectangle2(T left, T top, T right, T bottom) :
 			lb(left, bottom),
 			rt(right, top)
-	{};
+	{}
 
 	Rectangle2(Vector2<T> leftBottom, Vector2<T> rightTop) :
 			lb(leftBottom),
 			rt(rightTop)
-	{};
+	{}
 	
 	inline void Set(T left, T top, T right, T bottom){
 		this->lb = Vector2<T>(left, bottom);
 		this->rt = Vector2<T>(right, top);
-	};
+	}
 	
 	inline Vector2<T> Center()const{
 		return (this->lb + this->rt) / 2;
-	};
+	}
 
 	inline void SetCenter(const Vector2<T>& vec){
 		Vector2<T> offset = vec - Center();
 		this->operator +=(offset);
-	};
+	}
 
 	bool IsIn(const Vector2<T>& vec)const{
 		if(this->Left() <= this->Right()){
@@ -1217,93 +1270,95 @@ public:
 							vec.y >= this->Top();
 			}
 		}
-	};
+	}
 	
 	inline Vector2<T> Extent()const{
 		return this->Size()/2;
-	};
+	}
 
 	inline Vector2<T> Size()const{
 		return this->rt - this->lb;
-	};
+	}
 	
 	inline Rectangle2& operator=(const Rectangle2<T>&  rect){
 		this->rt = rect.rt;
 		this->lb = rect.lb;
 		return *this;
-	};
+	}
 
 	inline Rectangle2& operator+=(const Vector2<T>& vec){
 		this->rt += vec;
 		this->lb += vec;
 		return (*this);
-	};
+	}
 
 	inline Rectangle2 operator*(T num){
 		return Rectangle(this->lb * num, this->rt * num);
-	};
+	}
 
 	inline T& LeftBottom(){
 		//TODO: return min out of this->lb.x and this->rt.x
 		return this->lb;
-	};
+	}
 
 	inline const T& LeftBottom()const{
 		//TODO: return min out of this->lb.x and this->rt.x
 		return this->lb;
-	};
+	}
 
 	inline T& RightTop(){
 		//TODO: return min out of this->lb.x and this->rt.x
 		return this->rt;
-	};
+	}
 
 	inline const T& RightTop()const{
 		//TODO: return min out of this->lb.x and this->rt.x
 		return this->rt;
-	};
+	}
 
 	inline T& Left(){
 		//TODO: return min out of this->lb.x and this->rt.x
 		return this->lb.x;
-	};
+	}
 
 	inline const T& Left()const{
 		return this->lb.x;
-	};
+	}
 
 	inline T& Top(){
 		return this->rt.y;
-	};
+	}
 
 	inline const T& Top()const{
 		return this->rt.y;
-	};
+	}
 
 	inline T& Right(){
 		return this->rt.x;
-	};
+	}
 
 	inline const T& Right()const{
 		return this->rt.x;
-	};
+	}
 
 	inline T& Bottom(){
 		return this->lb.y;
-	};
+	}
 
 	inline const T& Bottom()const{
 		return this->lb.y;
-	};
+	}
 	
 	inline T Width()const{
 		return this->Right() - this->Left();
-	};
+	}
 	
 	inline T Height()const{
 		return this->Top() - this->Bottom();
-	};
-};
+	}
+};//~class Rectangle2
+
+
 
 //
 //
