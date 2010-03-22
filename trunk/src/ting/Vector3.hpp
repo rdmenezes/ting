@@ -511,7 +511,8 @@ public:
 		return s;
 	}
 #endif
-};
+};//~class Vector3
+
 
 
 //===============================
@@ -521,17 +522,33 @@ public:
 //
 //
 //===============================
+/**
+ * @brief 4x4 matrix template class.
+ * Note, that this matrix class stores elements in memory column by column.
+ * This is the same way as OpenGL matrices are stored in memory.
+ * This means easy use of this class with OpenGL.
+ */
 template <typename T> class Matrix4{
-	//OpenGL compatible matrix elements array in case T = float/double
+	//OpenGL compatible matrix elements array, if T is float or double
 	T m[4 * 4]; //matrix components 0-3 1st column, 4-7 2nd column, 8-11 3rd column, 12-15 4th column
 public:
+
+
+	
+	/**
+	 * @brief Default constructor.
+	 * NOTE: it does not initialize the matrix with any values.
+	 * Matrix elements are undefined after the matrix is created with this constructor.
+	 */
 	inline Matrix4(){}//Default constructor.
+
+
 
 	//copy constructor must be trivial.
 	//Let's allow compiler to make it for us.
 	//Matrix4(const Matrix4& matr){}
 
-	//~Matrix4(){}//destructor
+	
 
 	/**
 	 * @brief returns pointer to specified column.
@@ -588,7 +605,11 @@ public:
 		return (*this);
 	}
 
-	//Transpose matrix
+
+
+	/**
+	 * @brief Transpose matrix.
+	 */
 	Matrix4& Transpose(){
 		Exchange(this->m[1], this->m[4]);
 		Exchange(this->m[2], this->m[8]);
@@ -599,7 +620,14 @@ public:
 		return (*this);
 	}
 
-	//Multipply by matrix from the right m  = m * M
+
+
+	/**
+	 * @brief Multipply by matrix from the right.
+	 * Multiply this matrix by matrix M from the right, i.e. m  = m * M
+	 * @param M - matrix to multiply by.
+	 * @return reference to this matrix object.
+	 */
 	Matrix4& RightMultMatrix(const Matrix4 &M){
 		//TODO: rewrite to use Matrix4 instead of T tmpM[16]
 		T tmpM[16];
@@ -614,7 +642,14 @@ public:
 		return (*this);
 	}
 
-	//Multiply by matrix from the left m = M * m
+
+
+	/**
+	 * @brief Multipply by matrix from the left.
+	 * Multiply this matrix by matrix M from the left, i.e. m  = M * m
+	 * @param M - matrix to multiply by.
+	 * @return reference to this matrix object.
+	 */
 	Matrix4& LeftMultMatrix(const Matrix4& M){
 		//TODO: rewrite to use Matrix4 instead of T tmpM[16]
 		T tmpM[16];
@@ -628,6 +663,11 @@ public:
 		return (*this);
 	}
 
+
+
+	/**
+	 * @brief Initialize this matrix with identity matrix.
+	 */
 	Matrix4& Identity(){
 		this->m[0] = 1;    this->m[4] = 0;    this->m[8] = 0;    this->m[12] = 0;
 		this->m[1] = 0;    this->m[5] = 1;    this->m[9] = 0;    this->m[13] = 0;
@@ -785,6 +825,7 @@ public:
 	inline Matrix4& Rotate(const Quaternion<T>& q);//implementation see below
 
 
+	
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Matrix4<T>& mat){
 		s << "\n";
@@ -806,10 +847,40 @@ public:
 //
 //
 //===============================
+/**
+ * @brief Quaternion template class.
+ */
 template <typename T> class Quaternion{
 public:
-	T x, y, z, w; //Quaternion components
+	/**
+	 * @brief x component.
+	 */
+	T x;
+
+	/**
+	 * @brief y component.
+	 */
+	T y;
 	
+	/**
+	 * @brief z component.
+	 */
+	T z;
+
+	/**
+	 * @brief w component.
+	 */
+	T w;
+
+
+
+	/**
+	 * @brief Create quaternion with given components.
+	 * @param qx - x component.
+	 * @param qy - y component.
+	 * @param qz - z component.
+	 * @param qw - w component.
+	 */
 	Quaternion(T qx, T qy, T qz, T qw) :
 			x(qx),
 			y(qy),
@@ -817,28 +888,50 @@ public:
 			w(qw)
 	{}
 
+
+
+	/**
+	 * @brief Construct rotation quaternion.
+	 * Constructs a quaternion representing rotation (unit quaternion).
+	 * Rotation is given by 3 dimensional vector, whose direction defines the
+	 * axis about which rotation is done and its magnitude defines the angle of
+	 * rotation in radians.
+	 * @param axis - vector which defines the rotation.
+	 */
 	//this constructor creates unit quaternion of a rotation around the axis by |axis| radians
 	Quaternion(const Vector3<T>& axis){
 		T mag = axis.Magnitude();//magnitude is a rotation angle
 		if(mag != 0){
 			Vector3<T> a = axis;
 			a /= mag;//normalize axis
-			this->InitRot( a.x, a.y, a.z, mag);
+			this->InitRot(a.x, a.y, a.z, mag);
 		}else
 			this->Identity();
 	}
 
+
+
+	/**
+	 * @brief Default constructor.
+	 * Note, that it does not initialize quaternion components,
+	 * right after creation the components are undefined.
+	 */
 	// A default constructor
 	inline Quaternion(){}
 
+
+
+	/**
+	 * @brief Complex conjugate of this quaternion.
+	 * Note, complex conjugate of quaternion (x, y, z, w) is (-x, -y, -z, w).
+	 * @return quaternion instance which is a complex conjugate of this quaternion.
+	 */
 	//"complex conjugate of" operator
 	inline Quaternion operator!()const{
 		return Quaternion(-this->x, -this->y, -this->z, this->w);
 	}
 
-	inline Quaternion operator+(const Quaternion& q)const{
-		return Quaternion(this->x + q.x, this->y + q.y, this->z + q.z, this->w + q.w);
-	}
+
 
 	inline Quaternion& operator+=(const Quaternion& q){
 		this->x += q.x;
@@ -848,6 +941,14 @@ public:
 		return (*this);
 	}
 
+
+
+	inline Quaternion operator+(const Quaternion& q)const{
+		return Quaternion(this->x + q.x, this->y + q.y, this->z + q.z, this->w + q.w);
+	}
+
+
+
 	inline Quaternion& operator=(const Quaternion& q){
 		this->x = q.x;
 		this->y = q.y;
@@ -856,6 +957,14 @@ public:
 		return (*this);
 	}
 
+
+
+	/**
+	 * @brief Multiply by scalar and assign.
+	 * Multiplies this quaternion by scalar and assigns the result to this quaternion instance.
+	 * @param s - scalar value to multiply by.
+	 * @return reference to this quaternion instance.
+	 */
 	inline Quaternion& operator*=(T s){
 		this->x *= s;
 		this->y *= s;
@@ -864,10 +973,25 @@ public:
 		return (*this);
 	}
 
+
+
+	/**
+	 * @brief Multiply by scalar.
+	 * @param s - scalar value to multiply by.
+	 * @return resulting quaternion instance.
+	 */
 	inline Quaternion operator*(T s)const{
 		return (Quaternion(*this) *= s);
 	}
 
+
+
+	/**
+	 * @brief Divide by scalar and assign.
+	 * Divide this quaternion by scalar and assigns the result to this quaternion instance.
+	 * @param s - scalar value to divide by.
+	 * @return reference to this quaternion instance.
+	 */
 	inline Quaternion& operator/=(T s){
 		this->x /= s;
 		this->y /= s;
@@ -876,15 +1000,41 @@ public:
 		return (*this);
 	}
 
+
+
+	/**
+	 * @brief Divide by scalar.
+	 * @param s - scalar value to divide by.
+	 * @return resulting quaternion instance.
+	 */
 	inline Quaternion operator/(T s)const{
 		return (Quaternion(*this) /= s);
 	}
 
+
+
+	/**
+	 * @brief Dot product of quaternions.
+	 * Dot product of two quaternions (x1, y1, z1, w1) and
+	 * (x2, y2, z2, w2) is a scalar calculated as follows
+	 * x1 * x2 + y1 * y2 + z1 * z2 + w1 * w2
+	 * @return result of the dot product.
+	 */
 	//dot product of quaternions
 	inline T operator*(const Quaternion& q)const{
 		return this->x * q.x + this->y * q.y + this->z * q.z + this->w * q.w;
 	}
 
+
+
+	/**
+	 * @brief Multiply by quaternion and assign.
+	 * Multiplies this quaternion by another quaternion from the right
+	 * (quaternions multiplication is not associative) and assignes the
+	 * result to this quaternion instance.
+	 * @param q - quaternion to multiply by.
+	 * @return reference to this quaternion instance.
+	 */
 	//multiplication of quaternions
 	Quaternion& operator%=(const Quaternion& q){
 		T a = (this->w + this->x) * (q.w + q.x);
@@ -903,11 +1053,27 @@ public:
 		return (*this);
 	}
 
+
+
+	/**
+	 * @brief Multiply by quaternion.
+	 * Multiplies this quaternion by another quaternion from the right
+	 * (quaternions multiplication is not associative).
+	 * @param q - quaternion to multiply by.
+	 * @return resulting quaternion instance.
+	 */
 	//multiplication of quaternions
 	inline Quaternion operator%(const Quaternion& q)const{
 		return (Quaternion(*this) %= q);
 	}
 
+
+
+	/**
+	 * @brief Initialize with identity quaternion.
+	 * Note, identity quaternion is (0, 0, 0, 1).
+	 * @return reference to this quaternion instance.
+	 */
 	inline Quaternion& Identity(){
 		this->x = T(0);
 		this->y = T(0);
@@ -916,12 +1082,26 @@ public:
 		return *this;
 	}
 
+
+
+	/**
+	 * @brief Complex conjugate this quaternion.
+	 * Note, complex conjugate of quaternion (x, y, z, w) is (-x, -y, -z, w).
+	 * @return reference to this quaternion instance.
+	 */
 	//Complex conjugate
 	inline Quaternion& Conjugate(){
 		*this = !(*this);
 		return *this;
 	}
 
+
+
+	/**
+	 * @brief Negate this quaternion.
+	 * Note, negating quaternion means changing the sign of its every component.
+	 * @return reference to this quaternion instance.
+	 */
 	inline Quaternion& Negate(){
 		this->x = -this->x;
 		this->y = -this->y;
@@ -930,19 +1110,41 @@ public:
 		return *this;
 	}
 
+
+
+	/**
+	 * @brief Calculate power 2 from quaternion magnitude.
+	 * @return power 2 from magnitude.
+	 */
 	//returns the magnitude^2 of this quaternion
 	inline T MagPow2()const{
 		return (*this) * (*this);
 	}
 
+
+
+	/**
+	 * @brief Calculate quaternion magnitude.
+	 * @return quaternion magnitude.
+	 */
 	inline T Magnitude()const{
-		return T( sqrt(this->MagPow2()) );
+		return T(sqrt(this->MagPow2()));
 	}
 
+
+
+	/**
+	 * @brief Normalize quaternion.
+	 * Note, after normalization, the quaternion becomes a unit quaternion.
+	 * @return reference to this quaternion instance.
+	 */
 	inline Quaternion& Normalize(){
 		return (*this) /= Magnitude();
 	}
 
+
+
+	//TODO: consider removing this function moving its functional to corresponding constructor.
 	//Initialize this with rotation unit quaternion from axis (normalized) and an angle
 	inline void InitRot(T xx, T yy, T zz, T angle){
 		T sina2 = T(sin(angle / 2));
@@ -952,6 +1154,9 @@ public:
 		this->z = zz * sina2;
 	}
 
+
+
+	//TODO:consider removing this function
 	//multiply this quaternion by unit rotation quaternion
 	//from the left
 	//TODO: check how this function relates with rotation matrixes multiplication (left-right)
@@ -962,10 +1167,12 @@ public:
 		return (*this) = r % (*this);
 	}
 
-	//create 4x4 OpenGL like rotation matrix from this quaternion
+
+
+	//Create 4x4 OpenGL like rotation matrix from this quaternion
 	//ARGS: m - matrix to fill
 	//RETURNS: return a reference to m
-	//TODO: move this functionality to  Matrix4::InitRot(const Quaternion& q)
+	//TODO: move this functionality to  Matrix4::Matrix4(const Quaternion& q), i.e. create a contructor
 	Matrix4<T>& CreateMatrix4(Matrix4<T>& m)const{
 		// After about 300 trees murdered and 20 packs of chalk depleted, the
 		// mathematicians came up with these equations for a quaternion to matrix converion:
@@ -999,6 +1206,8 @@ public:
 		m[3][3] = T(1);
 		return m;
 	}
+
+
 
 	//--||--||--
 	Matrix4<T> ToMatrix4()const{
@@ -1063,6 +1272,8 @@ public:
 	}
 #endif  
 };//~class Quaterion
+
+
 
 //template <> class Vector2<unsigned>{
 //	unsigned v[2]; //Vector components
@@ -1152,6 +1363,8 @@ public:
 //	};
 //#endif
 //};//~class
+
+
 
 //===============================================
 //
