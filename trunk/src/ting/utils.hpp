@@ -61,6 +61,10 @@ namespace ting{
 
 /**
  * @brief Exchange two values.
+ * Note, that it uses temporary variable to switch the values. Thus, the value should
+ * have proper copy constructor defined.
+ * @param a - reference to value a.
+ * @param b - reference to value b.
  */
 template <class T> inline void Exchange(T &a, T &b){
 	T tmp = a;
@@ -130,6 +134,8 @@ template <class T> inline void ClampTop(T& v, const T top){
 /**
  * @brief Clamp value bottom.
  * Usage is analogous to ting::ClampTop.
+ * @param v - reference to the value which bottom is to be clamped.
+ * @param bottom - value to clamp the bottom to.
  */
 template <class T> inline void ClampBottom(T& v, const T bottom){
 	if(v < bottom){

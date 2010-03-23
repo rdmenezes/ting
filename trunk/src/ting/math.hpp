@@ -102,12 +102,6 @@ template <typename T_Type> inline T_Type Max(T_Type a, T_Type b){
 }
 
 
-//TODO: remove this???
-template <typename T> inline T DEps(){
-	return T(1e-6f);
-}
-
-
 
 /**
  * @brief Get number Pi.
@@ -214,8 +208,14 @@ template <typename T_Type> inline T_Type CubicRoot(T_Type x){
 }
 
 
+
 /**
  * @brief Calculate argument of a complex number.
+ * Any complex number
+ *     C = x + i * y
+ * can be represented in the form
+ *     C = |C| * exp(i * arg)
+ * where 'arg' is the argument of a complex number.
  * @param x - real part of a complex number.
  * @param y - imaginary part of a complex number.
  * @return argument of a complex number.
@@ -236,6 +236,7 @@ template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
 }
 
 
+
 /**
  * @brief Calculate sine of an angle.
  */
@@ -245,15 +246,19 @@ template <typename T> inline T Sin(T x){
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline float Sin<float>(float x){
 	return ::sin(x);
 }
+#endif
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline double Sin<double>(double x){
 	return ::sin(x);
 }
+#endif
 
 
 
@@ -275,15 +280,19 @@ template <typename T> inline T Cos(T x){
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline float Cos<float>(float x){
 	return ::cos(x);
 }
+#endif
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline double Cos<double>(double x){
 	return ::cos(x);
 }
+#endif
 
 
 
@@ -313,6 +322,7 @@ template <typename T> inline T Sqrt(T x){
 }
 
 
+
 /**
  * @brief Calculate e^x.
  */
@@ -322,15 +332,19 @@ template <typename T> inline T Exp(T x){
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline float Exp<float>(float x){
 	return ::exp(x);
 }
+#endif
 
 
 
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
 template <> inline double Exp<double>(double x){
 	return ::exp(x);
 }
+#endif
 
 
 

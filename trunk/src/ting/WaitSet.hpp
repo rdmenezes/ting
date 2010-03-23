@@ -70,6 +70,10 @@ namespace ting{
 
 
 
+/**
+ * @brief Base class for objects which can be waited for.
+ * Base class for objects which can be used in wait sets.
+ */
 class Waitable{
 	friend class WaitSet;
 
@@ -200,7 +204,9 @@ protected:
 
 
 
-
+/**
+ * @brief Set of Waitable objects to wait for.
+ */
 class WaitSet{
 	unsigned numWaitables;//number of Waitables added
 
@@ -216,6 +222,10 @@ class WaitSet{
 
 public:
 
+	/**
+	 * @brief Constructor.
+	 * @param maxSize - maximum number of Waitable objects can be added to this wait set.
+	 */
 	WaitSet(u32 maxSize) :
 			numWaitables(0)
 #if defined(__WIN32__)
@@ -240,6 +250,13 @@ public:
 
 
 
+	/**
+	 * @brief Destructor.
+	 * Note, that destructor will check if the wait set is empty. If it is not, then an assert
+	 * will be triggered.
+	 * It is user's responsibility to remove any waitable objects from the waitset
+	 * before the wait set object is destroyed.
+	 */
 	~WaitSet(){
 		//assert the wait set is empty
 		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
@@ -252,6 +269,12 @@ public:
 
 
 
+	/**
+	 * @brief Add Waitable object to the wait set.
+	 * @param w - pointer to the Waitable object.
+	 * @param flagsToWaitFor - determine events waiting for which we are interested.
+	 * @throw ting::Exc - in case the wait set is full or other error occurs.
+	 */
 	inline void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 //		TRACE(<< "WaitSet::Add(): enter" << std::endl)
 		ASSERT(w)
@@ -295,6 +318,14 @@ public:
 
 
 
+	/**
+	 * @brief Change wait flags for a given Waitable.
+	 * Changes wait flags for a given waitable, which is in this waitset.
+	 * @param w - pointer to Waitable for which the changing of wait flags is needed.
+	 * @param flagsToWaitFor - new wait flags to be set for the given Waitable.
+	 * @throw ting::Exc - in case the given Waitable object is not added to this wait set or
+	 *                    other error occurs.
+	 */
 	inline void Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		ASSERT(w)
 
@@ -336,6 +367,12 @@ public:
 
 
 
+	/**
+	 * @brief Remove Waitable from wait set.
+	 * @param w - pointer to Waitable object to be removed from the wait set.
+	 * @throw ting::Exc - in case the given Waitable is not added to this wait set or
+	 *                    other error occurs.
+	 */
 	inline void Remove(Waitable* w){
 		ASSERT(w)
 
