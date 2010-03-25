@@ -107,4 +107,4 @@ ting::Ptr<ting::Message> msg( new MyMessage(&thread) );
 //send the message
 thread.PushMessage(msg);
 }}}
-Note that our _Handle()_ method accesses private variables of the thread, so one should probably add a friend declaration to the _!MyThread_ class to indicate that _!MyMessage_ is a friend of _!MyThread_ class and can access its private variables. This will also ideologically indicate that _!MyThread_ can handle messages of type _!MyMessage_.
+Note, that our _Handle()_ method accesses private variables of the thread, so one should probably add a friend declaration to the _!MyThread_ class to indicate that _!MyMessage_ is a friend of _!MyThread_ class and can access its private variables. This will also ideologically indicate that _!MyThread_ can handle messages of type _!MyMessage_.
