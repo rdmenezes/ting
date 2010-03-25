@@ -26,7 +26,7 @@ After we have our thread class defined we can create an object of this class and
 MyThread thr; //create an object on the stack for simplicity
 thr.Start();//start thread execution
 }}}
-After starting the thread we can wait for it to finish its execution by calling ting::Thread::Join() method on the thread object. After this call we can surely say that thread has finished its execution
+After starting the thread we can wait for it to finish its execution by calling _ting::Thread::Join()_ method on the thread object. After this call we can surely say that thread has finished its execution
 {{{
 thr.Join();
 }}}
@@ -34,9 +34,9 @@ thr.Join();
 
 
 =Messages and Message Queues=
-To use Messages/Queues facility along with threads it is recommended to use _ting::!MsgThread_ class as a base class instead of simple _ting::Thread_. This is because _ting::!MsgThread_ class already contains a message queue object (_ting::Thread::queue_). Note that _ting::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See below examples for usage hints.
+To use Messages/Queues facility along with threads it is recommended to use _ting::!MsgThread_ class as a base class instead of simple _ting::Thread_. This is because _ting::!MsgThread_ class already contains a message queue object (_ting::Thread::queue_). Note, that _ting::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See below examples for usage hints.
 
-From now on we will assume that our sample _MyThread_ class is derived from _ting::!MsgThread_.
+From now on we will assume that our sample _!MyThread_ class is derived from _ting::!MsgThread_.
 
 Thus the thread can receive and handle messages from other threads. To make it possible, one needs to implement the message handling loop in the threads _ting::Thread::Run()_ method.
 
