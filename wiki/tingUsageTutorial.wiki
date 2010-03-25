@@ -6,7 +6,7 @@ first of all we need to include *ting* header to use the library
 #include <ting/Thread.hpp>
 }}}
 
-After that we can start using the library. To create a thread one needs to derive a new class representing her thread from ting::Thread base class and override its ting::Thread::Run() method
+After that we can start using the library. To create a thread one needs to derive a new class representing her thread from _ting::Thread_ base class and override its _ting::Thread::Run()_ method
 {{{
 class MyThread : public ting::Thread{
     //define some variables specific to your thread,
@@ -21,7 +21,7 @@ public:
     };
 };
 }}}
-After we have our thread class defined we can create an object of this class and start the thread execution by calling ting::Thread::Start() method on it
+After we have our thread class defined we can create an object of this class and start the thread execution by calling _ting::Thread::Start()_ method on it
 {{{
 MyThread thr; //create an object on the stack for simplicity
 thr.Start();//start thread execution
@@ -34,9 +34,9 @@ thr.Join();
 
 
 =Messages and Message Queues=
-To use Messages/Queues facility along with threads it is recommended to use _ting::MsgThread_ class as a base class instead of simple ting::Thread. This is because _ting::MsgThread_ class already contains a message queue object (_ting::Thread::queue_). Note that _ting::MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See below examples for usage hints.
+To use Messages/Queues facility along with threads it is recommended to use _ting::!MsgThread_ class as a base class instead of simple _ting::Thread_. This is because _ting::!MsgThread_ class already contains a message queue object (_ting::Thread::queue_). Note that _ting::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See below examples for usage hints.
 
-From now on we will assume that our sample _MyThread_ class is derived from _ting::MsgThread_.
+From now on we will assume that our sample _MyThread_ class is derived from _ting::!MsgThread_.
 
 Thus the thread can receive and handle messages from other threads. To make it possible, one needs to implement the message handling loop in the threads _ting::Thread::Run()_ method.
 
@@ -49,9 +49,9 @@ void MyThread::Run(){
     }
 };
 }}}
-This example uses _ting::Queue::GetMsg()_ to retrieve messages from the queue, _GetMsg()_ blocks execution if there are no messages on the queue until some message arrives.
+This example uses _ting::Queue::!GetMsg()_ to retrieve messages from the queue, _!GetMsg()_ blocks execution if there are no messages on the queue until some message arrives.
 
-It is also possible to use _ting::Queue::PeekMsg()_ which does not block execution, then typical implementation of _Run()_ method would look as follows
+It is also possible to use _ting::Queue::!PeekMsg()_ which does not block execution, then typical implementation of _Run()_ method would look as follows
 
 {{{
 void MyThread::Run(){
@@ -68,7 +68,7 @@ void MyThread::Run(){
 
 Note that each thread object has a _quitFlag_ volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
 
-Note that _ting::QuitMessage_ will set the _quitFlag_ when it is handled.
+Note that _ting::!QuitMessage_ will set the _quitFlag_ when it is handled.
 
 ==Creating your own message==
 A _Message_ is a mean to ask some thread to execute some code fragment.
@@ -107,4 +107,4 @@ ting::Ptr<ting::Message> msg( new MyMessage(&thread) );
 //send the message
 thread.PushMessage(msg);
 }}}
-Note that our _Handle()_ method accesses private variables of the thread, so one should probably add a friend declaration to the MyThread class to indicate that MyMessage is a friend of MyThread class and can access its private variables. This will also ideologically indicate that MyThread can handle messages of type MyMessage.
+Note that our _Handle()_ method accesses private variables of the thread, so one should probably add a friend declaration to the _!MyThread_ class to indicate that _!MyMessage_ is a friend of _!MyThread_ class and can access its private variables. This will also ideologically indicate that _!MyThread_ can handle messages of type _!MyMessage_.
