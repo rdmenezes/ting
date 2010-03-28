@@ -856,12 +856,41 @@ public:
 
 
 	/**
+	 * @brief Multiply this matrix by translation matrix.
+	 * Multiplies this matrix by Translation matrix from the right (M = M * T).
+	 * Translation only occurs in x-y plane, no translation in z direction,
+	 * i.e. z component of translation vector is assumed being 0.
+	 * @param x - x component of translation vector.
+	 * @param y - y component of translation vector.
+	 * @return reference to this matrix object.
+	 */
+	Matrix4& Translate(T x, T y){
+		return this->Translate(Vector2<T>(x, y));
+	}
+
+
+
+	/**
 	 * @brief Multiply this matrix by rotation matrix.
 	 * Multiplies this matrix by Rotation matrix from the right (M = M * R).
 	 * @param q - quaternion, representing the rotation.
 	 * @return reference to this matrix object.
 	 */
 	inline Matrix4& Rotate(const Quaternion<T>& q);//implementation see below
+
+
+
+	/**
+	 * @brief Multiply this matrix by rotation matrix.
+	 * Multiplies this matrix by Rotation matrix from the right (M = M * R).
+	 * @param rot - vector, representing the rotation. The vector direction
+	 *              defines the axis of rotation, vector length defines
+	 *              the angle of rotation in radians.
+	 * @return reference to this matrix object.
+	 */
+	inline Matrix4& Rotate(const Vector3<T>& rot){
+		return this->Rotate(Quaternion<T>(rot));
+	}
 
 
 	
