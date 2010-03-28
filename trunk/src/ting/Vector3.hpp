@@ -319,10 +319,18 @@ public:
 	}
 
 
-	//TODO: make this method static, returning new Vector2 object.
-	//Parse string of form "xxx, yyy" where xxx and yyy are positive decimal numbers
-	Vector2& ParseXY(const char* str){
+	/**
+	 * @brief Create vector from string.
+	 * Parse string of form "xxx, yyy" where xxx and yyy are positive (TODO: allow negative also)
+	 * decimal numbers.
+	 * @param str - pointer to null-terminated string to parse.
+	 * @return parsed Vector2 object.
+	 * @throw ting::Exc - in case the string passed as argument is bad formed.
+	 */
+	static Vector2 ParseXY(const char* str){
 		ASSERT(str)
+
+		Vector2 vec;
 
 		const char *p = str;
 
@@ -334,7 +342,7 @@ public:
 			++p;
 		}
 		
-		p = ParseNum<T>(p, this->x);
+		p = ParseNum<T>(p, vec.x);
 		if(!p)
 			throw Exc("Vector2::ParseXY(): input string should start with dight");
 
@@ -346,11 +354,11 @@ public:
 			++p;
 		}
 
-		p = ParseNum<T>(p, this->y);
+		p = ParseNum<T>(p, vec.y);
 		if(!p)
 			throw Exc("Vector2::ParseXY(): second number parsing failed");
 
-		return *this;
+		return vec;
 	}
 	
 #ifdef DEBUG  
