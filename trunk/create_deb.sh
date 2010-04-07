@@ -8,4 +8,4 @@ cp src/ting/*.hpp $dst
 
 cp -r DEBIAN debian_package
 
-dpkg -b debian_package libting-dev_0.4.1-1_i386.deb
+dpkg -b debian_package libting-dev_0.4.2-1_i386.deb

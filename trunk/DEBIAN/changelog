@@ -1,3 +1,11 @@
+libting-dev (0.4.2-1) stable; urgency=low
+
+  * Matrix transpose/scale/rotate multiplies from the right now, not from the left.
+  * Minor improvements.
+
+ -- Ivan Gagis <igagis@gmail.com>  Wed, 7 Apr 2010 15:11:00 +0200
+
+
 libting-dev (0.4.1-1) stable; urgency=low
 
   * bug fix in ting/Timer.hpp
