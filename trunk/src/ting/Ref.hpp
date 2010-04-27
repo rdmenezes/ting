@@ -426,6 +426,7 @@ public:
 	 * be destroyed if there are no other references. And this reference will be assigned
 	 * a new value.
 	 * @param r - reference to assign to this reference.
+	 * @return reference to this Ref object.
 	 */
 	Ref& operator=(const Ref &r){
 		M_REF_PRINT(<< "Ref::operator=(): invoked, p = " << (this->p) << std::endl)
@@ -435,6 +436,30 @@ public:
 		this->Destroy();
 
 		this->p = r.p;
+		if(this->p){
+			this->p->AddRef();
+		}
+		return *this;
+	}
+
+
+
+	/**
+	 * @brief assign const reference.
+	 * Note, that if this reference was pointing to some object, the object will
+	 * be destroyed if there are no other references. And this reference will be assigned
+	 * a new value.
+	 * @param r - reference to assign to this reference.
+	 * @return const reference to this Ref object.
+	 */
+	const Ref& operator=(const Ref &r)const{
+		M_REF_PRINT(<< "Ref::operator=()const: invoked, p = " << (this->p) << std::endl)
+		if(this == &r)
+			return *this;//detect self assignment
+
+		const_cast<Ref*>(this)->Destroy();
+
+		const_cast<Ref*>(this)->p = r.p;
 		if(this->p){
 			this->p->AddRef();
 		}
