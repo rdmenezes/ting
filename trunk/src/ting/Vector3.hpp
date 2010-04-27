@@ -1465,6 +1465,7 @@ template <class T> inline Vector2<T>& Vector2<T>::operator=(const Vector3<T>& ve
 template <class T> inline Vector3<T>& Vector3<T>::operator=(const Vector2<T>& vec){
 	this->x = vec.x;
 	this->y = vec.y;
+	this->z = 0;
 	return (*this);
 }
 
