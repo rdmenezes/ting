@@ -428,7 +428,9 @@ public:
 	 * @param r - reference to assign to this reference.
 	 * @return reference to this Ref object.
 	 */
-	Ref& operator=(const Ref &r){
+	//NOTE: the argument is intentionally not const!!! This is to avoid const ref assignment to
+	//      non-const ref.
+	Ref& operator=(Ref &r){
 		M_REF_PRINT(<< "Ref::operator=(): invoked, p = " << (this->p) << std::endl)
 		if(this == &r)
 			return *this;//detect self assignment
