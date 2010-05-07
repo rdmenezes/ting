@@ -109,4 +109,4 @@ The keywords
 {{{delete}}}
 and
 {{{delete[]}}}
-should not be resent in your programs. If they are then you might be not using automatic pointers somewhere.
+should not be present in your programs. If they are then you might be not using automatic pointers somewhere.
