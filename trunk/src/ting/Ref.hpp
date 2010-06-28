@@ -580,27 +580,40 @@ template <class T> class WeakRef{
 	RefCounted::Counter *counter;
 
 
+	inline void InitFromRefCounted(const RefCounted *rc){
+		if(!rc){
+			this->counter = 0;
+			return;
+		}
+		
+		ASSERT(rc)
+
+		this->InitFromCounter(ASS(rc->counter));
+	}
+
+
 	
-	inline void Init(const Ref<T> &r){
+	inline void InitFromStrongRef(const Ref<T> &r){
 		if(r.IsNotValid()){
 			this->counter = 0;
 			return;
 		}
 
-		this->counter = r.p->counter;
-		ASSERT(this->counter)
-
-		this->counter->mutex.Lock();
-		++(this->counter->numWeakRefs);
-		this->counter->mutex.Unlock();
+		this->InitFromRefCounted(r.operator->());
 	}
 
 
 
-	inline void Init(const WeakRef &r){
-		this->counter = r.counter;
-		if(this->counter == 0)
+	inline void InitFromWeakRef(const WeakRef &r){
+		if(r.counter == 0)
 			return;
+		this->InitFromCounter(r.counter);//counter can be 0
+	}
+
+
+
+	inline void InitFromCounter(RefCounted::Counter *c){
+		this->counter = ASS(c);
 
 		this->counter->mutex.Lock();
 		++(this->counter->numWeakRefs);
@@ -632,25 +645,21 @@ template <class T> class WeakRef{
 
 	
 public:
-	//NOTE: the int argument is just to make possible
-	//auto conversion from 0 to invalid WeakRef
-	//i.e. it will be possible to write 'return 0;'
-	//from the function returning WeakRef
-	inline WeakRef(int v = 0) :
-			counter(0)
-	{}
+	inline WeakRef(T* rc = 0){
+		this->InitFromRefCounted(rc);
+	}
 
 
 
 	inline WeakRef(const Ref<T> &r){
-		this->Init(r);
+		this->InitFromStrongRef(r);
 	}
 
 
 
 	//copy constructor
 	inline WeakRef(const WeakRef &r){
-		this->Init(r);
+		this->InitFromWeakRef(r);
 	}
 
 
@@ -661,10 +670,21 @@ public:
 
 
 
+	inline WeakRef& operator=(T* rc){
+		ASSERT(rc)
+
+		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
+		this->Destroy();
+		this->InitFromRefCounted(rc);
+		return *this;
+	}
+
+
+
 	inline WeakRef& operator=(const Ref<T> &r){
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
-		this->Init(r);
+		this->InitFromStrongRef(r);
 		return *this;
 	}
 
@@ -673,7 +693,7 @@ public:
 	inline WeakRef& operator=(const WeakRef<T> &r){
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
-		this->Init(r);
+		this->InitFromWeakRef(r);
 		return *this;
 	}
 
