@@ -150,7 +150,7 @@ template <class T_Ob, class T_Ret> void Connect(T_Ob* o, T_Ret(T_Ob::*m)(M_FUNC_
 
 //Weak ref and method Connect
 #define M_CONNECT_METH_WEAKREF(num_meth_params, unused) \
-template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob>& o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
+template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob> o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
 	ASSERT(m) \
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
