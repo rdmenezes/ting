@@ -161,8 +161,15 @@ public:
 #elif defined(__SYMBIAN32__)
 		this->m.Close();
 #elif defined(M_PTHREAD) //pthread
-		if(pthread_mutex_destroy(&this->m) != 0){
-			ASSERT(false)
+		int ret = pthread_mutex_destroy(&this->m);
+		if(ret != 0){
+			std::stringstream ss;
+			ss << "Mutex::~Mutex(): pthread_mutex_destroy() failed"
+					<< " error code = " << ret << ": " << strerror(ret) << ".";
+			if(ret == EBUSY){
+				ss << " You are trying to destroy locked mutex.";
+			}
+			ASSERT_INFO_ALWAYS(false, ss.str())
 		}
 #else
 #error "unknown system"
