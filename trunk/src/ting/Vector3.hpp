@@ -274,6 +274,10 @@ public:
 		return (this->x == 0 && this->y == 0);
 	}
 
+	inline bool IsPositiveOrZero()const{
+		return this->x >= 0 && this->y >= 0;
+	}
+
 	inline Vector2& Negate(){
 		//NOTE: this is faster than // (*this) = -(*this);
 		this->x = -this->x;
