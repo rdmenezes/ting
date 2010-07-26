@@ -137,8 +137,10 @@ inline void LogAssert(const char* file, int line){
 
 #ifdef __SYMBIAN32__
 #define ASS(x) (x)
+#define ASSCOND(x, cond) (x)
 #else
 #define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
+#define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
 #endif
 
 #else
@@ -146,6 +148,7 @@ inline void LogAssert(const char* file, int line){
 #define ASSERT(x)
 #define ASSERT_EXEC(x) x;
 #define ASS(x) (x)
+#define ASSCOND(x, cond) (x)
 #endif//~#ifdef DEBUG
 
 //==================
