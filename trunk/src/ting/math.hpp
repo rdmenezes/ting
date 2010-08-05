@@ -55,7 +55,7 @@ namespace ting{
  * @return 1 if the number is positive.
  */
 template <typename T_Type> inline T_Type Sign(T_Type n){
-	return n > 0 ? (1) : (-1);
+	return n < 0 ? (-1) : (1);
 }
 
 
@@ -72,7 +72,7 @@ template <typename T_Type> inline T_Type Sign(T_Type n){
  * @return absolute value of the passed argument.
  */
 template <typename T_Type> inline T_Type Abs(T_Type n){
-	return n > 0 ? n : (-n);
+	return n < 0 ? (-n) : (n);
 }
 
 
