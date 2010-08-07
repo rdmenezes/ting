@@ -643,7 +643,7 @@ public:
 	}
 
 	//Multiply by Vector3 (M * V). i.e. transform vector with transformation matrix
-	Vector3<T> operator*(const Vector3<T>& vec){
+	Vector3<T> operator*(const Vector3<T>& vec)const{
 		return Vector3<T>(
 					this->m[0] * vec[0] + this->m[4] * vec[1] + this->m[8] * vec[2] + this->m[12],
 					this->m[1] * vec[0] + this->m[5] * vec[1] + this->m[9] * vec[2] + this->m[13],
