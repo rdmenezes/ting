@@ -146,44 +146,50 @@ template <class T> inline void ClampBottom(T& v, const T bottom){
 
 
 /**
- * @brief convert byte order of 16 bit value to network format.
+ * @brief serialize 16 bit value.
+ * Serialize 16 bit value, less significant byte first.
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void ToNetworkFormat16(u16 value, u8* out_buf){
+inline void Serialize16(u16 value, u8* out_buf){
 	*reinterpret_cast<u16*>(out_buf) = value;//assume little-endian
 }
 
 
 
 /**
- * @brief convert byte order of 32 bit value to network format.
+ * @brief serialize 32 bit value.
+ * Serialize 32 bit value, less significant byte first.
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void ToNetworkFormat32(u32 value, u8* out_buf){
+inline void Serialize32(u32 value, u8* out_buf){
 	*reinterpret_cast<u32*>(out_buf) = value;//assume little-endian
 }
 
 
 
 /**
- * @brief Convert 16 bit value from network byte order to native byte order.
+ * @brief deserialize 16 bit value.
+ * Deserialize 16 bit value from the sequence of bytes. Assume that less significant
+ * byte goes first in the input byte sequence.
  * @param buf - pointer to buffer containig 2 bytes to convert from network format.
  * @return 16 bit unsigned integer converted from network byte order to native byte order.
  */
-inline u16 FromNetworkFormat16(const u8* buf){
+inline u16 Deserialize16(const u8* buf){
 	return *reinterpret_cast<const u16*>(buf);//assume little-endian
 }
 
 
 
 /**
- * @brief Convert 32 bit value from network byte order to native byte order.
+ * @brief deserialize 32 bit value.
+ * Deserialize 32 bit value from the sequence of bytes. Assume that less significant
+ * byte goes first in the input byte sequence.
  * @param buf - pointer to buffer containig 4 bytes to convert from network format.
  * @return 32 bit unsigned integer converted from network byte order to native byte order.
  */
-inline u32 FromNetworkFormat32(const u8* buf){
+inline u32 Deserialize32(const u8* buf){
 	return *reinterpret_cast<const u32*>(buf);//assume little-endian
 }
 
