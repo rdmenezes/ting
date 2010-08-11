@@ -1,5 +1,6 @@
 #include <ting/debug.hpp>
 #include <ting/Ref.hpp>
+#include <ting/Exc.hpp>
 
 
 
@@ -76,12 +77,37 @@ static void TestBasicWeakRefUseCase(){
 
 
 
+namespace TestExceptionThrowingFromRefCountedDerivedClassConstructor{
+
+class TestClass : public ting::RefCounted{
+public:
+	TestClass(){
+		throw ting::Exc("TestException!");
+	}
+};
+
+
+
+static void Run(){
+	try{
+		ting::Ref<TestClass> a(new TestClass());
+		ASSERT_ALWAYS(false)
+	}catch(ting::Exc& e){
+		//do nothing
+	}
+}
+
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Ref test" << std::endl)
 
 	TestConversionToBool();
 	TestOperatorLogicalNot();
 	TestBasicWeakRefUseCase();
+	TestExceptionThrowingFromRefCountedDerivedClassConstructor::Run();
 
 	//TODO: add more test cases
 
