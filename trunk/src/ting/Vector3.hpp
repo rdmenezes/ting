@@ -585,6 +585,10 @@ public:
 		this->operator=(num);
 	}
 
+	Vector4(T num, T w) :
+			x(num), y(num), z(num), w(w)
+	{}
+
 	Vector4(const Vector2<T>& vec) :
 			x(vec.x), y(vec.y), z(0), w(1)
 	{}
