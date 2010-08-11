@@ -116,11 +116,13 @@ private:
 				//there are weak references, they will now own the Counter object,
 				//therefore, do not delete Counter, just clear the pointer to RefCounted.
 				this->counter->p = 0;
+				DEBUG_CODE(this->counter = 0;)
 			}else{//no weak references
 				//NOTE: unlock before deleting because the mutex object is in Counter.
 				this->counter->mutex.Unlock();
 				M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
 				delete this->counter;
+				DEBUG_CODE(this->counter = 0;)
 				return n;
 			}
 		}
@@ -177,7 +179,9 @@ protected:
 
 public:
 	//destructor shall be virtual!!!
-	virtual ~RefCounted(){}
+	virtual ~RefCounted(){
+		ASSERT(!this->counter)//In the debug mode the this->counter is zeroed after deleting the object.
+	}
 
 	inline unsigned NumRefs()const{
 		return ASS(this->counter)->numHardRefs;
@@ -395,13 +399,15 @@ public:
 	 *	}
 	 * @endcode
 	 */
-	//Safe conversion to bool type.
-	//Because if using simple "operator bool()" it may result in chained automatic
-	//conversion to undesired types such as int.
+	//NOTE: Safe conversion to bool type.
+	//      Because if using simple "operator bool()" it may result in chained automatic
+	//      conversion to undesired types such as int.
 	inline operator unspecified_bool_type() const{
 		return this->IsValid() ? &Ref::Reset : 0;//Ref::Reset is taken just because it has matching signature
 	}
 
+	//NOTE: do not use this type of conversion, see NOTE to "operator unspecified_bool_type()"
+	//      for details.
 //	inline operator bool(){
 //		return this->IsValid();
 //	}
