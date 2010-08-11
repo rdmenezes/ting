@@ -106,26 +106,32 @@ private:
 
 
 	inline unsigned RemRef(){
+		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 		this->counter->mutex.Lock();
 		M_REF_PRINT(<< "RefCounted::RemRef(): mutex locked" << std::endl)
 		ASSERT(this->counter->numStrongRefs != 0)//if someone has called RemRef() then there should be at least 1 strong reference
+		M_REF_PRINT(<< "RefCounted::RemRef(): decrementing" << std::endl)
 		unsigned n = --(this->counter->numStrongRefs);
+		M_REF_PRINT(<< "RefCounted::RemRef(): decremented, new numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 
 		if(n == 0){//if no more strong references to the RefCounted
 			if(this->counter->numWeakRefs > 0){
 				//there are weak references, they will now own the Counter object,
 				//therefore, do not delete Counter, just clear the pointer to RefCounted.
 				this->counter->p = 0;
+				ASS(this->counter)->mutex.Unlock();
 				this->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
 			}else{//no weak references
-				//NOTE: unlock before deleting because the mutex object is in Counter.
+				//Unlock before deleting because the mutex object is in Counter.
+				//The Counter object will be deleted in destructor, as the destructor will be called shortly
+				//because number of strong references reached 0.
 				this->counter->mutex.Unlock();
 				M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
-				return 0;//zero strong references left
 			}
+			return 0;//zero strong references left
 		}
-		this->counter->mutex.Unlock();
+		ASS(this->counter)->mutex.Unlock();
 		M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
 
 		return n;
