@@ -97,33 +97,32 @@ class RefCounted{
 private:
 	inline unsigned AddRef(){
 		ASSERT(this->counter)
-		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
+		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 		Mutex::Guard mutexGuard(this->counter->mutex);
 		M_REF_PRINT(<< "RefCounted::AddRef(): mutex locked " << std::endl)
-		return ++(this->counter->numHardRefs);
+		return ++(this->counter->numStrongRefs);
 	}
 
 
 
 	inline unsigned RemRef(){
-		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numHardRefs = " << (this->counter->numHardRefs) << std::endl)
+		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 		this->counter->mutex.Lock();
 		M_REF_PRINT(<< "RefCounted::RemRef(): mutex locked" << std::endl)
-		unsigned n = --(this->counter->numHardRefs);
+		ASSERT(this->counter->numStrongRefs != 0)//if someone has called RemRef() then there should be at least 1 strong reference
+		unsigned n = --(this->counter->numStrongRefs);
 
-		if(n == 0){//if no more references to the RefCounted
+		if(n == 0){//if no more strong references to the RefCounted
 			if(this->counter->numWeakRefs > 0){
 				//there are weak references, they will now own the Counter object,
 				//therefore, do not delete Counter, just clear the pointer to RefCounted.
 				this->counter->p = 0;
-				DEBUG_CODE(this->counter = 0;)
+				this->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
 			}else{//no weak references
 				//NOTE: unlock before deleting because the mutex object is in Counter.
 				this->counter->mutex.Unlock();
 				M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
-				delete this->counter;
-				DEBUG_CODE(this->counter = 0;)
-				return n;
+				return 0;//zero strong references left
 			}
 		}
 		this->counter->mutex.Unlock();
@@ -137,11 +136,11 @@ private:
 	struct Counter : public PoolStored<Counter>{
 		RefCounted *p;
 		Mutex mutex;
-		unsigned numHardRefs;
+		unsigned numStrongRefs;
 		unsigned numWeakRefs;
 		inline Counter(RefCounted *ptr) :
 				p(ptr),
-				numHardRefs(0),
+				numStrongRefs(0),
 				numWeakRefs(0)
 		{
 			M_REF_PRINT(<< "Counter::Counter(): counter object created" << std::endl)
@@ -180,11 +179,15 @@ protected:
 public:
 	//destructor shall be virtual!!!
 	virtual ~RefCounted(){
-		ASSERT(!this->counter)//In the debug mode the this->counter is zeroed after deleting the object.
+		//Pointer to counter object can be 0 if there were weak references left upon the
+		//moment of the object destruction. So, check for 0.
+		if(this->counter){
+			delete this->counter;
+		}
 	}
 
 	inline unsigned NumRefs()const{
-		return ASS(this->counter)->numHardRefs;
+		return ASS(this->counter)->numStrongRefs;
 	}
 
 private:
@@ -637,7 +640,7 @@ template <class T> class WeakRef{
 
 		if(
 				--(this->counter->numWeakRefs) == 0 &&
-				this->counter->numHardRefs == 0
+				this->counter->numStrongRefs == 0
 			)
 		{
 			this->counter->mutex.Unlock();
@@ -736,10 +739,10 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 
 	r.counter->mutex.Lock();
 
-	this->p = r.counter->p;
+	this->p = ASS(r.counter)->p;
 
 	if(this->p){
-		++(r.counter->numHardRefs);
+		++(r.counter->numStrongRefs);
 	}
 	
 	r.counter->mutex.Unlock();
