@@ -5,6 +5,7 @@
 
 
 class TestClass : public ting::RefCounted{
+	int array[2048];
 public:
 	int a;
 
@@ -57,23 +58,33 @@ static void TestOperatorLogicalNot(){
 
 
 
-static void TestBasicWeakRefUseCase(){
-	ting::Ref<TestClass> a(new TestClass());
-	ASSERT_ALWAYS(a.IsValid())
+namespace TestBasicWeakRefUseCase{
 
-	bool wasDestroyed = false;
-	a->destroyed = &wasDestroyed;
 
-	ting::WeakRef<TestClass> wr(a);
-	ASSERT_ALWAYS(ting::Ref<TestClass>(wr).IsValid())
-	ASSERT_ALWAYS(!wasDestroyed)
 
-	a.Reset();
+static void Run1(){
+	for(unsigned i = 0; i < 1000; ++i){
+		ting::Ref<TestClass> a(new TestClass());
+		ASSERT_ALWAYS(a.IsValid())
 
-	ASSERT_ALWAYS(a.IsNotValid())
-	ASSERT_ALWAYS(wasDestroyed)
-	ASSERT_ALWAYS(ting::Ref<TestClass>(wr).IsNotValid())
+		bool wasDestroyed = false;
+		a->destroyed = &wasDestroyed;
+
+		ting::WeakRef<TestClass> wr(a);
+		ASSERT_ALWAYS(ting::Ref<TestClass>(wr).IsValid())
+		ASSERT_ALWAYS(!wasDestroyed)
+
+		a.Reset();
+
+		ASSERT_ALWAYS(a.IsNotValid())
+		ASSERT_ALWAYS(wasDestroyed)
+		ASSERT_ALWAYS(ting::Ref<TestClass>(wr).IsNotValid())
+	}//~for
 }
+
+
+
+}//~namespace
 
 
 
@@ -106,7 +117,7 @@ int main(int argc, char *argv[]){
 
 	TestConversionToBool();
 	TestOperatorLogicalNot();
-	TestBasicWeakRefUseCase();
+	TestBasicWeakRefUseCase::Run1();
 	TestExceptionThrowingFromRefCountedDerivedClassConstructor::Run();
 
 	//TODO: add more test cases
