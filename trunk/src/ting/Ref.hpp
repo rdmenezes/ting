@@ -119,7 +119,16 @@ private:
 			if(this->counter->numWeakRefs > 0){
 				//there are weak references, they will now own the Counter object,
 				//therefore, do not delete Counter, just clear the pointer to RefCounted.
+
+				//Zero the pointer to object in the counter. This will indicate to WeakRef that the
+				//object is not existing and the Counter object is owned by WeakRefs now.
+				//It is possible that there are no strong refs to the object but the object is still
+				//existing and the counter object is owned by object, not by WeakRefs. This happens when
+				//object was just created and no strong refs were created to the object, in that case,
+				//it is possible that WeakRef will be created and destroyed before any strong refs
+				//are created.
 				this->counter->p = 0;
+
 				ASS(this->counter)->mutex.Unlock();
 				this->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
 			}else{//no weak references
@@ -644,12 +653,16 @@ template <class T> class WeakRef{
 		this->counter->mutex.Lock();
 		ASSERT(this->counter->numWeakRefs > 0)
 
+		--this->counter->numWeakRefs;
+
 		if(
-				--(this->counter->numWeakRefs) == 0 &&
-				this->counter->numStrongRefs == 0
+				this->counter->numWeakRefs == 0 &&
+				this->counter->numStrongRefs == 0 &&
+				this->counter->p == 0 //this means that the Counter object is owned by WeakRef's
 			)
 		{
 			this->counter->mutex.Unlock();
+			M_REF_PRINT(<< "WeakRef::Destroy(): deleting counter" << std::endl)
 			delete this->counter;
 			return;
 		}else{
