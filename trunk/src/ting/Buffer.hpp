@@ -34,10 +34,17 @@ THE SOFTWARE. */
 
 #pragma once
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 #include "types.hpp"
 #include "debug.hpp"
 
+
+
 namespace ting{
+
 
 
 /**
@@ -192,6 +199,15 @@ public:
 	inline const T* Buf()const{
 		return this->buf;
 	}
+
+#ifdef DEBUG
+	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
+		for(unsigned i = 0; i < buf.Size(); ++i){
+			s << "\t" << buf[i] << std::endl;
+		}
+		return s;
+	}
+#endif
 };//~template class Buffer
 
 

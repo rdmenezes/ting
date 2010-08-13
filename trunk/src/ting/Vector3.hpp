@@ -34,9 +34,15 @@ THE SOFTWARE. */
 #include <cmath>
 #include <cstdlib>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 #include "types.hpp"
 #include "math.hpp"
 #include "Exc.hpp"
+
+
 
 namespace ting{
 
@@ -367,7 +373,7 @@ public:
 	
 #ifdef DEBUG  
 	friend std::ostream& operator<<(std::ostream& s, const Vector2<T>& vec){
-		s<<"("<<vec.x<<", "<<vec.y<<")";
+		s << "(" << vec.x << ", " << vec.y << ")";
 		return s;
 	}
 #endif
@@ -554,7 +560,7 @@ public:
 
 #ifdef DEBUG  
 	friend std::ostream& operator<<(std::ostream& s, const Vector3<T>& vec){
-		s<<"("<<vec.x<<", "<<vec.y<<", "<<vec.z<<")";
+		s << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
 		return s;
 	}
 #endif
@@ -1554,97 +1560,6 @@ public:
 	}
 #endif  
 };//~class Quaterion
-
-
-
-//template <> class Vector2<unsigned>{
-//	unsigned v[2]; //Vector components
-//  public:
-//	inline Vector2(){};//default constructor
-//
-//	Vector2(unsigned x, unsigned y){
-//		this->v[0] = x;
-//		this->v[1] = y;
-//	};
-//
-//	inline unsigned& X(){
-//		return this->v[0];
-//	};
-//
-//	inline const unsigned& X()const{
-//		return this->v[0];
-//	};
-//
-//	inline unsigned& Y(){
-//		return this->v[1];
-//	};
-//
-//	inline const unsigned& Y()const{
-//		return this->v[1];
-//	};
-//
-//	inline unsigned& operator[](unsigned i){
-//		ASSERT(i < 2)
-//		return this->v[i];
-//	};
-//
-//	inline const unsigned& operator[](unsigned i)const{
-//		ASSERT(i < 2)
-//		return this->v[i];
-//	};
-//
-//	inline bool operator==(const Vector2& vec)const{
-//		return this->v[0] == vec.v[0] && this->v[1] == vec.v[1];
-//	};
-//
-//	inline Vector2& operator=(const Vector2<unsigned>& vec){
-//		this->v[0] = vec.v[0];
-//		this->v[1] = vec.v[1];
-//		return (*this);
-//	};
-//
-////    inline Vector2& operator=(const Vector3<T>& vec);
-////
-////    inline Vector2 operator+(const Vector2& vec)const{return Vector2( vec.v[0]+v[0], vec.v[1]+v[1] );};
-////    inline Vector2 operator+(const Vector3<T>& vec)const;
-////    inline Vector2& operator+=(const Vector2& vec){v[0]+=vec.v[0];v[1]+=vec.v[1];return (*this);};
-////    inline Vector2 operator-(const Vector2& vec){return Vector2( v[0]-vec.v[0], v[1]-vec.v[1] );};
-////    inline Vector2 operator-(const Vector3<T>& vec)const;
-////    inline Vector2& operator-=(const Vector2& vec){v[0]-=vec.v[0];v[1]-=vec.v[1];return (*this);};
-////
-////    inline Vector2 operator-()const{return Vector2(-v[0],-v[1]);};//unary minus
-////
-////    inline Vector2 operator*(T num)const{return Vector2(v[0]*num, v[1]*num);}
-////    inline Vector2& operator*=(T num){v[0]*=num; v[1]*=num; return (*this);};
-////    inline Vector2 operator/(T num)const{return Vector2(v[0]/num, v[1]/num);};
-////    inline Vector2& operator/=(T num){v[0]/=num; v[1]/=num; return (*this);};
-////
-////    inline friend Vector2 operator*(T num, const Vector2& vec){return Vector2(vec.v[0]*num, vec.v[1]*num);};
-////
-////    //dot product
-////    inline T operator*(const Vector2& vec)const{return (v[0]*vec.v[0]+v[1]*vec.v[1]);};
-////
-//    inline bool IsZero()const{
-//		return (this->v[0] == 0 && this->v[1] == 0);
-//	};
-////    inline T MagPow2(){return (v[0]*v[0]+v[1]*v[1]);};
-////    inline T Magnitude(){return T( sqrt(MagPow2()) );};
-////    inline Vector2& Normalize(){(*this)/=Magnitude();return (*this);};
-////    inline Vector2& Scale(T value){(*this)*=value; return (*this);};
-//
-//    inline Vector2& SetToZero(){
-//		this->v[0] = 0;
-//		this->v[1] = 0;
-//		return (*this);
-//	};
-//
-//#ifdef DEBUG
-//	friend std::ostream& operator<<(std::ostream& s, const Vector2<unsigned>& vec){
-//		s<<"("<<vec.X()<<", "<<vec.Y()<<")";
-//		return s;
-//	};
-//#endif
-//};//~class
 
 
 
