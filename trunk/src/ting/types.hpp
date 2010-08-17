@@ -90,4 +90,48 @@ STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
 
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
 
+
+
+template <bool Value> class Bool{
+	bool value;
+public:
+	inline Bool(bool value = Value) :
+			value(value)
+	{}
+
+	inline operator bool()const{
+		return this->value;
+	}
+};
+
+
+
+template <unsigned Value> class Unsigned{
+	unsigned value;
+public:
+	inline Unsigned(unsigned value = Value) :
+			value(value)
+	{}
+
+	inline operator unsigned()const{
+		return this->value;
+	}
+};
+
+
+
+template <int Value> class Int{
+	int value;
+public:
+	inline Int(int value = Value) :
+			value(value)
+	{}
+
+	inline operator int()const{
+		return this->value;
+	}
+};
+
+
+
 }//~namespace ting
