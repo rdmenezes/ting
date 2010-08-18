@@ -92,6 +92,43 @@ STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
 
 
 
+/**
+ * @brief Thin wrapper above bool C++ built-in type.
+ * Thin wrapper above bool type which allows declaration
+ * of a bool type variable initialized to some value which is defined by template
+ * parameter. This is useful when declaring class members of type bool, so you can
+ * indicate to which value the variable should be initialized without using
+ * constructor initialization list or assigning the value in the constructor body.
+ * Auto-conversions to/from C++ built-in bool type are supported.
+ *
+ * Typical usage:
+ * @code
+ * #include <ting/types.hpp>
+ *
+ * //...
+ *
+ * class Widget{
+ *     ting::Bool<false> isHidden; //initialized to false upon object construction
+ * public:
+ *     void Draw(){
+ *         if(this->isHidden)
+ *             return;
+ *
+ *         //object is visible, draw it on the screen
+ *         //...
+ *
+ *     }
+ *
+ *     inline void SetHidden(bool hide){
+ *         this->isHidden = hide;
+ *     }
+ *
+ *     inline bool IsHidden()const{
+ *         return this->isHidden;
+ *     }
+ * }
+ * @endcode
+ */
 template <bool Value> class Bool{
 	bool value;
 public:
@@ -106,6 +143,25 @@ public:
 
 
 
+/**
+ * @brief Thin wrapper above unsigned int C++ built-in type.
+ * Thin wrapper above unsigned int type which allows declaration
+ * of a unsigned int type variable initialized to some value which is defined by template
+ * parameter. This is useful when declaring class members of unsigned int type, so you can
+ * indicate to which value the variable should be initialized without using
+ * constructor initialization list or assigning the value in the constructor body.
+ * Auto-conversions to/from C++ built-in unsigned int type are supported.
+ *
+ * Typical usage:
+ * @code
+ * #include <ting/types.hpp>
+ *
+ * //...
+ *
+ * ting::Unsigned<0> a1; //initialized to 0
+ * ting::Unsigned<100> a2; //initialized to 100
+ * @endcode
+ */
 template <unsigned Value> class Unsigned{
 	unsigned value;
 public:
@@ -120,6 +176,25 @@ public:
 
 
 
+/**
+ * @brief Thin wrapper above int C++ built-in type.
+ * Thin wrapper above int type which allows declaration
+ * of a int type variable initialized to some value which is defined by template
+ * parameter. This is useful when declaring class members of int type, so you can
+ * indicate to which value the variable should be initialized without using
+ * constructor initialization list or assigning the value in the constructor body.
+ * Auto-conversions to/from C++ built-in int type are supported.
+ *
+ * Typical usage:
+ * @code
+ * #include <ting/types.hpp>
+ *
+ * //...
+ *
+ * ting::Int<0> a1; //initialized to 0
+ * ting::Int<100> a2; //initialized to 100
+ * @endcode
+ */
 template <int Value> class Int{
 	int value;
 public:
