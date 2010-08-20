@@ -87,6 +87,7 @@ STATIC_ASSERT(sizeof(u32) == 4)
 STATIC_ASSERT(sizeof(s32) == 4)
 STATIC_ASSERT(sizeof(u64) == 8)
 STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
+STATIC_ASSERT(sizeof(s64) == 8)
 
 #endif //~M_DOC_DONT_EXTRACT //for doxygen
 
@@ -143,67 +144,47 @@ public:
 
 
 
-/**
- * @brief Thin wrapper above unsigned int C++ built-in type.
- * Thin wrapper above unsigned int type which allows declaration
- * of a unsigned int type variable initialized to some value which is defined by template
- * parameter. This is useful when declaring class members of unsigned int type, so you can
- * indicate to which value the variable should be initialized without using
- * constructor initialization list or assigning the value in the constructor body.
- * Auto-conversions to/from C++ built-in unsigned int type are supported.
- *
- * Typical usage:
- * @code
- * #include <ting/types.hpp>
- *
- * //...
- *
- * ting::Unsigned<0> a1; //initialized to 0
- * ting::Unsigned<100> a2; //initialized to 100
- * @endcode
- */
-template <unsigned Value> class Unsigned{
-	unsigned value;
+template <class T, int Value> class Inited{
+	T value;
 public:
-	inline Unsigned(unsigned value = Value) :
+	inline Inited(T value = T(Value)) :
 			value(value)
 	{}
 
-	inline operator unsigned()const{
+	inline operator T()const{
 		return this->value;
 	}
-};
 
+	inline T& operator+=(const T& val){
+		return (this->value += val);
+	}
 
+	inline T& operator-=(const T& val){
+		return (this->value -= val);
+	}
 
-/**
- * @brief Thin wrapper above int C++ built-in type.
- * Thin wrapper above int type which allows declaration
- * of a int type variable initialized to some value which is defined by template
- * parameter. This is useful when declaring class members of int type, so you can
- * indicate to which value the variable should be initialized without using
- * constructor initialization list or assigning the value in the constructor body.
- * Auto-conversions to/from C++ built-in int type are supported.
- *
- * Typical usage:
- * @code
- * #include <ting/types.hpp>
- *
- * //...
- *
- * ting::Int<0> a1; //initialized to 0
- * ting::Int<100> a2; //initialized to 100
- * @endcode
- */
-template <int Value> class Int{
-	int value;
-public:
-	inline Int(int value = Value) :
-			value(value)
-	{}
+	inline T& operator*=(const T& val){
+		return (this->value *= val);
+	}
 
-	inline operator int()const{
-		return this->value;
+	inline T& operator/=(const T& val){
+		return (this->value /= val);
+	}
+
+	inline T& operator%=(const T& val){
+		return (this->value %= val);
+	}
+
+	inline T& operator^=(const T& val){
+		return (this->value ^= val);
+	}
+
+	inline T& operator&=(const T& val){
+		return (this->value &= val);
+	}
+
+	inline T& operator|=(const T& val){
+		return (this->value |= val);
 	}
 };
 
