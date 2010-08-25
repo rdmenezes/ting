@@ -207,6 +207,14 @@ public:
 	inline T& operator--(int){
 		return (this->value--);
 	}
+
+	inline T* operator&(){
+		return &this->value;
+	}
+
+	inline const T* operator&()const{
+		return &this->value;
+	}
 };
 
 
