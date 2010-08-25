@@ -595,8 +595,12 @@ public:
 			x(num), y(num), z(num), w(w)
 	{}
 
-	Vector4(const Vector2<T>& vec) :
-			x(vec.x), y(vec.y), z(0), w(1)
+	Vector4(const Vector2<T>& vec, T z = 0, T w = 1) :
+			x(vec.x), y(vec.y), z(z), w(w)
+	{}
+
+	Vector4(const Vector3<T>& vec, T w = 1) :
+			x(vec.x), y(vec.y), z(vec.z), w(w)
 	{}
 
 	inline T& operator[](unsigned i){
