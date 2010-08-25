@@ -144,6 +144,7 @@ public:
 
 
 
+//TODO: write doxygen docs
 template <class T, int Value> class Inited{
 	T value;
 public:
@@ -185,6 +186,26 @@ public:
 
 	inline T& operator|=(const T& val){
 		return (this->value |= val);
+	}
+
+	//prefix increment
+	inline T& operator++(){
+		return (++this->value);
+	}
+
+	//postfix increment
+	inline T& operator++(int){
+		return (this->value++);
+	}
+
+	//prefix decrement
+	inline T& operator--(){
+		return (--this->value);
+	}
+
+	//postfix decrement
+	inline T& operator--(int){
+		return (this->value--);
 	}
 };
 
