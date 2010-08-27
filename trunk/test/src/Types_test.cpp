@@ -1,5 +1,6 @@
 #include <ting/types.hpp>
-#include <ting/Vector3.hpp>
+
+
 
 int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<<"Types test "<<std::endl)
