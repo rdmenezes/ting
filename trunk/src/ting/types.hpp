@@ -144,13 +144,45 @@ public:
 
 
 
-//TODO: write doxygen docs
+/**
+ * @brief Thin wrapper above any C++ built-in type allowing initialization from int.
+ * Thin wrapper above any C++ built-in type which allows initialization from C++ int type.
+ * This wrapper allows initialize the variable to some int value right
+ * in place of declaration.
+ * This is useful when declaring class members, so you can
+ * indicate to which value the variable should be initialized without using
+ * constructor initialization list or assigning the value in the constructor body.
+ * Auto-conversions to/from the original type are supported.
+ *
+ * Typical usage:
+ * @code
+ * #include <ting/types.hpp>
+ *
+ * //...
+ *
+ * class SampleInitedRect{
+ * public:
+ *     ting::Inited<float, 0> x; //initialized to 0 upon object construction
+ *     ting::Inited<float, -10> y; //initialized to -10 upon object construction
+ *     ting::Inited<float, 10> width; //initialized to 10 upon object construction
+ *     ting::Inited<float, 20> height; //initialized to 20 upon object construction
+ * }
+ * @endcode
+ */
 template <class T, int Value> class Inited{
 	T value;
 public:
-	inline Inited(T value = T(Value)) :
+	inline Inited() :
+			value(Value)
+	{}
+
+	inline Inited(T value) :
 			value(value)
 	{}
+
+	inline T& operator=(const T& val){
+		return this->value = val;
+	}
 
 	inline operator T()const{
 		return this->value;
@@ -194,7 +226,7 @@ public:
 	}
 
 	//postfix increment
-	inline T& operator++(int){
+	inline T operator++(int){
 		return (this->value++);
 	}
 
@@ -204,7 +236,7 @@ public:
 	}
 
 	//postfix decrement
-	inline T& operator--(int){
+	inline T operator--(int){
 		return (this->value--);
 	}
 
