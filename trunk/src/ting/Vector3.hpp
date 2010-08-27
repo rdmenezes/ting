@@ -527,6 +527,21 @@ public:
 					this->z * vec.z;
 	}
 
+	/**
+	 * @brief Component-wise multiplication.
+	 * Performs component-wise multiplication of two vectors.
+	 * The result of such operation is also vector.
+     * @param vec - vector to multiply by.
+     * @return Vector resulting from component-wise multiplication.
+     */
+	inline Vector3 CompMul(const Vector3& vec)const{
+		return Vector3(
+				this->x * vec.x,
+				this->y * vec.y,
+				this->z * vec.z
+			);
+	}
+
 	//Cross product
 	inline Vector3 operator%(const Vector3& vec)const{
 		return Vector3(this->y * vec.z - this->z * vec.y,
