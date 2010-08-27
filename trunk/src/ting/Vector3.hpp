@@ -62,7 +62,13 @@ template <> inline const char* ParseNum<int>(const char* str, int& out_Res){
 	const char *p = str;
 	unsigned i = 0;
 	
-	//TODO: allow '-' character in front of number
+	//allow '-' character in front of number
+	if(*p == '-'){
+		buf[i] = *p;
+		++i;
+		++p;
+	}
+
 	while(*p >= 0x30 && *p <= 0x39 && i < sizeof(buf)){
 		buf[i] = *p;
 		++i;
@@ -84,9 +90,25 @@ template <> inline const char* ParseNum<float>(const char* str, float& out_Res){
 	char buf[32];
 	const char *p = str;
 	unsigned i = 0;
-	
-	//TODO: allow one '.' character in the number
-	while(*p >= 0x30 && *p <= 0x39 && i < sizeof(buf)){
+
+	//allow '-' character in front of number
+	if(*p == '-'){
+		buf[i] = *p;
+		++i;
+		++p;
+	}
+
+	bool pointEncountered = false;
+
+	while(i < sizeof(buf)){
+		if(*p < '0' || '9' < *p){
+			if(!pointEncountered && *p == '.'){//allow one '.' character in the number
+				pointEncountered = true;
+			}else{
+				break;
+			}
+		}
+
 		buf[i] = *p;
 		++i;
 		++p;
@@ -331,8 +353,7 @@ public:
 
 	/**
 	 * @brief Create vector from string.
-	 * Parse string of form "xxx, yyy" where xxx and yyy are positive (TODO: allow negative also)
-	 * decimal numbers.
+	 * Parse string of form "xxx, yyy" where xxx and yyy are decimal numbers.
 	 * @param str - pointer to null-terminated string to parse.
 	 * @return parsed Vector2 object.
 	 * @throw ting::Exc - in case the string passed as argument is bad formed.
@@ -344,9 +365,8 @@ public:
 
 		const char *p = str;
 
-		//search the first number
-		//TODO: allow first '-' character
-		while(*p < 0x30 || *p > 0x39){
+		//search the first number, allow first '-' character
+		while((*p < 0x30 || *p > 0x39) && *p != '-'){
 			if(*p == 0)
 				throw Exc("Vector2::ParseXY(): no number found");
 			++p;
@@ -356,9 +376,8 @@ public:
 		if(!p)
 			throw Exc("Vector2::ParseXY(): input string should start with dight");
 
-		//search next number
-		//TODO: allow first '-' character
-		while(*p < 0x30 || *p > 0x39){
+		//search next number, allow first '-' character
+		while((*p < 0x30 || *p > 0x39) && *p != '-'){
 			if(*p == 0)
 				throw Exc("Vector2::ParseXY(): second number not found");
 			++p;
@@ -557,6 +576,58 @@ public:
 
 	//rotate this vector with unit quaternion which represents a rotation
 	inline Vector3<T>& Rotate(const Quaternion<T>& q);//see implemenation below
+
+
+		/**
+	 * @brief Create vector from string.
+	 * Parse string of form "xxx, yyy, zzz" where xxx, yyy and zzz are decimal numbers.
+	 * @param str - pointer to null-terminated string to parse.
+	 * @return parsed Vector3 object.
+	 * @throw ting::Exc - in case the string passed as argument is bad formed.
+	 */
+	static Vector3 ParseXYZ(const char* str){
+		ASSERT(str)
+
+		Vector3 vec;
+
+		const char *p = str;
+
+		//search the first number, allow first '-' character
+		while((*p < 0x30 || *p > 0x39) && *p != '-'){
+			if(*p == 0)
+				throw Exc("Vector3::ParseXYZ(): no number found");
+			++p;
+		}
+
+		p = ParseNum<T>(p, vec.x);
+		if(!p)
+			throw Exc("Vector3::ParseXYZ(): input string should start with dight");
+
+		//search next number, allow first '-' character
+		while((*p < 0x30 || *p > 0x39) && *p != '-'){
+			if(*p == 0)
+				throw Exc("Vector3::ParseXYZ(): second number not found");
+			++p;
+		}
+
+		p = ParseNum<T>(p, vec.y);
+		if(!p)
+			throw Exc("Vector3::ParseXYZ(): second number parsing failed");
+
+		//search next number, allow first '-' character
+		while((*p < 0x30 || *p > 0x39) && *p != '-'){
+			if(*p == 0)
+				throw Exc("Vector3::ParseXYZ(): second number not found");
+			++p;
+		}
+
+		p = ParseNum<T>(p, vec.z);
+		if(!p)
+			throw Exc("Vector3::ParseXYZ(): third number parsing failed");
+
+		return vec;
+	}
+
 
 #ifdef DEBUG  
 	friend std::ostream& operator<<(std::ostream& s, const Vector3<T>& vec){
