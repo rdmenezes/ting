@@ -52,6 +52,12 @@ namespace ting{
  * This class is supposed to be ancestor of all buffer-like objects.
  */
 template <class T> class Buffer{
+	
+	//forbid copying
+	inline Buffer(const Buffer& b){
+		ASSERT(false)
+	}
+	
 protected:
 	T* buf;
 	unsigned size;
@@ -59,13 +65,6 @@ protected:
 
 	
 	inline Buffer(){}
-
-
-
-	//forbid copying
-	inline Buffer(const Buffer& b){
-		ASSERT(false)
-	}
 
 
 
@@ -222,6 +221,18 @@ template <class T, unsigned bufSize> class StaticBuffer : public ting::Buffer<T>
 public:
 	inline StaticBuffer() :
 			ting::Buffer<T>(&staticBuffer[0], bufSize)
+	{}
+
+
+
+	/**
+	 * @brief Copy constructor.
+	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
+     * @param buf - static buffer to copy.
+     */
+	inline StaticBuffer(const StaticBuffer<T, bufSize> &buf) :
+			ting::Buffer<T>(&staticBuffer[0], bufSize),
+			staticBuffer(buf.staticBuffer)
 	{}
 };
 
