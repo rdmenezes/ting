@@ -57,7 +57,7 @@ template <class T> class Buffer{
 	inline Buffer(const Buffer& b){
 		ASSERT(false)
 	}
-	
+
 protected:
 	T* buf;
 	unsigned size;
@@ -67,6 +67,11 @@ protected:
 	inline Buffer(){}
 
 
+
+	Buffer& operator=(const Buffer& b){
+		//do nothing
+		return *this;
+	}
 
 public:
 	/**
