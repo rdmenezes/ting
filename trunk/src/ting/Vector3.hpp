@@ -1203,6 +1203,20 @@ public:
 	}
 
 
+
+	/**
+	 * @brief Multiply this matrix by rotation matrix.
+	 * Multiplies this matrix by Rotation matrix from the right (M = M * R).
+	 * Rotation is done around (0, 0, 1) axis by given number of radians.
+	 * Positive direction of rotation is determined by a right-hand rule.
+	 * @param rot - the angle of rotation in radians.
+	 * @return reference to this matrix object.
+	 */
+	inline Matrix4& Rotate(T rot){
+		return this->Rotate(Vector3<T>(0, 0, rot));
+	}
+
+
 	
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Matrix4<T>& mat){
