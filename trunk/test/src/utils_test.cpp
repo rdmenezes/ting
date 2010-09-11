@@ -7,26 +7,6 @@ using namespace ting;
 
 
 
-static void TestExchange(){
-	{
-		u32 a = 13, b = 14;
-		Exchange(a, b);
-
-		ASSERT_ALWAYS(a == 14)
-		ASSERT_ALWAYS(b == 13)
-	}
-
-	{
-		float a = 13, b = 14;
-		Exchange(a, b);
-
-		ASSERT_ALWAYS(a == 14)
-		ASSERT_ALWAYS(b == 13)
-	}
-}
-
-
-
 static void TestSerialization(){
 	//16 bit
 	for(u32 i = 0; i <= u16(-1); ++i){
@@ -64,7 +44,6 @@ static void TestSerialization(){
 int main(int argc, char *argv[]){
 //	TRACE(<< "utils test" << std::endl)
 
-	TestExchange();
 	TestSerialization();
 
 	TRACE_ALWAYS(<< "[PASSED]: utils test" << std::endl)

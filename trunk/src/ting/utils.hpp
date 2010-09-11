@@ -60,46 +60,6 @@ namespace ting{
 
 
 /**
- * @brief Exchange two values.
- * Note, that it uses temporary variable to switch the values. Thus, the value should
- * have proper copy constructor defined.
- * @param a - reference to value a.
- * @param b - reference to value b.
- */
-template <class T> inline void Exchange(T &a, T &b){
-	T tmp = a;
-	a = b;
-	b = tmp;
-}
-
-
-
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
-//quick exchange two unsigned 32bit integers
-template <> inline void Exchange<u32>(u32& x, u32& y){
-//	TRACE(<<"Exchange<u32>(): invoked"<<std::endl)
-	//NOTE: Do not make y^=x^=y^=x;
-	//Some compilers (e.g. gcc4.1) may generate incorrect code
-	y ^= x;
-	x ^= y;
-	y ^= x;
-}
-#endif
-
-
-
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
-//quick exchange two floats
-template <> inline void Exchange<float>(float& x, float& y){
-//	TRACE(<<"Exchange<float>(): invoked"<<std::endl)
-	Exchange<u32>(reinterpret_cast<u32&>(x), reinterpret_cast<u32&>(y));
-}
-STATIC_ASSERT(sizeof(float) == sizeof(u32))
-#endif
-
-
-
-/**
  * @brief Clamp value top.
  * This inline template function can be used to clamp the top of the value.
  * Example:

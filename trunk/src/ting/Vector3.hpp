@@ -33,6 +33,7 @@ THE SOFTWARE. */
 
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 
 #ifdef DEBUG
 #include <iostream>
@@ -960,12 +961,12 @@ public:
 	 * @brief Transpose matrix.
 	 */
 	Matrix4& Transpose(){
-		Exchange(this->m[1], this->m[4]);
-		Exchange(this->m[2], this->m[8]);
-		Exchange(this->m[6], this->m[9]);
-		Exchange(this->m[3], this->m[12]);
-		Exchange(this->m[7], this->m[13]);
-		Exchange(this->m[11], this->m[14]);
+		std::swap(this->m[1], this->m[4]);
+		std::swap(this->m[2], this->m[8]);
+		std::swap(this->m[6], this->m[9]);
+		std::swap(this->m[3], this->m[12]);
+		std::swap(this->m[7], this->m[13]);
+		std::swap(this->m[11], this->m[14]);
 		return (*this);
 	}
 
