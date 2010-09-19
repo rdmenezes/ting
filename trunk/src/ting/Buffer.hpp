@@ -225,7 +225,7 @@ template <class T, unsigned bufSize> class StaticBuffer : public ting::Buffer<T>
 	T staticBuffer[bufSize];
 public:
 	inline StaticBuffer() :
-			ting::Buffer<T>(&staticBuffer[0], bufSize)
+			ting::Buffer<T>(staticBuffer, bufSize)
 	{}
 
 
@@ -236,7 +236,7 @@ public:
      * @param buf - static buffer to copy.
      */
 	inline StaticBuffer(const StaticBuffer<T, bufSize> &buf) :
-			ting::Buffer<T>(&staticBuffer[0], bufSize),
+			ting::Buffer<T>(staticBuffer, bufSize),
 			staticBuffer(buf.staticBuffer)
 	{}
 };
