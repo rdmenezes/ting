@@ -299,6 +299,21 @@ public:
 		return !this->operator==(vec);
 	}
 
+	/**
+	 * @brief Component-wise multiplication.
+	 * Performs component-wise multiplication of two vectors.
+	 * The result of such operation is also vector.
+     * @param vec - vector to multiply by.
+     * @return Vector resulting from component-wise multiplication.
+     */
+	inline Vector2 CompMul(const Vector2& vec)const{
+		return Vector2(
+				this->x * vec.x,
+				this->y * vec.y
+			);
+	}
+
+
 	inline bool IsZero()const{
 		return (this->x == 0 && this->y == 0);
 	}
