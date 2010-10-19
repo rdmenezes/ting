@@ -340,6 +340,10 @@ public:
 			a(0)
 	{}
 
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+
 	int DoSomething(int newA){
 		this->a = newA;
 		return this->a;
@@ -358,7 +362,7 @@ static void Test(){
 		ting::Signal0 signal0;
 		ting::Signal1<int> signal1;
 		
-		ting::Ref<TestClass> a = ting::Ref<TestClass>(new TestClass());
+		ting::Ref<TestClass> a = TestClass::New();
 
 		{
 			ting::WeakRef<TestClass> wa(a);
@@ -404,7 +408,7 @@ static void Test(){
 	{
 		ting::Signal3<int, long, char*> sig;
 
-		ting::Ref<TestClass> tc = ting::Ref<TestClass>(new TestClass());
+		ting::Ref<TestClass> tc = TestClass::New();
 		ting::WeakRef<TestClass> wa(tc);
 
 
@@ -487,6 +491,10 @@ public:
 	void DoSomethingWithA(){
 		this->a = 278;
 	}
+
+	static inline ting::Ref<TestRefClass> New(){
+		return ting::Ref<TestRefClass>(new TestRefClass());
+	}
 };
 
 
@@ -511,7 +519,7 @@ static void DoSomethingWithA(){
 
 
 static void Test(){
-	ting::Ref<TestRefClass> rc(new TestRefClass());
+	ting::Ref<TestRefClass> rc = TestRefClass::New();
 	TestClass tc;
 
 	ting::Signal2<long, unsigned> sig;

@@ -192,6 +192,12 @@ protected:
 		return ::operator new(s);
 	}
 
+protected:
+	//operator delete is protected because only ting::Ref can delete the
+	//RefCounted object.
+	inline static void operator delete(void *p){
+		::operator delete(p);
+	}
 
 
 public:
@@ -204,6 +210,7 @@ public:
 		}
 	}
 
+public:
 	inline unsigned NumRefs()const{
 		return ASS(this->counter)->numStrongRefs;
 	}
@@ -552,7 +559,9 @@ private:
 			if(this->p->RemRef() == 0){
 				ASSERT(this->IsValid())
 				M_REF_PRINT(<< "Ref::Destroy(): deleting " << (this->p) << std::endl)
-				delete static_cast<T*>(this->p);
+				//deleting should be ok without type casting, because RefCounted
+				//destructor is virtual.
+				delete this->p;
 				M_REF_PRINT(<< "Ref::Destroy(): object " << (this->p) << " deleted" << std::endl)
 			}
 		}

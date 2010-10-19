@@ -213,7 +213,7 @@ typedef MemPool< \
 		((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T)) \
 	> T_MemoryPool;
 
-	static void* operator new (size_t size){
+	static void* operator new(size_t size){
 		M_POOL_TRACE(<< "new(): size = " << size << std::endl)
 		if(size != sizeof(T))
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
@@ -223,7 +223,7 @@ typedef MemPool< \
 		return T_MemoryPool::Alloc();
 	}
 
-	static void operator delete (void *p){
+	static void operator delete(void *p){
 		M_MEMPOOL_TYPEDEF
 		
 		T_MemoryPool::Free(p);

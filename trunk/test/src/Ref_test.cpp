@@ -16,6 +16,10 @@ public:
 		destroyed(0)
 	{}
 
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+
 	~TestClass(){
 		if(this->destroyed){
 			*this->destroyed = true;
@@ -27,7 +31,7 @@ public:
 
 static void TestConversionToBool(){
 	ting::Ref<TestClass> a;
-	ting::Ref<TestClass> b(new TestClass());
+	ting::Ref<TestClass> b = TestClass::New();
 
 	//test conversion to bool
 	if(a){
@@ -44,7 +48,7 @@ static void TestConversionToBool(){
 
 static void TestOperatorLogicalNot(){
 	ting::Ref<TestClass> a;
-	ting::Ref<TestClass> b(new TestClass());
+	ting::Ref<TestClass> b = TestClass::New();
 
 	//test operator !()
 	if(!a){
@@ -62,7 +66,7 @@ static void TestOperatorLogicalNot(){
 namespace TestBasicWeakRefUseCase{
 static void Run(){
 	for(unsigned i = 0; i < 1000; ++i){
-		ting::Ref<TestClass> a(new TestClass());
+		ting::Ref<TestClass> a = TestClass::New();
 		ASSERT_ALWAYS(a.IsValid())
 
 		bool wasDestroyed = false;
@@ -90,13 +94,17 @@ public:
 	TestClass(){
 		throw ting::Exc("TestException!");
 	}
+
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
 };
 
 
 
 static void Run(){
 	try{
-		ting::Ref<TestClass> a(new TestClass());
+		ting::Ref<TestClass> a = TestClass::New();
 		ASSERT_ALWAYS(false)
 	}catch(ting::Exc& e){
 		//do nothing
@@ -117,6 +125,15 @@ public:
 			destroyed(0)
 	{
 	}
+
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+
+	static inline TestClass* SimpleNew(){
+		return new TestClass();
+	}
+
 	~TestClass(){
 		if(this->destroyed)
 			*this->destroyed = true;
@@ -130,7 +147,7 @@ void Run1(){
 	
 	bool destroyed = false;
 	
-	TestClass *tc = new TestClass();
+	TestClass *tc = TestClass::SimpleNew();
 	ASSERT_ALWAYS(tc)
 	tc->destroyed = &destroyed;
 
@@ -162,7 +179,7 @@ void Run1(){
 void Run2(){
 	bool destroyed = false;
 
-	TestClass *tc = new TestClass();
+	TestClass *tc = TestClass::SimpleNew();
 	ASSERT_ALWAYS(tc)
 	tc->destroyed = &destroyed;
 
