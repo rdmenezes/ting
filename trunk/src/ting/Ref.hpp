@@ -185,9 +185,12 @@ protected:
 
 
 
-//	inline static void* operator new(size_t s){
-//		return ::operator new(s);
-//	}
+	//operator new is protected to enforce objects creation
+	//through static New() method, to avoid using of RefCounted objects
+	//via ordinary pointers.
+	inline static void* operator new(size_t s){
+		return ::operator new(s);
+	}
 
 
 
@@ -526,7 +529,7 @@ public:
 
 
 
-	//for type downcast
+	//for automatic type downcast
 	template <typename TBase> inline operator Ref<TBase>(){
 		//downcasting of invalid reference is also possible
 		if(this->IsNotValid())
@@ -537,6 +540,8 @@ public:
 		//NOTE: static cast to T*, not to TBase*,
 		//this is to forbid automatic upcast
 		return Ref<TBase>(static_cast<T*>(this->p));
+		//NOTE: if you get compiler error on this line, then you probaly
+		//trying to automatically downcast the class which cannot be downcasted.
 	}
 
 
