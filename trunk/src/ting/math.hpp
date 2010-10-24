@@ -78,32 +78,6 @@ template <typename T_Type> inline T_Type Abs(T_Type n){
 
 
 /**
- * @brief Get minimal of two given values.
- * @param a - 1st value.
- * @param b - 2nd value.
- * @return value 'a' if a is less than b.
- * @return value 'b' if b is less or equal to a.
- */
-template <typename T_Type> inline T_Type Min(T_Type a, T_Type b){
-	return a < b ? a : b;
-}
-
-
-
-/**
- * @brief Get maximal of two given values.
- * @param a - 1st value.
- * @param b - 2nd value.
- * @return value 'a' if a is greater than b.
- * @return value 'b' if b is greater or equal to a.
- */
-template <typename T_Type> inline T_Type Max(T_Type a, T_Type b){
-	return a > b ? a : b;
-}
-
-
-
-/**
  * @brief Get number Pi.
  * @return number Pi.
  */

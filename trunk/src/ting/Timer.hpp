@@ -58,6 +58,7 @@ THE SOFTWARE. */
 //~ ==System dependen headers inclusion==
 
 #include <list>
+#include <algorithm>
 
 #include "debug.hpp" //debugging facilities
 #include "types.hpp"
@@ -343,7 +344,7 @@ inline void TimerLib::TimerThread::Run(){
 
 		//make sure we will update warpFlag at least 4 times
 		//per ticks cycle (ticks cycle = 0xffffffffff ticks)
-		millis = ting::Min(millis, ting::u32(-1) / 4);
+		millis = std::min(millis, ting::u32(-1) / 4);
 		ASSERT(millis != 0)
 
 		this->mutex.Unlock();
