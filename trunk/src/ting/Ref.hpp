@@ -763,7 +763,7 @@ public:
 private:
 	inline static void* operator new(size_t size){
 		ASSERT_ALWAYS(false)//forbidden
-		//WeakRef objects can only be creaed on stack
+		//WeakRef objects can only be created on stack
 		//or as a memer of other object or array
 		return 0;
 	}
