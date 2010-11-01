@@ -235,7 +235,7 @@ private:
 template <class T> class Ref{
 	friend class WeakRef<T>;
 
-	RefCounted *p;
+	T *p;
 
 
 	
@@ -316,7 +316,7 @@ public:
 	 */
 	//NOTE: this constructor should be explicit to prevent undesired conversions from T* to Ref<T>
 	explicit inline Ref(T* rc) :
-			p(static_cast<RefCounted*>(rc))
+			p(rc)
 	{
 		M_REF_PRINT(<< "Ref::Ref(rc): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
@@ -523,7 +523,7 @@ public:
 	inline T* operator->(){
 		M_REF_PRINT(<< "Ref::operator->(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
-		return static_cast<T*>(this->p);
+		return this->p;
 	}
 
 
@@ -531,7 +531,7 @@ public:
 	inline const T* operator->()const{
 		M_REF_PRINT(<< "Ref::operator->()const: invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
-		return static_cast<T*>(this->p);
+		return this->p;
 	}
 
 
@@ -544,9 +544,7 @@ public:
 
 		M_REF_PRINT(<< "Ref::downcast(): invoked, p = " << (this->p) << std::endl)
 
-		//NOTE: static cast to T*, not to TBase*,
-		//this is to forbid automatic upcast
-		return Ref<TBase>(static_cast<T*>(this->p));
+		return Ref<TBase>(this->p);
 		//NOTE: if you get compiler error on this line, then you probaly
 		//trying to automatically downcast the class which cannot be downcasted.
 	}
@@ -616,9 +614,11 @@ template <class T> class WeakRef{
 	friend class Ref<T>;
 
 	RefCounted::Counter *counter;
+	T* p;//this pointer is only valid if counter is not 0 and counter->p is not 0
+	
 
 
-	inline void InitFromRefCounted(const RefCounted *rc){
+	inline void InitFromRefCounted(T *rc){
 		if(!rc){
 			this->counter = 0;
 			return;
@@ -627,11 +627,13 @@ template <class T> class WeakRef{
 		ASSERT(rc)
 
 		this->InitFromCounter(ASS(rc->counter));
+
+		this->p = rc;
 	}
 
 
 	
-	inline void InitFromStrongRef(const Ref<T> &r){
+	inline void InitFromStrongRef(Ref<T> &r){
 		if(r.IsNotValid()){
 			this->counter = 0;
 			return;
@@ -643,9 +645,13 @@ template <class T> class WeakRef{
 
 
 	inline void InitFromWeakRef(const WeakRef &r){
-		if(r.counter == 0)
+		if(r.counter == 0){
+			this->counter = 0;
 			return;
+		}
 		this->InitFromCounter(r.counter);//counter can be 0
+
+		this->p = r.p;
 	}
 
 
@@ -687,6 +693,7 @@ template <class T> class WeakRef{
 
 	
 public:
+	//TODO:make it private and add static(?) method to RefCounted
 	inline WeakRef(T* rc = 0){
 		this->InitFromRefCounted(rc);
 	}
@@ -694,7 +701,7 @@ public:
 
 
 	inline WeakRef(const Ref<T> &r){
-		this->InitFromStrongRef(r);
+		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
 	}
 
 
@@ -726,7 +733,7 @@ public:
 	inline WeakRef& operator=(const Ref<T> &r){
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
-		this->InitFromStrongRef(r);
+		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
 		return *this;
 	}
 
@@ -770,12 +777,14 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 		return;
 	}
 
-	r.counter->mutex.Lock();
+	ASS(r.counter)->mutex.Lock();
 
-	this->p = ASS(r.counter)->p;
-
-	if(this->p){
+	if(r.counter->p){
+		ASSERT(r.counter->p == static_cast<RefCounted*>(r.p))
+		this->p = ASS(r.p);
 		++(r.counter->numStrongRefs);
+	}else{
+		this->p = 0;
 	}
 	
 	r.counter->mutex.Unlock();

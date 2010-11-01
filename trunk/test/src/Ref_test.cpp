@@ -80,7 +80,7 @@ static void Run(){
 
 		ASSERT_ALWAYS(a.IsNotValid())
 		ASSERT_ALWAYS(wasDestroyed)
-		ASSERT_ALWAYS(ting::Ref<TestClass>(wr).IsNotValid())
+		ASSERT_INFO_ALWAYS(ting::Ref<TestClass>(wr).IsNotValid(), "i = " << i)
 	}//~for
 }
 }//~namespace
