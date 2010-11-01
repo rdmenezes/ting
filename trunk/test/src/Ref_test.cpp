@@ -203,15 +203,97 @@ void Run2(){
 
 
 
+namespace TestVirtualInheritedRefCounted{
+	class A : virtual public ting::RefCounted{
+	public:
+		int a;
+	};
+
+	class B : virtual public ting::RefCounted{
+	public:
+		int b;
+	};
+	
+	class C : public A, B{
+	public:
+		int c;
+		
+		bool& destroyed;
+		
+		C(bool& destroyed) :
+				destroyed(destroyed)
+		{}
+		
+		~C(){
+			this->destroyed = true;
+		}
+		
+		static ting::Ref<C> New(bool& destroyed){
+			return ting::Ref<C>(new C(destroyed));
+		}
+	};
+	
+	void Run1(){
+		bool isDestroyed = false;
+		
+		ting::Ref<C> p = C::New(isDestroyed);
+		
+		ASSERT_ALWAYS(!isDestroyed)
+		ASSERT_ALWAYS(p.IsValid())
+		
+		p.Reset();
+		
+		ASSERT_ALWAYS(p.IsNotValid())
+		ASSERT_ALWAYS(isDestroyed)
+	}
+	
+	void Run2(){
+		bool isDestroyed = false;
+		
+		ting::Ref<A> p = C::New(isDestroyed);
+		
+		ASSERT_ALWAYS(!isDestroyed)
+		ASSERT_ALWAYS(p.IsValid())
+		
+		p.Reset();
+		
+		ASSERT_ALWAYS(p.IsNotValid())
+		ASSERT_ALWAYS(isDestroyed)
+	}
+	
+	void Run3(){
+		bool isDestroyed = false;
+		
+		ting::Ref<ting::RefCounted> p = C::New(isDestroyed);
+		
+		ASSERT_ALWAYS(!isDestroyed)
+		ASSERT_ALWAYS(p.IsValid())
+		
+		p.Reset();
+		
+		ASSERT_ALWAYS(p.IsNotValid())
+		ASSERT_ALWAYS(isDestroyed)
+	}
+}
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Ref test" << std::endl)
 
 	TestConversionToBool();
+	
 	TestOperatorLogicalNot();
+	
 	TestBasicWeakRefUseCase::Run();
+	
 	TestExceptionThrowingFromRefCountedDerivedClassConstructor::Run();
+	
 	TestCreatingWeakRefFromRefCounted::Run1();
 	TestCreatingWeakRefFromRefCounted::Run2();
+	
+	TestVirtualInheritedRefCounted::Run1();
+	TestVirtualInheritedRefCounted::Run2();
+	TestVirtualInheritedRefCounted::Run3();
 
 	//TODO: add more test cases
 

@@ -320,7 +320,7 @@ public:
 	{
 		M_REF_PRINT(<< "Ref::Ref(rc): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
-		this->p->AddRef();
+		static_cast<RefCounted*>(this->p)->AddRef();//NOTE: static_cast is just to make sure that passed object inherits RefCounted
 		M_REF_PRINT(<< "Ref::Ref(rc): exiting" << (this->p) << std::endl)
 	}
 
