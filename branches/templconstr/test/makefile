@@ -28,6 +28,7 @@ endif
 
 #compiler flags
 cf := -Wall -I../src
+cf += -g
 cf += -DDEBUG
 
 
