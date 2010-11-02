@@ -659,7 +659,7 @@ template <class T> class WeakRef{
 
 
 
-	inline void InitFromWeakRef(const WeakRef& r){
+	template <class TBase> inline void InitFromWeakRef(const WeakRef<TBase>& r){
 		M_REF_PRINT(<< "WeakRef::InitFromWeakRef(): invoked " << std::endl)
 		if(r.counter == 0){
 			this->counter = 0;
@@ -711,18 +711,6 @@ template <class T> class WeakRef{
 	}
 
 
-	inline WeakRef(RefCounted::Counter *c, T* rc){
-		M_REF_PRINT(<< "WeakRef::WeakRef(RefCounted::Counter*, T*): invoked" << std::endl)
-		if(!c){
-			this->counter = 0;
-			return;
-		}
-		ASSERT(c)
-		this->InitFromCounter(c);
-
-		this->p = rc;//should cast automaticly
-	}
-
 	
 public:
 	//TODO:make it private and add static(?) method to RefCounted
@@ -742,6 +730,14 @@ public:
 
 	//copy constructor
 	inline WeakRef(const WeakRef& r){
+		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef&): invoked" << std::endl)
+		this->InitFromWeakRef(r);
+	}
+
+
+
+	//downcast / to-const cast constructor
+	template <class TBase> inline WeakRef(const WeakRef<TBase>& r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TBase>&): invoked" << std::endl)
 		this->InitFromWeakRef(r);
 	}
@@ -787,6 +783,17 @@ public:
 
 
 
+	//template for downcasting
+	template <class TBase> inline WeakRef& operator=(const WeakRef<TBase>& r){
+		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TBase>&): invoked" << std::endl)
+		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
+		this->Destroy();
+		this->InitFromWeakRef(r);
+		return *this;
+	}
+
+
+
 	/**
 	 * @brief Reset this reference.
 	 * After calling this method the reference becomes invalid, i.e. it
@@ -799,17 +806,6 @@ public:
 	}
 
 
-
-	//TODO: make template constructor and template operator=() instead of this conversion operator?
-
-	//for automatic type downcast / to-const cast
-	template <typename TBase> inline operator WeakRef<TBase>(){
-		M_REF_PRINT(<< "WeakRef::downcast(): invoked, p = " << (this->p) << std::endl)
-
-		return WeakRef<TBase>(this->counter, this->p);
-		//NOTE: if you get compiler error on this line, then you probaly
-		//trying to automatically downcast the class which cannot be downcasted.
-	}
 
 private:
 	inline static void* operator new(size_t size){
