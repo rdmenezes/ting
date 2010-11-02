@@ -659,6 +659,8 @@ template <class T> class WeakRef{
 		this->InitFromCounter(r.counter);
 
 		this->p = r.p;//should cast automaticly
+		//NOTE: if you get 'invalid conversion' error here, then you must be trying
+		//to do automatic cast to unrelated type.
 	}
 
 
@@ -817,7 +819,8 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 	ASS(r.counter)->mutex.Lock();
 
 	if(r.counter->p){
-		ASSERT(r.counter->p == static_cast<RefCounted*>(r.p))
+		//NOTE: static_cast() to const(!) RefCounted because T may be a const type.
+		ASSERT(r.counter->p == static_cast<const RefCounted*>(r.p))
 		this->p = ASS(r.p);
 		++(r.counter->numStrongRefs);
 	}else{

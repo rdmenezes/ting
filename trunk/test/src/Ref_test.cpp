@@ -510,14 +510,18 @@ void Run1(){
 		ting::WeakRef<TestClass> wa(a);
 		ting::WeakRef<const TestClass> wb(a);
 		ting::WeakRef<const TestClass> wb1(b);
+
+		ASSERT_ALWAYS(ting::Ref<TestClass>(wa)->a == 1234)
+		ASSERT_ALWAYS(ting::Ref<const TestClass>(wb)->a == 1234)
+		ASSERT_ALWAYS(ting::Ref<const TestClass>(wb1)->a == 1234)
 	}
 
 	{
 		ting::WeakRef<TestClass> wa(a);
 		ting::WeakRef<const TestClass> wb(wa);
-	}
-	//TODO:
 
+		ASSERT_ALWAYS(ting::Ref<const TestClass>(wb)->a == 1234)
+	}
 }
 }//~namespace
 
