@@ -36,7 +36,7 @@ THE SOFTWARE. */
 #include "Thread.hpp"
 #include "PoolStored.hpp"
 
-//#define M_ENABLE_REF_PRINT
+#define M_ENABLE_REF_PRINT
 #ifdef M_ENABLE_REF_PRINT
 #define M_REF_PRINT(x) TRACE(<<"[REF]" x)
 #else
@@ -659,7 +659,7 @@ template <class T> class WeakRef{
 
 
 
-	inline void InitFromWeakRef(const WeakRef& r){
+	template <class TBase> inline void InitFromWeakRef(const WeakRef<TBase>& r){
 		M_REF_PRINT(<< "WeakRef::InitFromWeakRef(): invoked " << std::endl)
 		if(r.counter == 0){
 			this->counter = 0;
@@ -741,7 +741,7 @@ public:
 
 
 	//copy constructor
-	inline WeakRef(const WeakRef& r){
+	template <class TBase> inline WeakRef(const WeakRef<TBase>& r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TBase>&): invoked" << std::endl)
 		this->InitFromWeakRef(r);
 	}
@@ -777,7 +777,7 @@ public:
 
 
 
-	inline WeakRef& operator=(const WeakRef& r){
+	template <class TBase> inline WeakRef& operator=(const WeakRef<TBase>& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TBase>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
@@ -801,7 +801,7 @@ public:
 
 
 	//TODO: make template constructor and template operator=() instead of this conversion operator?
-
+/*
 	//for automatic type downcast / to-const cast
 	template <typename TBase> inline operator WeakRef<TBase>(){
 		M_REF_PRINT(<< "WeakRef::downcast(): invoked, p = " << (this->p) << std::endl)
@@ -810,6 +810,7 @@ public:
 		//NOTE: if you get compiler error on this line, then you probaly
 		//trying to automatically downcast the class which cannot be downcasted.
 	}
+*/
 
 private:
 	inline static void* operator new(size_t size){
