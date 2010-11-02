@@ -423,8 +423,20 @@ public:
 	 * @return true if both references are pointing to the same object or both are invalid.
 	 * @return false otherwise.
 	 */
-	inline bool operator==(const Ref &r)const{
+	template <class TS> inline bool operator==(const Ref<TS>& r)const{
 		return this->p == r.p;
+	}
+
+
+
+	/**
+	 * @brief tells if 2 references are not equal.
+	 * @param r - reference to compare this reference to.
+	 * @return false if both references are pointing to the same object or both are invalid.
+	 * @return true otherwise.
+	 */
+	template <class TS> inline bool operator!=(const Ref<TS>& r)const{
+		return !(this->operator==<TS>(r));
 	}
 
 
@@ -521,8 +533,9 @@ public:
 
 
 
-	//TODO:
-	inline T& operator*(){
+	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
+	//it means that the Ref itself cannot be changed to point to another object.
+	inline T& operator*()const{
 		M_REF_PRINT(<< "Ref::operator*(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator*(): this->p is zero")
 		return static_cast<T&>(*this->p);
@@ -530,25 +543,10 @@ public:
 
 
 
-	inline const T& operator*()const{
-		M_REF_PRINT(<< "const Ref::operator*(): invoked, p = " << (this->p) << std::endl)
-		ASSERT_INFO(this->p, "const Ref::operator*(): this->p is zero")
-		return static_cast<T&>(*this->p);
-	}
-
-
-
-	//TODO:
-	inline T* operator->(){
+	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
+	//it means that the Ref itself cannot be changed to point to another object.
+	inline T* operator->()const{
 		M_REF_PRINT(<< "Ref::operator->(): invoked, p = " << (this->p) << std::endl)
-		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
-		return this->p;
-	}
-
-
-
-	inline const T* operator->()const{
-		M_REF_PRINT(<< "Ref::operator->()const: invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
 		return this->p;
 	}

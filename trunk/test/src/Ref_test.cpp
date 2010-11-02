@@ -52,6 +52,69 @@ static void TestOperatorLogicalNot(){
 
 
 
+namespace TestOperatorArrowAndOperatorStar{
+class A : public ting::RefCounted{
+public:
+	int a;
+
+	A() : a(98)
+	{}
+
+	static inline ting::Ref<A> New(){
+		return ting::Ref<A>(new A());
+	}
+};
+
+
+static void Run1(){
+	ting::Ref<A> a = A::New();
+	ting::Ref<const A> ac = A::New();
+
+	ASSERT_ALWAYS(a)
+	ASSERT_ALWAYS(ac)
+
+	ASSERT_ALWAYS(ac != a)
+	ASSERT_ALWAYS(a != ac)
+
+	a->a = 123;
+	ASSERT_ALWAYS((*a).a == 123)
+
+	(*a).a = 456;
+	ASSERT_ALWAYS(a->a == 456)
+
+	ASSERT_ALWAYS(ac->a == 98)
+	ASSERT_ALWAYS((*ac).a == 98)
+
+	ac = a;
+
+	ASSERT_ALWAYS(ac == a)
+	ASSERT_ALWAYS(a == ac)
+}
+
+static void Run2(){
+	const ting::Ref<A> a = A::New();
+	const ting::Ref<const A> ac = A::New();
+
+	ASSERT_ALWAYS(a)
+	ASSERT_ALWAYS(ac)
+
+	ASSERT_ALWAYS(ac != a)
+	ASSERT_ALWAYS(a != ac)
+
+	a->a = 123;
+	ASSERT_ALWAYS((*a).a == 123)
+
+	(*a).a = 456;
+	ASSERT_ALWAYS(a->a == 456)
+
+	ASSERT_ALWAYS(ac->a == 98)
+	ASSERT_ALWAYS((*ac).a == 98)
+}
+
+}//~namespace
+
+
+
 namespace TestBasicWeakRefUseCase{
 class TestClass : public ting::RefCounted{
 public:
@@ -462,6 +525,9 @@ void Run1(){
 
 int main(int argc, char *argv[]){
 //	TRACE(<< "Ref test" << std::endl)
+
+	TestOperatorArrowAndOperatorStar::Run1();
+	TestOperatorArrowAndOperatorStar::Run2();
 
 	TestAutomaticDowncasting::Run1();
 
