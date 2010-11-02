@@ -95,6 +95,8 @@ class RefCounted{
 
 	
 private:
+	//NOTE: reference may be added to a constant instance of the object, this is
+	//why this method should be const.
 	inline unsigned AddRef(){
 		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
@@ -105,7 +107,9 @@ private:
 
 
 
-	inline unsigned RemRef(){
+	//NOTE: reference may be removed from a constant instance of the object, this is
+	//why this method should be const.
+	inline unsigned RemRef()const{
 		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 		this->counter->mutex.Lock();
@@ -130,7 +134,7 @@ private:
 				this->counter->p = 0;
 
 				ASS(this->counter)->mutex.Unlock();
-				this->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
+				const_cast<RefCounted*>(this)->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
 			}else{//no weak references
 				//Unlock before deleting because the mutex object is in Counter.
 				//The Counter object will be deleted in destructor, as the destructor will be called shortly
@@ -320,7 +324,15 @@ public:
 	{
 		M_REF_PRINT(<< "Ref::Ref(rc): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
-		static_cast<RefCounted*>(this->p)->AddRef();//NOTE: static_cast is just to make sure that passed object inherits RefCounted
+
+		//NOTE: in order to make sure that passed object inherits RefCounted
+		//do static_cast() to RefCounted. Since the T type may be a const type
+		//(e.g. Ref<const int>), so cast to const RefCounted and then use const_cast().
+		if(this->p){
+			const_cast<RefCounted*>(
+					static_cast<const RefCounted*>(this->p)
+				)->AddRef();
+		}
 		M_REF_PRINT(<< "Ref::Ref(rc): exiting" << (this->p) << std::endl)
 	}
 
@@ -344,7 +356,9 @@ public:
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
 		this->p = r.p;
 		if(this->p){
-			this->p->AddRef();
+			const_cast<RefCounted*>(
+					static_cast<const RefCounted*>(this->p)
+				)->AddRef();
 		}
 	}
 
@@ -536,12 +550,10 @@ public:
 
 
 
-	//for automatic type downcast
-	template <typename TBase> inline operator Ref<TBase>(){
-		//downcasting of invalid reference is also possible
-		if(this->IsNotValid())
-			return 0;
+	//TODO: make template constructor and template operator=() instead of this conversion operator?
 
+	//for automatic type downcast / to-const cast
+	template <typename TBase> inline operator Ref<TBase>(){
 		M_REF_PRINT(<< "Ref::downcast(): invoked, p = " << (this->p) << std::endl)
 
 		return Ref<TBase>(this->p);
@@ -612,6 +624,7 @@ private:
 //T should be RefCounted!!!
 template <class T> class WeakRef{
 	friend class Ref<T>;
+	template <class TBase> friend class WeakRef;
 
 	RefCounted::Counter *counter;
 	T* p;//this pointer is only valid if counter is not 0 and counter->p is not 0
@@ -619,6 +632,7 @@ template <class T> class WeakRef{
 
 
 	inline void InitFromRefCounted(T *rc){
+		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): invoked " << std::endl)
 		if(!rc){
 			this->counter = 0;
 			return;
@@ -634,6 +648,7 @@ template <class T> class WeakRef{
 
 	
 	inline void InitFromStrongRef(Ref<T> &r){
+		M_REF_PRINT(<< "WeakRef::InitFromStrongRef(): invoked " << std::endl)
 		if(r.IsNotValid()){
 			this->counter = 0;
 			return;
@@ -644,14 +659,16 @@ template <class T> class WeakRef{
 
 
 
-	inline void InitFromWeakRef(const WeakRef &r){
+	inline void InitFromWeakRef(const WeakRef& r){
+		M_REF_PRINT(<< "WeakRef::InitFromWeakRef(): invoked " << std::endl)
 		if(r.counter == 0){
 			this->counter = 0;
 			return;
 		}
-		this->InitFromCounter(r.counter);//counter can be 0
+		ASSERT(r.counter)
+		this->InitFromCounter(r.counter);
 
-		this->p = r.p;
+		this->p = r.p;//should cast automaticly
 	}
 
 
@@ -661,6 +678,7 @@ template <class T> class WeakRef{
 
 		this->counter->mutex.Lock();
 		++(this->counter->numWeakRefs);
+		M_REF_PRINT(<< "WeakRef::InitFromCounter(): new numWeakRefs = " << (this->counter->numWeakRefs) << std::endl)
 		this->counter->mutex.Unlock();
 	}
 
@@ -674,6 +692,8 @@ template <class T> class WeakRef{
 		ASSERT(this->counter->numWeakRefs > 0)
 
 		--this->counter->numWeakRefs;
+
+		M_REF_PRINT(<< "WeakRef::Destroy(): new numWeakRefs = " << (this->counter->numWeakRefs) << std::endl)
 
 		if(
 				this->counter->numWeakRefs == 0 &&
@@ -691,29 +711,45 @@ template <class T> class WeakRef{
 	}
 
 
+	inline WeakRef(RefCounted::Counter *c, T* rc){
+		M_REF_PRINT(<< "WeakRef::WeakRef(RefCounted::Counter*, T*): invoked" << std::endl)
+		if(!c){
+			this->counter = 0;
+			return;
+		}
+		ASSERT(c)
+		this->InitFromCounter(c);
+
+		this->p = rc;//should cast automaticly
+	}
+
 	
 public:
 	//TODO:make it private and add static(?) method to RefCounted
 	inline WeakRef(T* rc = 0){
+		M_REF_PRINT(<< "WeakRef::WeakRef(T*): invoked" << std::endl)
 		this->InitFromRefCounted(rc);
 	}
 
 
 
 	inline WeakRef(const Ref<T> &r){
+		M_REF_PRINT(<< "WeakRef::WeakRef(const Ref<T>&): invoked" << std::endl)
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
 	}
 
 
 
 	//copy constructor
-	inline WeakRef(const WeakRef &r){
+	inline WeakRef(const WeakRef& r){
+		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TBase>&): invoked" << std::endl)
 		this->InitFromWeakRef(r);
 	}
 
 
 
 	inline ~WeakRef(){
+		M_REF_PRINT(<< "WeakRef::~WeakRef(): invoked" << std::endl)
 		this->Destroy();
 	}
 
@@ -721,6 +757,7 @@ public:
 
 	inline WeakRef& operator=(T* rc){
 		ASSERT(rc)
+		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
 
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
@@ -731,6 +768,7 @@ public:
 
 
 	inline WeakRef& operator=(const Ref<T> &r){
+		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
@@ -739,7 +777,8 @@ public:
 
 
 
-	inline WeakRef& operator=(const WeakRef<T> &r){
+	inline WeakRef& operator=(const WeakRef& r){
+		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TBase>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromWeakRef(r);
@@ -754,12 +793,24 @@ public:
 	 * does not refer to any object.
 	 */
 	inline void Reset(){
+		M_REF_PRINT(<< "WeakRef::Reset(): invoked" << std::endl)
 		this->Destroy();
 		this->counter = 0;
 	}
 
 
-	
+
+	//TODO: make template constructor and template operator=() instead of this conversion operator?
+
+	//for automatic type downcast / to-const cast
+	template <typename TBase> inline operator WeakRef<TBase>(){
+		M_REF_PRINT(<< "WeakRef::downcast(): invoked, p = " << (this->p) << std::endl)
+
+		return WeakRef<TBase>(this->counter, this->p);
+		//NOTE: if you get compiler error on this line, then you probaly
+		//trying to automatically downcast the class which cannot be downcasted.
+	}
+
 private:
 	inline static void* operator new(size_t size){
 		ASSERT_ALWAYS(false)//forbidden

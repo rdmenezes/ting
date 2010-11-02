@@ -64,7 +64,7 @@ static void TestOperatorLogicalNot(){
 
 
 namespace TestBasicWeakRefUseCase{
-static void Run(){
+static void Run1(){
 	for(unsigned i = 0; i < 1000; ++i){
 		ting::Ref<TestClass> a = TestClass::New();
 		ASSERT_ALWAYS(a.IsValid())
@@ -83,6 +83,34 @@ static void Run(){
 		ASSERT_INFO_ALWAYS(ting::Ref<TestClass>(wr).IsNotValid(), "i = " << i)
 	}//~for
 }
+
+static void Run2(){
+	ting::Ref<TestClass> a = TestClass::New();
+	ASSERT_ALWAYS(a.IsValid())
+
+	bool wasDestroyed = false;
+	a->destroyed = &wasDestroyed;
+
+	ting::WeakRef<TestClass> wr1(a);
+	ting::WeakRef<TestClass> wr2(wr1);
+	ting::WeakRef<TestClass> wr3;
+
+	wr3 = wr1;
+
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr1).IsValid())
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr2).IsValid())
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr3).IsValid())
+
+	a.Reset();
+
+	ASSERT_ALWAYS(a.IsNotValid())
+	ASSERT_ALWAYS(wasDestroyed)
+
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr1).IsNotValid())
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr2).IsNotValid())
+	ASSERT_ALWAYS(ting::Ref<TestClass>(wr3).IsNotValid())
+}
+
 }//~namespace
 
 
@@ -204,77 +232,119 @@ void Run2(){
 
 
 namespace TestVirtualInheritedRefCounted{
-	class A : virtual public ting::RefCounted{
-	public:
-		int a;
-	};
+class A : virtual public ting::RefCounted{
+public:
+	int a;
+};
 
-	class B : virtual public ting::RefCounted{
-	public:
-		int b;
-	};
-	
-	class C : public A, B{
-	public:
-		int c;
-		
-		bool& destroyed;
-		
-		C(bool& destroyed) :
-				destroyed(destroyed)
-		{}
-		
-		~C(){
-			this->destroyed = true;
-		}
-		
-		static ting::Ref<C> New(bool& destroyed){
-			return ting::Ref<C>(new C(destroyed));
-		}
-	};
-	
-	void Run1(){
-		bool isDestroyed = false;
-		
-		ting::Ref<C> p = C::New(isDestroyed);
-		
-		ASSERT_ALWAYS(!isDestroyed)
-		ASSERT_ALWAYS(p.IsValid())
-		
-		p.Reset();
-		
-		ASSERT_ALWAYS(p.IsNotValid())
-		ASSERT_ALWAYS(isDestroyed)
+class B : virtual public ting::RefCounted{
+public:
+	int b;
+};
+
+class C : public A, B{
+public:
+	int c;
+
+	bool& destroyed;
+
+	C(bool& destroyed) :
+			destroyed(destroyed)
+	{}
+
+	~C(){
+		this->destroyed = true;
 	}
-	
-	void Run2(){
-		bool isDestroyed = false;
-		
-		ting::Ref<A> p = C::New(isDestroyed);
-		
-		ASSERT_ALWAYS(!isDestroyed)
-		ASSERT_ALWAYS(p.IsValid())
-		
-		p.Reset();
-		
-		ASSERT_ALWAYS(p.IsNotValid())
-		ASSERT_ALWAYS(isDestroyed)
+
+	static ting::Ref<C> New(bool& destroyed){
+		return ting::Ref<C>(new C(destroyed));
 	}
-	
-	void Run3(){
-		bool isDestroyed = false;
-		
-		ting::Ref<ting::RefCounted> p = C::New(isDestroyed);
-		
-		ASSERT_ALWAYS(!isDestroyed)
-		ASSERT_ALWAYS(p.IsValid())
-		
-		p.Reset();
-		
-		ASSERT_ALWAYS(p.IsNotValid())
-		ASSERT_ALWAYS(isDestroyed)
-	}
+};
+
+void Run1(){
+	bool isDestroyed = false;
+
+	ting::Ref<C> p = C::New(isDestroyed);
+
+	ASSERT_ALWAYS(!isDestroyed)
+	ASSERT_ALWAYS(p.IsValid())
+
+	p.Reset();
+
+	ASSERT_ALWAYS(p.IsNotValid())
+	ASSERT_ALWAYS(isDestroyed)
 }
+
+void Run2(){
+	bool isDestroyed = false;
+
+	ting::Ref<A> p = C::New(isDestroyed);
+
+	ASSERT_ALWAYS(!isDestroyed)
+	ASSERT_ALWAYS(p.IsValid())
+
+	p.Reset();
+
+	ASSERT_ALWAYS(p.IsNotValid())
+	ASSERT_ALWAYS(isDestroyed)
+}
+
+void Run3(){
+	bool isDestroyed = false;
+
+	ting::Ref<ting::RefCounted> p = C::New(isDestroyed);
+
+	ASSERT_ALWAYS(!isDestroyed)
+	ASSERT_ALWAYS(p.IsValid())
+
+	p.Reset();
+
+	ASSERT_ALWAYS(p.IsNotValid())
+	ASSERT_ALWAYS(isDestroyed)
+}
+}//~namespace
+
+
+
+namespace TestConstantReferences{
+class TestClass : public ting::RefCounted{
+public:
+	int a;
+
+	mutable int b;
+
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+};
+
+void Run1(){
+	ting::Ref<TestClass> a = TestClass::New();
+	ting::Ref<const TestClass> b(a);
+
+	ASSERT_ALWAYS(a)
+	ASSERT_ALWAYS(b)
+
+	a->a = 1234;
+	a->b = 425345;
+	
+	b->b = 2113245;
+
+	{
+		ting::WeakRef<TestClass> wa(a);
+		ting::WeakRef<const TestClass> wb(a);
+		ting::WeakRef<const TestClass> wb1(b);
+	}
+
+	{
+		ting::WeakRef<TestClass> wa(a);
+		ting::WeakRef<const TestClass> wb(wa);
+	}
+	//TODO:
+
+}
+}//~namespace
+
 
 
 int main(int argc, char *argv[]){
@@ -284,8 +354,9 @@ int main(int argc, char *argv[]){
 	
 	TestOperatorLogicalNot();
 	
-	TestBasicWeakRefUseCase::Run();
-	
+	TestBasicWeakRefUseCase::Run1();
+	TestBasicWeakRefUseCase::Run2();
+
 	TestExceptionThrowingFromRefCountedDerivedClassConstructor::Run();
 	
 	TestCreatingWeakRefFromRefCounted::Run1();
@@ -295,7 +366,7 @@ int main(int argc, char *argv[]){
 	TestVirtualInheritedRefCounted::Run2();
 	TestVirtualInheritedRefCounted::Run3();
 
-	//TODO: add more test cases
+	TestConstantReferences::Run1();
 
 	TRACE_ALWAYS(<< "[PASSED]: Ref test" << std::endl)
 
