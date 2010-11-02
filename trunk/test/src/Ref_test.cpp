@@ -5,25 +5,12 @@
 
 
 
+namespace TestBoolRelatedStuff{
+
 class TestClass : public ting::RefCounted{
-	int array[2048];
 public:
-	int a;
-
-	bool *destroyed;
-
-	TestClass() :
-		destroyed(0)
-	{}
-
 	static inline ting::Ref<TestClass> New(){
 		return ting::Ref<TestClass>(new TestClass());
-	}
-
-	~TestClass(){
-		if(this->destroyed){
-			*this->destroyed = true;
-		}
 	}
 };
 
@@ -61,9 +48,30 @@ static void TestOperatorLogicalNot(){
 	}
 }
 
+}//~namespace
+
 
 
 namespace TestBasicWeakRefUseCase{
+class TestClass : public ting::RefCounted{
+public:
+	bool *destroyed;
+
+	TestClass() :
+		destroyed(0)
+	{}
+
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+
+	~TestClass(){
+		if(this->destroyed){
+			*this->destroyed = true;
+		}
+	}
+};
+
 static void Run1(){
 	for(unsigned i = 0; i < 1000; ++i){
 		ting::Ref<TestClass> a = TestClass::New();
@@ -231,6 +239,111 @@ void Run2(){
 
 
 
+namespace TestAutomaticDowncasting{
+class A : public ting::RefCounted{
+public:
+	int a;
+
+	A() : a(0)
+	{}
+};
+
+class B : public A{
+public:
+	int b;
+
+	B() : b(0)
+	{}
+};
+
+class C : public B{
+public:
+	int c;
+
+	C() : c(0)
+	{}
+
+	static ting::Ref<C> New(){
+		return ting::Ref<C>(new C());
+	}
+};
+
+
+
+void Run1(){
+	ting::Ref<C> c = C::New();
+	ASSERT_ALWAYS(c)
+
+	const int DConstA = 1;
+	const int DConstB = 3;
+	const int DConstC = 5;
+
+	c->a = DConstA;
+	c->b = DConstB;
+	c->c = DConstC;
+
+	//A
+	{
+		ting::Ref<A> a(c);
+		ASSERT_ALWAYS(a.IsValid())
+		ASSERT_ALWAYS(a->a == DConstA)
+
+		ASSERT_ALWAYS(a.DynamicCast<B>())
+		ASSERT_ALWAYS(a.DynamicCast<B>()->a == DConstA)
+		ASSERT_ALWAYS(a.DynamicCast<B>()->b == DConstB)
+
+		ASSERT_ALWAYS(a.DynamicCast<C>())
+		ASSERT_ALWAYS(a.DynamicCast<C>()->a == DConstA)
+		ASSERT_ALWAYS(a.DynamicCast<C>()->b == DConstB)
+		ASSERT_ALWAYS(a.DynamicCast<C>()->c == DConstC)
+	}
+
+	{
+		ting::Ref<A> a;
+		a = c;
+		ASSERT_ALWAYS(a.IsValid())
+		ASSERT_ALWAYS(a->a == DConstA)
+
+		ASSERT_ALWAYS(a.DynamicCast<B>())
+		ASSERT_ALWAYS(a.DynamicCast<B>()->a == DConstA)
+		ASSERT_ALWAYS(a.DynamicCast<B>()->b == DConstB)
+
+		ASSERT_ALWAYS(a.DynamicCast<C>())
+		ASSERT_ALWAYS(a.DynamicCast<C>()->a == DConstA)
+		ASSERT_ALWAYS(a.DynamicCast<C>()->b == DConstB)
+		ASSERT_ALWAYS(a.DynamicCast<C>()->c == DConstC)
+	}
+
+	//B
+	{
+		ting::Ref<B> b(c);
+		ASSERT_ALWAYS(b.IsValid())
+		ASSERT_ALWAYS(b->a == DConstA)
+		ASSERT_ALWAYS(b->b == DConstB)
+
+		ASSERT_ALWAYS(b.DynamicCast<C>())
+		ASSERT_ALWAYS(b.DynamicCast<C>()->a == DConstA)
+		ASSERT_ALWAYS(b.DynamicCast<C>()->b == DConstB)
+		ASSERT_ALWAYS(b.DynamicCast<C>()->c == DConstC)
+	}
+
+	{
+		ting::Ref<B> b;
+		b = c;
+		ASSERT_ALWAYS(b.IsValid())
+		ASSERT_ALWAYS(b->a == DConstA)
+		ASSERT_ALWAYS(b->b == DConstB)
+
+		ASSERT_ALWAYS(b.DynamicCast<C>())
+		ASSERT_ALWAYS(b.DynamicCast<C>()->a == DConstA)
+		ASSERT_ALWAYS(b.DynamicCast<C>()->b == DConstB)
+		ASSERT_ALWAYS(b.DynamicCast<C>()->c == DConstC)
+	}
+}
+
+}//~namespace
+
+
 namespace TestVirtualInheritedRefCounted{
 class A : virtual public ting::RefCounted{
 public:
@@ -350,9 +463,10 @@ void Run1(){
 int main(int argc, char *argv[]){
 //	TRACE(<< "Ref test" << std::endl)
 
-	TestConversionToBool();
-	
-	TestOperatorLogicalNot();
+	TestAutomaticDowncasting::Run1();
+
+	TestBoolRelatedStuff::TestConversionToBool();
+	TestBoolRelatedStuff::TestOperatorLogicalNot();
 	
 	TestBasicWeakRefUseCase::Run1();
 	TestBasicWeakRefUseCase::Run2();

@@ -238,6 +238,7 @@ private:
 //T should be RefCounted!!!
 template <class T> class Ref{
 	friend class WeakRef<T>;
+	template <class TS> friend class Ref;
 
 	T *p;
 
@@ -346,20 +347,39 @@ public:
 
 
 
+private:
+	template <class TS>inline void InitFromStrongRef(const Ref<TS>& r){
+		this->p = r.p; //should downcast automaticly
+		if(this->p){
+			//NOTE: first, static cast to const RefCounted, because even if T is a const type
+			//it is possible to do. After that we can cast to non-const RefCounted and call the
+			//AddRef() method which is not const.
+			//Thus, we also ensure at compile time that T inherits RefCounted.
+			const_cast<RefCounted*>(
+					static_cast<const RefCounted*>(this->p)
+				)->AddRef();
+		}
+	}
+
+
+public:
 	/**
 	 * @brief Copy constructor.
 	 * Creates new reference object which referes to the same object as 'r'.
 	 * @param r - existing Ref object to make copy of.
 	 */
 	//copy constructor
-	Ref(const Ref& r){
+	inline Ref(const Ref& r){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
-		this->p = r.p;
-		if(this->p){
-			const_cast<RefCounted*>(
-					static_cast<const RefCounted*>(this->p)
-				)->AddRef();
-		}
+		this->InitFromStrongRef<T>(r);
+	}
+
+
+
+	//downcast / to-const cast constructor
+	template <class TS> inline Ref(const Ref<TS>& r){
+		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
+		this->InitFromStrongRef<TS>(r);
 	}
 
 
@@ -476,48 +496,32 @@ public:
 	 * @param r - reference to assign to this reference.
 	 * @return reference to this Ref object.
 	 */
-	//NOTE: the argument is intentionally not const!!! This is to avoid const ref assignment to
-	//      non-const ref.
-	Ref& operator=(Ref &r){
+	Ref& operator=(const Ref& r){
 		M_REF_PRINT(<< "Ref::operator=(): invoked, p = " << (this->p) << std::endl)
 		if(this == &r)
 			return *this;//detect self assignment
 
 		this->Destroy();
-
-		this->p = r.p;
-		if(this->p){
-			this->p->AddRef();
-		}
+		this->InitFromStrongRef<T>(r);
 		return *this;
 	}
 
 
 
-	/**
-	 * @brief assign const reference.
-	 * Note, that if this reference was pointing to some object, the object will
-	 * be destroyed if there are no other references. And this reference will be assigned
-	 * a new value.
-	 * @param r - reference to assign to this reference.
-	 * @return const reference to this Ref object.
-	 */
-	const Ref& operator=(const Ref &r)const{
-		M_REF_PRINT(<< "Ref::operator=()const: invoked, p = " << (this->p) << std::endl)
-		if(this == &r)
-			return *this;//detect self assignment
+	//downcast / to-const assignment
+	template <class TS> Ref<T>& operator=(const Ref<TS>& r){
+		//self-assignment should be impossible
+		ASSERT(reinterpret_cast<const void*>(this) != reinterpret_cast<const void*>(&r))
 
-		const_cast<Ref*>(this)->Destroy();
+		this->Destroy();
+		this->InitFromStrongRef<TS>(r);
 
-		const_cast<Ref*>(this)->p = r.p;
-		if(this->p){
-			this->p->AddRef();
-		}
 		return *this;
 	}
 
 
 
+	//TODO:
 	inline T& operator*(){
 		M_REF_PRINT(<< "Ref::operator*(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator*(): this->p is zero")
@@ -534,6 +538,7 @@ public:
 
 
 
+	//TODO:
 	inline T* operator->(){
 		M_REF_PRINT(<< "Ref::operator->(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
@@ -546,19 +551,6 @@ public:
 		M_REF_PRINT(<< "Ref::operator->()const: invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
 		return this->p;
-	}
-
-
-
-	//TODO: make template constructor and template operator=() instead of this conversion operator?
-
-	//for automatic type downcast / to-const cast
-	template <typename TBase> inline operator Ref<TBase>(){
-		M_REF_PRINT(<< "Ref::downcast(): invoked, p = " << (this->p) << std::endl)
-
-		return Ref<TBase>(this->p);
-		//NOTE: if you get compiler error on this line, then you probaly
-		//trying to automatically downcast the class which cannot be downcasted.
 	}
 
 
@@ -624,7 +616,7 @@ private:
 //T should be RefCounted!!!
 template <class T> class WeakRef{
 	friend class Ref<T>;
-	template <class TBase> friend class WeakRef;
+	template <class TS> friend class WeakRef;
 
 	RefCounted::Counter *counter;
 	T* p;//this pointer is only valid if counter is not 0 and counter->p is not 0
@@ -659,7 +651,7 @@ template <class T> class WeakRef{
 
 
 
-	template <class TBase> inline void InitFromWeakRef(const WeakRef<TBase>& r){
+	template <class TS> inline void InitFromWeakRef(const WeakRef<TS>& r){
 		M_REF_PRINT(<< "WeakRef::InitFromWeakRef(): invoked " << std::endl)
 		if(r.counter == 0){
 			this->counter = 0;
@@ -731,15 +723,15 @@ public:
 	//copy constructor
 	inline WeakRef(const WeakRef& r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef&): invoked" << std::endl)
-		this->InitFromWeakRef(r);
+		this->InitFromWeakRef<T>(r);
 	}
 
 
 
 	//downcast / to-const cast constructor
-	template <class TBase> inline WeakRef(const WeakRef<TBase>& r){
-		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TBase>&): invoked" << std::endl)
-		this->InitFromWeakRef(r);
+	template <class TS> inline WeakRef(const WeakRef<TS>& r){
+		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TS>&): invoked" << std::endl)
+		this->InitFromWeakRef<TS>(r);
 	}
 
 
@@ -774,21 +766,21 @@ public:
 
 
 	inline WeakRef& operator=(const WeakRef& r){
-		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TBase>&): invoked" << std::endl)
+		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
-		this->InitFromWeakRef(r);
+		this->InitFromWeakRef<T>(r);
 		return *this;
 	}
 
 
 
 	//template for downcasting
-	template <class TBase> inline WeakRef& operator=(const WeakRef<TBase>& r){
-		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TBase>&): invoked" << std::endl)
+	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r){
+		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
-		this->InitFromWeakRef(r);
+		this->InitFromWeakRef<TS>(r);
 		return *this;
 	}
 
