@@ -1,0 +1,19 @@
+Package: libting-dev
+Version: 0.4.2
+Section: devel 
+Priority: extra
+Architecture: i386
+Essential: no
+Depends: 
+Pre-Depends:  
+Recommends: 
+Suggests: 
+Installed-Size: 197879
+Maintainer: Ivan Gagis <igagis@gmail.com>
+Conflicts: 
+Replaces: 
+Provides: ting
+Description: simple cross-platform C++ library.
+ For multithreaded development tt provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
+ For network development it provides TCPSocket, UDPSocket classes, etc.
+ The library code is entirely in .hpp files.
