@@ -331,4 +331,30 @@ template <> inline long double Exp<long double>(long double x){
 
 
 
+/**
+ * @brief Calculate ln(x).
+ * Calculate natural logarithm of x.
+ */
+template <typename T> inline T Ln(T x){
+	return x.Ln();
+}
+
+
+
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
+template <> inline float Ln<float>(float x){
+	return ::log(x);
+}
+#endif
+
+
+
+#ifndef M_DOC_DONT_EXTRACT //for doxygen
+template <> inline double Ln<double>(double x){
+	return ::log(x);
+}
+#endif
+
+
+
 }//~namespace ting
