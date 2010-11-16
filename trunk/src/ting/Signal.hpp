@@ -122,6 +122,14 @@ public: \
 			return true; \
 		} \
 	} \
+\
+	virtual bool IsAlive(){ \
+		if(Ref<T_Ob> r = this->o){ \
+			return true; \
+		}else{ \
+			return false; \
+		} \
+	} \
 };
 
 
@@ -157,6 +165,14 @@ template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob> o, T_Ret(T_Ob::*m)
 		); \
 	ting::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
+\
+	for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end();){ \
+		if(!(*i)->IsAlive()){ \
+			i = this->slotLink.erase(i); \
+		}else{ \
+			++i; \
+		} \
+	} \
 }
 
 
@@ -298,6 +314,9 @@ M_TEMPLATE(n) class Signal##n{ \
 	public: \
 		virtual ~SlotLink(){} \
 		virtual bool Execute(M_FUNC_PARAMS_FULL(n)) = 0; \
+		virtual bool IsAlive(){ \
+			return true; \
+		} \
 	}; \
 \
 	M_REPEAT2(M_INCREMENT(n), M_METHOD_SLOT, n) \

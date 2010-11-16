@@ -134,7 +134,7 @@ static void Test(){
 			bool res = sig.Disconnect((unsigned(*)(int, long)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 2)
-			
+
 			res = sig.Disconnect((unsigned(*)(int, long)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 2)
@@ -361,7 +361,7 @@ static void Test(){
 	{
 		ting::Signal0 signal0;
 		ting::Signal1<int> signal1;
-		
+
 		ting::Ref<TestClass> a = TestClass::New();
 
 		{
@@ -444,11 +444,11 @@ static void Test(){
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 1)
 		}
-		
+
 		sig.Emit(43, 0, 0);
 		ASSERT_ALWAYS(tc->a == 43)
 
-		
+
 		//kill the object
 		{
 			tc.Reset();
@@ -470,6 +470,42 @@ static void Test(){
 				);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+		}
+	}
+
+	{
+		ting::Signal0 signal0;
+
+		ting::Ref<TestClass> a;
+
+		{
+			a = TestClass::New();
+
+			signal0.Connect(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				);
+
+			ASSERT_ALWAYS(signal0.NumConnections() == 1)
+
+			signal0.Connect(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				);
+			ASSERT_ALWAYS(signal0.NumConnections() == 2)
+
+			a.Reset();
+			//Now we have 2 dead connections (weak refs are invalid)
+			ASSERT_ALWAYS(signal0.NumConnections() == 2)
+
+			a = TestClass::New();
+			//this connect should remove dead connections
+			signal0.Connect(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				);
+			//should be only one alive connection
+			ASSERT_ALWAYS(signal0.NumConnections() == 1)
 		}
 	}
 }
@@ -582,7 +618,6 @@ int main(int argc, char *argv[]){
 	methodConnection::Test();
 	weakRefConnection::Test();
 	mixedConnection::Test();
-	
 
 	TRACE_ALWAYS(<< "[PASSED]: Signal test" << std::endl)
 
