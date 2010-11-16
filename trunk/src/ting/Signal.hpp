@@ -124,11 +124,7 @@ public: \
 	} \
 \
 	virtual bool IsAlive(){ \
-		if(Ref<T_Ob> r = this->o){ \
-			return true; \
-		}else{ \
-			return false; \
-		} \
+		return !this->o.IsSurelyInvalid(); \
 	} \
 };
 

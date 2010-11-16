@@ -185,6 +185,11 @@ protected:
 		//      keyword in initializer list.
 		this->counter = new Counter(this);
 		ASSERT(this->counter)
+		
+		ASSERT_INFO(
+				this->counter->p == this,
+				"this->counter->p = " << this->counter->p << " this = " << this
+			)
 	}
 
 
@@ -597,7 +602,7 @@ private:
  * 
  *	if(ting::Ref<TestClass> obj = weakt){
  *		//object still exists
- *		obj->DoSomethig();
+ *		obj->DoSomething();
  *	}
  *
  *	t.Reset();//destroy the object
@@ -627,12 +632,27 @@ template <class T> class WeakRef{
 			this->counter = 0;
 			return;
 		}
-		
-		ASSERT(rc)
 
+		ASSERT(rc->counter)
+
+		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): rc->counter->p = " << rc->counter->p << " rc = " << rc << std::endl)
+		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): casted rc = " << static_cast<const RefCounted*>(rc) << std::endl)
+
+		ASSERT_INFO(
+				rc->counter->p == static_cast<const RefCounted*>(rc),
+				"rc->counter->p = " << rc->counter->p
+						<< " rc = " << static_cast<const RefCounted*>(rc)
+			)
+		
 		this->InitFromCounter(ASS(rc->counter));
 
 		this->p = rc;
+		
+		ASSERT_INFO(
+				this->counter->p == static_cast<const RefCounted*>(this->p),
+				"this->counter->p = " << this->counter->p
+						<< " this->p = " << static_cast<const RefCounted*>(this->p)
+			)
 	}
 
 
@@ -666,7 +686,9 @@ template <class T> class WeakRef{
 
 
 	inline void InitFromCounter(RefCounted::Counter *c){
-		this->counter = ASS(c);
+		ASSERT(c)
+		ASSERT(c->p)
+		this->counter = c;
 
 		this->counter->mutex.Lock();
 		++(this->counter->numWeakRefs);
@@ -797,6 +819,11 @@ public:
 		this->counter = 0;
 	}
 
+
+
+	inline bool IsSurelyInvalid()const{
+		return this->counter == 0 || this->counter->p == 0;
+	}
 
 
 private:
