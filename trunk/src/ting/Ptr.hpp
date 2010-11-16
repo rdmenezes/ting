@@ -75,6 +75,12 @@ public:
 		const_cast<Ptr&>(ptr).p = 0;
 	}
 
+	template <class TS> inline Ptr(const Ptr<TS>& ptr){
+		M_PTR_PRINT(<< "Ptr::Ptr(conversion): invoked, ptr.p = " << (ptr.p) << std::endl)
+		this->p = ptr.p;
+		const_cast<Ptr&>(ptr).p = 0;
+	}
+
 	inline ~Ptr(){
 		this->Destroy();
 	}
@@ -116,6 +122,15 @@ public:
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
 		M_PTR_PRINT(<< "Ptr::operator=(Ptr&): exit, this->p = " << (this->p) << std::endl)
+		return (*this);
+	}
+
+	template <class TS> inline Ptr& operator=(const Ptr<TS>& ptr){
+		M_PTR_PRINT(<< "Ptr::operator=(conversion): enter, this->p = " << (this->p) << std::endl)
+		this->Destroy();
+		this->p = ptr.p;
+		const_cast<Ptr&>(ptr).p = 0;
+		M_PTR_PRINT(<< "Ptr::operator=(conversion): exit, this->p = " << (this->p) << std::endl)
 		return (*this);
 	}
 
@@ -199,12 +214,6 @@ public:
 	 */
 	template <class TS> inline TS* StaticCast(){
 		return static_cast<TS*>(this->operator->());
-	}
-
-	//for automatic type downcast
-	template <typename TBase> inline operator Ptr<TBase>(){
-		M_PTR_PRINT(<< "Ptr::downcast(): invoked, p = " << (this->p) << std::endl)
-		return Ptr<TBase>(this->Extract());
 	}
 
 private:
