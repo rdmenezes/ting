@@ -80,7 +80,7 @@ public:
 	template <class TS> inline Ptr(const Ptr<TS>& ptr){
 		M_PTR_PRINT(<< "Ptr::Ptr(conversion): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
-		const_cast<Ptr&>(ptr).p = 0;
+		const_cast<Ptr<TS>&>(ptr).p = 0;
 	}
 
 	inline ~Ptr(){
@@ -131,7 +131,7 @@ public:
 		M_PTR_PRINT(<< "Ptr::operator=(conversion): enter, this->p = " << (this->p) << std::endl)
 		this->Destroy();
 		this->p = ptr.p;
-		const_cast<Ptr&>(ptr).p = 0;
+		const_cast<Ptr<TS>&>(ptr).p = 0;
 		M_PTR_PRINT(<< "Ptr::operator=(conversion): exit, this->p = " << (this->p) << std::endl)
 		return (*this);
 	}
