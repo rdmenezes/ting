@@ -50,6 +50,8 @@ namespace ting{
  * that object when pointer goes out of scope.
  */
 template <class T> class Ptr{
+	template <class TS> friend class Ptr<TS>;
+
 	void* p;
 public:
 	explicit inline Ptr(T* ptr = 0) :
