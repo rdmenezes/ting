@@ -169,11 +169,11 @@ public:
  * }
  * @endcode
  */
-template <class T, int Value> class Inited{
+template <class T, int V> class Inited{
 	T value;
 public:
 	inline Inited() :
-			value(Value)
+			value(T(V))
 	{}
 
 	inline Inited(T value) :
