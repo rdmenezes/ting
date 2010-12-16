@@ -54,7 +54,7 @@ which represent a signals with different number of arguments (from 1 to 10).
 
 To create a signal object with 0 arguments just do this:
 {{{
-ting::Signla0 mySignal;
+ting::Signal0 mySignal;
 }}}
 
 To create a signal, for example, with 3 arguments of types {{{int}}}, {{{char}}} and {{{int*}}}, do the following:
