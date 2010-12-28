@@ -88,7 +88,7 @@ public:
 		WRITE = 2,          // bin: 00000010
 		READ_AND_WRITE = 3  // bin: 00000011
 	};
-	
+
 protected:
 	u32 readinessFlags;
 
@@ -100,7 +100,19 @@ protected:
 
 
 
-	//TODO: write doxygen comments
+	inline bool IsAdded()const{
+		return this->isAdded;
+	}
+
+
+
+	/**
+	 * @brief Copy constructor.
+	 * It is not possible to copy a waitable which is currently added to WaitSet.
+	 * Works as std::auto_ptr, i.e. the object it copied from becomes invalid.
+	 * Use this copy constructor only if you really know what you are doing.
+	 * @param w - Waitable object to copy.
+	 */
 	inline Waitable(const Waitable& w) :
 			isAdded(false),
 			userData(w.userData),
@@ -116,7 +128,13 @@ protected:
 
 
 
-	//TODO: write doxygen comments
+	/**
+	 * @brief Assignment operator.
+	 * It is not possible to assign a waitable which is currently added to WaitSet.
+	 * Works as std::auto_ptr, i.e. the object it copied from becomes invalid.
+	 * Use this copy constructor only if you really know what you are doing.
+	 * @param w - Waitable object to assign to this object.
+	 */
 	inline Waitable& operator=(const Waitable& w){
 		//cannot copy because this Waitable is added to WaitSet
 		if(this->isAdded)
@@ -125,7 +143,7 @@ protected:
 		//cannot copy from waitable which is adde to WaitSet
 		if(w.isAdded)
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
-		
+
 		ASSERT(!this->isAdded)
 
 		//Clear readiness flags on copying.
@@ -278,7 +296,7 @@ public:
 	inline void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 //		TRACE(<< "WaitSet::Add(): enter" << std::endl)
 		ASSERT(w)
-		
+
 		ASSERT(!w->isAdded)
 		ASSERT(flagsToWaitFor != 0)//wait for at least something
 
@@ -499,7 +517,7 @@ private:
 				++numEvents;
 			}
 		}
-		
+
 		return numEvents;
 
 #else //assume *nix

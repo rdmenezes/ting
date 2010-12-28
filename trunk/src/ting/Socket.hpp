@@ -64,10 +64,6 @@ THE SOFTWARE. */
 
 
 
-//#ifdef _MSC_VER
-//#pragma  warning( disable : 4290)
-//#endif
-
 #include "Singleton.hpp"
 #include "Exc.hpp"
 #include "types.hpp"
@@ -83,11 +79,6 @@ THE SOFTWARE. */
  * All the declarations of ting library are made inside this namespace.
  */
 namespace ting{
-
-
-
-//forward declarations
-//...
 
 
 
@@ -229,6 +220,8 @@ public:
 	void Close(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 		if(this->IsValid()){
+			ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
+
 #ifdef __WIN32__
 			//Closing socket in Win32.
 			//refer to http://tangentsoft.net/wskfaq/newbie.html#howclose for details
@@ -320,8 +313,7 @@ protected:
 	}
 
 	inline void SetWaitingEventsForWindows(long flags){
-		ASSERT(this->eventForWaitable != WSA_INVALID_EVENT)
-		ASSERT(this->IsValid())
+		ASSERT_INFO(this->IsValid() && (this->eventForWaitable != WSA_INVALID_EVENT), "HINT: Most probably, you are trying to remove the _closed_ socket from WaitSet. If so, you should first remove the socket from WaitSet and then call Close() method.")
 
 		if(WSAEventSelect(
 				this->socket,
