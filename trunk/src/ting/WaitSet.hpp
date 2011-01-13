@@ -466,7 +466,9 @@ public:
 	 * and so on.
 	 * @param timeout - maximum time in milliseconds to wait for event.
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
-	 *                     Can be 0.
+	 *                     The buffer size must be equal or greater than the number ow waitables
+	 *                     currently added to the wait set.
+	 *                     This pointer can be 0, if you are not interested in list of triggered waitables.
 	 * @return number of objects triggered. If 0 then timeout was hit.
 	 * @throw ting::Exc - in case of errors.
 	 */
