@@ -64,8 +64,13 @@ THE SOFTWARE. */
 #include <errno.h>
 #include <ctime>
 
+//if we have Solaris
 #if defined(sun) || defined(__sun)
 #include <sched.h>	//	for sched_yield();
+#endif
+
+#if defined(__linux__)
+#include <sys/eventfd.h>
 #endif
 
 #endif
@@ -548,6 +553,9 @@ class Queue : public Waitable{
 #if defined(__WIN32__)
 	//use additional semaphore to implement Waitable on Windows
 	HANDLE eventForWaitable;
+#elif defined(__linux__)
+	//use eventfd()
+	int eventFD;
 #else
 	//use pipe to implement Waitable in *nix systems
 	int pipeEnds[2];
@@ -584,6 +592,14 @@ public:
 		if(this->eventForWaitable == NULL){
 			throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
 		}
+#elif defined(__linux__)
+		this->eventFD = eventfd(0, EFD_NONBLOCK);
+		if(this->eventFD < 0){
+			std::stringstream ss;
+			ss << "Queue::Queue(): could not create eventfd (linux) for implementing Waitable,"
+					<< " error code = " << errno << ": " << strerror(errno);
+			throw ting::Exc(ss.str().c_str());
+		}
 #else // assume *nix
 		if(::pipe(&this->pipeEnds[0]) < 0){
 			std::stringstream ss;
@@ -618,6 +634,8 @@ public:
 		}
 #if defined(__WIN32__)
 		CloseHandle(this->eventForWaitable);
+#elif defined(__linux__)
+		close(this->eventFD);
 #else // assume *nix
 		close(this->pipeEnds[0]);
 		close(this->pipeEnds[1]);
@@ -653,6 +671,10 @@ public:
 #if defined(__WIN32__)
 			if(SetEvent(this->eventForWaitable) == 0){
 				throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
+			}
+#elif defined(__linux__)
+			if(eventfd_write(this->eventFD, 1) < 0){
+				throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
 			}
 #else
 			{
@@ -694,9 +716,19 @@ public:
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
+#elif defined(__linux__)
+				{
+					eventfd_t value;
+					if(eventfd_read(this->eventFD, &value) < 0){
+						throw ting::Exc("Queue::Wait(): eventfd_read() failed");
+					}
+					ASSERT(value == 1)
+				}
 #else
-				u8 oneByteBuf[1];
-				read(this->pipeEnds[0], oneByteBuf, 1);
+				{
+					u8 oneByteBuf[1];
+					read(this->pipeEnds[0], oneByteBuf, 1);
+				}
 #endif
 			}
 
@@ -741,6 +773,14 @@ public:
 						ASSERT(false)
 						throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 					}
+#elif defined(__linux__)
+					{
+						eventfd_t value;
+						if(eventfd_read(this->eventFD, &value) < 0){
+							throw ting::Exc("Queue::Wait(): eventfd_read() failed");
+						}
+						ASSERT(value == 1)
+					}
 #else
 					u8 oneByteBuf[1];
 					read(this->pipeEnds[0], oneByteBuf, 1);
@@ -768,6 +808,14 @@ public:
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
+				}
+#elif defined(__linux__)
+				{
+					eventfd_t value;
+					if(eventfd_read(this->eventFD, &value) < 0){
+						throw ting::Exc("Queue::Wait(): eventfd_read() failed");
+					}
+					ASSERT(value == 1)
 				}
 #else
 				u8 oneByteBuf[1];
@@ -806,7 +854,11 @@ private:
 	virtual bool CheckSignalled(){
 		return (this->readinessFlags & this->flagsMask) != 0;
 	}
-
+#elif defined(__linux__)
+	//override
+	int GetHandle(){
+		return this->eventFD;
+	}
 #else
 	//override
 	int GetHandle(){

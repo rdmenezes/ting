@@ -39,9 +39,8 @@ void Run(){
 
 
 
-int main(int argc, char *argv[]){
-//	TRACE(<< "Ref test" << std::endl)
-
+namespace test_general{
+void Run(){
 	ting::WaitSet ws(4);
 
 	ting::Queue q1, q2;
@@ -108,16 +107,16 @@ int main(int argc, char *argv[]){
 
 	ws.Remove(&q1);
 	ws.Remove(&q2);
+}
+}//~namespace
 
 
+int main(int argc, char *argv[]){
+//	TRACE(<< "Ref test" << std::endl)
 
-
-
+	test_general::Run();
 
 	test_message_queue_as_waitable::Run();
-
-
-
 
 	TRACE_ALWAYS(<< "[PASSED]: WaitSet test" << std::endl)
 

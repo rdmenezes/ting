@@ -52,9 +52,10 @@ THE SOFTWARE. */
 
 #include <windows.h>
 
-#else //assume *nix
+#elif defined(__linux__)
 #include <sys/epoll.h>
-
+#else
+#error "Unsupported OS"
 #endif
 
 
@@ -212,9 +213,11 @@ protected:
 
 
 
-#else //assume *nix
+#elif defined(__linux__)
 protected:
 	virtual int GetHandle() = 0;
+#else
+#error "Unsupported OS"
 #endif
 };//~class Waitable
 
@@ -232,10 +235,12 @@ class WaitSet{
 	Array<Waitable*> waitables;
 	Array<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
 
-#else //assume *nix
+#elif defined(__linux__)
 	int epollSet;
 
 	Array<epoll_event> revents;//used for getting the result from epoll_wait()
+#else
+#error "Unsupported OS"
 #endif
 
 public:
@@ -255,7 +260,7 @@ public:
 			throw ting::Exc("WaitSet::WaitSet(): requested WaitSet size is too big");
 	}
 
-#else //assume *nix
+#elif defined(__linux__)
 			,revents(maxSize)
 	{
 		ASSERT(int(maxSize) > 0)
@@ -264,6 +269,8 @@ public:
 			throw ting::Exc("WaitSet::WaitSet(): epoll_create() failed");
 		}
 	}
+#else
+#error "Unsupported OS"
 #endif
 
 
@@ -280,8 +287,10 @@ public:
 		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
 #if defined(__WIN32__)
 		//do nothing
-#else //assume *nix
+#elif defined(__linux__)
 		close(this->epollSet);
+#else
+#error "Unsupported OS"
 #endif
 	}
 
@@ -312,7 +321,7 @@ public:
 		this->handles[this->numWaitables] = w->GetHandle();
 		this->waitables[this->numWaitables] = w;
 
-#else //assume *nix
+#elif defined(__linux__)
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
@@ -326,6 +335,8 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
+#else
+#error "Unsupported OS"
 #endif
 
 		++this->numWaitables;
@@ -366,7 +377,7 @@ public:
 		//set new wait flags
 		w->SetWaitingEvents(flagsToWaitFor);
 
-#else //assume *nix
+#elif defined(__linux__)
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
@@ -380,6 +391,8 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
+#else
+#error "Unsupported OS"
 #endif
 	}
 
@@ -419,7 +432,7 @@ public:
 		//clear wait flags (disassociate socket and Windows event)
 		w->SetWaitingEvents(0);
 
-#else //assume *nix
+#elif defined(__linux__)
 		int res = epoll_ctl(
 				this->epollSet,
 				EPOLL_CTL_DEL,
@@ -428,6 +441,8 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Remove(): epoll_ctl() failed");
+#else
+#error "Unsupported OS"
 #endif
 
 		--this->numWaitables;
@@ -522,7 +537,7 @@ private:
 
 		return numEvents;
 
-#else //assume *nix
+#elif defined(__linux__)
 		ASSERT(int(timeout) >= 0)
 		int epollTimeout = waitInfinitly ? (-1) : int(timeout);
 
@@ -538,7 +553,7 @@ private:
 					epollTimeout
 				);
 
-	//		TRACE(<< "epoll_wait() returned " << res << std::endl)
+//			TRACE(<< "epoll_wait() returned " << res << std::endl)
 
 			if(res < 0){
 				//if interrupted by signal, try waiting again.
@@ -580,6 +595,8 @@ private:
 
 		ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
 		return unsigned(res);
+#else
+#error "Unsupported OS"
 #endif
 	}
 };//~class WaitSet
