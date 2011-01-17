@@ -149,4 +149,4 @@ public:
 };
 }}}
 
-NOTE: note the usage of virtual inheritance when deriving from !RefCounted, it is allowed and in some cases is  useful.
+NOTE: note the usage of virtual inheritance in this example when deriving from !RefCounted, it is allowed and in some cases is  useful.
