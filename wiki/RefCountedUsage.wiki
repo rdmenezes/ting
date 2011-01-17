@@ -127,11 +127,11 @@ To avoid such situations, one needs to do a proper design of his/her classes and
 <br>
 = Creating strong and weak references from pointer =
 
-It is possible to construct the Ref and !WeakRef objects passing the ordinary pointer to the !RefCounted object as argument to corresponding constructor. In general, it is not recommended to do this, but in some cases it is useful:
+It is possible to construct the Ref and !WeakRef objects passing the ordinary pointer to the !RefCounted object as argument to corresponding constructor. In general, it is _NOT RECOMMENDED_ to do this, except for the following two cases:
   # creating the first strong reference in static New() method.
   # creating strong or weak reference using "this" pointer inside of the !RefCounted object methods.
 
-NOTE: The 2nd case have one thing to remember: Creating _strong_ references using "this" pointer from within the constructor is NOT recommended, if you do so, be prepared to very probable program crash. Creating weak references using "this" pointer from within the constructor IS ok.
+NOTE: The 2nd case has exception: Creating _strong_ references using "this" pointer from within the constructor is NOT recommended, if you do so, be prepared to very probable program crash. Creating weak references using "this" pointer from within the constructor IS ok.
 
 {{{
 class TestClass : virtual public ting::RefCounted{
