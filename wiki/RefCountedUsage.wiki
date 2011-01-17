@@ -121,3 +121,26 @@ The purpose of the reference counting mechanism is to avoid memory leaks, but, n
 If there are two objects which hold strong references to each other then these two objects will never be destroyed, even if all strong references to them from "outside" world have went out of scope. Because there are still at least 1 strong reference to each of the object exists (reference being held by another object).
 
 To avoid such situations, one needs to do a proper design of his/her classes and use weak reference in one of such objects and strong reference in another one. This is the _main_ reason why weak references are introduced.
+
+
+
+<br>
+= Creating strong and weak references from pointer =
+
+It is possible to construct the Ref and WeakRef objects passing the ordinary pointer to the RefCounted object as argument to corresponding constructor. In general, it is not recommended to do this, but in some cases it is useful:
+  # creating the first strong reference in static New() method.
+  # creating strong or weak reference using "this" pointer inside of the RefCounted object methods.
+
+NOTE: The 2nd case have one thing to remember: Creating _strong_ references using "this" pointer from within the constructor is NOT recommended, if you do so, be prepared to very probable program crash. Creating weak references using "this" pointer from within the constructor IS ok.
+
+{{{
+class TestClass : virtual public ting::RefCounted{
+public:
+
+    TestClass(){
+        ting::Ref<TestClass> sr(this);//!!! do not do like this, will lead to crash later!
+        ting::WeakRef<TestClass> wr(this)// OK!
+    }
+
+};
+}}}
