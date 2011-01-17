@@ -146,6 +146,10 @@ public:
         ting::Ref<TestClass> sr(this); // OK!
         ting::WeakRef<TestClass> wr(this); // OK!
     }
+
+    static ting::Ref<TestClass> New(){
+        return ting::Ref<TestClass>(new TestClass());
+    }
 };
 }}}
 
