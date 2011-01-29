@@ -205,7 +205,7 @@ static void Run(){
 	try{
 		ting::Ref<TestClass> a = TestClass::New();
 		ASSERT_ALWAYS(false)
-	}catch(ting::Exc& e){
+	}catch(ting::Exc&){
 		//do nothing
 	}
 }

@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ THE SOFTWARE. */
 #endif
 
 #ifdef _MSC_VER //If Microsoft C++ compiler
-#pragma warning(disable:4290)
+#pragma warning(disable:4290) //WARNING: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 #endif
 
 //  ==System dependent headers inclusion==
@@ -344,7 +344,7 @@ inline void TimerLib::TimerThread::Run(){
 
 		//make sure we will update warpFlag at least 4 times
 		//per ticks cycle (ticks cycle = 0xffffffffff ticks)
-		millis = std::min(millis, ting::u32(-1) / 4);
+		millis = (std::min)(millis, ting::u32(-1) / 4);//NOTE: enclose (std::min) into parentheses in order to avoid compilation errors when using MSVC compiler, because windows.h defines min and max macros.
 		ASSERT(millis != 0)
 
 		this->mutex.Unlock();
