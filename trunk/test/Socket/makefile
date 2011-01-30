@@ -8,8 +8,10 @@ endif
 
 
 ifeq ($(platform),win32)
+    libs := -lws2_32
     remove := del /Q /F 
 else
+    libs := -lpthread -lrt
     remove := rm -rf
 endif
 
@@ -26,7 +28,7 @@ default: $(binary_name)
 
 $(binary_name): Socket_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) -lpthread -lrt $<
+	@g++ -o $@ $(cf) $< $(libs)
 
 
 
