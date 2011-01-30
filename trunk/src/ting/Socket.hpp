@@ -102,6 +102,10 @@ protected:
 	inline static int DEIntr(){
 		return WSAEINTR;
 	}
+	
+	inline static int DEAgain(){
+		return WSAEWOULDBLOCK;
+	}
 #else //assume *nix
 	typedef int T_Socket;
 
@@ -115,6 +119,10 @@ protected:
 
 	inline static int DEIntr(){
 		return EINTR;
+	}
+
+	inline static int DEAgain(){
+		return EAGAIN;
 	}
 #endif
 
@@ -405,7 +413,7 @@ private:
 
 	//parse IP address from string
 	static u32 ParseString(const char* ip){
-		//TODO: there already is a IP parsing function in BSD sockets, consider using it here
+		//TODO: there already is an IP parsing function in BSD sockets, consider using it here
 		if(!ip)
 			throw Socket::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
 
@@ -635,21 +643,6 @@ public:
 		this->ClearAllReadinessFlags();
 	}
 
-	/**
-	 * @brief Send data to connected socket.
-	 * Sends data on connected socket. This method does not guarantee that the whole
-	 * buffer will be sent completely, it will return the number of bytes actually sent.
-	 * @param data - pointer to the buffer with data to send.
-	 * @param size - number of bytes to send.
-	 * @return the number of bytes actually sent.
-	 */
-	//TODO:remove this deprecated function
-	unsigned Send(const u8* data, unsigned size){
-		TRACE_ALWAYS(<< "TCPSocket::Send(const u8* data, unsigned size) is DEPRECATED, use Send(ting::Buffer<u8>& buf) instead" << std::endl)
-		ting::Buffer<u8> wrap(const_cast<u8*>(data), size);
-		return this->Send(wrap);
-	}
-
 
 
 	/**
@@ -683,6 +676,9 @@ public:
 #endif
 				if(errorCode == DEIntr()){
 					continue;
+				}if(errorCode == DEAgain()){
+					//can't send more bytes, return 0 bytes sent
+					res = 0;
 				}else{
 					std::stringstream ss;
 					ss << "TCPSocket::Send(): send() failed, error code = " << errorCode << ": " << strerror(errorCode);
@@ -694,21 +690,6 @@ public:
 
 		ASSERT(res >= 0)
 		return unsigned(res);
-	}
-
-
-
-	/**
-	 * @brief Send data to connected socket.
-	 * Sends data on connected socket. This method blocks until all data is completely sent.
-	 * @param data - pointer to the buffer with data to send.
-	 * @param size - number of bytes to send.
-	 */
-	//TODO:remove this deprecated function
-	void SendAll(const u8* data, unsigned size){
-		TRACE_ALWAYS(<< "TCPSocket::SendAll(const u8* data, unsigned size) is DEPRECATED, use SendAll(const ting::Buffer<u8>& buf) instead" << std::endl)
-		ting::Buffer<u8> wrap(const_cast<u8*>(data), size);
-		this->SendAll(wrap);
 	}
 
 
@@ -750,25 +731,6 @@ public:
 	 * If there is no data available this function does not block, instead it returns 0,
 	 * indicating that 0 bytes were received.
 	 * If previous WaitSet::Wait() indicated that socket is ready for reading
-	 * and TCPSocket::Recv() returns 0, then connection was reset by peer.
-	 * @param buf - pointer to the buffer where to put received data.
-	 * @param maxSize - maximal number of bytes which can be put to the buffer.
-	 * @return the number of bytes written to the buffer.
-	 */
-	//returns 0 if connection was closed by peer
-	//TODO:remove this deprecated function
-	inline unsigned Recv(u8* buf, unsigned maxSize){
-		TRACE_ALWAYS(<< "TCPSocket::Recv(u8* buf, unsigned maxSize) is DEPRECATED, use Recv(ting::Buffer<u8>& buf) instead" << std::endl)
-		ting::Buffer<u8> wrap(buf, maxSize);
-		return this->Recv(wrap);
-	}
-
-	/**
-	 * @brief Receive data from connected socket.
-	 * Receives data available on the socket.
-	 * If there is no data available this function does not block, instead it returns 0,
-	 * indicating that 0 bytes were received.
-	 * If previous WaitSet::Wait() indicated that socket is ready for reading
 	 * and TCPSocket::Recv() returns 0, then connection was closed by peer.
 	 * @param buf - pointer to the buffer where to put received data.
 	 * @param offset - offset inside the buffer where to start putting data from.
@@ -800,6 +762,9 @@ public:
 #endif
 				if(errorCode == DEIntr()){
 					continue;
+				}if(errorCode == DEAgain()){
+					//no data available, return 0 bytes received
+					len = 0;
 				}else{
 					std::stringstream ss;
 					ss << "TCPSocket::Recv(): recv() failed, error code = " << errorCode << ": " << strerror(errorCode);
@@ -1186,13 +1151,7 @@ public:
 		this->Open(0);
 	}
 
-	//returns number of bytes sent, should be less or equal to size.
-	//TODO: remove this deprecated function
-	unsigned Send(const u8* buf, u16 size, const IPAddress& destinationIP){
-		TRACE(<< "UDPSocket::Send(const u8* buf, u16 size, IPAddress destinationIP) is DEPRECATED, use Send(const ting::Buffer<u8>& buf, IPAddress destinationIP) instead" << std::endl)
-		ting::Buffer<u8> wrap(const_cast<u8*>(buf), size);
-		return this->Send(wrap, destinationIP);
-	}
+
 
 	//returns number of bytes sent, should be less or equal to size.
 	unsigned Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
@@ -1226,13 +1185,6 @@ public:
 	}
 
 
-	//returns number of bytes received
-	//TODO: remove this deprecated function
-	inline unsigned Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP){
-		TRACE(<< "UDPSocket::Recv(u8* buf, u16 maxSize, IPAddress &out_SenderIP) is DEPRECATED, use Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP) insted" << std::endl)
-		ting::Buffer<u8> wrap(buf, maxSize);
-		return this->Recv(wrap, out_SenderIP);
-	}
 
 	//returns number of bytes received
 	unsigned Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
