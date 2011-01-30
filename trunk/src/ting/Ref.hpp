@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -226,9 +226,8 @@ public:
 
 private:
 	//copy constructor is private, no copying
-	inline RefCounted(const RefCounted& rc){
-		ASSERT(false)
-	}
+	inline RefCounted(const RefCounted&);
+	inline RefCounted& operator=(const RefCounted&);
 };//~class RefCounted
 
 

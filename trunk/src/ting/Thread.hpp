@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -562,14 +562,8 @@ class Queue : public Waitable{
 #endif
 
 	//forbid copying
-	Queue(const Queue&){
-		ASSERT(false)
-	}
-
-	Queue& operator=(const Queue&){
-		ASSERT(false)
-		return *this;
-	}
+	Queue(const Queue&);
+	Queue& operator=(const Queue&);
 
 public:
 	/**

@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis
+Copyright (c) 2009-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -177,6 +177,7 @@ public:
 
 
 	Socket(const Socket& s) :
+			Waitable(),
 			//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
 			//Therefore, init variables to invalid values.
 #ifdef __WIN32__

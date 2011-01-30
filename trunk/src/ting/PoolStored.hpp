@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis
+Copyright (c) 2009-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include <new>
-#include <vector>
+#include <list>
 
 #include "debug.hpp"
 #include "types.hpp"
@@ -104,20 +104,17 @@ template <class T> class PoolStored{
 				M_POOL_TRACE(<< "Chunk::Chunk(copy): invoked" << std::endl)
 			}
 
-			Chunk& operator=(const Chunk& c){
-				M_POOL_TRACE(<< "Chunk::operator=(): invoked" << std::endl)
-				ASSERT(false)
-				return *this;
-			}
-
 			~Chunk(){
 				ASSERT_INFO(this->numAllocated == 0, "this->numAllocated = " << this->numAllocated << " should be 0")
 			}
+
+		private:
+			Chunk& operator=(const Chunk&);//assignment is not allowed (no operator=() implementation provided)
 		};
 
 		
 		struct ChunksList{
-			typedef std::vector<Chunk> T_List;
+			typedef std::list<Chunk> T_List;
 			typedef typename T_List::iterator T_Iter;
 			T_List chunks;
 			ting::Mutex mutex;
@@ -183,7 +180,7 @@ template <class T> class PoolStored{
 			//find chunk the p belongs to
 			for(typename ChunksList::T_Iter i = cl.chunks.begin(); i != cl.chunks.end(); ++i){
 				ASSERT((*i).numAllocated != 0)
-				if((*i).End() > p && p >= (*i).Begin()){
+				if((*i).Begin() <= p && p < (*i).End()){
 					Chunk *chunk = &(*i);
 					M_POOL_TRACE(<< "Free(): chunk found = " << chunk << std::endl)
 					--(chunk->numAllocated);

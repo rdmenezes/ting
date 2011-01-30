@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -126,7 +126,9 @@ public:
 	 * @param a - Array object to copy.
 	 */
 	//copy constructor
-	inline Array(const Array& a){
+	inline Array(const Array& a) :
+			ting::Buffer<T>()
+	{
 		this->CopyFrom(a);
 	}
 

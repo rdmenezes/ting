@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis
+Copyright (c) 2009-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -54,9 +54,7 @@ namespace ting{
 template <class T> class Buffer{
 	
 	//forbid copying
-	inline Buffer(const Buffer& b){
-		ASSERT(false)
-	}
+	inline Buffer(const Buffer&);
 
 protected:
 	T* buf;
@@ -68,7 +66,7 @@ protected:
 
 
 
-	Buffer& operator=(const Buffer& b){
+	Buffer& operator=(const Buffer&){
 		//do nothing
 		return *this;
 	}
@@ -233,8 +231,8 @@ public:
 	/**
 	 * @brief Copy constructor.
 	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
-     * @param buf - static buffer to copy.
-     */
+	 * @param buf - static buffer to copy.
+	 */
 	inline StaticBuffer(const StaticBuffer<T, bufSize> &buf) :
 			ting::Buffer<T>(staticBuffer, bufSize),
 			staticBuffer(buf.staticBuffer)

@@ -162,9 +162,6 @@ public:
 	}
 
 	inline void Start(ting::u32 millisec){
-		if(millisec < 0)
-			throw ting::Exc("Timer::Start() negative timeout value is not allowed");
-
 		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, need to create TimerLib singletone object")
 		
 		this->Stop();//make sure the timer is not running already
@@ -368,19 +365,19 @@ inline void TimerLib::TimerThread::Run(){
  */
 inline ting::u32 GetTicks(){
 #ifdef __WIN32__
-	static LARGE_INTEGER perfCounterFreq = {0};
-    if(perfCounterFreq.QuadPart == 0){
-        if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
-            //looks like the system does not support high resolution tick counter
-            return GetTickCount();
-        }
-    }
-    LARGE_INTEGER ticks;
-    if(QueryPerformanceCounter(&ticks) == FALSE){
-        return GetTickCount();
-    }
+	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
+	if(perfCounterFreq.QuadPart == 0){
+		if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
+		//looks like the system does not support high resolution tick counter
+			return GetTickCount();
+		}
+	}
+	LARGE_INTEGER ticks;
+	if(QueryPerformanceCounter(&ticks) == FALSE){
+		return GetTickCount();
+	}
 
-    return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
+	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
 #else
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
