@@ -58,7 +58,7 @@ try{
     //connect to remote listening socket
     sock.Open(ip);
     
-    //receive some data (note that it is a blocking call)
+    //receive data (expecting 4 bytes)
     ting::StaticBuffer<ting::u8, 4> data;
     unsigned bytesReceived = 0;
     while(bytesReceived < 4){
