@@ -1,3 +1,9 @@
+libting-dev (0.5.1-1) stable; urgency=low
+
+  * Bug fix in Sockets.hpp
+
+ -- Ivan Gagis <igagis@gmail.com>  Mon, 31 Jan 2011 15:42:00 +0200
+
 libting-dev (0.5.0-1) stable; urgency=low
 
   * const support for Ref and WeakRef and Ptr.

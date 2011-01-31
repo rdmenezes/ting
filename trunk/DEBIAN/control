@@ -1,5 +1,5 @@
 Package: libting-dev
-Version: 0.5.0
+Version: 0.5.1
 Section: devel 
 Priority: extra
 Architecture: i386
@@ -8,7 +8,7 @@ Depends:
 Pre-Depends:  
 Recommends: 
 Suggests: 
-Installed-Size: 197879
+Installed-Size: 239037
 Maintainer: Ivan Gagis <igagis@gmail.com>
 Conflicts: 
 Replaces: 
