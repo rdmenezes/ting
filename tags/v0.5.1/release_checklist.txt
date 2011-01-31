@@ -1,0 +1,12 @@
+* update ting version number in every .hpp file header
+
+* add new entry to debian/changelog file
+
+* update "Installed-Size:" in debian/control
+
+* update version number in the create_deb.sh file in the pakage name
+
+* update the PROJECT_NUMBER variable in the doxygen.cfg file to latest version number
+
+* generate doxygen docs
+
