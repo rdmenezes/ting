@@ -32,8 +32,12 @@ try{
     //if we get here then new connection is accepted.
     
     //send some data
-    ting::byte data[] = {'0', '1', '2', '4'};
-    sock.SendAll(data, sizeof(data));
+    ting::StaticBuffer<ting::u8, 4> data;
+    data[0] = '0';
+    data[1] = '1';
+    data[2] = '2';
+    data[3] = '4';
+    sock.SendAll(data);
 }catch(ting::Socket::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
 }
@@ -55,8 +59,11 @@ try{
     sock.Open(ip);
     
     //receive some data (note that it is a blocking call)
-    ting::byte buf[1024];
-    sock.Recv(buf, sizeof(buf));
+    ting::StaticBuffer<ting::u8, 4> data;
+    unsigned bytesReceived = 0;
+    while(bytesReceived < 4){
+        bytesReceived += sock.Recv(data, bytesReceived);
+    }
 }catch(ting::Socket::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
 }
@@ -100,10 +107,10 @@ After ting::WaitSet::Wait() returned we can check every socket for activity with
 {{{
 if(s1.CanRead()){
     //try to read some data from socket
-    ting::byte buf[1024];
+    ting::StaticBuffer<ting::u8, 1024> buf;
 
     //after calling Recv() the read ready flag will be cleared
-    ting::uint len = sock.Recv(buf, sizeof(buf));
+    unsigned len = sock.Recv(buf);
     if(len == 0){
        //0 received length means remote socket disconnection
        //Handle disconnection
@@ -132,8 +139,8 @@ try {
     ting::IPAddress ip("127.0.0.1", 5060);
     rcvSock.Open(5060);
     while(1){
-        ting::byte buf[1024];
-        rcvSock.Recv(buf, sizeof(buf), ip); 
+        ting::StaticBuffer<ting::u8, 1024> buf;
+        rcvSock.Recv(buf, ip); 
     }
 }catch(ting::Socket::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
@@ -150,8 +157,13 @@ try {
     ting::UDPSocket sendSock;
     ting::IPAddress ip("127.0.0.1", 5060);
     sendSock.Open();
-    ting::byte data[] = {'0', '1', '2', '4'};
-    sendSock.Send(data, sizeof(data), ip);
+
+    ting::StaticBuffer<ting::u8, 4> data;
+    data[0] = '0';
+    data[1] = '1';
+    data[2] = '2';
+    data[3] = '4';
+    sendSock.Send(data, ip);
 }catch(ting::Socket::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
 }
