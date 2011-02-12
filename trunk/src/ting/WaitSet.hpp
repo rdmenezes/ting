@@ -460,7 +460,7 @@ public:
 	 * 'out_events' buffer and the return value from the function indicates number of these objects
 	 * which have triggered.
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
-	 *                     The buffer will not be initialize to 0's by this function.
+	 *                     The buffer will not be initialized to 0's by this function.
 	 *                     The buffer shall be large enough to hold maxmimum number of Waitables
 	 *                     this WaitSet can hold.
 	 *                     It is valid to pass 0 pointer, in that case this argument will not be used.
