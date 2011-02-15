@@ -26,6 +26,8 @@ threadlib :=
 rtlib :=
 endif
 
+compiler := g++
+
 #compiler flags
 cf := -Wall -I../../src
 cf += -DDEBUG
@@ -41,7 +43,7 @@ run_utils_test: utils_test$(ext)
 
 utils_test$(ext): src/utils_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -52,7 +54,7 @@ run_debug_test: debug_test$(ext)
 
 debug_test$(ext): src/debug_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -63,7 +65,7 @@ run_PoolStored_test: PoolStored_test$(ext)
 
 PoolStored_test$(ext): src/PoolStored_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -73,7 +75,7 @@ run_Timer_test: Timer_test$(ext)
 
 Timer_test$(ext): src/Timer_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -83,7 +85,7 @@ run_Buffer_test: Buffer_test$(ext)
 
 Buffer_test$(ext): src/Buffer_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -93,7 +95,7 @@ run_Types_test: Types_test$(ext)
 
 Types_test$(ext): src/Types_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -103,7 +105,7 @@ run_Thread_test: Thread_test$(ext)
 
 Thread_test$(ext): src/Thread_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
@@ -113,7 +115,7 @@ run_Ref_test: Ref_test$(ext)
 
 Ref_test$(ext): src/Ref_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $<
+	@$(compiler) -o $@ $(cf) $<
 
 
 
@@ -123,7 +125,7 @@ run_Signal_test: Signal_test$(ext)
 
 Signal_test$(ext): src/Signal_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $<
+	@$(compiler) -o $@ $(cf) $<
 
 
 
@@ -133,7 +135,7 @@ run_WaitSet_test: WaitSet_test$(ext)
 
 WaitSet_test$(ext): src/WaitSet_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(threadlib) $(rtlib) $<
+	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
 
 
