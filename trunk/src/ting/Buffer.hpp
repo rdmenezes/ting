@@ -101,7 +101,7 @@ public:
 	 * @return size of element in bytes.
 	 */
 	inline unsigned SizeOfElem()const{
-		return sizeof(*(this->buf));
+		return sizeof(this->buf[0]);
 	}
 
 
@@ -166,7 +166,6 @@ public:
 	 * @return pointer to "after last" element of the buffer.
 	 */
 	inline T* End(){
-		ASSERT((this->buf + this->size) != 0)
 		return this->buf + this->size;
 	}
 
@@ -177,30 +176,10 @@ public:
 	 * @return const pointer to "after last" element of the buffer.
 	 */
 	inline const T* End()const{
-		ASSERT((this->buf + this->size) != 0)
 		return this->buf + this->size;
 	}
 
 
-
-	/**
-	 * @brief get pointer to first element of the buffer.
-	 * @return pointer to first element of the buffer.
-	 */
-	inline T* Buf(){
-		return this->buf;
-	}
-
-
-
-	/**
-	 * @brief get pointer to first element of the buffer.
-	 * Const version of Buffer::Buf().
-	 * @return pointer to first element of the buffer.
-	 */
-	inline const T* Buf()const{
-		return this->buf;
-	}
 
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){

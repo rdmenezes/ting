@@ -57,29 +57,76 @@ namespace ting{
  */
 template <class T> class Array : public ting::Buffer<T>{
 
-	inline void PrivateInit(unsigned arraySize){
-		this->size = arraySize;
-		if(this->size == 0){
+	inline void AllocateMemory(unsigned arraySize){
+		if(arraySize == 0){
+			this->size = 0;
 			this->buf = 0;
 			return;
 		}
 
-		M_ARRAY_PRINT(<< "Array::PrivateInit(): size = " << this->size << std::endl)
-		try{
-			this->buf = new T[arraySize];
-		}catch(...){
-			M_ARRAY_PRINT(<< "Array::Init(): exception caught" << this->size << std::endl)
-			this->buf = 0;
-			this->size = 0;
-			throw;//rethrow the exception
+		ting::u8 *buffer = new ting::u8[arraySize * sizeof(T)];
+		ASSERT(buffer)
+
+		this->buf = reinterpret_cast<T*>(buffer);
+		this->size = arraySize;
+
+		//check for strict aliasing
+		ASSERT(this->buf)
+		ASSERT(reinterpret_cast<void*>(this->buf) == buffer)
+	}
+
+	inline void InitObjectsByDefaultConstructor(){
+		for(T* p = this->Begin(); p != this->End(); ++p){
+			try{
+				new (p) T();
+			}catch(...){
+				//exception thrown from one of the objects constructor,
+				//destroy all previously created objects.
+				for(T* k = this->Begin(); k != p; ++k){
+					k->~T();
+				}
+				throw;//rethrow exception
+			}
 		}
-		M_ARRAY_PRINT(<< "Array::PrivateInit(): buf = " << static_cast<void*>(this->buf) << std::endl)
+	}
+
+	inline void InitObjectsByCopyConstructor(const ting::Buffer<T>& buffer){
+		ASSERT(this->Size() == buffer.Size())
+		const T* s = buffer.Begin();
+		for(T* p = this->Begin(); p != this->End(); ++p, ++s){
+			try{
+				new (p) T(*s);
+			}catch(...){
+				//exception thrown from one of the objects copy constructor,
+				//destroy all previously created objects.
+				for(T* k = this->Begin(); k != p; ++k){
+					k->~T();
+				}
+				throw;//rethrow exception
+			}
+		}
+	}
+
+	inline void DestroyObjects(){
+		for(T* p = &this->buf[0]; p != &this->buf[this->size]; ++p){
+			p->~T();
+		}
+	}
+
+	inline void FreeMemory(){
+		ting::u8 *buffer = reinterpret_cast<ting::u8*>(this->buf);
+
+		//check for strict aliasing
+		ASSERT(reinterpret_cast<void*>(this->buf) == buffer)
+
+		delete[] buffer;//It is ok to delete 0 pointer
 	}
 
 
 
 	inline void Destroy(){
-		delete[] this->buf;
+		this->DestroyObjects();
+		this->FreeMemory();
 	}
 
 
@@ -97,7 +144,34 @@ public:
 	//NOTE: the constructor is explicit to avoid undesired automatic
 	//conversions from unsigned to Array.
 	explicit inline Array(unsigned arraySize = 0){
-		this->PrivateInit(arraySize);
+		this->AllocateMemory(arraySize);
+		try{
+			this->InitObjectsByDefaultConstructor();
+		}catch(...){
+			this->FreeMemory();
+			throw;
+		}
+	}
+
+
+
+	/**
+	 * @brief Creates new Array containing copy of given buffer contents.
+	 * Creates a new Array instance of the same size as the given buffer.
+	 * The contents of that newly created Array are initialized to the
+	 * contents of the given buffer, i.e. all the array elements are
+	 * created using copy constructors.
+     * @param b - the buffer from which the data will be copied.
+     */
+	//NOTE: the constructor is explicit to avoid possible ambiguities.
+	explicit inline Array(const ting::Buffer<T>& b){
+		this->AllocateMemory(b.Size());
+		try{
+			this->InitObjectsByCopyConstructor(b);
+		}catch(...){
+			this->FreeMemory();
+			throw;
+		}
 	}
 
 
@@ -173,7 +247,38 @@ public:
 	void Init(unsigned arraySize){
 		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
 		this->Destroy();
-		this->PrivateInit(arraySize);
+		this->AllocateMemory(arraySize);
+		try{
+			this->InitObjectsByDefaultConstructor();
+		}catch(...){
+			this->FreeMemory();
+			this->buf = 0;
+			this->size = 0;
+			throw;
+		}
+	}
+
+
+
+	/**
+	 * @brief initialize array with the copy of given buffer contents.
+	 * The contents of this Array are initialized to the
+	 * contents of the given buffer, i.e. all the array elements are
+	 * created using copy constructors.
+	 * @param arraySize - number of elements this array should hold.
+	 *                    If 0 is supplied then array will become invalid.
+	 */
+	void Init(const ting::Buffer<T>& b){
+		this->Destroy();
+		this->AllocateMemory(b.Size());
+		try{
+			this->InitObjectsByCopyConstructor(b);
+		}catch(...){
+			this->FreeMemory();
+			this->buf = 0;
+			this->size = 0;
+			throw;
+		}
 	}
 
 
@@ -205,8 +310,12 @@ public:
 	 * @brief Converts to bool.
 	 * @return bool - value of Array::IsValid().
 	 */
-	inline operator bool(){
-		return this->IsValid();
+	//Safe conversion to bool type.
+	//Because if using simple "operator bool()" it may result in chained automatic
+	//conversion to undesired types such as int.
+	typedef void (Array::*unspecified_bool_type)();
+	inline operator unspecified_bool_type() const{
+		return this->IsValid() ? &Array::Reset : 0; //Array::Reset is taken just because it has matching signature
 	}
 
 
