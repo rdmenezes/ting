@@ -229,6 +229,7 @@ protected:
  * @brief Set of Waitable objects to wait for.
  */
 class WaitSet{
+	unsigned size;
 	unsigned numWaitables;//number of Waitables added
 
 #if defined(__WIN32__)
@@ -249,7 +250,8 @@ public:
 	 * @brief Constructor.
 	 * @param maxSize - maximum number of Waitable objects can be added to this wait set.
 	 */
-	WaitSet(u32 maxSize) :
+	WaitSet(unsigned maxSize) :
+			size(maxSize),
 			numWaitables(0)
 #if defined(__WIN32__)
 			,waitables(maxSize)
@@ -294,6 +296,15 @@ public:
 #endif
 	}
 
+
+
+	/**
+	 * @brief Get maximum size of the wait set.
+	 * @return maximum number of Waitables this WaitSet can hold.
+	 */
+	inline unsigned Size()const{
+		return this->size;
+	}
 
 
 	/**
