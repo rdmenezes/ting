@@ -1168,7 +1168,7 @@ public:
 		sockAddr.sin_family = AF_INET;
 		int res = ::sendto(
 				this->socket,
-				reinterpret_cast<const char*>(buf.Buf()),
+				reinterpret_cast<const char*>(buf.Begin()),
 				buf.Size(),
 				0,
 				reinterpret_cast<struct sockaddr*>(&sockAddr),
@@ -1206,7 +1206,7 @@ public:
 
 		int res = ::recvfrom(
 				this->socket,
-				reinterpret_cast<char*>(buf.Buf()),
+				reinterpret_cast<char*>(buf.Begin()),
 				buf.Size(),
 				0,
 				reinterpret_cast<sockaddr*>(&sockAddr),
