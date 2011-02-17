@@ -147,7 +147,7 @@ public:
 	 * @param a - Array object to assign from.
 	 */
 	inline Array& operator=(const Array& a){
-		//behavior similar to Ptr class
+		//behavior similar to ting::Ptr class
 		this->Destroy();
 		this->CopyFrom(a);
 		return (*this);
