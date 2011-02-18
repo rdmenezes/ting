@@ -946,7 +946,19 @@ class Thread{
 	}
 
 public:
-	inline Thread();//see implementation below as inline method
+	inline Thread() :
+			state(Thread::NEW)
+	{
+#if defined(__WIN32__)
+		this->th = NULL;
+#elif defined(__SYMBIAN32__)
+		//do nothing
+#elif defined(M_PTHREAD)
+		//do nothing
+#else
+#error "unknown system"
+#endif
+	}
 
 	virtual ~Thread(){
 		ASSERT_INFO(
@@ -1238,20 +1250,6 @@ inline void MsgThread::PushQuitMessage(){
 }
 
 
-
-inline Thread::Thread() :
-		state(Thread::NEW)
-{
-#if defined(__WIN32__)
-	this->th = NULL;
-#elif defined(__SYMBIAN32__)
-	//do nothing
-#elif defined(M_PTHREAD)
-	//do nothing
-#else
-#error "unknown system"
-#endif
-}
 
 }//~namespace ting
 
