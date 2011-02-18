@@ -37,7 +37,10 @@ THE SOFTWARE. */
 #include "Thread.hpp"
 #include "debug.hpp"
 
+
+#ifndef M_MAX_NUM_SIG_PARAMETERS
 #define M_MAX_NUM_SIG_PARAMETERS 10
+#endif
 
 //output ", class T_Pn", the comma is written only if n==0
 #define M_TEMPLATE_PARAM(n, a) M_COMMA_IF_NOT_0(n) class T_P##n
