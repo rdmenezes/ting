@@ -33,7 +33,7 @@ cf := -Wall -I../../src
 cf += -DDEBUG
 
 
-default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Thread_test run_Ref_test run_WaitSet_test run_Signal_test
+default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
 
 
 
@@ -99,16 +99,6 @@ Types_test$(ext): src/Types_test.cpp
 
 
 
-run_Thread_test: Thread_test$(ext)
-	@echo running $^...
-	@./$^
-
-Thread_test$(ext): src/Thread_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
-
-
-
 run_Ref_test: Ref_test$(ext)
 	@echo running $^...
 	@./$^
@@ -146,7 +136,6 @@ clean:
 	@$(remove) Timer_test$(ext)
 	@$(remove) Buffer_test$(ext)
 	@$(remove) Types_test$(ext)
-	@$(remove) Thread_test$(ext)
 	@$(remove) Ref_test$(ext)
 	@$(remove) Signal_test$(ext)
 	@$(remove) WaitSet_test$(ext)

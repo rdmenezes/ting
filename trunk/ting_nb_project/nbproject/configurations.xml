@@ -1,24 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="62">
+<configurationDescriptor version="69">
   <logicalFolder name="root" displayName="root" projectFiles="true">
-    <df name="src" root="../test/src">
-      <in>PoolStored_test.cpp</in>
-      <in>Ref_test.cpp</in>
-      <in>Thread_test.cpp</in>
-      <in>Timer_test.cpp</in>
-      <in>WaitSet_test.cpp</in>
+    <df name="src" root="../src">
+      <df name="ting" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Array.hpp</in>
+        <in>Buffer.hpp</in>
+        <in>Exc.hpp</in>
+        <in>PoolStored.hpp</in>
+        <in>Ptr.hpp</in>
+        <in>Ref.hpp</in>
+        <in>Signal.hpp</in>
+        <in>Singleton.hpp</in>
+        <in>Socket.hpp</in>
+        <in>Thread.hpp</in>
+        <in>Timer.hpp</in>
+        <in>Vector3.hpp</in>
+        <in>WaitSet.hpp</in>
+        <in>codegen.h</in>
+        <in>debug.hpp</in>
+        <in>math.hpp</in>
+        <in>types.hpp</in>
+        <in>utils.hpp</in>
+      </df>
+    </df>
+    <df name="test" root="../test">
+      <df name="Array" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Array_test</in>
+        <in>Array_test.cpp</in>
+        <in>makefile</in>
+      </df>
+      <df name="other" kind="SOURCE_LOGICAL_FOLDER">
+        <df name="src" kind="SOURCE_LOGICAL_FOLDER">
+          <in>Buffer_test.cpp</in>
+          <in>PoolStored_test.cpp</in>
+          <in>Ref_test.cpp</in>
+          <in>Signal_test.cpp</in>
+          <in>Thread_test.cpp</in>
+          <in>Timer_test.cpp</in>
+          <in>Types_test.cpp</in>
+          <in>WaitSet_test.cpp</in>
+          <in>debug_test.cpp</in>
+          <in>utils_test.cpp</in>
+        </df>
+        <in>Buffer_test</in>
+        <in>PoolStored_test</in>
+        <in>Ref_test</in>
+        <in>Signal_test</in>
+        <in>Thread_test</in>
+        <in>Timer_test</in>
+        <in>Types_test</in>
+        <in>WaitSet_test</in>
+        <in>debug_test</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>utils_test</in>
+      </df>
+      <df name="Socket" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Socket_test</in>
+        <in>Socket_test.cpp</in>
+        <in>makefile</in>
+      </df>
+      <in>makefile</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false">
-      <itemPath>../test/makefile</itemPath>
-      <itemPath>../src</itemPath>
       <itemPath>ting_nb_project-Makefile.mk</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
+    <Elem>../test</Elem>
     <Elem>../src</Elem>
-    <Elem>../test/src</Elem>
   </sourceRootList>
   <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
   <confs>

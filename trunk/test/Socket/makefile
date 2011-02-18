@@ -23,7 +23,7 @@ cf += -DDEBUG
 
 
 default: $(binary_name)
-	@echo running Socket test...
+	@echo running $^...
 	@./$^
 
 $(binary_name): Socket_test.cpp

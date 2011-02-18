@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := Array_test
+binary_name := Thread_test
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -27,7 +27,7 @@ default: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): Array_test.cpp
+$(binary_name): Thread_test.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $< $(libs)
 

@@ -2,6 +2,7 @@ subdirs :=
 subdirs += other
 subdirs += Socket
 subdirs += Array
+subdirs += Thread
 
 
 
