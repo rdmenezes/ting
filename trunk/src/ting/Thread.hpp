@@ -1179,7 +1179,7 @@ public:
 	 * @brief Send a message to thread's queue.
 	 * @param msg - a message to send.
 	 */
-	void PushMessage(Ptr<ting::Message> msg){
+	inline void PushMessage(Ptr<ting::Message> msg){
 		this->queue.PushMessage(msg);
 	}
 };
