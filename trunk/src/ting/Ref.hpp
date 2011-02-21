@@ -254,7 +254,7 @@ public:
 	 * Performs standard C++ static_cast().
 	 * @return reference to object of casted class.
 	 */
-	template <class TS> inline Ref<TS> StaticCast(){
+	template <class TS> inline Ref<TS> StaticCast()const{
 		return Ref<TS>(static_cast<TS*>(this->operator->()));
 	}
 
@@ -263,23 +263,6 @@ public:
 	/**
 	 * @brief cast dynamically.
 	 * Performs standard C++ dynamic_cast() operation.
-	 * @return valid reference to object of casted class if dynamic_cast() succeeds, i.e. if the
-	 *         object can be cast to requested class.
-	 * @return invalid reference otherwise, i. e. if the object cannot be cast to requested class.
-	 */
-	template <class TS> inline Ref<TS> DynamicCast(){
-		ASSERT(this->IsValid())
-		TS* t = dynamic_cast<TS*>(this->operator->());
-		if(t)
-			return Ref<TS>(t);
-		else
-			return Ref<TS>();
-	}
-
-
-
-	/**
-	 * @brief constant version of Ref::DynamicCast()
 	 * @return valid reference to object of casted class if dynamic_cast() succeeds, i.e. if the
 	 *         object can be cast to requested class.
 	 * @return invalid reference otherwise, i. e. if the object cannot be cast to requested class.
