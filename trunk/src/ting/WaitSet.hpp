@@ -318,7 +318,6 @@ public:
 		ASSERT(w)
 
 		ASSERT(!w->isAdded)
-		ASSERT(flagsToWaitFor != 0)//wait for at least something
 
 #if defined(__WIN32__)
 		ASSERT(this->numWaitables <= this->handles.Size())
@@ -372,7 +371,6 @@ public:
 		ASSERT(w)
 
 		ASSERT(w->isAdded)
-		ASSERT(flagsToWaitFor != 0)//wait for at least something
 
 #if defined(__WIN32__)
 		//check if the Waitable object is added to this wait set
