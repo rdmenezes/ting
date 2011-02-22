@@ -336,8 +336,10 @@ public:
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
-		e.events = (u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
-				(u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0);
+		e.events =
+				(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
+				| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
+				| (EPOLLERR);
 		int res = epoll_ctl(
 				this->epollSet,
 				EPOLL_CTL_ADD,
@@ -392,8 +394,10 @@ public:
 		epoll_event e;
 		e.data.fd = w->GetHandle();
 		e.data.ptr = w;
-		e.events = (u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0) |
-				(u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0);
+		e.events =
+				(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
+				| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
+				| (EPOLLERR);
 		int res = epoll_ctl(
 				this->epollSet,
 				EPOLL_CTL_MOD,
@@ -590,7 +594,7 @@ private:
 		{
 			Waitable* w = static_cast<Waitable*>(e->data.ptr);
 			ASSERT(w)
-			if((e->events & (EPOLLIN | EPOLLPRI)) != 0){
+			if((e->events & (EPOLLIN | EPOLLPRI | EPOLLERR)) != 0){
 				w->SetCanReadFlag();
 			}
 			if((e->events & EPOLLOUT) != 0){
