@@ -161,7 +161,7 @@ template <class T> class PoolStored{
 					++chunk->numAllocated;
 					M_POOL_TRACE(<< "Alloc(): Free cell found = " << i << " sizeof(PoolElem) = " << sizeof(PoolElem) << std::endl)
 					M_POOL_TRACE(<< "Alloc(): returning " << static_cast<BufHolder*>(i) << std::endl)
-					return reinterpret_cast<void*>(static_cast<BufHolder*>(i));
+					return ASS(reinterpret_cast<void*>(static_cast<BufHolder*>(i)));
 				}
 			}
 			ASSERT(false)
@@ -177,7 +177,7 @@ template <class T> class PoolStored{
 
 			ting::Mutex::Guard mutlock(cl.mutex);
 			
-			//find chunk the p belongs to
+			//find chunk the "p" belongs to
 			for(typename ChunksList::T_Iter i = cl.chunks.begin(); i != cl.chunks.end(); ++i){
 				ASSERT((*i).numAllocated != 0)
 				if((*i).Begin() <= p && p < (*i).End()){
@@ -188,7 +188,7 @@ template <class T> class PoolStored{
 						cl.chunks.erase(i);
 					}else{
 						static_cast<PoolElem*>(
-								reinterpret_cast<BufHolder*>(p)
+								ASS(reinterpret_cast<BufHolder*>(p))
 							)->isFree = true;
 					}
 					return;
