@@ -1,11 +1,11 @@
 #!/usr/bin/make -f
 
 build:
-	$(MAKE)
+#	$(MAKE)
 
 clean:
-	$(MAKE) clean
-	rm debian/files
+#	$(MAKE) clean
+	rm -f debian/files
 	rm -rf debian/out
 
 binary:
