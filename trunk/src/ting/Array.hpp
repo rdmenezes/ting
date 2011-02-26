@@ -161,8 +161,8 @@ public:
 	 * The contents of that newly created Array are initialized to the
 	 * contents of the given buffer, i.e. all the array elements are
 	 * created using copy constructors.
-     * @param b - the buffer from which the data will be copied.
-     */
+	 * @param b - the buffer from which the data will be copied.
+	 */
 	//NOTE: the constructor is explicit to avoid possible ambiguities.
 	explicit inline Array(const ting::Buffer<T>& b){
 		this->AllocateMemory(b.Size());
@@ -228,7 +228,7 @@ public:
 	}
 
 
-	
+
 	~Array(){
 		M_ARRAY_PRINT(<< "Array::~Array(): invoked" << std::endl)
 		this->Destroy();
@@ -265,8 +265,7 @@ public:
 	 * The contents of this Array are initialized to the
 	 * contents of the given buffer, i.e. all the array elements are
 	 * created using copy constructors.
-	 * @param arraySize - number of elements this array should hold.
-	 *                    If 0 is supplied then array will become invalid.
+	 * @param b - the buffer from which the data will be copied.
 	 */
 	void Init(const ting::Buffer<T>& b){
 		this->Destroy();
