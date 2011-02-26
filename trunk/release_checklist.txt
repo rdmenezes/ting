@@ -2,9 +2,7 @@
 
 * add new entry to debian/changelog file
 
-* update "Installed-Size:" in debian/control
-
-* update version number in the create_deb.sh file in the pakage name
+* generate debian package using dpkg-buildpackage
 
 * update the PROJECT_NUMBER variable in the doxygen.cfg file to latest version number
 
