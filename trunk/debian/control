@@ -1,0 +1,16 @@
+Source: libting
+Section: devel
+Priority: extra
+Maintainer: Ivan Gagis <igagis@gmail.com>
+Build-Depends:
+Standards-Version: 3.7.2
+
+Package: libting-dev
+Section: devel
+Architecture: any
+Depends: #TODO:
+Description: simple cross-platform C++ library.
+ For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
+ For network development it provides TCPSocket, UDPSocket classes, etc.
+ It also provides reference counted pointers, smart pointers for buffers.
+ The library code is entirely in .hpp files.

@@ -1,0 +1,41 @@
+libting-dev (0.5.1-1) stable; urgency=low
+
+  * Bug fix in Sockets.hpp
+
+ -- Ivan Gagis <igagis@gmail.com>  Mon, 31 Jan 2011 15:42:00 +0200
+
+libting-dev (0.5.0-1) stable; urgency=low
+
+  * const support for Ref and WeakRef and Ptr.
+
+ -- Ivan Gagis <igagis@gmail.com>  Tue, 28 Dec 2010 17:49:00 +0200
+
+libting-dev (0.4.2-1) stable; urgency=low
+
+  * Matrix transpose/scale/rotate multiplies from the right now, not from the left.
+  * Minor improvements.
+
+ -- Ivan Gagis <igagis@gmail.com>  Wed, 7 Apr 2010 15:11:00 +0200
+
+
+libting-dev (0.4.1-1) stable; urgency=low
+
+  * bug fix in ting/Timer.hpp
+
+ -- Ivan Gagis <igagis@gmail.com>  Sat, 6 Mar 2010 21:41:00 +0200
+
+
+libting-dev (0.4.0-1) stable; urgency=low
+
+  * some improvements
+  * some bugfixes
+
+ -- Ivan Gagis <igagis@gmail.com>  Fri, 25 Feb 2010 15:52:00 +0200
+
+
+libting-dev (0.3.0-1) stable; urgency=low
+
+  * Initial release
+
+ -- Ivan Gagis <igagis@gmail.com>  Fri, 06 Nov 2009 17:44:00 +0300
+
