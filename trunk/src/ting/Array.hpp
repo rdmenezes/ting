@@ -20,14 +20,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// ting 0.5.1
+// ting 0.6.0
 // Homepage: http://code.google.com/p/ting
 
 /**
  * @file Array.hpp
  * @author Ivan Gagis <igagis@gmail.com>
  * @brief automatic array class.
- * Array class, it is an auto pointer for new[] / delete[].
+ * Array class. It is an auto pointer for new[] / delete[].
  */
 
 #pragma once
