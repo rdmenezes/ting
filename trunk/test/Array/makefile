@@ -9,7 +9,7 @@ endif
 
 ifeq ($(platform),win32)
     libs := -lws2_32
-    remove := del /Q /F 
+    remove := del /Q /F
 else
     libs := -lpthread -lrt
     remove := rm -rf

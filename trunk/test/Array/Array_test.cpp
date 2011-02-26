@@ -176,7 +176,7 @@ void Run(){
 			try{
 				ting::Array<TestClass> a(134);
 				ASSERT_ALWAYS(false)
-			}catch(std::exception &e){
+			}catch(std::exception &){
 				//NOTE: because constructors and destructors will be called we need
 				//      to multiply by 2, also we need to subtract 1 because for the triggering
 				//      object the constructor will be called, but not the destructor.
@@ -197,7 +197,7 @@ void Run(){
 				ting::Array<TestClass> a;
 				a.Init(134);
 				ASSERT_ALWAYS(false)
-			}catch(std::exception &e){
+			}catch(std::exception &){
 				//NOTE: because constructors and destructors will be called we need
 				//      to multiply by 2, also we need to subtract 1 because for the triggering
 				//      object the constructor will be called, but not the destructor.
@@ -311,7 +311,7 @@ void Run(){
 			try{
 				ting::Array<TestClass> a(buffer);
 				ASSERT_ALWAYS(false)
-			}catch(std::exception &e){
+			}catch(std::exception &){
 				//NOTE: because constructors and destructors will be called we need
 				//      to multiply by 2, also we need to subtract 1 because for the triggering
 				//      object the constructor will be called, but not the destructor.
@@ -334,7 +334,7 @@ void Run(){
 				ting::Array<TestClass> a;
 				a.Init(buffer);
 				ASSERT_ALWAYS(false)
-			}catch(std::exception &e){
+			}catch(std::exception &){
 				//NOTE: because constructors and destructors will be called we need
 				//      to multiply by 2, also we need to subtract 1 because for the triggering
 				//      object the constructor will be called, but not the destructor.

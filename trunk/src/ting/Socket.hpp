@@ -681,7 +681,18 @@ public:
 					res = 0;
 				}else{
 					std::stringstream ss;
-					ss << "TCPSocket::Send(): send() failed, error code = " << errorCode << ": " << strerror(errorCode);
+					ss << "TCPSocket::Send(): send() failed, error code = " << errorCode << ": ";
+#ifdef _MSC_VER //if MSVC compiler
+					{
+						const unsigned msgbufSize = 0xff;
+						char msgbuf[msgbufSize];
+						strerror_s(msgbuf, msgbufSize, errorCode);
+						msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+						ss << msgbuf;
+					}
+#else
+					ss << strerror(errorCode);
+#endif
 					throw Socket::Exc(ss.str());
 				}
 			}
@@ -767,7 +778,18 @@ public:
 					len = 0;
 				}else{
 					std::stringstream ss;
-					ss << "TCPSocket::Recv(): recv() failed, error code = " << errorCode << ": " << strerror(errorCode);
+					ss << "TCPSocket::Recv(): recv() failed, error code = " << errorCode << ": ";
+#ifdef _MSC_VER //if MSVC compiler
+					{
+						const unsigned msgbufSize = 0xff;
+						char msgbuf[msgbufSize];
+						strerror_s(msgbuf, msgbufSize, errorCode);
+						msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+						ss << msgbuf;
+					}
+#else
+					ss << strerror(errorCode);
+#endif
 					throw Socket::Exc(ss.str());
 				}
 			}

@@ -3,7 +3,6 @@
 
 
 
-
 namespace BasicClientServerTest{
 
 class ServerThread : public ting::MsgThread{

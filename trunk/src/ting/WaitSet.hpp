@@ -50,7 +50,17 @@ THE SOFTWARE. */
 #define WIN32
 #endif
 
+//if _WINSOCKAPI_ macro is not defined then it means that the winsock header file
+//has not been included. Here we temporarily define the macro in order to prevent
+//inclusion of winsock.h from within the windows.h. Because it may later conflict with
+//winsock2.h if it is included later.
+#ifndef _WINSOCKAPI_
+#define _WINSOCKAPI_
 #include <windows.h>
+#undef _WINSOCKAPI_
+#else
+#include <windows.h>
+#endif
 
 #elif defined(__linux__)
 #include <sys/epoll.h>
