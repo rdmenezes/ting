@@ -4,9 +4,9 @@ build:
 	$(MAKE)
 
 clean:
+	$(MAKE) clean
 	rm debian/files
 	rm -rf debian/out
-	$(MAKE) clean
 
 binary:
 	./debian/libting-dev.sh
