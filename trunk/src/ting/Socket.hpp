@@ -106,6 +106,10 @@ protected:
 	inline static int DEAgain(){
 		return WSAEWOULDBLOCK;
 	}
+
+	inline static int DEInProgress(){
+		return WSAEWOULDBLOCK;
+	}
 #else //assume *nix
 	typedef int T_Socket;
 
@@ -123,6 +127,10 @@ protected:
 
 	inline static int DEAgain(){
 		return EAGAIN;
+	}
+
+	inline static int DEInProgress(){
+		return EINPROGRESS;
 	}
 #endif
 
@@ -322,7 +330,7 @@ protected:
 	}
 
 	inline void SetWaitingEventsForWindows(long flags){
-		ASSERT_INFO(this->IsValid() && (this->eventForWaitable != WSA_INVALID_EVENT), "HINT: Most probably, you are trying to remove the _closed_ socket from WaitSet. If so, you should first remove the socket from WaitSet and then call Close() method.")
+		ASSERT_INFO(this->IsValid() && (this->eventForWaitable != WSA_INVALID_EVENT), "HINT: Most probably, you are trying to remove the _closed_ socket from WaitSet. If so, you should first remove the socket from WaitSet and only then call the Close() method.")
 
 		if(WSAEventSelect(
 				this->socket,
@@ -560,17 +568,6 @@ public:
 	}
 
 	/**
-	 * @brief A constructor which automatically calls TCPSocket::Open() method.
-	 * This constructor creates a socket and calls its TCPSocket::Open() method.
-	 * So, it creates an already opened socket.
-	 * @param ip - IP address to 'connect to/listen on'.
-	 * @param disableNaggle - enable/disable Naggle algorithm.
-	 */
-	TCPSocket(const IPAddress& ip, bool disableNaggle = false){
-		this->Open(ip, disableNaggle);
-	}
-
-	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
 	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
@@ -604,24 +601,6 @@ public:
 			throw Socket::Exc("TCPSocket::Open(): Couldn't create socket");
 		}
 
-		//Connecting to remote host
-		sockaddr_in sockAddr;
-		memset(&sockAddr, 0, sizeof(sockAddr));
-		sockAddr.sin_family = AF_INET;
-		sockAddr.sin_addr.s_addr = ip.host;
-		sockAddr.sin_port = htons(ip.port);
-
-		// Connect to the remote host
-		if(connect(
-				this->socket,
-				reinterpret_cast<sockaddr *>(&sockAddr),
-				sizeof(sockAddr)
-			) == DSocketError())
-		{
-			this->Close();
-			throw Socket::Exc("TCPSocket::Open(): Couldn't connect to remote host");
-		}
-
 		//Disable Naggle algorithm if required
 		if(disableNaggle)
 			this->DisableNaggle();
@@ -641,6 +620,48 @@ public:
 #endif
 
 		this->ClearAllReadinessFlags();
+
+		//Connecting to remote host
+		sockaddr_in sockAddr;
+		memset(&sockAddr, 0, sizeof(sockAddr));
+		sockAddr.sin_family = AF_INET;
+		sockAddr.sin_addr.s_addr = ip.host;
+		sockAddr.sin_port = htons(ip.port);
+
+		// Connect to the remote host
+		if(connect(
+				this->socket,
+				reinterpret_cast<sockaddr *>(&sockAddr),
+				sizeof(sockAddr)
+			) == DSocketError())
+		{
+#ifdef __WIN32__
+			int errorCode = WSAGetLastError();
+#else //linux/unix
+			int errorCode = errno;
+#endif
+			if(errorCode == DEIntr()){
+				//do nothing, for non-blocking socket the connection request still should remain active
+			}else if(errorCode == DEInProgress()){
+				//do nothing, this is not an error, we have non-blocking socket
+			}else{
+				std::stringstream ss;
+				ss << "TCPSocket::Open(): connect() failed, error code = " << errorCode << ": ";
+#ifdef _MSC_VER //if MSVC compiler
+				{
+					const unsigned msgbufSize = 0xff;
+					char msgbuf[msgbufSize];
+					strerror_s(msgbuf, msgbufSize, errorCode);
+					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+					ss << msgbuf;
+				}
+#else
+				ss << strerror(errorCode);
+#endif
+				this->Close();
+				throw Socket::Exc(ss.str());
+			}
+		}
 	}
 
 
@@ -676,7 +697,7 @@ public:
 #endif
 				if(errorCode == DEIntr()){
 					continue;
-				}if(errorCode == DEAgain()){
+				}else if(errorCode == DEAgain()){
 					//can't send more bytes, return 0 bytes sent
 					res = 0;
 				}else{
@@ -773,7 +794,7 @@ public:
 #endif
 				if(errorCode == DEIntr()){
 					continue;
-				}if(errorCode == DEAgain()){
+				}else if(errorCode == DEAgain()){
 					//no data available, return 0 bytes received
 					len = 0;
 				}else{
@@ -910,9 +931,9 @@ public:
 	/**
 	 * @brief A copy constructor.
 	 * Copy constructor creates a new socket object which refers to the same socket as s.
-	 * 	After constructor completes the s becomes invalid.
-	 * 	In other words, the behavior of copy constructor is similar to one of std::auto_ptr class from standard C++ library.
-	 * 	@param s - other TCP socket to make a copy from.
+	 * After constructor completes the s becomes invalid.
+	 * In other words, the behavior of copy constructor is similar to one of std::auto_ptr class from standard C++ library.
+	 * @param s - other TCP socket to make a copy from.
 	 */
 	//copy constructor
 	TCPServerSocket(const TCPServerSocket& s) :
@@ -930,17 +951,6 @@ public:
 		this->disableNaggle = s.disableNaggle;
 		this->Socket::operator=(s);
 		return *this;
-	}
-
-	/**
-	 * @brief A constructor which automatically calls TCPServerSocket::Open() method.
-	 * This constructor creates a socket and calls its TCPServerSocket::Open() method.
-	 * So, it creates an already opened socket listening on the specified port.
-	 * @param port - IP port number to listen on.
-	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
-	 */
-	TCPServerSocket(u16 port, bool disableNaggle = false){
-		this->Open(port, disableNaggle);
 	}
 
 	/**
