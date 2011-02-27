@@ -685,7 +685,7 @@ public:
 		while(true){
 			res = send(
 					this->socket,
-					reinterpret_cast<const char*>(&buf[offset]),
+					reinterpret_cast<const char*>(buf.Begin()),
 					buf.Size() - offset,
 					0
 				);
@@ -782,7 +782,7 @@ public:
 		while(true){
 			len = recv(
 					this->socket,
-					reinterpret_cast<char*>(&buf[offset]),
+					reinterpret_cast<char*>(buf.Begin()),
 					buf.Size() - offset,
 					0
 				);
