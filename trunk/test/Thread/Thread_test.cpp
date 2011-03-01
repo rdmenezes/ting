@@ -1,6 +1,7 @@
 #include <ting/debug.hpp>
 #include <ting/Thread.hpp>
 #include <ting/Buffer.hpp>
+#include <ting/types.hpp>
 
 
 
@@ -116,6 +117,61 @@ static void Run(){
 
 
 
+namespace TestNestedJoin{
+
+class TestRunnerThread : public ting::Thread{
+public:
+	class TopLevelThread : public ting::Thread{
+	public:
+
+		class InnerLevelThread : public ting::Thread{
+		public:
+
+			//overrun
+			void Run(){
+			}
+		} inner;
+
+		//override
+		void Run(){
+			this->inner.Start();
+			ting::Thread::Sleep(100);
+			this->inner.Join();
+		}
+	} top;
+
+	volatile bool success;
+
+	TestRunnerThread() :
+			success(false)
+	{}
+
+	//override
+	void Run(){
+		this->top.Start();
+		this->top.Join();
+		this->success = true;
+	}
+};
+
+
+
+static void Run(){
+	TestRunnerThread runner;
+	runner.Start();
+
+	ting::Thread::Sleep(1000);
+
+	ASSERT_ALWAYS(runner.success)
+
+	runner.Join();
+}
+
+
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Thread test" << std::endl)
 
@@ -124,6 +180,8 @@ int main(int argc, char *argv[]){
 	TestManyThreads::Run();
 
 	TestImmediateExitThread::Run();
+
+	TestNestedJoin::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
 
