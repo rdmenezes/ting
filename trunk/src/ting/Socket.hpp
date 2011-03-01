@@ -903,7 +903,7 @@ private:
 			flags |= FD_READ;
 		}
 		if((flagsToWaitFor & Waitable::WRITE) != 0){
-			flags |= FD_WRITE;
+			flags |= FD_WRITE | FD_CONNECT;
 		}
 		this->SetWaitingEventsForWindows(flags);
 	}
