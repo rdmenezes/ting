@@ -23,4 +23,4 @@ rm -f debian/substvars
 dpkg-gencontrol -p$packageName -P$baseDir
 
 dpkg -b $baseDir ../file.deb
-dpkg-name ../file.deb #rename file to proper debian format (package_version_arch.deb)
+dpkg-name --overwrite ../file.deb #rename file to proper debian format (package_version_arch.deb)
