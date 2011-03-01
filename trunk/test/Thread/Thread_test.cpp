@@ -3,6 +3,10 @@
 #include <ting/Buffer.hpp>
 
 
+
+
+namespace TestJoinBeforeAndAfterThreadHasFinished{
+
 class TestThread : public ting::Thread{
 public:
 	int a, b;
@@ -18,31 +22,38 @@ public:
 
 
 
-static void TestJoinAfterThreadHasFinished(){
-	TestThread t;
+static void Run(){
 
-	t.Start();
+	//Test join after thread has finished
+	{
+		TestThread t;
 
-	ting::Thread::Sleep(2000);
+		t.Start();
 
-	t.Join();
+		ting::Thread::Sleep(2000);
+
+		t.Join();
+	}
+
+
+
+	//Test join before thread has finished
+	{
+		TestThread t;
+
+		t.Start();
+
+		t.Join();
+	}
 }
 
-
-
-static void TestJoinBeforeThreadHasFinished(){
-	TestThread t;
-
-	t.Start();
-
-	t.Join();
-}
-
+}//~namespace
 
 
 //====================
 //Test many threads
 //====================
+namespace TestManyThreads{
 
 class TestThread1 : public ting::MsgThread{
 public:
@@ -58,8 +69,7 @@ public:
 
 
 
-static void TestManyThreads(){
-	//TODO: make sure it runs with 1000 threads
+static void Run(){
 	ting::StaticBuffer<TestThread1, 500> thr;
 
 	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
@@ -74,12 +84,15 @@ static void TestManyThreads(){
 	}
 }
 
+}//~namespace
 
 
 
 //==========================
 //Test immediate thread exit
 //==========================
+
+namespace TestImmediateExitThread{
 
 class ImmediateExitThread : public ting::Thread{
 public:
@@ -91,7 +104,7 @@ public:
 };
 
 
-static void TestImmediateExitThread(){
+static void Run(){
 	for(unsigned i = 0; i < 100; ++i){
 		ImmediateExitThread t;
 		t.Start();
@@ -99,18 +112,18 @@ static void TestImmediateExitThread(){
 	}
 }
 
+}//~namespace
+
 
 
 int main(int argc, char *argv[]){
 //	TRACE(<< "Thread test" << std::endl)
 
-	TestJoinAfterThreadHasFinished();
-	
-	TestJoinBeforeThreadHasFinished();
+	TestJoinBeforeAndAfterThreadHasFinished::Run();
 
-	TestManyThreads();
+	TestManyThreads::Run();
 
-	TestImmediateExitThread();
+	TestImmediateExitThread::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
 
