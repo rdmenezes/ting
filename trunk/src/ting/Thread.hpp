@@ -920,10 +920,8 @@ class Thread{
 		return 0;
 	}
 
-	static inline ting::Mutex& Mutex1(){
-		static ting::Mutex m;
-		return m;
-	}
+	ting::Mutex mutex1;
+
 	static inline ting::Mutex& Mutex2(){
 		static ting::Mutex m;
 		return m;
@@ -1009,7 +1007,7 @@ public:
 		//Protect by mutex to avoid several Start() methods to be called
 		//by concurrent threads simultaneously and to protect call to Join() before Start()
 		//has returned.
-		ting::Mutex::Guard mutexGuard1(Thread::Mutex1());
+		ting::Mutex::Guard mutexGuard1(this->mutex1);
 		//Protect by mutex to avoid incorrect state changing in case when thread
 		//exits before the Start() method retruned.
 		ting::Mutex::Guard mutexGuard2(Thread::Mutex2());
@@ -1078,7 +1076,7 @@ public:
 //		TRACE(<< "Thread::Join(): enter" << std::endl)
 
 		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexGuard(Thread::Mutex1());
+		ting::Mutex::Guard mutexGuard(this->mutex1);
 
 		if(this->state == NEW){
 			//thread was not started, do nothing
