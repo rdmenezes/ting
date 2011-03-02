@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := Singleton_test
+binary_name := Ref_test
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -36,7 +36,7 @@ libtestso.so: testso.cpp
 
 
 
-$(binary_name): Singleton_test.cpp libtestso.so
+$(binary_name): Ref_test.cpp libtestso.so
 	@echo Building $@...
 	@g++ -o $@ $(cf) $< $(libs) -L. -ltestso
 
