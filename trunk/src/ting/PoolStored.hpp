@@ -121,7 +121,7 @@ template <class T> class PoolStored{
 
 			~ChunksList(){
 //				TRACE(<< "PoolStored::ChunksList::~ChunksList(): invoked" << std::endl)
-				ASSERT_INFO(this->chunks.size() == 0, "PoolStored: cannot destroy chunk list because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
+				ASSERT_INFO(this->chunks.size() == 0, "PoolStored: cannot destroy chunk list because it is not empty (" << this->chunks.size() << "). Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
 			}
 		};
 		
