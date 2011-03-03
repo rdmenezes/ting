@@ -4,6 +4,7 @@ subdirs += Socket
 subdirs += Array
 subdirs += Thread
 subdirs += SingletonOverSharedLibrary
+subdirs += RefOverSharedLibrary
 
 
 
