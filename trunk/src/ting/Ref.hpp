@@ -434,8 +434,20 @@ public:
 
 
 
+	template <class TS> inline bool operator<=(const Ref<TS>& r)const{
+		return this->p <= r.p;
+	}
+
+
+
 	template <class TS> inline bool operator>(const Ref<TS>& r)const{
 		return this->p > r.p;
+	}
+
+
+
+	template <class TS> inline bool operator>=(const Ref<TS>& r)const{
+		return this->p >= r.p;
 	}
 
 

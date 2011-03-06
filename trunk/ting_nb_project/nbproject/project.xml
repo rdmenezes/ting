@@ -6,13 +6,13 @@
             <name>ting_nb_project</name>
             <make-project-type>0</make-project-type>
             <c-extensions/>
-            <cpp-extensions/>
+            <cpp-extensions>cpp</cpp-extensions>
             <header-extensions>h,hpp</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>/home/ivan/prj/ting/src</sourceRootElem>
-                <sourceRootElem>/home/ivan/prj/ting/test</sourceRootElem>
+                <sourceRootElem>../src</sourceRootElem>
+                <sourceRootElem>../test</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>Default</confElem>
