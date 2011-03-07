@@ -2,6 +2,7 @@ subdirs :=
 subdirs += other
 subdirs += Socket
 subdirs += Array
+subdirs += Ptr
 subdirs += Thread
 subdirs += SingletonOverSharedLibrary
 subdirs += RefOverSharedLibrary
