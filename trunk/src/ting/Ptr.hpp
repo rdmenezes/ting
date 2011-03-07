@@ -52,7 +52,7 @@ namespace ting{
 template <class T> class Ptr{
 	template <class TS> friend class Ptr;
 
-	void* p;
+	T* p;
 public:
 	explicit inline Ptr(T* ptr = 0) :
 			p(ptr)
@@ -89,12 +89,12 @@ public:
 
 	inline T* operator->(){
 		ASSERT_INFO(this->p, "Ptr::operator->(): this->p is zero")
-		return static_cast<T*>(p);
+		return this->p;
 	}
 
 	inline const T* operator->()const{
 		ASSERT_INFO(this->p, "const Ptr::operator->(): this->p is zero")
-		return static_cast<T*>(this->p);
+		return this->p;
 	}
 
 	inline T& operator*(){
@@ -141,7 +141,7 @@ public:
 	}
 
 	inline bool operator!=(const T* ptr)const{
-		return !( *this == ptr );
+		return !this->operator==(ptr);
 	}
 
 	inline bool operator!()const{
@@ -173,7 +173,7 @@ public:
 	 * @return pointer to object previously owned by that Ptr instance.
 	 */
 	inline T* Extract(){
-		T* pp = static_cast<T*>(this->p);
+		T* pp = this->p;
 		this->p = 0;
 		return pp;
 	}
@@ -221,17 +221,12 @@ public:
 private:
 	inline void Destroy(){
 		M_PTR_PRINT(<< "Ptr::~Ptr(): delete invoked, this->p = " << this->p << std::endl)
-		delete static_cast<T*>(this->p);
+		delete this->p;
 	}
 
-	inline void* operator new(size_t){
-		ASSERT(false)//forbidden
-		return reinterpret_cast<void*>(0);
-	}
+	inline void* operator new(size_t);
 
-	inline void operator delete(void*){
-		ASSERT(false)//forbidden
-	}
+	inline void operator delete(void*);
 };
 
 }//~namespace ting
