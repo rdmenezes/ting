@@ -203,22 +203,27 @@ public:
 		ASSERT(!this->isAdded)
 	}
 
+	//TODO: write doxygen docs
 	inline bool CanRead()const{
 		return (this->readinessFlags & READ) != 0;
 	}
 
+	//TODO: write doxygen docs
 	inline bool CanWrite()const{
 		return (this->readinessFlags & WRITE) != 0;
 	}
 
+	//TODO: write doxygen docs
 	inline bool ErrorCondition()const{
 		return (this->readinessFlags & ERROR) != 0;
 	}
 
+	//TODO: write doxygen docs
 	inline void* GetUserData(){
 		return this->userData;
 	}
 
+	//TODO: write doxygen docs
 	inline void SetUserData(void* data){
 		this->userData = data;
 	}
