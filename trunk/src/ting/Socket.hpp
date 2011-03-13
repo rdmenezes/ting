@@ -303,7 +303,11 @@ private:
 			throw Socket::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
 		}
 
-		if((events.lNetworkEvents & (FD_READ | FD_ACCEPT | FD_CLOSE)) != 0){
+		if((events.lNetworkEvents & FD_CLOSE) != 0){
+			this->SetErrorFlag();
+		}
+
+		if((events.lNetworkEvents & (FD_READ | FD_ACCEPT)) != 0){
 			this->SetCanReadFlag();
 		}
 

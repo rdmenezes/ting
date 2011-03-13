@@ -97,7 +97,8 @@ public:
 		NOT_READY = 0,      // bin: 00000000
 		READ = 1,           // bin: 00000001
 		WRITE = 2,          // bin: 00000010
-		READ_AND_WRITE = 3  // bin: 00000011
+		READ_AND_WRITE = 3, // bin: 00000011
+		ERROR = 4           // bin: 00000100
 	};
 
 protected:
@@ -185,6 +186,14 @@ protected:
 		this->readinessFlags &= (~WRITE);
 	}
 
+	inline void SetErrorFlag(){
+		this->readinessFlags |= ERROR;
+	}
+
+	inline void ClearErrorFlag(){
+		this->readinessFlags &= (~ERROR);
+	}
+
 	inline void ClearAllReadinessFlags(){
 		this->readinessFlags = NOT_READY;
 	}
@@ -200,6 +209,10 @@ public:
 
 	inline bool CanWrite()const{
 		return (this->readinessFlags & WRITE) != 0;
+	}
+
+	inline bool ErrorCondition()const{
+		return (this->readinessFlags & ERROR) != 0;
 	}
 
 	inline void* GetUserData(){
@@ -602,13 +615,16 @@ private:
 		{
 			Waitable* w = static_cast<Waitable*>(e->data.ptr);
 			ASSERT(w)
-			if((e->events & (EPOLLIN | EPOLLPRI | EPOLLERR)) != 0){
+			if((e->events & EPOLLERR) != 0){
+				w->SetErrorFlag();
+			}
+			if((e->events & (EPOLLIN | EPOLLPRI)) != 0){
 				w->SetCanReadFlag();
 			}
 			if((e->events & EPOLLOUT) != 0){
 				w->SetCanWriteFlag();
 			}
-			ASSERT(w->CanRead() || w->CanWrite())
+			ASSERT(w->CanRead() || w->CanWrite() || w->ErrorCondition())
 			if(out_events){
 				ASSERT(numEvents < out_events->Size())
 				out_events->operator[](numEvents) = w;
