@@ -28,9 +28,13 @@ endif
 
 compiler := g++
 
+#external compiler flags (to be passed to make from command line)
+ecf :=
+
 #compiler flags
 cf := -Wall -I../../src
 cf += -DDEBUG
+cf += $(ecf)
 
 
 default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
