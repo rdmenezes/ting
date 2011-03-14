@@ -104,7 +104,7 @@ public:
 		READ = 1,           // bin: 00000001
 		WRITE = 2,          // bin: 00000010
 		READ_AND_WRITE = 3, // bin: 00000011
-		ERROR = 4           // bin: 00000100
+		ERROR_CONDITION = 4 // bin: 00000100
 	};
 
 protected:
@@ -193,11 +193,11 @@ protected:
 	}
 
 	inline void SetErrorFlag(){
-		this->readinessFlags |= ERROR;
+		this->readinessFlags |= ERROR_CONDITION;
 	}
 
 	inline void ClearErrorFlag(){
-		this->readinessFlags &= (~ERROR);
+		this->readinessFlags &= (~ERROR_CONDITION);
 	}
 
 	inline void ClearAllReadinessFlags(){
@@ -221,7 +221,7 @@ public:
 
 	//TODO: write doxygen docs
 	inline bool ErrorCondition()const{
-		return (this->readinessFlags & ERROR) != 0;
+		return (this->readinessFlags & ERROR_CONDITION) != 0;
 	}
 
 	//TODO: write doxygen docs
