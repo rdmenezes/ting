@@ -21,9 +21,12 @@ ifeq ($(platform),linux)
 endif
 
 
+#external compiler flags (to be passed to make from command line)
+ecf :=
 
 #compiler flags
-cf := -Wall -I../../src
+cf := $(ecf)
+cf += -Wall -I../../src
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 

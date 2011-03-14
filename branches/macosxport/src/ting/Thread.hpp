@@ -317,7 +317,7 @@ public:
 		for(unsigned char n = ++n_name, p = 0; n > 0;)
 		{
 			unsigned char idx = n%('Z'-'A'+1);
-			name[p++] = 'A'+idx;
+			name[++p] = 'A'+idx;
 			n -= idx;
 		}
 		// end it with null and create the semaphore

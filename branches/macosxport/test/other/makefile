@@ -26,14 +26,19 @@ threadlib := -lpthread
 rtlib :=
 endif
 ifeq ($(platform),win32)
-threadlib := 
+threadlib :=
 rtlib :=
 endif
 
+
 compiler := g++
 
+#external compiler flags (to be passed to make from command line)
+ecf :=
+
 #compiler flags
-cf := -Wall -I../../src
+cf := $(ecf)
+cf += -Wall -I../../src
 cf += -DDEBUG
 cf += -g
 
