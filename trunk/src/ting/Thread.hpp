@@ -67,8 +67,8 @@ THE SOFTWARE. */
 #include <e32std.h>
 #include <hal.h>
 
-#else //assume pthread
-#define M_PTHREAD
+#elif defined(__linux__) || defined(__APPLE__) || defined(sun) || defined(__sun)
+
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -133,7 +133,7 @@ class Mutex{
 	CRITICAL_SECTION m;
 #elif defined(__SYMBIAN32__)
 	RCriticalSection m;
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 	pthread_mutex_t m;
 #else
 #error "unknown system"
@@ -159,7 +159,7 @@ public:
 		if(this->m.CreateLocal() != KErrNone){
 			throw ting::Exc("Mutex::Mutex(): failed creating mutex (CreateLocal() failed)");
 		}
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 		if(pthread_mutex_init(&this->m, NULL) != 0){
 			throw ting::Exc("Mutex::Mutex(): failed creating mutex (pthread_mutex_init() failed)");
 		}
@@ -176,7 +176,7 @@ public:
 		DeleteCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Close();
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 		int ret = pthread_mutex_destroy(&this->m);
 		if(ret != 0){
 			std::stringstream ss;
@@ -206,7 +206,7 @@ public:
 		EnterCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Wait();
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_lock(&this->m);
 #else
 #error "unknown system"
@@ -224,7 +224,7 @@ public:
 		LeaveCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Signal();
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_unlock(&this->m);
 #else
 #error "unknown system"
@@ -283,7 +283,7 @@ class Semaphore{
 #elif defined(__APPLE__)
 	//TODO:
 	sem_t *s;
-#elif defined(M_PTHREAD)
+#elif defined(__linux__)
 	sem_t s;
 #else
 #error "unknown system"
@@ -324,7 +324,7 @@ public:
 		name[p] = '\0';
 		this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
 		if (this->s == SEM_FAILED)
-#elif defined(M_PTHREAD)
+#elif defined(__linux__)
 		if(sem_init(&this->s, 0, initialValue) < 0 )
 #else
 #error "unknown system"
@@ -344,7 +344,7 @@ public:
 		this->s.Close();
 #elif defined(__APPLE__)
 		sem_close(this->s);
-#elif defined(M_PTHREAD)
+#elif defined(__linux__)
 		sem_destroy(&this->s);
 #else
 #error "unknown system"
@@ -428,7 +428,7 @@ public:
 				return false;
 			}
 		}
-#elif defined(M_PTHREAD)
+#elif defined(__linux__)
 		if(timeoutMillis == 0){
 			int retVal;
 			do{
@@ -479,7 +479,7 @@ public:
 		if(sem_post(this->s) < 0){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
 		}
-#elif defined(M_PTHREAD)
+#elif defined(__linux__)
 		if(sem_post(&this->s) < 0){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
 		}
@@ -498,7 +498,7 @@ class CondVar{
 	Semaphore semDone;
 	unsigned numWaiters;
 	unsigned numSignals;
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 	//A pointer to store system dependent handle
 	pthread_cond_t cond;
 #else
@@ -519,7 +519,7 @@ public:
 #if defined(__WIN32__) || defined(__SYMBIAN32__)
 		this->numWaiters = 0;
 		this->numSignals = 0;
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_cond_init(&this->cond, NULL);
 #else
 #error "unknown system"
@@ -528,7 +528,7 @@ public:
 
 	~CondVar(){
 #if defined(__WIN32__) || defined(__SYMBIAN32__)
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 	pthread_cond_destroy(&this->cond);
 #else
 #error "unknown system"
@@ -554,7 +554,7 @@ public:
 		this->cvMutex.Unlock();
 
 		mutex.Lock();
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_cond_wait(&this->cond, &mutex.m);
 #else
 #error "unknown system"
@@ -573,7 +573,7 @@ public:
 		}else{
 			this->cvMutex.Unlock();
 		}
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_cond_signal(&this->cond);
 #else
 #error "unknown system"
@@ -959,7 +959,7 @@ class Thread{
 	static unsigned int __stdcall RunThread(void *data)
 #elif defined(__SYMBIAN32__)
 	static TInt RunThread(TAny *data)
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 	static void* RunThread(void *data)
 #else
 #error "unknown system"
@@ -987,7 +987,7 @@ class Thread{
 #ifdef __WIN32__
 		//Do nothing, _endthreadex() will be called   automatically
 		//upon returning from the thread routine.
-#elif defined(M_PTHREAD) //pthread
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_exit(0);
 #endif
 		return 0;
@@ -1012,7 +1012,7 @@ class Thread{
 	HANDLE th;
 #elif defined(__SYMBIAN32__)
 	RThread th;
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 	pthread_t th;
 #else
 #error "unknown system"
@@ -1035,7 +1035,7 @@ public:
 		this->th = NULL;
 #elif defined(__SYMBIAN32__)
 		//do nothing
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		//do nothing
 #else
 #error "unknown system"
@@ -1110,7 +1110,7 @@ public:
 			throw ting::Exc("Thread::Start(): starting thread failed");
 		}
 		this->th.Resume();//start the thread execution
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		{
 			pthread_attr_t attr;
 
@@ -1171,7 +1171,7 @@ public:
 		this->th.Logon(reqStat);
 		User::WaitForRequest(reqStat);
 		this->th.Close();
-#elif defined(M_PTHREAD)
+#elif defined(__linux__) || defined(__APPLE__)
 		pthread_join(this->th, 0);
 #else
 #error "unknown system"
