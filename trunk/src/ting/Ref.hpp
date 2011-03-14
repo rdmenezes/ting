@@ -410,7 +410,7 @@ public:
 	 * @return true if both references are pointing to the same object or both are invalid.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator==(const Ref<TS>& r)const{
+	inline bool operator==(const Ref& r)const{
 		return this->p == r.p;
 	}
 
@@ -422,31 +422,31 @@ public:
 	 * @return false if both references are pointing to the same object or both are invalid.
 	 * @return true otherwise.
 	 */
-	template <class TS> inline bool operator!=(const Ref<TS>& r)const{
-		return !(this->operator==<TS>(r));
+	inline bool operator!=(const Ref& r)const{
+		return !(this->operator==(r));
 	}
 
 
 
-	template <class TS> inline bool operator<(const Ref<TS>& r)const{
+	inline bool operator<(const Ref& r)const{
 		return this->p < r.p;
 	}
 
 
 
-	template <class TS> inline bool operator<=(const Ref<TS>& r)const{
+	inline bool operator<=(const Ref& r)const{
 		return this->p <= r.p;
 	}
 
 
 
-	template <class TS> inline bool operator>(const Ref<TS>& r)const{
+	inline bool operator>(const Ref& r)const{
 		return this->p > r.p;
 	}
 
 
 
-	template <class TS> inline bool operator>=(const Ref<TS>& r)const{
+	inline bool operator>=(const Ref& r)const{
 		return this->p >= r.p;
 	}
 
