@@ -1,4 +1,4 @@
-platform := darwin
+platform := linux
 
 ifeq ($(platform),linux)
 ext :=
@@ -34,7 +34,8 @@ compiler := g++
 
 #compiler flags
 cf := -Wall -I../../src
-cf += -DDEBUG -g
+cf += -DDEBUG
+cf += -g
 
 
 default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test

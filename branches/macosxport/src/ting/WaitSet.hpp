@@ -232,9 +232,13 @@ protected:
 #elif defined(__linux__) || defined(__APPLE__)
 protected:
 	virtual int GetHandle() = 0;
+
+
+
 #else
 #error "Unsupported OS"
 #endif
+
 };//~class Waitable
 
 

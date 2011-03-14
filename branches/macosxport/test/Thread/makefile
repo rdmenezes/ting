@@ -1,4 +1,4 @@
-platform := darwin
+platform := linux
 
 binary_name := Thread_test
 

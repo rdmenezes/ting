@@ -931,7 +931,7 @@ private:
 	int GetHandle(){
 		return this->eventFD;
 	}
-#else /* APPLE and other unixes...*/
+#else // *nix systems (MacOS, BSD, linux, etc.)
 	//override
 	int GetHandle(){
 		//return read end of pipe

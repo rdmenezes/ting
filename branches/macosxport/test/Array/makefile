@@ -1,4 +1,4 @@
-platform := darwin
+platform := linux
 
 binary_name := Array_test
 

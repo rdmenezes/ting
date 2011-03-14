@@ -54,9 +54,13 @@ THE SOFTWARE. */
 
 #include<sys/time.h>
 
-#else //assume linux
+#elif defined(__linux__)
 
 #include <ctime>
+
+#else
+
+#error Unknown system
 
 #endif
 //~ ==System dependen headers inclusion==
@@ -386,7 +390,7 @@ inline ting::u32 GetTicks(){
 	// Mac os X doesn't support clock_gettime
 	timeval t;
 	gettimeofday(&t, 0);
-	return t.tv_sec*1000;
+	return t.tv_sec * 1000;
 #else
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
