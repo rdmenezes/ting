@@ -71,6 +71,7 @@ public:
 
 
 static void Run(){
+	//TODO: read ulimit
 	ting::StaticBuffer<TestThread1, 500> thr;
 
 	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
@@ -175,12 +176,16 @@ static void Run(){
 int main(int argc, char *argv[]){
 //	TRACE(<< "Thread test" << std::endl)
 
-	TestJoinBeforeAndAfterThreadHasFinished::Run();
-
+//	TRACE(<< "running TestManyThreads..." << std::endl)
 	TestManyThreads::Run();
 
+//	TRACE(<< "running TestJoinBeforeAndAfterThreadHasFinished" << std::endl)
+	TestJoinBeforeAndAfterThreadHasFinished::Run();
+
+//	TRACE(<< "running TestImmediateExitThread" << std::endl)
 	TestImmediateExitThread::Run();
 
+//	TRACE(<< "running TestNestedJoin" << std::endl)
 	TestNestedJoin::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)

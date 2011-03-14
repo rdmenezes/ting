@@ -9,11 +9,17 @@ endif
 
 ifeq ($(platform),win32)
     libs := -lws2_32
-    remove := del /Q /F 
-else
+    remove := del /Q /F
+endif
+ifeq ($(platform),darwin)
+    libs := -lpthread
+    remove := rm -rf
+endif
+ifeq ($(platform),linux)
     libs := -lpthread -lrt
     remove := rm -rf
 endif
+
 
 #external compiler flags (to be passed to make from command line)
 ecf :=
@@ -36,5 +42,4 @@ $(binary_name): Socket_test.cpp
 
 clean:
 	@$(remove) $(binary_name)
-
 

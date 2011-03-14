@@ -50,10 +50,16 @@ THE SOFTWARE. */
 
 #include <windows.h>
 
-#else //assume linux
+#elif defined(__APPLE__)
+
+#include<sys/time.h>
+
+#elif defined(__linux__)
 
 #include <ctime>
 
+#else
+#error "Unknown OS"
 #endif
 //~ ==System dependen headers inclusion==
 
@@ -378,12 +384,19 @@ inline ting::u32 GetTicks(){
 	}
 
 	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
-#else
+#elif defined(__APPLE__)
+	//Mac os X doesn't support clock_gettime
+	timeval t;
+	gettimeofday(&t, 0);
+	return ting::u32(t.tv_sec * 1000);
+#elif defined(__linux__)
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
 		throw ting::Exc("GetTicks(): clock_gettime() returned error");
 
 	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
+#else
+#error "Unsupported OS"
 #endif
 }
 

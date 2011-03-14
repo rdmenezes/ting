@@ -21,10 +21,15 @@ ifeq ($(platform),linux)
 threadlib := -lpthread
 rtlib := -lrt
 endif
-ifeq ($(platform),win32)
-threadlib := 
+ifeq ($(platform),darwin)
+threadlib := -lpthread
 rtlib :=
 endif
+ifeq ($(platform),win32)
+threadlib :=
+rtlib :=
+endif
+
 
 compiler := g++
 
@@ -32,9 +37,10 @@ compiler := g++
 ecf :=
 
 #compiler flags
-cf := -Wall -I../../src
+cf := $(ecf)
+cf += -Wall -I../../src
 cf += -DDEBUG
-cf += $(ecf)
+cf += -g
 
 
 default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
