@@ -50,6 +50,10 @@ THE SOFTWARE. */
 
 #include <windows.h>
 
+#elif defined (__APPLE__)
+
+#include<sys/time.h>
+
 #else //assume linux
 
 #include <ctime>
@@ -378,6 +382,11 @@ inline ting::u32 GetTicks(){
 	}
 
 	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
+#elif defined(__APPLE__)
+	// Mac os X doesn't support clock_gettime
+	timeval t;
+	gettimeofday(&t, 0);
+	return t.tv_sec*1000;
 #else
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)

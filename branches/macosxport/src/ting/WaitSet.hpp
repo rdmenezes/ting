@@ -56,14 +56,20 @@ THE SOFTWARE. */
 //winsock2.h if it is included later.
 #ifndef _WINSOCKAPI_
 #define _WINSOCKAPI_
-#include <windows.h>
+	#include <windows.h>
 #undef _WINSOCKAPI_
 #else
-#include <windows.h>
+	#include <windows.h>
 #endif
 
 #elif defined(__linux__)
-#include <sys/epoll.h>
+	#include <sys/epoll.h>
+
+#elif defined(__APPLE__)
+	#include <sys/types.h>
+	#include <sys/event.h>
+	#include <sys/time.h>
+
 #else
 #error "Unsupported OS"
 #endif
@@ -223,7 +229,7 @@ protected:
 
 
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__APPLE__)
 protected:
 	virtual int GetHandle() = 0;
 #else
@@ -239,17 +245,43 @@ protected:
  * @brief Set of Waitable objects to wait for.
  */
 class WaitSet{
-	unsigned size;
+	unsigned const size;
 	unsigned numWaitables;//number of Waitables added
 
 #if defined(__WIN32__)
 	Array<Waitable*> waitables;
 	Array<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
 
-#elif defined(__linux__)
+#elif defined(__linux__) 
 	int epollSet;
 
 	Array<epoll_event> revents;//used for getting the result from epoll_wait()
+#elif defined(__APPLE__)
+	int kq_queue; // kqueue, file descriptor
+	Array<struct kevent> kq_output; // events (size*2)
+
+	void SetEvent(Waitable *w, bool read_write, bool add_remove)
+	{
+		int16_t filter = (read_write)?EVFILT_READ:EVFILT_WRITE;
+		uint16_t flags = (add_remove)?EV_ADD:EV_DELETE;
+		struct kevent input, output;
+		static const struct timespec tmout = {0,0};
+
+		// add a new event
+		EV_SET(&input, w->GetHandle(), filter, flags | EV_RECEIPT, 0, 0, (void*)w);
+
+		// now try to add this event to the kqueue
+		int result = kevent(kq_queue, &input, 1, &output, 1, &tmout);
+		if (result == -1)
+		{
+			/*std::cout << "ERROR on Set " << errno << "!" << std::endl; */
+		}
+		if (result == -1 && errno == ENOENT) { /*std::cout << "blah" << std::endl; */ }
+	}
+	static const bool EVENT_READ  = true;
+	static const bool EVENT_WRITE = false;
+	void AddEvent(Waitable *w, bool RW)    { SetEvent(w,RW,true); }
+	void RemoveEvent(Waitable *w, bool RW) { SetEvent(w,RW,false); }
 #else
 #error "Unsupported OS"
 #endif
@@ -281,6 +313,14 @@ public:
 			throw ting::Exc("WaitSet::WaitSet(): epoll_create() failed");
 		}
 	}
+#elif defined(__APPLE__)
+		,kq_output(maxSize*2)
+	{
+		this->kq_queue = kqueue();
+		if (this->kq_queue == -1) {
+			throw ting::Exc("WaitSet::WaitSet(): kqueue creation failed");
+		}
+	}
 #else
 #error "Unsupported OS"
 #endif
@@ -301,6 +341,8 @@ public:
 		//do nothing
 #elif defined(__linux__)
 		close(this->epollSet);
+#elif defined(__APPLE__)
+		close(this->kq_queue);
 #else
 #error "Unsupported OS"
 #endif
@@ -357,6 +399,15 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
+#elif defined(__APPLE__)
+		if (u32(flagsToWaitFor) & Waitable::READ)
+		{
+			AddEvent(w,EVENT_READ);
+		}
+		if (u32(flagsToWaitFor) & Waitable::WRITE)
+		{
+			AddEvent(w,EVENT_WRITE);
+		}
 #else
 #error "Unsupported OS"
 #endif
@@ -414,6 +465,15 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
+#elif defined(__APPLE__)
+		if (u32(flagsToWaitFor) & Waitable::READ)
+		{
+			AddEvent(w,EVENT_READ);
+		}
+		if (u32(flagsToWaitFor) & Waitable::WRITE)
+		{
+			AddEvent(w,EVENT_WRITE);
+		}
 #else
 #error "Unsupported OS"
 #endif
@@ -464,6 +524,9 @@ public:
 			);
 		if(res < 0)
 			throw ting::Exc("WaitSet::Remove(): epoll_ctl() failed");
+#elif defined(__APPLE__)
+			RemoveEvent(w,EVENT_READ);
+			RemoveEvent(w,EVENT_WRITE);
 #else
 #error "Unsupported OS"
 #endif
@@ -618,6 +681,42 @@ private:
 
 		ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
 		return unsigned(res);
+#elif defined(__APPLE__)
+		struct timespec tmout = {
+			timeout/1000, /* seconds */
+			(timeout%1000)*1000000 };   /* nanoseconds */
+
+		/* loop forever */
+		for (;;)
+		{
+			int nev = kevent(kq_queue, 0, 0, 
+					&kq_output[0], kq_output.Size(),
+					(waitInfinitly)?0:&tmout);
+
+
+			if (nev == -1 && errno != EINTR)
+			{
+				throw ting::Exc("Error on kevent");
+			}
+			else if (nev == 0)
+			{
+				return 0; // timeout
+			}
+			else if (nev > 0)
+			{
+				for (int i = 0; i < nev; i++)
+				{
+					struct kevent &evt = kq_output[i];
+					Waitable *w = reinterpret_cast<Waitable*>(evt.udata);
+					if (evt.filter & EVFILT_WRITE) w->SetCanWriteFlag();
+					if (evt.filter & EVENT_READ)   w->SetCanReadFlag();
+					if(out_events){
+						out_events->operator[](i) = w;
+					}
+				}
+				return nev;
+			}
+		}
 #else
 #error "Unsupported OS"
 #endif

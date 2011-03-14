@@ -280,6 +280,8 @@ class Semaphore{
 	HANDLE s;
 #elif defined(__SYMBIAN32__)
 	RSemaphore s;
+#elif defined(__APPLE__)
+	sem_t *s;
 #elif defined(M_PTHREAD)
 	sem_t s;
 #else
@@ -303,6 +305,25 @@ public:
 		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
 #elif defined(__SYMBIAN32__)
 		if(this->s.CreateLocal(initialValue) != KErrNone)
+#elif defined(__APPLE__)
+		// Darwin/BSD/... semaphores are named semaphores, we need to create a 
+		// different name for new semaphores.
+		char name[256];
+		// this n_name is shared among all semaphores, maybe it will be worth protect it
+		// by a mutex or a CAS operation;
+		static unsigned int n_name = 0;
+		unsigned char p = 0;
+		// fill the name
+		for(unsigned char n = ++n_name, p = 0; n > 0;)
+		{
+			unsigned char idx = n%('Z'-'A'+1);
+			name[p++] = 'A'+idx;
+			n -= idx;
+		}
+		// end it with null and create the semaphore
+		name[p] = '\0';
+		this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
+		if (this->s == SEM_FAILED)
 #elif defined(M_PTHREAD)
 		if(sem_init(&this->s, 0, initialValue) < 0 )
 #else
@@ -321,6 +342,8 @@ public:
 		CloseHandle(this->s);
 #elif defined(__SYMBIAN32__)
 		this->s.Close();
+#elif defined(__APPLE__)
+		sem_close(this->s);
 #elif defined(M_PTHREAD)
 		sem_destroy(&this->s);
 #else
@@ -332,8 +355,8 @@ public:
 
 	/**
 	 * @brief Wait on semaphore.
-	 * Decrments semaphore value. If current value is 0 then this method will wait
-	 * until some other thread signalls the semaphore (i.e. increments the value)
+	 * Decrements semaphore value. If current value is 0 then this method will wait
+	 * until some other thread signals the semaphore (i.e. increments the value)
 	 * by calling Semaphore::Signal() on that semaphore.
 	 * @param timeoutMillis - waiting timeout.
 	 *                        If timeoutMillis is 0 (the default value) then this
@@ -360,6 +383,46 @@ public:
 			this->s.Wait();
 		}else{
 			throw ting::Exc("Semaphore::Wait(): timeouted wait unimplemented on Symbian, TODO: implement");
+		}
+#elif defined(__APPLE__)
+		int retVal = 0;
+		if (timeoutMillis == 0)
+		{
+			do {
+				retVal = sem_wait(this->s);
+			} while (retVal == -1 && errno == EINTR);
+			if (retVal < 0) throw ting::Exc("Semaphore::Wait(): wait failed");
+		}
+		else
+		{
+			// simulate the behaviour of wait
+			while(timeoutMillis > 0) {
+				retVal = sem_trywait(this->s);
+				if (retVal == 0) break; // OK leave the loop
+				else {
+					if (errno == EAGAIN) // the semaphore was blocked
+					{
+						struct timespec amount;
+						struct timespec result;
+						int resultsleep;
+						amount.tv_sec = timeoutMillis/1000;
+						amount.tv_nsec = (timeoutMillis%1000)*1000000;
+						resultsleep = nanosleep(&amount, &result);
+						// update timeoutMillis based on the output of the sleep call
+						// if nanosleep returns -1 the sleep was interrumped and result
+						// struct is updated with the remainin unsleept time.
+						timeoutMillis = (resultsleep == 0) ? 0
+							: result.tv_sec*1000 + result.tv_nsec/1000000;
+					}
+					else if (errno != EINTR)
+					{
+						throw ting::Exc("Semaphore::Wait(): wait failed");
+					}
+				}
+			} // repeat
+
+			// no time left means we reached the timeout
+			if (timeoutMillis == 0) return false;
 		}
 #elif defined(M_PTHREAD)
 		if(timeoutMillis == 0){
@@ -408,6 +471,10 @@ public:
 		}
 #elif defined(__SYMBIAN32__)
 		this->s.Signal();
+#elif defined(__APPLE__)
+		if(sem_post(this->s) < 0){
+			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
+		}
 #elif defined(M_PTHREAD)
 		if(sem_post(&this->s) < 0){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
@@ -864,7 +931,7 @@ private:
 	int GetHandle(){
 		return this->eventFD;
 	}
-#else
+#else /* APPLE and other unixes...*/
 	//override
 	int GetHandle(){
 		//return read end of pipe
@@ -1129,7 +1196,7 @@ public:
 		User::After(msec * 1000);
 #elif defined(M_PTHREAD)
 		if(msec == 0){
-	#if defined(sun) || defined(__sun)
+	#if defined(sun) || defined(__sun) || defined(__APPLE__)
 			sched_yield();
 	#else
 			pthread_yield();
@@ -1152,15 +1219,21 @@ public:
 	 * creatged.
 	 * @return uniqie thread identifier.
 	 */
-	static inline unsigned GetCurrentThreadID(){
 #ifdef __WIN32__
+	static inline unsigned GetCurrentThreadID(){
 		return unsigned(GetCurrentThreadId());
+	}
+#elif defined(__APPLE__)
+	static inline unsigned long int GetCurrentThreadID(){
+		return (unsigned long int)(pthread_self());
+	}
 #elif defined(M_PTHREAD)
+	static inline unsigned GetCurrentThreadID(){
 		return unsigned(pthread_self());
+	}
 #else
 #error "unknown system"
 #endif
-	}
 };
 
 
