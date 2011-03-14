@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ting/Singleton.hpp>
+#include "../../src/ting/Singleton.hpp"
 
 
 class TestSingleton : public ting::Singleton<TestSingleton>{

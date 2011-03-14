@@ -5,4 +5,4 @@
 
 
 
-void DoSmth(ting::Ref<TestClass> r);
+void DoSmth(ting::Ref<TestClass>& r);

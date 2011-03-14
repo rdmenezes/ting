@@ -9,8 +9,11 @@ int main(int argc, char *argv[]){
 
 	bool destroyed = false;
 
-	DoSmth(TestClass::New(&destroyed));
+	ting::Ref<TestClass> tc = TestClass::New(&destroyed);
 
+	DoSmth(tc);
+
+	ASSERT_ALWAYS(!tc)
 	ASSERT_ALWAYS(destroyed)
 
 	TRACE_ALWAYS(<< "[PASSED]: Ref over shared library test" << std::endl)
