@@ -281,7 +281,7 @@ class Semaphore{
 #elif defined(__SYMBIAN32__)
 	RSemaphore s;
 #elif defined(__APPLE__)
-	//TODO:
+	//TODO: consider using the MPCreateSemaphore
 	sem_t *s;
 #elif defined(__linux__)
 	sem_t s;
