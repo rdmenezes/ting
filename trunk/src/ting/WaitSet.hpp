@@ -661,7 +661,7 @@ private:
 				}
 				++numEvents;
 			}else{
-				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i)
+				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0))
 			}
 		}
 		ASSERT(numEvents > 0)

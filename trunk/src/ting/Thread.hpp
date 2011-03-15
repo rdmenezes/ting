@@ -661,7 +661,7 @@ public:
 
 #if defined(__WIN32__)
 		this->eventForWaitable = CreateEvent(
-				NULL,
+				NULL, //security attributes
 				TRUE, //manual-reset
 				FALSE, //not signalled initially
 				NULL //no name
@@ -778,6 +778,7 @@ public:
 	Ptr<Message> PeekMsg(){
 		Mutex::Guard mutexGuard(this->mut);
 		if(this->first){
+			ASSERT(this->CanRead())
 			//NOTE: Decrement semaphore value, because we take one message from queue.
 			//      The semaphore value should be > 0 here, so there will be no hang
 			//      in Wait().
@@ -807,10 +808,10 @@ public:
 					read(this->pipeEnds[0], oneByteBuf, 1);
 				}
 #endif
-			}
-
-			if(!this->first) //clear 'can read' flag if no messages left on the queue
 				this->ClearCanReadFlag();
+			}else{
+				ASSERT(this->CanRead())
+			}
 
 			return Ptr<Message>(ret);
 		}
@@ -835,6 +836,7 @@ public:
 		{
 			Mutex::Guard mutexGuard(this->mut);
 			if(this->first){
+				ASSERT(this->CanRead())
 				//NOTE: Decrement semaphore value, because we take one message from queue.
 				//      The semaphore value should be > 0 here, so there will be no hang
 				//      in Wait().
@@ -862,10 +864,10 @@ public:
 					u8 oneByteBuf[1];
 					read(this->pipeEnds[0], oneByteBuf, 1);
 #endif
-				}
-
-				if(!this->first) //clear 'can read' flag if no messages left on the queue
 					this->ClearCanReadFlag();
+				}else{
+					ASSERT(this->CanRead())
+				}
 
 				M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit without waiting on semaphore" << std::endl)
 				return Ptr<Message>(ret);
@@ -876,6 +878,7 @@ public:
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signalled" << std::endl)
 		{
 			Mutex::Guard mutexGuard(this->mut);
+			ASSERT(this->CanRead())
 			ASSERT(this->first)
 			Message* ret = this->first;
 			this->first = this->first->next;
@@ -898,10 +901,10 @@ public:
 				u8 oneByteBuf[1];
 				read(this->pipeEnds[0], oneByteBuf, 1);
 #endif
-			}
-
-			if(!this->first) //clear 'can read' flag if no messages left on the queue
 				this->ClearCanReadFlag();
+			}else{
+				ASSERT(this->CanRead())
+			}
 
 			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit after waiting on semaphore" << std::endl)
 			return Ptr<Message>(ret);
