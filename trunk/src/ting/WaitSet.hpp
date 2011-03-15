@@ -614,6 +614,10 @@ public:
 
 private:
 	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
+		if(this->numWaitables == 0){
+			throw ting::Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
+		}
+
 		if(out_events){
 			if(out_events->Size() < this->numWaitables){
 				throw ting::Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
@@ -625,7 +629,7 @@ private:
 			timeout -= 1;
 
 		DWORD waitTimeout = waitInfinitly ? (INFINITE) : DWORD(timeout);
-		ASSERT(waitTimeout >= 0)
+
 		DWORD res = WaitForMultipleObjectsEx(
 				this->numWaitables,
 				this->handles.Begin(),
@@ -636,11 +640,16 @@ private:
 
 		ASSERT(res != WAIT_IO_COMPLETION)//it is impossible because we supplied FALSE as last parameter to WaitForMultipleObjectsEx()
 
+		//we are not expecting abandoned mutexes
+		ASSERT(res < WAIT_ABANDONED_0 || (WAIT_ABANDONED_0 + this->numWaitables) <= res)
+
 		if(res == WAIT_FAILED)
 			throw ting::Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");
 
 		if(res == WAIT_TIMEOUT)
 			return 0;
+
+		ASSERT(WAIT_OBJECT_0 <= res && res < (WAIT_OBJECT_0 + this->numWaitables ))
 
 		//check for activities
 		unsigned numEvents = 0;
