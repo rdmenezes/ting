@@ -31,6 +31,8 @@ cf += -fstrict-aliasing #strict aliasing!!!
 
 
 default: $(binary_name)
+
+test: $(binary_name)
 	@echo running $^...
 	@./$^
 

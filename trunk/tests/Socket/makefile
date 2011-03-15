@@ -31,6 +31,8 @@ cf += -DDEBUG
 
 
 default: $(binary_name)
+
+test: $(binary_name)
 	@echo running $^...
 	@./$^
 

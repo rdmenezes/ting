@@ -29,8 +29,9 @@ cf += -Wall -I../../src
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
-
 default: $(binary_name)
+
+test: $(binary_name)
 	@echo running $^...
 	@./$^
 

@@ -43,7 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
+default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Timer_test$(ext) Buffer_test$(ext) Types_test$(ext) Ref_test$(ext) Signal_test$(ext) WaitSet_test$(ext)
+
+
+test: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
 
 
 

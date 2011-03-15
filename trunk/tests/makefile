@@ -20,7 +20,7 @@ endif
 
 
 
-default all clean:
+default all clean test:
 	@$(MAKE) $(subdirs) target=$@
 
 .PHONY: $(subdirs)
