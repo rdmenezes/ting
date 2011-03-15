@@ -42,8 +42,6 @@
       </df>
       <df name="Ptr">
         <in>Ptr_test.cpp</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
       </df>
       <df name="RefOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
         <in>Ref_test.cpp</in>
