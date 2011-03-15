@@ -10,6 +10,7 @@ incDir=$baseDir/usr/include/ting
 mkdir -p $incDir
 
 cp src/ting/*.hpp $incDir
+cp src/ting/*.h $incDir
 
 
 
