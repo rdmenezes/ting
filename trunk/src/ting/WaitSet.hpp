@@ -625,9 +625,6 @@ private:
 		}
 
 #if defined(__WIN32__)
-		if(timeout == INFINITE)
-			timeout -= 1;
-
 		DWORD waitTimeout = waitInfinitly ? (INFINITE) : DWORD(timeout);
 
 		DWORD res = WaitForMultipleObjectsEx(
@@ -661,7 +658,7 @@ private:
 				}
 				++numEvents;
 			}else{
-				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0))
+				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
 			}
 		}
 		ASSERT(numEvents > 0)

@@ -942,6 +942,33 @@ private:
 		//error condition is not possible for queue
 		ASSERT((this->readinessFlags & ting::Waitable::ERROR_CONDITION) == 0)
 
+/*
+#ifdef DEBUG
+		{
+			Mutex::Guard mutexGuard(this->mut);
+			if(this->first){
+				ASSERT_ALWAYS(this->CanRead())
+
+				//event should be in signalled state
+				ASSERT_ALWAYS(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0)
+			}
+
+			if(this->CanRead()){
+				ASSERT_ALWAYS(this->first)
+
+				//event should be in signalled state
+				ASSERT_ALWAYS(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0)
+			}
+
+			//if event is in signalled state
+			if(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0){
+				ASSERT_ALWAYS(this->CanRead())
+				ASSERT_ALWAYS(this->first)
+			}
+		}
+#endif
+*/
+
 		return (this->readinessFlags & this->flagsMask) != 0;
 	}
 #elif defined(__linux__)
