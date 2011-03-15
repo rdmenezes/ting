@@ -740,7 +740,7 @@ public:
 			//NOTE: in linux imlementation with epoll(), the CanRead
 			//flag will also be set in WaitSet::Wait() method.
 			//NOTE: set CanRead flag before event notification/pipe write, because
-			//if do it after then some other thread which was witing on the WaitSet
+			//if do it after then some other thread which was waiting on the WaitSet
 			//may read the CanRead flag while it was not set yet.
 			ASSERT(!this->CanRead())
 			this->SetCanReadFlag();
