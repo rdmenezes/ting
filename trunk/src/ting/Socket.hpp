@@ -299,6 +299,7 @@ private:
 	bool CheckSignalled(){
 		WSANETWORKEVENTS events;
 		memset(&events, 0, sizeof(events));
+		ASSERT(this->IsValid())
 		if(WSAEnumNetworkEvents(this->socket, this->eventForWaitable, &events) != 0){
 			throw Socket::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
 		}
@@ -307,13 +308,40 @@ private:
 			this->SetErrorFlag();
 		}
 
-		if((events.lNetworkEvents & (FD_READ | FD_ACCEPT)) != 0){
+		if((events.lNetworkEvents & FD_READ) != 0){
 			this->SetCanReadFlag();
+			if(events.iErrorCode[ASSCOND(FD_READ_BIT, < FD_MAX_EVENTS)] != 0){
+				this->SetErrorFlag();
+			}
 		}
 
-		if(events.lNetworkEvents & FD_WRITE){
-			this->SetCanWriteFlag();
+		if((events.lNetworkEvents & FD_ACCEPT) != 0){
+			this->SetCanReadFlag();
+			if(events.iErrorCode[ASSCOND(FD_ACCEPT_BIT, < FD_MAX_EVENTS)] != 0){
+				this->SetErrorFlag();
+			}
 		}
+
+		if((events.lNetworkEvents & FD_WRITE) != 0){
+			this->SetCanWriteFlag();
+			if(events.iErrorCode[ASSCOND(FD_WRITE_BIT, < FD_MAX_EVENTS)] != 0){
+				this->SetErrorFlag();
+			}
+		}
+
+		if((events.lNetworkEvents & FD_CONNECT) != 0){
+			this->SetCanWriteFlag();
+			if(events.iErrorCode[ASSCOND(FD_CONNECT_BIT, < FD_MAX_EVENTS)] != 0){
+				this->SetErrorFlag();
+			}
+		}
+
+#ifdef DEBUG
+		//if some event occured then some of readiness flags should be set
+		if(events.lNetworkEvents != 0){
+			ASSERT_ALWAYS(this->readinessFlags != 0)
+		}
+#endif
 
 		return this->Waitable::CheckSignalled();
 	}

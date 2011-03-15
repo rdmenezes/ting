@@ -662,6 +662,7 @@ private:
 				++numEvents;
 			}
 		}
+		ASSERT(numEvents > 0)
 
 		return numEvents;
 

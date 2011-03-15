@@ -929,6 +929,9 @@ private:
 
 	//returns true if signalled
 	virtual bool CheckSignalled(){
+		//error condition is not possible for queue
+		ASSERT((this->readinessFlags & ting::Waitable::ERROR_CONDITION) == 0)
+
 		return (this->readinessFlags & this->flagsMask) != 0;
 	}
 #elif defined(__linux__)
