@@ -12,7 +12,7 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>../src</sourceRootElem>
-                <sourceRootElem>../test</sourceRootElem>
+                <sourceRootElem>../tests</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>Default</confElem>
