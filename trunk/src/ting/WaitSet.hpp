@@ -660,6 +660,8 @@ private:
 					out_events->operator[](numEvents) = this->waitables[i];
 				}
 				++numEvents;
+			}else{
+				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i)
 			}
 		}
 		ASSERT(numEvents > 0)
