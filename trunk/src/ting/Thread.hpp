@@ -956,13 +956,11 @@ private:
 	virtual void SetWaitingEvents(u32 flagsToWaitFor){
 		//It is not allowed to wait on queue for write,
 		//because it is always possible to push new message to queue.
-		ASSERT((flagsToWaitFor & Waitable::WRITE) == 0)
-
-		//error condition is not possible for Queue
-		ASSERT((flagsToWaitFor & Waitable::ERROR_CONDITION) == 0)
-		
-		if(flagsToWaitFor != ting::Waitable::READ){
-			throw ting::Exc("Queue::SetWaitingEvents(): flagsToWaitFor should be ting::Waitable::READ, other values are not allowed");
+		//Error condition is not possible for Queue.
+		//Thus, only possible flag values are READ and 0 (NOT_READY)
+		if(flagsToWaitFor != 0 && flagsToWaitFor != ting::Waitable::READ){
+			ASSERT_INFO(false, "flagsToWaitFor = " << flagsToWaitFor)
+			throw ting::Exc("Queue::SetWaitingEvents(): flagsToWaitFor should be ting::Waitable::READ or 0, other values are not allowed");
 		}
 
 		this->flagsMask = flagsToWaitFor;

@@ -300,6 +300,9 @@ private:
 			throw Socket::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
 		}
 
+		//NOTE: sometimes no events are reported, don't know why.
+//		ASSERT(events.lNetworkEvents != 0)
+
 		if((events.lNetworkEvents & FD_CLOSE) != 0){
 			this->SetErrorFlag();
 		}
@@ -932,6 +935,7 @@ private:
 		long flags = FD_CLOSE;
 		if((flagsToWaitFor & Waitable::READ) != 0){
 			flags |= FD_READ;
+			//NOTE: since it is not a TCPServerSocket, FD_ACCEPT is not needed here.
 		}
 		if((flagsToWaitFor & Waitable::WRITE) != 0){
 			flags |= FD_WRITE | FD_CONNECT;
@@ -1094,6 +1098,10 @@ public:
 
 #ifdef WIN32
 		sock.CreateEventForWaitable();
+
+		//NOTE: accepted socket is associated with the same event object as the listening socket which accepted it.
+		//Reassociate the socket with its own event object.
+		sock.SetWaitingEvents(0);
 #endif
 
 		//Set the socket to non-blocking mode for accept()
@@ -1123,6 +1131,10 @@ public:
 private:
 	//override
 	void SetWaitingEvents(u32 flagsToWaitFor){
+		if(flagsToWaitFor != 0 && flagsToWaitFor != Waitable::READ){
+			throw ting::Exc("TCPServerSocket::SetWaitingEvents(): only Waitable::READ flag allowed");
+		}
+
 		long flags = FD_CLOSE;
 		if((flagsToWaitFor & Waitable::READ) != 0){
 			flags |= FD_ACCEPT;

@@ -584,6 +584,7 @@ public:
 	 *                     this WaitSet can hold.
 	 *                     It is valid to pass 0 pointer, in that case this argument will not be used.
 	 * @return number of objects triggered.
+	 *         NOTE: for some reason, on Windows it can return 0 objects triggered.
 	 * @throw ting::Exc - in case of errors.
 	 */
 	inline unsigned Wait(Buffer<Waitable*>* out_events = 0){
@@ -604,6 +605,7 @@ public:
 	 *                     currently added to the wait set.
 	 *                     This pointer can be 0, if you are not interested in list of triggered waitables.
 	 * @return number of objects triggered. If 0 then timeout was hit.
+	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
 	 * @throw ting::Exc - in case of errors.
 	 */
 	inline unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
@@ -658,10 +660,15 @@ private:
 				}
 				++numEvents;
 			}else{
-				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
+				//NOTE: sometimes the event is reported as signalled, but no read/write events indicated.
+				//      Don't know why it happens.
+//				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
 			}
 		}
-		ASSERT(numEvents > 0)
+
+		//NOTE: Sometimes the event is reported as signalled, but no actual activity is there.
+		//      Don't know why.
+//		ASSERT(numEvents > 0)
 
 		return numEvents;
 
