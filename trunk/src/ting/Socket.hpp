@@ -37,18 +37,12 @@ THE SOFTWARE. */
 #include <sstream>
 
 
-#if defined(__WIN32__) || defined(WIN32)
-#ifndef __WIN32__
-#define __WIN32__
-#endif
-#ifndef WIN32
-#define WIN32
-#endif
+#if defined(WIN32)
 
 #include <winsock2.h>
 #include <windows.h>
 
-#else //assume *nix
+#elif defined(__linux__) || defined(__APPLE__)
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -60,6 +54,8 @@ THE SOFTWARE. */
 #include <errno.h>
 #include <unistd.h>
 
+#else
+#error "Unsupported OS"
 #endif
 
 
@@ -88,7 +84,7 @@ namespace ting{
  */
 class Socket : public Waitable{
 protected:
-#ifdef __WIN32__
+#ifdef WIN32
 	typedef SOCKET T_Socket;
 
 	inline static T_Socket DInvalidSocket(){
@@ -134,14 +130,14 @@ protected:
 	}
 #endif
 
-#ifdef __WIN32__
+#ifdef WIN32
 	WSAEVENT eventForWaitable;
 #endif
 
 	T_Socket socket;
 
 	Socket() :
-#ifdef __WIN32__
+#ifdef WIN32
 			eventForWaitable(WSA_INVALID_EVENT),
 #endif
 			socket(DInvalidSocket())
@@ -164,7 +160,7 @@ protected:
 		this->Close();
 		this->socket = s.socket;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		this->eventForWaitable = s.eventForWaitable;
 		const_cast<Socket&>(s).eventForWaitable = WSA_INVALID_EVENT;
 #endif
@@ -196,7 +192,7 @@ public:
 			Waitable(),
 			//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
 			//Therefore, init variables to invalid values.
-#ifdef __WIN32__
+#ifdef WIN32
 			eventForWaitable(WSA_INVALID_EVENT),
 #endif
 			socket(DInvalidSocket())
@@ -239,7 +235,7 @@ public:
 		if(this->IsValid()){
 			ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
 
-#ifdef __WIN32__
+#ifdef WIN32
 			//Closing socket in Win32.
 			//refer to http://tangentsoft.net/wskfaq/newbie.html#howclose for details
 			shutdown(this->socket, SD_BOTH);
@@ -267,7 +263,7 @@ public:
 
 		sockaddr_in addr;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		int len = sizeof(addr);
 #else//assume linux/unix
 		socklen_t len = sizeof(addr);
@@ -287,7 +283,7 @@ public:
 
 
 
-#ifdef __WIN32__
+#ifdef WIN32
 private:
 	//override
 	HANDLE GetHandle(){
@@ -511,22 +507,24 @@ private:
 class SocketLib : public Singleton<SocketLib>{
 public:
 	SocketLib(){
-#ifdef __WIN32__
+#ifdef WIN32
 		WORD versionWanted = MAKEWORD(2,2);
 		WSADATA wsaData;
-		if(WSAStartup(versionWanted, &wsaData) != 0 )
+		if(WSAStartup(versionWanted, &wsaData) != 0 ){
 			throw Socket::Exc("SocketLib::SocketLib(): Winsock 2.2 initialization failed");
+		}
 #else //assume linux/unix
 		// SIGPIPE is generated when a remote socket is closed
 		void (*handler)(int);
 		handler = signal(SIGPIPE, SIG_IGN);
-		if(handler != SIG_DFL)
+		if(handler != SIG_DFL){
 			signal(SIGPIPE, handler);
+		}
 #endif
 	}
 
 	~SocketLib(){
-#ifdef __WIN32__
+#ifdef WIN32
 		// Clean up windows networking
 		if(WSACleanup() == SOCKET_ERROR)
 			if(WSAGetLastError() == WSAEINPROGRESS){
@@ -537,8 +535,9 @@ public:
 		// Restore the SIGPIPE handler
 		void (*handler)(int);
 		handler = signal(SIGPIPE, SIG_DFL);
-		if(handler != SIG_IGN)
+		if(handler != SIG_IGN){
 			signal(SIGPIPE, handler);
+		}
 #endif
 	}
 
@@ -621,13 +620,13 @@ public:
 			throw Socket::Exc("TCPSocket::Open(): socket already opened");
 
 		//create event for implementing Waitable
-#ifdef __WIN32__
+#ifdef WIN32
 		this->CreateEventForWaitable();
 #endif
 
 		this->socket = ::socket(AF_INET, SOCK_STREAM, 0);
 		if(this->socket == DInvalidSocket()){
-#ifdef __WIN32__
+#ifdef WIN32
 			this->CloseEventForWaitable();
 #endif
 			throw Socket::Exc("TCPSocket::Open(): Couldn't create socket");
@@ -638,17 +637,17 @@ public:
 			this->DisableNaggle();
 
 		//Set the socket to non-blocking mode
-#if defined(O_NONBLOCK)
+#if defined(__linux__) || defined(__APPLE__)
 		{
 			fcntl(this->socket, F_SETFL, O_NONBLOCK);
 		}
-#elif defined(__WIN32__)
+#elif defined(WIN32)
 		{
 			u_long mode = 1;
 			ioctlsocket(this->socket, FIONBIO, &mode);
 		}
 #else
-#error "How do we set non-blocking mode on other operating systems?"
+#error "Unsupported OS"
 #endif
 
 		this->ClearAllReadinessFlags();
@@ -667,7 +666,7 @@ public:
 				sizeof(sockAddr)
 			) == DSocketError())
 		{
-#ifdef __WIN32__
+#ifdef WIN32
 			int errorCode = WSAGetLastError();
 #else //linux/unix
 			int errorCode = errno;
@@ -722,7 +721,7 @@ public:
 					0
 				);
 			if(res == DSocketError()){
-#ifdef __WIN32__
+#ifdef WIN32
 				int errorCode = WSAGetLastError();
 #else //linux/unix
 				int errorCode = errno;
@@ -819,7 +818,7 @@ public:
 					0
 				);
 			if(len == DSocketError()){
-#ifdef __WIN32__
+#ifdef WIN32
 				int errorCode = WSAGetLastError();
 #else //linux/unix
 				int errorCode = errno;
@@ -863,7 +862,7 @@ public:
 
 		sockaddr_in addr;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		int len = sizeof(addr);
 #else//assume linux/unix
 		socklen_t len = sizeof(addr);
@@ -894,7 +893,7 @@ public:
 
 		sockaddr_in addr;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		int len = sizeof(addr);
 #else//assume linux/unix
 		socklen_t len = sizeof(addr);
@@ -926,7 +925,7 @@ private:
 
 
 
-#ifdef __WIN32__
+#ifdef WIN32
 private:
 	//override
 	void SetWaitingEvents(u32 flagsToWaitFor){
@@ -998,13 +997,13 @@ public:
 
 		this->disableNaggle = disableNaggle;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		this->CreateEventForWaitable();
 #endif
 
 		this->socket = ::socket(AF_INET, SOCK_STREAM, 0);
 		if(this->socket == DInvalidSocket()){
-#ifdef __WIN32__
+#ifdef WIN32
 			this->CloseEventForWaitable();
 #endif
 			throw Socket::Exc("TCPServerSocket::Open(): Couldn't create socket");
@@ -1039,17 +1038,17 @@ public:
 		}
 
 		//Set the socket to non-blocking mode for accept()
-#if defined(O_NONBLOCK)
+#if defined(__linux__) || defined(__APPLE__)
 		{
 			fcntl(this->socket, F_SETFL, O_NONBLOCK);
 		}
-#elif defined(__WIN32__)
+#elif defined(WIN32)
 		{
 			u_long mode = 1;
 			ioctlsocket(this->socket, FIONBIO, &mode);
 		}
 #else
-#error "How do we set non-blocking mode on other operating systems?"
+#error "Unsupported OS"
 #endif
 	}
 
@@ -1072,7 +1071,7 @@ public:
 
 		sockaddr_in sockAddr;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		int sock_alen = sizeof(sockAddr);
 #else //linux/unix
 		socklen_t sock_alen = sizeof(sockAddr);
@@ -1093,24 +1092,23 @@ public:
 		if(sock.socket == DInvalidSocket())
 			return sock;//no connections to be accepted, return invalid socket
 
-#ifdef __WIN32__
+#ifdef WIN32
 		sock.CreateEventForWaitable();
 #endif
 
-		//set blocking mode
-#ifdef __WIN32__
-		{
-			//passing a zero value, socket mode set to block on
-			u_long mode = 0;
-			ioctlsocket(sock.socket, FIONBIO, &mode);
-		}
-#elif defined(O_NONBLOCK)
+		//Set the socket to non-blocking mode for accept()
+#if defined(__linux__) || defined(__APPLE__)
 		{
 			int flags = fcntl(sock.socket, F_GETFL, 0);
-			fcntl(sock.socket, F_SETFL, flags & (~O_NONBLOCK));
+			fcntl(sock.socket, F_SETFL, flags | O_NONBLOCK);
+		}
+#elif defined(WIN32)
+		{
+			u_long mode = 1;
+			ioctlsocket(sock.socket, FIONBIO, &mode);
 		}
 #else
-#error "do not know how to set blocking mode to socket"
+#error "Unsupported OS"
 #endif
 
 		if(this->disableNaggle)
@@ -1121,7 +1119,7 @@ public:
 
 
 
-#ifdef __WIN32__
+#ifdef WIN32
 private:
 	//override
 	void SetWaitingEvents(u32 flagsToWaitFor){
@@ -1168,13 +1166,13 @@ public:
 		if(this->IsValid())
 			throw Socket::Exc("UDPSocket::Open(): the socket is already opened");
 
-#ifdef __WIN32__
+#ifdef WIN32
 		this->CreateEventForWaitable();
 #endif
 
 		this->socket = ::socket(AF_INET, SOCK_DGRAM, 0);
 		if(this->socket == DInvalidSocket()){
-#ifdef __WIN32__
+#ifdef WIN32
 			this->CloseEventForWaitable();
 #endif
 			throw Socket::Exc("UDPSocket::Open(): ::socket() failed");
@@ -1262,7 +1260,7 @@ public:
 
 		sockaddr_in sockAddr;
 
-#ifdef __WIN32__
+#ifdef WIN32
 		int sockLen = sizeof(sockAddr);
 #else //linux/unix
 		socklen_t sockLen = sizeof(sockAddr);
@@ -1290,7 +1288,7 @@ public:
 
 
 
-#ifdef __WIN32__
+#ifdef WIN32
 private:
 	//override
 	void SetWaitingEvents(u32 flagsToWaitFor){

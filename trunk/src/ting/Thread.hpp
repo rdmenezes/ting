@@ -41,13 +41,11 @@ THE SOFTWARE. */
 #include "Exc.hpp"
 #include "WaitSet.hpp"
 
-#if defined(__WIN32__) || defined(WIN32)
-#ifndef __WIN32__
-#define __WIN32__
-#endif
-#ifndef WIN32
-#define WIN32
-#endif
+
+//=========
+//= WIN32 =
+//=========
+#if defined(WIN32)
 
 //if _WINSOCKAPI_ macro is not defined then it means that the winsock header file
 //has not been included. Here we temporarily define the macro in order to prevent
@@ -63,11 +61,21 @@ THE SOFTWARE. */
 
 #include <process.h>
 
+
+
+//===========
+//= Symbian =
+//===========
 #elif defined(__SYMBIAN32__)
 #include <string.h>
 #include <e32std.h>
 #include <hal.h>
 
+
+
+//========================================
+//= Linux, Mac OS (Apple), Solaris (Sun) =
+//========================================
 #elif defined(__linux__) || defined(__APPLE__) || defined(sun) || defined(__sun)
 
 #include <unistd.h>
@@ -85,6 +93,10 @@ THE SOFTWARE. */
 #include <sys/eventfd.h>
 #endif
 
+
+
+#else
+#error "Unsupported OS"
 #endif
 
 
@@ -130,7 +142,7 @@ class Mutex{
 	friend class CondVar;
 
 	//system dependent handle
-#ifdef __WIN32__
+#ifdef WIN32
 	CRITICAL_SECTION m;
 #elif defined(__SYMBIAN32__)
 	RCriticalSection m;
@@ -154,7 +166,7 @@ public:
 	 */
 	Mutex(){
 		M_MUTEX_TRACE(<< "Mutex::Mutex(): invoked " << this << std::endl)
-#ifdef __WIN32__
+#ifdef WIN32
 		InitializeCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		if(this->m.CreateLocal() != KErrNone){
@@ -173,7 +185,7 @@ public:
 
 	~Mutex(){
 		M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
-#ifdef __WIN32__
+#ifdef WIN32
 		DeleteCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Close();
@@ -203,7 +215,7 @@ public:
 	 */
 	void Lock(){
 		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
-#ifdef __WIN32__
+#ifdef WIN32
 		EnterCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Wait();
@@ -221,7 +233,7 @@ public:
 	 */
 	void Unlock(){
 		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
-#ifdef __WIN32__
+#ifdef WIN32
 		LeaveCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 		this->m.Signal();
@@ -277,7 +289,7 @@ public:
  */
 class Semaphore{
 	//system dependent handle
-#ifdef __WIN32__
+#ifdef WIN32
 	HANDLE s;
 #elif defined(__SYMBIAN32__)
 	RSemaphore s;
@@ -303,7 +315,7 @@ public:
 	 * @brief Create the semaphore with given initial value.
 	 */
 	Semaphore(unsigned initialValue = 0){
-#ifdef __WIN32__
+#ifdef WIN32
 		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
 #elif defined(__SYMBIAN32__)
 		if(this->s.CreateLocal(initialValue) != KErrNone)
@@ -339,7 +351,7 @@ public:
 
 
 	~Semaphore(){
-#ifdef __WIN32__
+#ifdef WIN32
 		CloseHandle(this->s);
 #elif defined(__SYMBIAN32__)
 		this->s.Close();
@@ -367,7 +379,7 @@ public:
 	 * @return returns false if the timeout was hit.
 	 */
 	bool Wait(unsigned timeoutMillis = 0){
-#ifdef __WIN32__
+#ifdef WIN32
 		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis))){
 			case WAIT_OBJECT_0:
 //				LOG(<<"Semaphore::Wait(): exit"<<std::endl)
@@ -470,7 +482,7 @@ public:
 	 */
 	inline void Signal(){
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
-#ifdef __WIN32__
+#ifdef WIN32
 		if( ReleaseSemaphore(this->s, 1, NULL) == 0 ){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
 		}
@@ -517,7 +529,7 @@ class CondVar{
 public:
 
 	CondVar(){
-#if defined(__WIN32__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 		this->numWaiters = 0;
 		this->numSignals = 0;
 #elif defined(__linux__) || defined(__APPLE__)
@@ -528,7 +540,8 @@ public:
 	}
 
 	~CondVar(){
-#if defined(__WIN32__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__)
+		//do nothing
 #elif defined(__linux__) || defined(__APPLE__)
 	pthread_cond_destroy(&this->cond);
 #else
@@ -537,7 +550,7 @@ public:
 	}
 
 	void Wait(Mutex& mutex){
-#if defined(__WIN32__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 		this->cvMutex.Lock();
 		++this->numWaiters;
 		this->cvMutex.Unlock();
@@ -563,7 +576,7 @@ public:
 	}
 
 	void Notify(){
-#if defined(__WIN32__) || defined(__SYMBIAN32__)
+#if defined(WIN32) || defined(__SYMBIAN32__)
 		this->cvMutex.Lock();
 
 		if(this->numWaiters > this->numSignals){
@@ -633,15 +646,17 @@ class Queue : public Waitable{
 	Message *first,
 			*last;
 
-#if defined(__WIN32__)
+#if defined(WIN32)
 	//use additional semaphore to implement Waitable on Windows
 	HANDLE eventForWaitable;
 #elif defined(__linux__)
 	//use eventfd()
 	int eventFD;
-#else
+#elif defined(__APPLE__)
 	//use pipe to implement Waitable in *nix systems
 	int pipeEnds[2];
+#else
+#error "Unsupported OS"
 #endif
 
 	//forbid copying
@@ -659,7 +674,7 @@ public:
 		//can write will always be set because it is always possible to post a message to the queue
 		this->SetCanWriteFlag();
 
-#if defined(__WIN32__)
+#if defined(WIN32)
 		this->eventForWaitable = CreateEvent(
 				NULL, //security attributes
 				TRUE, //manual-reset
@@ -677,13 +692,15 @@ public:
 					<< " error code = " << errno << ": " << strerror(errno);
 			throw ting::Exc(ss.str().c_str());
 		}
-#else // assume *nix
+#elif defined(__APPLE__)
 		if(::pipe(&this->pipeEnds[0]) < 0){
 			std::stringstream ss;
 			ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
 					<< " error code = " << errno << ": " << strerror(errno);
 			throw ting::Exc(ss.str().c_str());
 		}
+#else
+#error "Unsupported OS"
 #endif
 	}
 
@@ -709,13 +726,15 @@ public:
 				msg = nextMsg;
 			}
 		}
-#if defined(__WIN32__)
+#if defined(WIN32)
 		CloseHandle(this->eventForWaitable);
 #elif defined(__linux__)
 		close(this->eventFD);
-#else // assume *nix
+#elif defined(__APPLE__)
 		close(this->pipeEnds[0]);
 		close(this->pipeEnds[1]);
+#else
+#error "Unsupported OS"
 #endif
 	}
 
@@ -745,7 +764,7 @@ public:
 			ASSERT(!this->CanRead())
 			this->SetCanReadFlag();
 			
-#if defined(__WIN32__)
+#if defined(WIN32)
 			if(SetEvent(this->eventForWaitable) == 0){
 				throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
 			}
@@ -753,11 +772,13 @@ public:
 			if(eventfd_write(this->eventFD, 1) < 0){
 				throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
 			}
-#else
+#elif defined(__APPLE__)
 			{
 				u8 oneByteBuf[1];
 				write(this->pipeEnds[1], oneByteBuf, 1);
 			}
+#else
+#error "Unsupported OS"
 #endif
 		}
 
@@ -789,7 +810,7 @@ public:
 			this->first = this->first->next;
 
 			if(this->first == 0){
-#if defined(__WIN32__)
+#if defined(WIN32)
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
@@ -802,11 +823,13 @@ public:
 					}
 					ASSERT(value == 1)
 				}
-#else
+#elif defined(__APPLE__)
 				{
 					u8 oneByteBuf[1];
 					read(this->pipeEnds[0], oneByteBuf, 1);
 				}
+#else
+#error "Unsupported OS"
 #endif
 				this->ClearCanReadFlag();
 			}else{
@@ -847,7 +870,7 @@ public:
 				this->first = this->first->next;
 
 				if(this->first == 0){
-#if defined(__WIN32__)
+#if defined(WIN32)
 					if(ResetEvent(this->eventForWaitable) == 0){
 						ASSERT(false)
 						throw ting::Exc("Queue::Wait(): ResetEvent() failed");
@@ -860,9 +883,13 @@ public:
 						}
 						ASSERT(value == 1)
 					}
+#elif defined(__APPLE__)
+					{
+						u8 oneByteBuf[1];
+						read(this->pipeEnds[0], oneByteBuf, 1);
+					}
 #else
-					u8 oneByteBuf[1];
-					read(this->pipeEnds[0], oneByteBuf, 1);
+#error "Unsupported OS"
 #endif
 					this->ClearCanReadFlag();
 				}else{
@@ -884,7 +911,7 @@ public:
 			this->first = this->first->next;
 
 			if(this->first == 0){
-#if defined(__WIN32__)
+#if defined(WIN32)
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
@@ -897,9 +924,13 @@ public:
 					}
 					ASSERT(value == 1)
 				}
+#elif defined(__APPLE__)
+				{
+					u8 oneByteBuf[1];
+					read(this->pipeEnds[0], oneByteBuf, 1);
+				}
 #else
-				u8 oneByteBuf[1];
-				read(this->pipeEnds[0], oneByteBuf, 1);
+#error "Unsupported OS"
 #endif
 				this->ClearCanReadFlag();
 			}else{
@@ -912,7 +943,7 @@ public:
 	}
 
 private:
-#ifdef __WIN32__
+#ifdef WIN32
 	//override
 	HANDLE GetHandle(){
 		//return event handle
@@ -996,14 +1027,14 @@ private:
  */
 class Thread{
 //Tread Run function
-#ifdef __WIN32__
+#ifdef WIN32
 	static unsigned int __stdcall RunThread(void *data)
 #elif defined(__SYMBIAN32__)
 	static TInt RunThread(TAny *data)
 #elif defined(__linux__) || defined(__APPLE__)
 	static void* RunThread(void *data)
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 	{
 		ting::Thread *thr = reinterpret_cast<ting::Thread*>(data);
@@ -1025,11 +1056,13 @@ class Thread{
 			thr->state = STOPPED;
 		}
 
-#ifdef __WIN32__
+#ifdef WIN32
 		//Do nothing, _endthreadex() will be called   automatically
 		//upon returning from the thread routine.
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_exit(0);
+#else
+#error "Unsupported OS"
 #endif
 		return 0;
 	}
@@ -1056,7 +1089,7 @@ class Thread{
 #elif defined(__linux__) || defined(__APPLE__)
 	pthread_t th;
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 
 	//forbid copying
@@ -1072,14 +1105,14 @@ public:
 	inline Thread() :
 			state(Thread::NEW)
 	{
-#if defined(__WIN32__)
+#if defined(WIN32)
 		this->th = NULL;
 #elif defined(__SYMBIAN32__)
 		//do nothing
 #elif defined(__linux__) || defined(__APPLE__)
 		//do nothing
 #else
-#error "unknown system"
+#error "Unsuported OS"
 #endif
 	}
 
@@ -1129,7 +1162,7 @@ public:
 		if(this->state != NEW)
 			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
 
-#ifdef __WIN32__
+#ifdef WIN32
 		this->th = reinterpret_cast<HANDLE>(
 				_beginthreadex(
 						NULL,
@@ -1172,7 +1205,7 @@ public:
 			pthread_attr_destroy(&attr);
 		}
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 		this->state = RUNNING;
 	}
@@ -1203,7 +1236,7 @@ public:
 
 		ASSERT(this->state == RUNNING || this->state == STOPPED)
 
-#ifdef __WIN32__
+#ifdef WIN32
 		WaitForSingleObject(this->th, INFINITE);
 		CloseHandle(this->th);
 		this->th = NULL;
@@ -1215,7 +1248,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_join(this->th, 0);
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 
 		//NOTE: at this point the thread's Run() method should already exit and state
@@ -1237,7 +1270,7 @@ public:
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
 	static void Sleep(unsigned msec = 0){
-#ifdef __WIN32__
+#ifdef WIN32
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
 #elif defined(__SYMBIAN32__)
 		User::After(msec * 1000);
@@ -1254,7 +1287,7 @@ public:
 			usleep(msec * 1000);
 		}
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 	}
 
@@ -1269,13 +1302,13 @@ public:
 	 * @return uniqie thread identifier.
 	 */
 	static inline ting::u32 GetCurrentThreadID(){
-#ifdef __WIN32__
+#ifdef WIN32
 		return ting::u32(GetCurrentThreadId());
 #elif defined(__APPLE__) || defined(__linux__)
 		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(ting::u32))
 		return ting::u32(pthread_self());
 #else
-#error "unknown system"
+#error "Unsupported OS"
 #endif
 	}
 };
