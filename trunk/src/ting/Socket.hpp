@@ -106,7 +106,7 @@ protected:
 	inline static int DEInProgress(){
 		return WSAEWOULDBLOCK;
 	}
-#else //assume *nix
+#elif defined(__linux__) || defined(__APPLE__)
 	typedef int T_Socket;
 
 	inline static T_Socket DInvalidSocket(){
@@ -128,6 +128,8 @@ protected:
 	inline static int DEInProgress(){
 		return EINPROGRESS;
 	}
+#else
+#error "Unsupported OS"
 #endif
 
 #ifdef WIN32
@@ -746,26 +748,26 @@ public:
 
 		this->ClearCanWriteFlag();
 
-		//Keep sending data until it is sent or an error occurs
-		int res;
+		int len;
+
 		while(true){
-			res = send(
+			len = send(
 					this->socket,
 					reinterpret_cast<const char*>(buf.Begin()),
 					buf.Size() - offset,
 					0
 				);
-			if(res == DSocketError()){
+			if(len == DSocketError()){
 #ifdef WIN32
 				int errorCode = WSAGetLastError();
-#else //linux/unix
+#else
 				int errorCode = errno;
 #endif
 				if(errorCode == DEIntr()){
 					continue;
 				}else if(errorCode == DEAgain()){
 					//can't send more bytes, return 0 bytes sent
-					res = 0;
+					len = 0;
 				}else{
 					std::stringstream ss;
 					ss << "TCPSocket::Send(): send() failed, error code = " << errorCode << ": ";
@@ -786,8 +788,8 @@ public:
 			break;
 		}//~while
 
-		ASSERT(res >= 0)
-		return unsigned(res);
+		ASSERT(len >= 0)
+		return unsigned(len);
 	}
 
 
@@ -855,7 +857,7 @@ public:
 			if(len == DSocketError()){
 #ifdef WIN32
 				int errorCode = WSAGetLastError();
-#else //linux/unix
+#else
 				int errorCode = errno;
 #endif
 				if(errorCode == DEIntr()){
@@ -899,7 +901,7 @@ public:
 
 #ifdef WIN32
 		int len = sizeof(addr);
-#else//assume linux/unix
+#else
 		socklen_t len = sizeof(addr);
 #endif
 
@@ -930,7 +932,7 @@ public:
 
 #ifdef WIN32
 		int len = sizeof(addr);
-#else//assume linux/unix
+#else
 		socklen_t len = sizeof(addr);
 #endif
 
@@ -1240,6 +1242,7 @@ public:
 
 
 
+	//TODO: write doxygen comment
 	//returns number of bytes sent, should be less or equal to size.
 	unsigned Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
 		if(!this->IsValid())
@@ -1253,26 +1256,60 @@ public:
 		sockAddr.sin_addr.s_addr = destinationIP.host;
 		sockAddr.sin_port = htons(destinationIP.port);
 		sockAddr.sin_family = AF_INET;
-		int res = ::sendto(
-				this->socket,
-				reinterpret_cast<const char*>(buf.Begin()),
-				buf.Size(),
-				0,
-				reinterpret_cast<struct sockaddr*>(&sockAddr),
-				sockLen
-			);
 
-		if(res == DSocketError())
-			throw Socket::Exc("UDPSocket::Send(): sendto() failed");
+
+		int len;
+
+		while(true){
+			len = ::sendto(
+					this->socket,
+					reinterpret_cast<const char*>(buf.Begin()),
+					buf.Size(),
+					0,
+					reinterpret_cast<struct sockaddr*>(&sockAddr),
+					sockLen
+				);
+
+			if(len == DSocketError()){
+#ifdef WIN32
+				int errorCode = WSAGetLastError();
+#else
+				int errorCode = errno;
+#endif
+				if(errorCode == DEIntr()){
+					continue;
+				}else if(errorCode == DEAgain()){
+					//can't send more bytes, return 0 bytes sent
+					len = 0;
+				}else{
+					std::stringstream ss;
+					ss << "UDPSocket::Send(): sendto() failed, error code = " << errorCode << ": ";
+#ifdef _MSC_VER //if MSVC compiler
+					{
+						const unsigned msgbufSize = 0xff;
+						char msgbuf[msgbufSize];
+						strerror_s(msgbuf, msgbufSize, errorCode);
+						msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+						ss << msgbuf;
+					}
+#else
+					ss << strerror(errorCode);
+#endif
+					throw Socket::Exc(ss.str());
+				}
+			}
+			break;
+		}//~while
 
 		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
-		ASSERT_INFO(res <= int(buf.Size()), "res = " << res)
+		ASSERT_INFO(len <= int(buf.Size()), "res = " << len)
 
-		return res;
+		return len;
 	}
 
 
 
+	//TODO: write doxygen comment
 	//returns number of bytes received
 	unsigned Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 		if(!this->IsValid())
@@ -1287,28 +1324,61 @@ public:
 
 #ifdef WIN32
 		int sockLen = sizeof(sockAddr);
-#else //linux/unix
+#elif defined(__linux__) || defined(__APPLE__)
 		socklen_t sockLen = sizeof(sockAddr);
+#else
+#error "Unsupported OS"
 #endif
 
-		int res = ::recvfrom(
-				this->socket,
-				reinterpret_cast<char*>(buf.Begin()),
-				buf.Size(),
-				0,
-				reinterpret_cast<sockaddr*>(&sockAddr),
-				&sockLen
-			);
+		int len;
+		
+		while(true){
+			len = ::recvfrom(
+					this->socket,
+					reinterpret_cast<char*>(buf.Begin()),
+					buf.Size(),
+					0,
+					reinterpret_cast<sockaddr*>(&sockAddr),
+					&sockLen
+				);
 
-		if(res == DSocketError())
-			throw Socket::Exc("UDPSocket::Recv(): recvfrom() failed");
+			if(len == DSocketError()){
+#ifdef WIN32
+				int errorCode = WSAGetLastError();
+#else
+				int errorCode = errno;
+#endif
+				if(errorCode == DEIntr()){
+					continue;
+				}else if(errorCode == DEAgain()){
+					//no data available, return 0 bytes received
+					len = 0;
+				}else{
+					std::stringstream ss;
+					ss << "UDPSocket::Recv(): recvfrom() failed, error code = " << errorCode << ": ";
+#ifdef _MSC_VER //if MSVC compiler
+					{
+						const unsigned msgbufSize = 0xff;
+						char msgbuf[msgbufSize];
+						strerror_s(msgbuf, msgbufSize, errorCode);
+						msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+						ss << msgbuf;
+					}
+#else
+					ss << strerror(errorCode);
+#endif
+					throw Socket::Exc(ss.str());
+				}
+			}
+			break;
+		}//~while
 
 		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
-		ASSERT_INFO(res <= int(buf.Size()), "res = " << res)
+		ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
 
 		out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
 		out_SenderIP.port = ntohs(sockAddr.sin_port);
-		return res;
+		return len;
 	}
 
 
