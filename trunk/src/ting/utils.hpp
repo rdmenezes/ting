@@ -159,7 +159,7 @@ inline u16 Deserialize16(const u8* buf){
 	//assume little-endian
 	ret = u16(*buf);
 	++buf;
-	ret |= (u16(*buf)) << 8;
+	ret |= ((u16(*buf)) << 8);
 
 	return ret;
 
@@ -184,11 +184,11 @@ inline u32 Deserialize32(const u8* buf){
 	//assume little-endian
 	ret = u32(*buf);
 	++buf;
-	ret |= (u32(*buf)) << 8;
+	ret |= ((u32(*buf)) << 8);
 	++buf;
-	ret |= (u32(*buf)) << 16;
+	ret |= ((u32(*buf)) << 16);
 	++buf;
-	ret |= (u32(*buf)) << 24;
+	ret |= ((u32(*buf)) << 24);
 
 	return ret;
 
