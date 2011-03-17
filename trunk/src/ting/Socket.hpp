@@ -171,6 +171,50 @@ protected:
 
 
 
+	void DisableNaggle(){
+		if(!this->IsValid())
+			throw Socket::Exc("Socket::DisableNaggle(): socket is not valid");
+
+#if defined(__linux__) || defined(__APPLE__) || defined(WIN32)
+		{
+			int yes = 1;
+			setsockopt(this->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(yes));
+		}
+#else
+#error "Unsupported OS"
+#endif
+	}
+
+
+
+	void SetNonBlockingMode(){
+		if(!this->IsValid())
+			throw Socket::Exc("Socket::SetNonBlockingMode(): socket is not valid");
+
+#if defined(__linux__) || defined(__APPLE__)
+		{
+			int flags = fcntl(this->socket, F_GETFL, 0);
+			if(flags == -1){
+				throw Socket::Exc("Socket::SetNonBlockingMode(): fcntl(F_GETFL) failed");
+			}
+			if(fcntl(this->socket, F_SETFL, flags | O_NONBLOCK) != 0){
+				throw Socket::Exc("Socket::SetNonBlockingMode(): fcntl(F_SETFL) failed");
+			}
+		}
+#elif defined(WIN32)
+		{
+			u_long mode = 1;
+			if(ioctlsocket(this->socket, FIONBIO, &mode) != 0){
+				throw Socket::Exc("Socket::SetNonBlockingMode(): ioctlsocket(FIONBIO) failed");
+			}
+		}
+#else
+#error "Unsupported OS"
+#endif
+	}
+
+
+
 public:
 	/**
 	 * @brief Basic exception class.
@@ -639,19 +683,7 @@ public:
 		if(disableNaggle)
 			this->DisableNaggle();
 
-		//Set the socket to non-blocking mode
-#if defined(__linux__) || defined(__APPLE__)
-		{
-			fcntl(this->socket, F_SETFL, O_NONBLOCK);
-		}
-#elif defined(WIN32)
-		{
-			u_long mode = 1;
-			ioctlsocket(this->socket, FIONBIO, &mode);
-		}
-#else
-#error "Unsupported OS"
-#endif
+		this->SetNonBlockingMode();
 
 		this->ClearAllReadinessFlags();
 
@@ -917,15 +949,6 @@ public:
 			);
 	}
 
-private:
-	void DisableNaggle(){
-		if(!this->IsValid())
-			throw Socket::Exc("TCPSocket::DisableNaggle(): socket is not opened");
-
-		int yes = 1;
-		setsockopt(this->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(yes));
-	}
-
 
 
 #ifdef WIN32
@@ -1041,19 +1064,7 @@ public:
 			throw Socket::Exc("TCPServerSocket::Open(): Couldn't listen to local port");
 		}
 
-		//Set the socket to non-blocking mode for accept()
-#if defined(__linux__) || defined(__APPLE__)
-		{
-			fcntl(this->socket, F_SETFL, O_NONBLOCK);
-		}
-#elif defined(WIN32)
-		{
-			u_long mode = 1;
-			ioctlsocket(this->socket, FIONBIO, &mode);
-		}
-#else
-#error "Unsupported OS"
-#endif
+		this->SetNonBlockingMode();
 	}
 
 	/**
@@ -1104,20 +1115,7 @@ public:
 		sock.SetWaitingEvents(0);
 #endif
 
-		//Set the socket to non-blocking mode for accept()
-#if defined(__linux__) || defined(__APPLE__)
-		{
-			int flags = fcntl(sock.socket, F_GETFL, 0);
-			fcntl(sock.socket, F_SETFL, flags | O_NONBLOCK);
-		}
-#elif defined(WIN32)
-		{
-			u_long mode = 1;
-			ioctlsocket(sock.socket, FIONBIO, &mode);
-		}
-#else
-#error "Unsupported OS"
-#endif
+		sock.SetNonBlockingMode();
 
 		if(this->disableNaggle)
 			sock.DisableNaggle();
@@ -1209,12 +1207,27 @@ public:
 				throw Socket::Exc("UDPSocket::Open(): could not bind to local port");
 			}
 		}
-#ifdef SO_BROADCAST
-		//Allow LAN broadcasts with the socket
+
+		this->SetNonBlockingMode();
+
+		//Allow broadcasting
+#if defined(WIN32) || defined(__linux__) || defined(__APPLE__)
 		{
 			int yes = 1;
-			setsockopt(this->socket, SOL_SOCKET, SO_BROADCAST, (char*)&yes, sizeof(yes));
+			if(setsockopt(
+					this->socket,
+					SOL_SOCKET,
+					SO_BROADCAST,
+					reinterpret_cast<char*>(&yes),
+					sizeof(yes)
+				) == DSocketError())
+			{
+				this->Close();
+				throw Socket::Exc("UDPSocket::Open(): failed setting broadcast option");
+			}
 		}
+#else
+#error "Unsupported OS"
 #endif
 
 		this->ClearAllReadinessFlags();
