@@ -109,6 +109,13 @@ void Run(){
 
 	//Here we have 2 sockets sockS and sockR
 
+	{
+		ting::IPAddress addrS = sockS.GetRemoteAddress();
+		ting::IPAddress addrR = sockR.GetRemoteAddress();
+		TRACE(<< "SendDataContinuously::Run(): addrS = " << std::hex << addrS.host << ":" << addrS.port << std::endl)
+		TRACE(<< "SendDataContinuously::Run(): addrR = " << std::hex << addrR.host << ":" << addrR.port << std::endl)
+	}
+
 	ting::WaitSet ws(2);
 	ws.Add(&sockR, ting::Waitable::READ);
 	ws.Add(&sockS, ting::Waitable::WRITE);
