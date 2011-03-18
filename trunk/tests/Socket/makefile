@@ -22,12 +22,12 @@ endif
 
 
 #external compiler flags (to be passed to make from command line)
-ecf :=
+ecf := -DDEBUG
 
 #compiler flags
 cf := $(ecf)
 cf += -Wall -I../../src
-cf += -DDEBUG
+cf += -g
 
 
 default: $(binary_name)
