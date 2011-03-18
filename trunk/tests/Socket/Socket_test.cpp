@@ -366,6 +366,13 @@ void Run(){
 				if(recvBufBytes == recvBuffer.Size()){
 					recvBufBytes = 0;
 					ting::u32 num = ting::Deserialize32(recvBuffer.Begin());
+
+					//TODO: debugging code, remove when debugged
+					if(num == 65536 || num == 81920 || num == 98304 || num == 114688 || num == 131072 || num == 147456 || num == 163840){
+						TRACE(<< num << " ")
+					}
+					//~
+
 					ASSERT_INFO_ALWAYS(
 							rcnt == num,
 							"num = " << num << " rcnt = " << rcnt
