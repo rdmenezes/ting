@@ -748,12 +748,21 @@ public:
 
 		this->ClearCanWriteFlag();
 
+		ASSERT_INFO((
+				(buf.Begin() + offset) <= (buf.End() - 1)) ||
+				((buf.Size() == 0) && (offset == 0))
+			,
+				"buf.Begin() = " << reinterpret_cast<const void*>(buf.Begin())
+				<< " offset = " << offset
+				<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
+			)
+
 		int len;
 
 		while(true){
 			len = send(
 					this->socket,
-					reinterpret_cast<const char*>(buf.Begin()),
+					reinterpret_cast<const char*>(buf.Begin() + offset),
 					buf.Size() - offset,
 					0
 				);
@@ -845,12 +854,21 @@ public:
 		if(!this->IsValid())
 			throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
+		ASSERT_INFO((
+				(buf.Begin() + offset) <= (buf.End() - 1)) ||
+				((buf.Size() == 0) && (offset == 0))
+			,
+				"buf.Begin() = " << reinterpret_cast<void*>(buf.Begin())
+				<< " offset = " << offset
+				<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
+			)
+
 		int len;
 
 		while(true){
 			len = recv(
 					this->socket,
-					reinterpret_cast<char*>(buf.Begin()),
+					reinterpret_cast<char*>(buf.Begin() + offset),
 					buf.Size() - offset,
 					0
 				);

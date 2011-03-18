@@ -25,10 +25,7 @@
     </df>
     <df name="tests" root="../tests">
       <df name="Array" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Array_test</in>
         <in>Array_test.cpp</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
       </df>
       <df name="other" kind="SOURCE_LOGICAL_FOLDER">
         <df name="src" kind="SOURCE_LOGICAL_FOLDER">
@@ -42,54 +39,28 @@
           <in>debug_test.cpp</in>
           <in>utils_test.cpp</in>
         </df>
-        <in>Buffer_test</in>
-        <in>PoolStored_test</in>
-        <in>Ref_test</in>
-        <in>Signal_test</in>
-        <in>Timer_test</in>
-        <in>Types_test</in>
-        <in>WaitSet_test</in>
-        <in>debug_test</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
-        <in>utils_test</in>
       </df>
       <df name="Ptr" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Ptr_test</in>
         <in>Ptr_test.cpp</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
       </df>
       <df name="RefOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Ref_test</in>
         <in>Ref_test.cpp</in>
         <in>TestClass.hpp</in>
-        <in>makefile</in>
         <in>testso.cpp</in>
         <in>testso.hpp</in>
       </df>
       <df name="SingletonOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Singleton_test</in>
         <in>Singleton_test.cpp</in>
         <in>TestSingleton.hpp</in>
-        <in>makefile</in>
         <in>testso.cpp</in>
         <in>testso.hpp</in>
       </df>
       <df name="Socket" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Socket_test</in>
         <in>Socket_test.cpp</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
       </df>
       <df name="Thread" kind="SOURCE_LOGICAL_FOLDER">
-        <in>Thread_test</in>
         <in>Thread_test.cpp</in>
-        <in>makefile</in>
-        <in>makefile_msvc</in>
       </df>
-      <in>makefile</in>
-      <in>makefile_msvc</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
