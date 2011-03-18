@@ -97,8 +97,9 @@ void Run(){
 	}
 
 	//Accept some connection
+	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::TCPSocket sockR;
-	for(unsigned i = 0; i < 10 && sockR.IsNotValid(); ++i){
+	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
 		ting::Thread::Sleep(100);
 		sockR = serverSock.Accept();
 	}
@@ -109,8 +110,8 @@ void Run(){
 	//Here we have 2 sockets sockS and sockR
 
 	ting::WaitSet ws(2);
-	ws.Add(&sockS, ting::Waitable::WRITE);
 	ws.Add(&sockR, ting::Waitable::READ);
+	ws.Add(&sockS, ting::Waitable::WRITE);
 
 
 	ting::u32 scnt = 0;
@@ -128,6 +129,7 @@ void Run(){
 		ting::StaticBuffer<ting::Waitable*, 2> triggered;
 
 		unsigned numTriggered = ws.WaitWithTimeout(1000, &triggered);
+//		unsigned numTriggered = ws.Wait(&triggered);
 
 		ASSERT_ALWAYS(numTriggered <= 2)
 
@@ -147,6 +149,8 @@ void Run(){
 
 		for(unsigned i = 0; i < numTriggered; ++i){
 			if(triggered[i] == &sockS){
+				ASSERT_ALWAYS(triggered[i] != &sockR)
+
 				TRACE(<< "SendDataContinuously::Run(): sockS triggered" << std::endl)
 				ASSERT_ALWAYS(!sockS.CanRead())
 				ASSERT_ALWAYS(!sockS.ErrorCondition())
@@ -169,12 +173,24 @@ void Run(){
 				}
 
 				try{
-					bytesSent += sockS.Send(sendBuffer, bytesSent);
+					unsigned res = sockS.Send(sendBuffer, bytesSent);
+					bytesSent += res;
+					if(res == 0){
+						TRACE(<< "SendDataContinuously::Run(): 0 bytes sent" << std::endl)
+						//ting::Thread::Sleep(2000);
+						ASSERT_ALWAYS(res > 0) //since it was CanWrite() we should be able to write at least something
+					}else{
+						//ting::Thread::Sleep(200);
+						TRACE(<< "SendDataContinuously::Run(): " << res << " bytes sent" << std::endl)
+					}
+					ASSERT_ALWAYS(!sockS.CanWrite())
 				}catch(ting::Socket::Exc& e){
 					ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
 				}
 				ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
 			}else if(triggered[i] == &sockR){
+				ASSERT_ALWAYS(triggered[i] != &sockS)
+
 				TRACE(<< "SendDataContinuously::Run(): sockR triggered" << std::endl)
 				ASSERT_ALWAYS(sockR.CanRead())
 				ASSERT_ALWAYS(!sockR.ErrorCondition())
@@ -225,6 +241,9 @@ void Run(){
 
 	ws.Remove(&sockS);
 	ws.Remove(&sockR);
+
+	ASSERT_ALWAYS(rcnt > 0) //check that at least anything was received
+	ASSERT_ALWAYS(scnt > 0) //check that at least anything was sent
 }
 
 }//~namespace
@@ -237,7 +256,7 @@ int main(int argc, char *argv[]){
 	ting::SocketLib socketsLib;
 
 	BasicClientServerTest::Run();
-	//SendDataContinuously::Run();
+	SendDataContinuously::Run();
 
 	TRACE_ALWAYS(<<"[PASSED]: Socket test"<<std::endl)
 
