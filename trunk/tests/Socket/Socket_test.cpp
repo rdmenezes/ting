@@ -225,7 +225,8 @@ void Run(){
 						break;//~while(true)
 					}
 
-					for(const ting::u8* p = buf.Begin(); p != buf.End(); ++p){
+					const ting::u8* p = buf.Begin();
+					for(unsigned i = 0; i < numBytesReceived && p != buf.End(); ++p, ++i){
 						recvBuffer[recvBufBytes] = *p;
 						++recvBufBytes;
 
@@ -256,9 +257,6 @@ void Run(){
 
 	ws.Remove(&sockS);
 	ws.Remove(&sockR);
-
-	ASSERT_ALWAYS(rcnt > 0) //check that at least anything was received
-	ASSERT_ALWAYS(scnt > 0) //check that at least anything was sent
 }
 
 }//~namespace
@@ -292,13 +290,9 @@ void Run(){
 
 	//Here we have 2 sockets sockS and sockR
 
-	ting::u32 scnt = 0;
-	ting::Array<ting::u8> sendBuffer;
-	unsigned bytesSent = 0;
+	ting::u8 scnt = 0;
 
-	ting::u32 rcnt = 0;
-	ting::StaticBuffer<ting::u8, sizeof(ting::u32)> recvBuffer;
-	unsigned recvBufBytes = 0;
+	ting::u8 rcnt = 0;
 
 
 	ting::u32 startTime = ting::GetTicks();
@@ -307,37 +301,18 @@ void Run(){
 
 		//SEND
 
-		ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
-
-		if(sendBuffer.Size() == bytesSent){
-			sendBuffer.Init(0xffff + 1);
-			bytesSent = 0;
-
-			STATIC_ASSERT(sizeof(ting::u32) == 4)
-			ASSERT_INFO_ALWAYS((sendBuffer.Size() % sizeof(ting::u32)) == 0,
-					"sendBuffer.Size() = " << sendBuffer.Size()
-					<< " (sendBuffer.Size() % sizeof(ting::u32)) = "
-					<< (sendBuffer.Size() % sizeof(ting::u32))
-				)
-
-			ting::u8* p = sendBuffer.Begin();
-			for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
-				ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
-				ting::Serialize32(scnt, p);
-				++scnt;
-			}
-			ASSERT_ALWAYS(p == sendBuffer.End())
-		}
-
-		ASSERT_ALWAYS(sendBuffer.Size() > 0)
-
 		try{
-			unsigned res = sockS.Send(sendBuffer, bytesSent);
-			bytesSent += res;
+			ting::Buffer<ting::u8> buf(&scnt, 1);
+			unsigned res = sockS.Send(buf);
+			ASSERT_ALWAYS(res <= 1)
+			if(res == 1){
+				++scnt;
+			}else{
+				ASSERT_ALWAYS(false)
+			}
 		}catch(ting::Socket::Exc& e){
 			ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
 		}
-		ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
 
 
 		//READ
@@ -357,42 +332,14 @@ void Run(){
 				break;//~while(true)
 			}
 
-			for(const ting::u8* p = buf.Begin(); p != buf.End(); ++p){
-				recvBuffer[recvBufBytes] = *p;
-				++recvBufBytes;
-
-				ASSERT_ALWAYS(recvBufBytes <= recvBuffer.Size())
-
-				if(recvBufBytes == recvBuffer.Size()){
-					recvBufBytes = 0;
-					ting::u32 num = ting::Deserialize32(recvBuffer.Begin());
-
-					//TODO: debugging code, remove when debugged
-					if(num == 65536 || num == 81920 || num == 98304 || num == 114688 || num == 131072 || num == 147456 || num == 163840){
-						TRACE(<< num << " ")
-					}
-					//~
-
-					ASSERT_INFO_ALWAYS(
-							rcnt == num,
-							"num = " << num << " rcnt = " << rcnt
-									<< " rcnt - num = " << (rcnt - num)
-									<< " recvBuffer = "
-									<< unsigned(recvBuffer[0]) << ", "
-									<< unsigned(recvBuffer[1]) << ", "
-									<< unsigned(recvBuffer[2]) << ", "
-									<< unsigned(recvBuffer[3])
-						)
-					++rcnt;
-				}
+			const ting::u8* p = buf.Begin();
+			for(unsigned i = 0; i < numBytesReceived && p != buf.End(); ++p, ++i){
+				ASSERT_INFO_ALWAYS(rcnt == *p, "rcnt = " << unsigned(rcnt) << " *p = " << unsigned(*p) << " diff = " << unsigned(rcnt - *p))
+				++rcnt;
 			}//~for
 		}//~while(true)
 		
 	}//~while
-
-
-	ASSERT_ALWAYS(rcnt > 0) //check that at least anything was received
-	ASSERT_ALWAYS(scnt > 0) //check that at least anything was sent
 }
 
 }//~namespace
@@ -406,7 +353,7 @@ int main(int argc, char *argv[]){
 
 	BasicClientServerTest::Run();
 	SendDataContinuouslyWithWaitSet::Run();
-//	SendDataContinuously::Run();
+	SendDataContinuously::Run();
 
 	TRACE_ALWAYS(<<"[PASSED]: Socket test"<<std::endl)
 
