@@ -82,7 +82,7 @@ void Run(){
 
 
 
-namespace SendDataContinuously{
+namespace SendDataContinuouslyWithWaitSet{
 
 void Run(){
 	ting::TCPServerSocket serverSock;
@@ -265,6 +265,131 @@ void Run(){
 
 
 
+namespace SendDataContinuously{
+
+void Run(){
+	ting::TCPServerSocket serverSock;
+
+	serverSock.Open(13666);
+
+
+	ting::TCPSocket sockS;
+	{
+		ting::IPAddress ip("127.0.0.1", 13666);
+		sockS.Open(ip);
+	}
+
+	//Accept connection
+//	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
+	ting::TCPSocket sockR;
+	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
+		ting::Thread::Sleep(100);
+		sockR = serverSock.Accept();
+	}
+
+	ASSERT_ALWAYS(sockS.IsValid())
+	ASSERT_ALWAYS(sockR.IsValid())
+
+	//Here we have 2 sockets sockS and sockR
+
+	ting::u32 scnt = 0;
+	ting::Array<ting::u8> sendBuffer;
+	unsigned bytesSent = 0;
+
+	ting::u32 rcnt = 0;
+	ting::StaticBuffer<ting::u8, sizeof(ting::u32)> recvBuffer;
+	unsigned recvBufBytes = 0;
+
+
+	ting::u32 startTime = ting::GetTicks();
+
+	while(ting::GetTicks() - startTime < 5000){ //5 seconds
+
+		//SEND
+
+		ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
+
+		if(sendBuffer.Size() == bytesSent){
+			sendBuffer.Init(0xffff + 1);
+			bytesSent = 0;
+
+			STATIC_ASSERT(sizeof(ting::u32) == 4)
+			ASSERT_INFO_ALWAYS((sendBuffer.Size() % sizeof(ting::u32)) == 0,
+					"sendBuffer.Size() = " << sendBuffer.Size()
+					<< " (sendBuffer.Size() % sizeof(ting::u32)) = "
+					<< (sendBuffer.Size() % sizeof(ting::u32))
+				)
+
+			ting::u8* p = sendBuffer.Begin();
+			for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
+				ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
+				ting::Serialize32(scnt, p);
+				++scnt;
+			}
+			ASSERT_ALWAYS(p == sendBuffer.End())
+		}
+
+		ASSERT_ALWAYS(sendBuffer.Size() > 0)
+
+		try{
+			unsigned res = sockS.Send(sendBuffer, bytesSent);
+			bytesSent += res;
+		}catch(ting::Socket::Exc& e){
+			ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
+		}
+		ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
+
+
+		//READ
+
+		while(true){
+			ting::StaticBuffer<ting::u8, 0x2000> buf; //8kb buffer
+			unsigned numBytesReceived;
+			try{
+				numBytesReceived = sockR.Recv(buf);
+			}catch(ting::Socket::Exc& e){
+				ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
+			}
+			ASSERT_ALWAYS(numBytesReceived <= buf.Size())
+//			TRACE(<< "SendDataContinuously::Run(): " << numBytesReceived << " bytes received" << std::endl)
+
+			if(numBytesReceived == 0){
+				break;//~while(true)
+			}
+
+			for(const ting::u8* p = buf.Begin(); p != buf.End(); ++p){
+				recvBuffer[recvBufBytes] = *p;
+				++recvBufBytes;
+
+				ASSERT_ALWAYS(recvBufBytes <= recvBuffer.Size())
+
+				if(recvBufBytes == recvBuffer.Size()){
+					recvBufBytes = 0;
+					ting::u32 num = ting::Deserialize32(recvBuffer.Begin());
+					ASSERT_INFO_ALWAYS(
+							rcnt == num,
+							"num = " << num << " rcnt = " << rcnt
+									<< " rcnt - num = " << (rcnt - num)
+									<< " recvBuffer = "
+									<< unsigned(recvBuffer[0]) << ", "
+									<< unsigned(recvBuffer[1]) << ", "
+									<< unsigned(recvBuffer[2]) << ", "
+									<< unsigned(recvBuffer[3])
+						)
+					++rcnt;
+				}
+			}//~for
+		}//~while(true)
+		
+	}//~while
+
+
+	ASSERT_ALWAYS(rcnt > 0) //check that at least anything was received
+	ASSERT_ALWAYS(scnt > 0) //check that at least anything was sent
+}
+
+}//~namespace
+
 
 
 int main(int argc, char *argv[]){
@@ -273,7 +398,8 @@ int main(int argc, char *argv[]){
 	ting::SocketLib socketsLib;
 
 	BasicClientServerTest::Run();
-	SendDataContinuously::Run();
+	SendDataContinuouslyWithWaitSet::Run();
+//	SendDataContinuously::Run();
 
 	TRACE_ALWAYS(<<"[PASSED]: Socket test"<<std::endl)
 
