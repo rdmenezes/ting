@@ -96,8 +96,8 @@ void Run(){
 		sockS.Open(ip);
 	}
 
-	//Accept some connection
-	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
+	//Accept connection
+//	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::TCPSocket sockR;
 	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
 		ting::Thread::Sleep(100);
@@ -112,8 +112,10 @@ void Run(){
 	{
 		ting::IPAddress addrS = sockS.GetRemoteAddress();
 		ting::IPAddress addrR = sockR.GetRemoteAddress();
-		TRACE(<< "SendDataContinuously::Run(): addrS = " << std::hex << addrS.host << ":" << addrS.port << std::endl)
-		TRACE(<< "SendDataContinuously::Run(): addrR = " << std::hex << addrR.host << ":" << addrR.port << std::endl)
+//		TRACE(<< "SendDataContinuously::Run(): addrS = " << std::hex << addrS.host << ":" << addrS.port << std::dec << std::endl)
+//		TRACE(<< "SendDataContinuously::Run(): addrR = " << std::hex << addrR.host << ":" << addrR.port << std::dec << std::endl)
+		ASSERT_ALWAYS(addrS.host == 0x7f000001) //check that IP is 127.0.0.1
+		ASSERT_ALWAYS(addrR.host == 0x7f000001) //check that IP is 127.0.0.1
 	}
 
 	ting::WaitSet ws(2);
@@ -132,7 +134,7 @@ void Run(){
 
 	ting::u32 startTime = ting::GetTicks();
 	
-	while(ting::GetTicks() - startTime < 10000){
+	while(ting::GetTicks() - startTime < 5000){ //5 seconds
 		ting::StaticBuffer<ting::Waitable*, 2> triggered;
 
 		unsigned numTriggered = ws.WaitWithTimeout(1000, &triggered);
@@ -141,24 +143,24 @@ void Run(){
 		ASSERT_ALWAYS(numTriggered <= 2)
 
 		if(numTriggered == 0){
-			TRACE(<< "SendDataContinuously::Run(): 0 triggered" << std::endl)
+//			TRACE(<< "SendDataContinuously::Run(): 0 triggered" << std::endl)
 			continue;
 		}
 
 		//If 2 waitables have triggered they should be 2 different waitables.
 		if(numTriggered == 2){
-			TRACE(<< "SendDataContinuously::Run(): 2 triggered" << std::endl)
+//			TRACE(<< "SendDataContinuously::Run(): 2 triggered" << std::endl)
 			ASSERT_ALWAYS(triggered[0] != triggered[1])
 		}else{
 			ASSERT_ALWAYS(numTriggered == 1)
-			TRACE(<< "SendDataContinuously::Run(): 1 triggered" << std::endl)
+//			TRACE(<< "SendDataContinuously::Run(): 1 triggered" << std::endl)
 		}
 
 		for(unsigned i = 0; i < numTriggered; ++i){
 			if(triggered[i] == &sockS){
 				ASSERT_ALWAYS(triggered[i] != &sockR)
 
-				TRACE(<< "SendDataContinuously::Run(): sockS triggered" << std::endl)
+//				TRACE(<< "SendDataContinuously::Run(): sockS triggered" << std::endl)
 				ASSERT_ALWAYS(!sockS.CanRead())
 				ASSERT_ALWAYS(!sockS.ErrorCondition())
 				ASSERT_ALWAYS(sockS.CanWrite())
@@ -166,29 +168,34 @@ void Run(){
 				ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
 
 				if(sendBuffer.Size() == bytesSent){
-					ting::Array<ting::u8> buf(0xffff + 1);
+					sendBuffer.Init(0xffff + 1);
+					bytesSent = 0;
+					
 					STATIC_ASSERT(sizeof(ting::u32) == 4)
-					ASSERT_INFO_ALWAYS((buf.Size() % sizeof(ting::u32)) == 0, "buf.Size() = " << buf.Size() << " (buf.Size() % sizeof(ting::u32)) = " << (buf.Size() % sizeof(ting::u32)))
+					ASSERT_INFO_ALWAYS((sendBuffer.Size() % sizeof(ting::u32)) == 0,
+							"sendBuffer.Size() = " << sendBuffer.Size()
+							<< " (sendBuffer.Size() % sizeof(ting::u32)) = "
+							<< (sendBuffer.Size() % sizeof(ting::u32))
+						)
 
-					ting::u8* p = buf.Begin();
-					for(; p != buf.End(); p += sizeof(ting::u32)){
-						ASSERT_INFO_ALWAYS(p < (buf.End() - (sizeof(ting::u32) - 1)), "p = " << p << " buf.End() = " << buf.End())
+					ting::u8* p = sendBuffer.Begin();
+					for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
+						ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
 						ting::Serialize32(scnt, p);
 						++scnt;
 					}
-					ASSERT_ALWAYS(p == buf.End())
+					ASSERT_ALWAYS(p == sendBuffer.End())
 				}
+
+				ASSERT_ALWAYS(sendBuffer.Size() > 0)
 
 				try{
 					unsigned res = sockS.Send(sendBuffer, bytesSent);
 					bytesSent += res;
 					if(res == 0){
-						TRACE(<< "SendDataContinuously::Run(): 0 bytes sent" << std::endl)
-						//ting::Thread::Sleep(2000);
 						ASSERT_ALWAYS(res > 0) //since it was CanWrite() we should be able to write at least something
 					}else{
-						//ting::Thread::Sleep(200);
-						TRACE(<< "SendDataContinuously::Run(): " << res << " bytes sent" << std::endl)
+//						TRACE(<< "SendDataContinuously::Run(): " << res << " bytes sent" << std::endl)
 					}
 					ASSERT_ALWAYS(!sockS.CanWrite())
 				}catch(ting::Socket::Exc& e){
@@ -198,7 +205,7 @@ void Run(){
 			}else if(triggered[i] == &sockR){
 				ASSERT_ALWAYS(triggered[i] != &sockS)
 
-				TRACE(<< "SendDataContinuously::Run(): sockR triggered" << std::endl)
+//				TRACE(<< "SendDataContinuously::Run(): sockR triggered" << std::endl)
 				ASSERT_ALWAYS(sockR.CanRead())
 				ASSERT_ALWAYS(!sockR.ErrorCondition())
 				ASSERT_ALWAYS(!sockR.CanWrite())
@@ -212,6 +219,7 @@ void Run(){
 						ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
 					}
 					ASSERT_ALWAYS(numBytesReceived <= buf.Size())
+//					TRACE(<< "SendDataContinuously::Run(): " << numBytesReceived << " bytes received" << std::endl)
 
 					if(numBytesReceived == 0){
 						break;//~while(true)
