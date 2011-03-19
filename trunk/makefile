@@ -1,5 +1,6 @@
 subdirs :=
 subdirs += tests
+subdirs += docs
 
 
 
