@@ -4,7 +4,4 @@
 
 * generate debian package using dpkg-buildpackage
 
-* update the PROJECT_NUMBER variable in the doxygen.cfg file to latest version number
-
-* generate doxygen docs
-
+* update the PROJECT_NUMBER variable in the docs/doxygen.cfg file to latest version number
