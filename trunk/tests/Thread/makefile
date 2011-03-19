@@ -45,4 +45,4 @@ $(binary_name): Thread_test.cpp
 clean:
 	@$(remove) $(binary_name)
 
-
+include ../../targets.mk

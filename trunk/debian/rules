@@ -1,12 +1,14 @@
 #!/usr/bin/make -f
 
 build:
-#	$(MAKE)
+#TODO: remove compiler var setting as long as g++ 4.5 is released
+	$(MAKE) compiler=g++-4.5
 
 clean:
-#	$(MAKE) clean
+	$(MAKE) clean
 	rm -f debian/files
 	rm -rf debian/out
 
 binary:
 	./debian/libting-dev.sh
+	./debian/libting-doc.sh

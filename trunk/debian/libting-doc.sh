@@ -1,16 +1,16 @@
 #!/bin/sh
 
-packageName=libting-dev
+packageName=libting-doc
 
 baseDir=debian/out/$packageName
 mkdir -p $baseDir
 
 #copy files
-incDir=$baseDir/usr/include/ting
-mkdir -p $incDir
+docDir=$baseDir/usr/share/doc/libting
+mkdir -p $docDir
 
-cp src/ting/*.hpp $incDir
-cp src/ting/*.h $incDir
+cp docs/index.htm $docDir
+cp -r docs/html_doc_files $docDir
 
 
 

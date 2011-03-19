@@ -44,4 +44,5 @@ $(binary_name): Array_test.cpp
 clean:
 	@$(remove) $(binary_name)
 
+include ../../targets.mk
 

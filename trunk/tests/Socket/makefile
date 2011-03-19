@@ -45,3 +45,4 @@ $(binary_name): Socket_test.cpp
 clean:
 	@$(remove) $(binary_name)
 
+include ../../targets.mk

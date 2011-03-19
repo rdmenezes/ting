@@ -61,4 +61,7 @@ $(binary_name): Singleton_test.cpp lib$(lib_name).$(lib_ext)
 clean:
 	@$(remove) $(binary_name)
 	@$(remove) lib$(lib_name).$(lib_ext)
+
+include ../../targets.mk
+
 	

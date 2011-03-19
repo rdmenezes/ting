@@ -152,4 +152,6 @@ clean:
 	@$(remove) Ref_test$(ext)
 	@$(remove) Signal_test$(ext)
 	@$(remove) WaitSet_test$(ext)
+	
+include ../../targets.mk
 
