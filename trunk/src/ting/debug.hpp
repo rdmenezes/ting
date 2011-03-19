@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ THE SOFTWARE. */
 //
 //
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
 #ifdef __SYMBIAN32__
@@ -63,7 +63,7 @@ inline std::ofstream& DebugLogger(){
 #endif
 }//~namespace ting_debug
 }//~namespace ting
-#endif //~M_DOC_DONT_EXTRACT //for doxygen
+#endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
 #ifdef __SYMBIAN32__
 #define LOG_ALWAYS(x)
@@ -154,7 +154,7 @@ inline void LogAssert(const char* file, int line){
 //==================
 //=  Static assert =
 //==================
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
 template <bool b> struct C_StaticAssert{
@@ -168,7 +168,7 @@ template <> struct C_StaticAssert<true>{};
 	ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
 };
 #define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
-#endif //~M_DOC_DONT_EXTRACT //for doxygen
+#endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
 #if defined(__GNUG__) || (_MSC_VER >= 7100) //__COUNTER__ macro is only supported in these compilers
 #define STATIC_ASSERT(x) M_STATIC_ASSERT_I(x, __LINE__, __COUNTER__)

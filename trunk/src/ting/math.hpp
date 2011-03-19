@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -220,7 +220,7 @@ template <typename T> inline T Sin(T x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Sin<float>(float x){
 	return ::sin(x);
 }
@@ -228,7 +228,7 @@ template <> inline float Sin<float>(float x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Sin<double>(double x){
 	return ::sin(x);
 }
@@ -254,7 +254,7 @@ template <typename T> inline T Cos(T x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Cos<float>(float x){
 	return ::cos(x);
 }
@@ -262,7 +262,7 @@ template <> inline float Cos<float>(float x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Cos<double>(double x){
 	return ::cos(x);
 }
@@ -306,7 +306,7 @@ template <typename T> inline T Exp(T x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Exp<float>(float x){
 	return ::exp(x);
 }
@@ -314,7 +314,7 @@ template <> inline float Exp<float>(float x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Exp<double>(double x){
 	return ::exp(x);
 }
@@ -341,7 +341,7 @@ template <typename T> inline T Ln(T x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Ln<float>(float x){
 	return ::log(x);
 }
@@ -349,7 +349,7 @@ template <> inline float Ln<float>(float x){
 
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Ln<double>(double x){
 	return ::log(x);
 }

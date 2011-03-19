@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis
+Copyright (c) 2008-2011 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,7 @@ typedef unsigned long long int u64;
 typedef long long int s64;
 
 
-#ifndef M_DOC_DONT_EXTRACT //for doxygen
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 
 STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
 STATIC_ASSERT(sizeof(u8) == 1)
@@ -89,7 +89,7 @@ STATIC_ASSERT(sizeof(u64) == 8)
 STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
 STATIC_ASSERT(sizeof(s64) == 8)
 
-#endif //~M_DOC_DONT_EXTRACT //for doxygen
+#endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
 
 
