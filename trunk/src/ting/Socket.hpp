@@ -446,7 +446,7 @@ public:
 
 	/**
 	 * @brief Create IP address specifying exact ip address and port number.
-	 * @param h - IP address. For example, 0x100007f represents "127.0.0.1" IP address value.
+	 * @param h - IP address. For example, 0x7f000001 represents "127.0.0.1" IP address value.
 	 * @param p - IP port number.
 	 */
 	inline IPAddress(u32 h, u16 p) :
@@ -467,7 +467,7 @@ public:
 	 * @param p - IP port number.
 	 */
 	inline IPAddress(u8 h1, u8 h2, u8 h3, u8 h4, u16 p) :
-			host(u32(h1) + (u32(h2) << 8) + (u32(h3) << 16) + (u32(h4) << 24)),
+			host((u32(h1) << 24) + (u32(h2) << 16) + (u32(h3) << 8) + u32(h4)),
 			port(p)
 	{}
 
@@ -534,7 +534,7 @@ private:
 			if(xxx > 255)
 				ThrowInvalidIP();
 
-			h |= (xxx << (8 * t));
+			h |= (xxx << (8 * (3 - t)));
 
 			++curp;
 		}
@@ -692,7 +692,7 @@ public:
 		sockaddr_in sockAddr;
 		memset(&sockAddr, 0, sizeof(sockAddr));
 		sockAddr.sin_family = AF_INET;
-		sockAddr.sin_addr.s_addr = ip.host;
+		sockAddr.sin_addr.s_addr = htonl(ip.host);
 		sockAddr.sin_port = htons(ip.port);
 
 		// Connect to the remote host
@@ -1189,6 +1189,8 @@ public:
 	 * In other words, a valid socket is an opened socket.
 	 * In case of errors this method throws Socket::Exc.
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
+	 *				 If 0 is passed then system will assign some free port if any. If there
+	 *               are no free ports, then it is an error and an exception will be thrown.
 	 * This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
 	 */
 	void Open(u16 port){
@@ -1253,14 +1255,24 @@ public:
 	}
 
 
+	
 	inline void Open(){
 		this->Open(0);
 	}
 
 
 
-	//TODO: write doxygen comment
-	//returns number of bytes sent, should be less or equal to size.
+	/**
+	 * @brief Send datagram over UDP socket.
+	 * The datagram is sent to UDP socket all at once. If the datagram cannot be
+	 * sent at once at the current moment, 0 will be returned.
+	 * Note, that underlying protocol limits the maximum size of the datagram,
+	 * trying to send the bigger datagram will result in an exception to be thrown.
+	 * @param buf - buffer containing the datagram to send.
+	 * @param destinationIP - the destination IP address to send the datagram to.
+	 * @return number of bytes actually sent. Actually it is either 0 or the size of the
+	 *         datagram passed in as argument.
+	 */
 	unsigned Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Send(): socket is not opened");
@@ -1270,7 +1282,7 @@ public:
 		sockaddr_in sockAddr;
 		int sockLen = sizeof(sockAddr);
 
-		sockAddr.sin_addr.s_addr = destinationIP.host;
+		sockAddr.sin_addr.s_addr = htonl(destinationIP.host);
 		sockAddr.sin_port = htons(destinationIP.port);
 		sockAddr.sin_family = AF_INET;
 
@@ -1320,20 +1332,35 @@ public:
 
 		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
 		ASSERT_INFO(len <= int(buf.Size()), "res = " << len)
+		ASSERT_INFO((len == int(buf.Size())) || (len == 0), "res = " << len)
 
 		return len;
 	}
 
 
 
-	//TODO: write doxygen comment
-	//returns number of bytes received
+	/**
+	 * @brief Receive datagram.
+	 * Writes a datagram to the given buffer at once if it is available.
+	 * If there is no received datagram availabe a 0 will be returned.
+	 * Note, that it will always write out the whole datagram at once. I.e. it is either all or nothing.
+	 * Except for the case when the given buffer is not large enough to store the datagram,
+	 * in which case the datagram is truncated to the size of the buffer and the rest of the data is lost.
+     * @param buf - reference to the buffer the received datagram will be stored to. The buffer
+	 *              should be large enough to store the whole datagram. If datagram
+	 *              does not fit the passed buffer, then the datagram tail will be truncated
+	 *              and this tail data will be lost.
+     * @param out_SenderIP - reference to the ip address structure where the IP address
+	 *                       of the sender will be stored.
+     * @return number of bytes stored in the output buffer.
+     */
 	unsigned Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 		if(!this->IsValid())
 			throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
 
-		//the flag shall be cleared even if this function fails to avoid subsequent
-		//calls to Recv() because it indicates that there's activity.
+		//The 'can read' flag shall be cleared even if this function fails.
+		//This is to avoid subsequent calls to Recv() because of it indicating
+		//that there's an activity.
 		//So, do it at the beginning of the function.
 		this->ClearCanReadFlag();
 
