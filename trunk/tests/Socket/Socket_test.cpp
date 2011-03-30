@@ -18,6 +18,8 @@ public:
 
 			listenSock.Open(13666);//start listening
 
+			ASSERT_ALWAYS(listenSock.GetLocalPort() == 13666)
+
 			//Accept some connection
 			ting::TCPSocket sock;
 			while(!sock.IsValid() && !this->quitFlag){
@@ -27,6 +29,11 @@ public:
 					m->Handle();
 				}
 			}
+
+			ASSERT_ALWAYS(sock.IsValid())
+
+			ASSERT_ALWAYS(sock.GetLocalAddress().host == 0x7f000001)
+			ASSERT_ALWAYS(sock.GetRemoteAddress().host == 0x7f000001)
 
 			ting::StaticBuffer<ting::u8, 4> data;
 			data[0] = '0';
@@ -57,7 +64,10 @@ void Run(){
 		sock.Open(ip);
 
 		ASSERT_ALWAYS(sock.IsValid())
-		
+
+		ASSERT_ALWAYS(sock.GetLocalAddress().host == 0x7f000001)
+		ASSERT_ALWAYS(sock.GetRemoteAddress().host == 0x7f000001)
+
 		ting::StaticBuffer<ting::u8, 4> data;
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 30; ++i){
@@ -405,6 +415,7 @@ void Run(){
 		ASSERT_INFO_ALWAYS(false, e.What())
 	}
 
+	ASSERT_ALWAYS(recvSock.GetLocalPort() == 13666)
 
 	ting::UDPSocket sendSock;
 
