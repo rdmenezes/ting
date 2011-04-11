@@ -61,7 +61,7 @@ THE SOFTWARE. */
 #else
 #error "Unknown OS"
 #endif
-//~ ==System dependen headers inclusion==
+//~ ==System dependent headers inclusion==
 
 #include <list>
 #include <algorithm>
