@@ -4,6 +4,7 @@ subdirs += Socket
 subdirs += Array
 subdirs += Ptr
 subdirs += Thread
+subdirs += Timer
 
 
 #Looks like static variables are not shared between dll boundaries on win32,

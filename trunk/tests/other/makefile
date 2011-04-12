@@ -43,10 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Timer_test$(ext) Buffer_test$(ext) Types_test$(ext) Ref_test$(ext) Signal_test$(ext) WaitSet_test$(ext)
+default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Buffer_test$(ext) Types_test$(ext) Ref_test$(ext) Signal_test$(ext) WaitSet_test$(ext)
 
 
-test: run_debug_test run_utils_test run_PoolStored_test run_Timer_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
+test: run_debug_test run_utils_test run_PoolStored_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test run_Signal_test
 
 
 
@@ -77,16 +77,6 @@ run_PoolStored_test: PoolStored_test$(ext)
 	@./$^
 
 PoolStored_test$(ext): src/PoolStored_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
-
-
-
-run_Timer_test: Timer_test$(ext)
-	@echo running $^...
-	@./$^
-
-Timer_test$(ext): src/Timer_test.cpp
 	@echo Building $@...
 	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
@@ -146,7 +136,6 @@ clean:
 	@$(remove) debug_test$(ext)
 	@$(remove) utils_test$(ext)
 	@$(remove) PoolStored_test$(ext)
-	@$(remove) Timer_test$(ext)
 	@$(remove) Buffer_test$(ext)
 	@$(remove) Types_test$(ext)
 	@$(remove) Ref_test$(ext)
