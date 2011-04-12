@@ -388,7 +388,7 @@ inline ting::u32 GetTicks(){
 	//Mac os X doesn't support clock_gettime
 	timeval t;
 	gettimeofday(&t, 0);
-	return ting::u32(t.tv_sec * 1000);
+	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
 #elif defined(__linux__)
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
