@@ -1,7 +1,7 @@
 #include <vector>
 
-#include <ting/debug.hpp>
-#include <ting/Timer.hpp>
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/Timer.hpp"
 
 int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<<"Timer test "<<std::endl)
@@ -14,21 +14,25 @@ int main(int argc, char *argv[]){
 
 		TestTimer1(bool* exitFlag) :
 				e(exitFlag)
-		{}
+		{
+			this->expired.Connect(this, &TestTimer1::OnExpire);
+		}
 
-		//override
-		ting::u32 OnExpire(){
+		void OnExpire(){
 			TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
 			*this->e = true;
-			return 0;
 		}
 	} timer1(&exit);
 
 	struct TestTimer2 : public ting::Timer{
-		//override
-		ting::u32 OnExpire(){
+		TestTimer2(){
+			this->expired.Connect(this, &TestTimer2::OnExpire);
+		}
+
+		void OnExpire(){
 			TRACE_ALWAYS(<<"\t- timer2 fired!"<<std::endl)
-			return 1000;
+
+			this->Start(1500);
 		}
 	} timer2;
 

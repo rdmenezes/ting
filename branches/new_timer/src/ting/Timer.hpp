@@ -71,6 +71,9 @@ THE SOFTWARE. */
 #include "Singleton.hpp"
 #include "Thread.hpp"
 #include "math.hpp"
+#include "Signal.hpp"
+
+
 
 namespace ting{
 
@@ -86,25 +89,31 @@ inline ting::u32 GetTicks();
 
 
 
+typedef ting::u16 TTicks; //thicks type, should be unsigned. TODO: change to ting::u32 after testing
+
+
+
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
 
 	class TimerThread : public ting::Thread{
 	public:
-		bool quitFlag;
-		
+		ting::Inited<bool, false> quitFlag;
+
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 
-		typedef std::list<Timer*> T_TimerList;
+		typedef std::map<Timer*> T_TimerList;
 		typedef T_TimerList::iterator T_TimerIter;
 		T_TimerList timers;
 
-		bool warpFlag;//false if last call to GetTicks() returned value in first half
+//		bool warpFlag;//false if last call to GetTicks() returned value in first half
 
-		TimerThread() :
-				quitFlag(false)
-		{}
+		TimerThread()// :
+//				quitFlag(false)
+		{
+			ASSERT(!this->quitFlag)
+		}
 
 		~TimerThread(){
 			//at the time of DimerLib destroying there should be no active timers
@@ -131,7 +140,7 @@ class TimerLib : public Singleton<TimerLib>{
 	inline void AddTimer(Timer* timer, u32 timeout){
 		this->thread.AddTimer(timer, timeout);
 	}
-	
+
 	inline bool RemoveTimer(Timer* timer){
 		return this->thread.RemoveTimer(timer);
 	}
@@ -152,24 +161,42 @@ public:
 class Timer{
 	friend class TimerLib::TimerThread;
 
-	ting::u32 endTime;
-	bool warp;
-
-	bool isStarted;
 public:
-	inline Timer() :
-			warp(false),
-			isStarted(false)
-	{}
+	enum EState{
+		NOT_STARTED,
+		RUNNING,
+		EXPIRED
+	};
+
+private:
+//	ting::u32 endTime;
+//	bool warp;
+
+	ting::Inited<EState, NOT_STARTED> state;
+public:
+
+	ting::Signal0 expired;
+
+	inline Timer()// :
+//			warp(false),
+//			isStarted(false)
+	{
+		ASSERT(this->state == NOT_STARTED)
+	}
 
 	virtual ~Timer(){
 		ASSERT(TimerLib::IsCreated())
 		this->Stop();
+
+		ASSERT(
+				this->state == NOT_STARTED ||
+				this->state == EXPIRED
+			)
 	}
 
 	inline void Start(ting::u32 millisec){
-		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, need to create TimerLib singletone object")
-		
+		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
+
 		this->Stop();//make sure the timer is not running already
 		TimerLib::Inst().AddTimer(this, millisec);
 	}
@@ -177,22 +204,20 @@ public:
 	/**
 	 * @brief Stop the timer.
 	 * Stops the timer if it was started before. In case it was not started
-	 * or it is already expired this method does nothing.
-	 * @return true - if the timer was successfuly interrupted. I.e. it was
-	 *                in running state and has not expired at the time this
-	 *                method was called.
-	 * @return false - if the timer was not in running state (either not
-	 *                 started or already expired) at the moment this method
-	 *                 was called.
+	 * or it has already expired this method does nothing.
+	 * @return the state in which the timer was at the moment of stopping. If returned state is
+	 *         RUNNING then the timer was started before the Stop() method was called, and, as a result
+	 *         of the method call, it was stopped before expiring and
+	 *         the exired signal was not emitted. If the returned state is EXPIRED
+	 *         then the timer has expired already at the moment the Stop() method was called
+	 *         and the expired signal has been emitted before stopping. If the returned state is NOT_STARTED
+	 *         then the timer has not been started yet at the moment the Stop() method was
+	 *         called and the expired signal was not emitted, of course.
 	 */
-	inline bool Stop(){
+	inline EState Stop(){
 		ASSERT(TimerLib::IsCreated())
 		return TimerLib::Inst().RemoveTimer(this);
 	}
-
-	//return number fo milliseconds to reschedule this timer for,
-	//return 0 for no timer rescheduling.
-	virtual u32 OnExpire() = 0;
 };
 
 
@@ -366,8 +391,9 @@ inline void TimerLib::TimerThread::Run(){
 
 
 /**
- * @brief Returns number of milliseconds since system start.
- * @return number of milliseconds passed since system start.
+ * @brief Get constantly increasing millisecond ticks.
+ * It is not guaranteed that the ticks counting started at the system start.
+ * @return constantly increasing millisecond ticks.
  */
 inline ting::u32 GetTicks(){
 #ifdef __WIN32__
