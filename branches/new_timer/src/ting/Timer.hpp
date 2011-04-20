@@ -107,24 +107,24 @@ class TimerLib : public Singleton<TimerLib>{
 		typedef T_TimerList::iterator T_TimerIter;
 		T_TimerList timers;
 
-//		bool warpFlag;//false if last call to GetTicks() returned value in first half
+		ting::Inited<ting::u64, 0> ticks;
 
-		TimerThread()// :
-//				quitFlag(false)
-		{
+		ting::Inited<bool, false> incTicks;
+
+		TimerThread(){
 			ASSERT(!this->quitFlag)
 		}
 
 		~TimerThread(){
-			//at the time of DimerLib destroying there should be no active timers
+			//at the time of TimerLib destroying there should be no active timers
 			ASSERT(this->timers.size() == 0)
 		}
 
 		inline void AddTimer(Timer* timer, u32 timeout);
 
-		inline bool RemoveTimer(Timer* timer);
+		inline Timer::EState RemoveTimer(Timer* timer);
 
-		inline void SetQuitFlagAndSignalSema(){
+		inline void SetQuitFlagAndSignalSemaphore(){
 			this->quitFlag = true;
 			this->sema.Signal();
 		}
@@ -133,7 +133,7 @@ class TimerLib : public Singleton<TimerLib>{
 		inline void Run();
 
 	private:
-		inline void UpdateTimer(Timer* timer, u32 newTimeout);
+//		inline void UpdateTimer(Timer* timer, u32 newTimeout);
 
 	} thread;
 
@@ -151,7 +151,7 @@ public:
 	}
 
 	~TimerLib(){
-		this->thread.SetQuitFlagAndSignalSema();
+		this->thread.SetQuitFlagAndSignalSemaphore();
 		this->thread.Join();
 	}
 };
@@ -169,18 +169,14 @@ public:
 	};
 
 private:
-//	ting::u32 endTime;
-//	bool warp;
+	ting::TimerLib::TimerThread::T_TimerIter i;//if satte is RUNNING, this is the iterator into the map of timers
 
 	ting::Inited<EState, NOT_STARTED> state;
 public:
 
-	ting::Signal0 expired;
+	ting::Signal1<Timer&> expired;
 
-	inline Timer()// :
-//			warp(false),
-//			isStarted(false)
-	{
+	inline Timer(){
 		ASSERT(this->state == NOT_STARTED)
 	}
 
@@ -224,44 +220,38 @@ public:
 
 //methods
 
-inline void TimerLib::TimerThread::UpdateTimer(Timer* timer, u32 newTimeout){
-	ting::u32 curTicks = ting::GetTicks();
+//inline void TimerLib::TimerThread::UpdateTimer(Timer* timer, u32 newTimeout){
+//	ting::u32 curTicks = ting::GetTicks();
+//
+//	timer->endTime = curTicks + newTimeout;
+//
+//	if(timer->endTime < curTicks){
+//		timer->warp = true;
+//	}else{
+//		timer->warp = false;
+//	}
+//}
 
-	timer->endTime = curTicks + newTimeout;
-
-	if(timer->endTime < curTicks){
-		timer->warp = true;
-	}else{
-		timer->warp = false;
-	}
-}
 
 
-
-inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
+inline Timer::EState TimerLib::TimerThread::RemoveTimer(Timer* timer){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
-	if(!timer->isStarted)
-		return false;
+	if(timer->state != Timer::RUNNING)
+		return timer->state;
 
 	//if isStarted flag is set then the timer will be stopped now, so
 	//change the flag
-	timer->isStarted = false;
+	timer->state = Timer::NOT_STARTED;
 
-	for(T_TimerIter i = this->timers.begin(); i != this->timers.end(); ++i){
-		if(*i == timer){
-			this->timers.erase(i);
-			this->sema.Signal();
-			return true;
-		}
-	}
+	ASSERT(timer->i != this->timers.end())
 
-	//shall never get there because if timer->isStarted flag is set
-	//then the timer have to be in the list
-	ASSERT(false)
+	this->timers.erase(timer->i);
+	timer->i = this->timers.end();
 
-	return false;
+	//was in RUNNING state
+	return Timer::RUNNING;
 }
 
 
@@ -270,9 +260,12 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
-	ASSERT(!timer->isStarted)
+	if(timer->state == Timer::RUNNING)
+		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already reunning!");
 
-	timer->isStarted = true;
+	timer->state = Timer::RUNNING;
+
+	ting::u64 stopTicks =
 
 	this->UpdateTimer(timer, timeout);
 
@@ -400,7 +393,7 @@ inline ting::u32 GetTicks(){
 	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
 	if(perfCounterFreq.QuadPart == 0){
 		if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
-		//looks like the system does not support high resolution tick counter
+			//looks like the system does not support high resolution tick counter
 			return GetTickCount();
 		}
 	}
