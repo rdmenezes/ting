@@ -352,9 +352,9 @@ inline void TimerLib::TimerThread::Run(){
 
 		this->mutex.Unlock();
 
-		M_TIMER_TRACE(<<"TimerThread: waiting for "<<millis<< " ms" << std::endl)
+		M_TIMER_TRACE(<< "TimerThread: waiting for " << millis << " ms" << std::endl)
 		this->sema.Wait(millis);
-		M_TIMER_TRACE(<<"TimerThread: signalled" << std::endl)
+		M_TIMER_TRACE(<< "TimerThread: signalled" << std::endl)
 		//It does not matter signalled or timed out
 
 		this->mutex.Lock();
