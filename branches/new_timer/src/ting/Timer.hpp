@@ -89,7 +89,7 @@ inline ting::u32 GetTicks();
 
 
 
-typedef ting::u16 TTicks; //thicks type, should be unsigned. TODO: change to ting::u32 after testing
+const unsigned DMaxTicks = 0xffff;// TODO: change to ting::u32(-1) after testing
 
 
 
@@ -107,9 +107,17 @@ class TimerLib : public Singleton<TimerLib>{
 		typedef T_TimerList::iterator T_TimerIter;
 		T_TimerList timers;
 
-		ting::Inited<ting::u64, 0> ticks;
 
-		ting::Inited<bool, false> incTicks;
+
+		ting::Inited<ting::u64, 0> ticks;
+		ting::Inited<bool, false> incTicks;//flag indicates that high dword of ticks needs increment
+
+        //This function should be called at least once in 16 days.
+        //This should be achieved by having a repeating timer set to 16 days, which will do nothing but
+        //calling this function.
+        inline ting::u64 GetTicks();
+
+
 
 		TimerThread(){
 			ASSERT(!this->quitFlag)
@@ -169,7 +177,7 @@ public:
 	};
 
 private:
-	ting::TimerLib::TimerThread::T_TimerIter i;//if satte is RUNNING, this is the iterator into the map of timers
+	ting::TimerLib::TimerThread::T_TimerIter i;//if state is RUNNING, this is the iterator into the map of timers
 
 	ting::Inited<EState, NOT_STARTED> state;
 public:
@@ -271,6 +279,25 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 
 	this->timers.push_back(timer);
 	this->sema.Signal();
+}
+
+
+
+inline ting::u64 TimerLib::TimerThread::GetTicks(){
+    ting::u32 ticks = ting::GetTicks() % DMaxTicks;
+
+    if(this->incTicks){
+        if(ticks < DMaxTicks / 2){
+            this->incTicks = false;
+            this->ticks += (ting::u64(DMaxTicks) + 1); //update 64 bit ticks counter
+        }
+    }else{
+        if(ticks > DMaxTicks / 2){
+            this->incTicks = true;
+        }
+    }
+
+    return this->ticks + ting::u64(ticks);
 }
 
 
