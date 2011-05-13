@@ -147,20 +147,13 @@ class TimerLib : public Singleton<TimerLib>{
 
 	} thread;
 
-	inline void AddTimer(Timer* timer, u32 timeout){
-		this->thread.AddTimer(timer, timeout);
-	}
-
-	inline bool RemoveTimer(Timer* timer){
-		return this->thread.RemoveTimer(timer);
-	}
-
 public:
 	TimerLib(){
 		this->thread.Start();
 	}
 
 	~TimerLib(){
+        ASSERT(this->thread.timers.size() == 0)
 		this->thread.SetQuitFlagAndSignalSemaphore();
 		this->thread.Join();
 	}
@@ -203,8 +196,10 @@ public:
 	inline void Start(ting::u32 millisec){
 		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
-		this->Stop();//make sure the timer is not running already
-		TimerLib::Inst().AddTimer(this, millisec);
+        //TODO: consider removing this call to Stop()
+//		this->Stop();//make sure the timer is not running already
+
+        TimerLib::Inst().thread.AddTimer(this, millisec);
 	}
 
 	/**
@@ -222,7 +217,7 @@ public:
 	 */
 	inline EState Stop(){
 		ASSERT(TimerLib::IsCreated())
-		return TimerLib::Inst().RemoveTimer(this);
+		return TimerLib::Inst().thread.RemoveTimer(this);
 	}
 };
 
@@ -261,7 +256,7 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 
 	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
 
-    this->timers.insert(
+    timer->i = this->timers.insert(
             std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
         );
 
