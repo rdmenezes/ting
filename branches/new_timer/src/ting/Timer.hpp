@@ -63,7 +63,7 @@ THE SOFTWARE. */
 #endif
 //~ ==System dependent headers inclusion==
 
-#include <list>
+#include <map>
 #include <algorithm>
 
 #include "debug.hpp" //debugging facilities
@@ -89,7 +89,7 @@ inline ting::u32 GetTicks();
 
 
 
-const unsigned DMaxTicks = 0xffff;// TODO: change to ting::u32(-1) after testing
+const unsigned DMaxTicks = 0xffffffff;// TODO: change to ting::u32(-1) after testing
 
 
 
@@ -103,7 +103,9 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 
-		typedef std::map<Timer*> T_TimerList;
+        //map requires key uniquiness, but in our case the key is a stop ticks,
+        //so, use multimap to allow similar keys.
+		typedef std::multimap<ting::u64, Timer*> T_TimerList;
 		typedef T_TimerList::iterator T_TimerIter;
 		T_TimerList timers;
 
@@ -226,22 +228,6 @@ public:
 
 
 
-//methods
-
-//inline void TimerLib::TimerThread::UpdateTimer(Timer* timer, u32 newTimeout){
-//	ting::u32 curTicks = ting::GetTicks();
-//
-//	timer->endTime = curTicks + newTimeout;
-//
-//	if(timer->endTime < curTicks){
-//		timer->warp = true;
-//	}else{
-//		timer->warp = false;
-//	}
-//}
-
-
-
 inline Timer::EState TimerLib::TimerThread::RemoveTimer(Timer* timer){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
@@ -273,11 +259,13 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 
 	timer->state = Timer::RUNNING;
 
-	ting::u64 stopTicks =
+	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
 
-	this->UpdateTimer(timer, timeout);
+    this->timers.insert(
+            std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
+        );
 
-	this->timers.push_back(timer);
+    //signal the semaphore about new timer addition in order to recalculate the waiting time
 	this->sema.Signal();
 }
 
@@ -305,104 +293,20 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 //override
 inline void TimerLib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
-	//init warp flag
-	if(ting::GetTicks() < ting::u32(-1) / 2){
-		this->warpFlag = false;
-	}else{
-		this->warpFlag = true;
-	}
 
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): creating mutex guard" << std::endl)
-	ting::Mutex::Guard mutexGuard(this->mutex);
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): entering while()" << std::endl)
+
 	while(!this->quitFlag){
-		//check warp
-		ting::u32 ticks = ting::GetTicks();
-		M_TIMER_TRACE(<<"TimerThread: ticks = " << ticks << std::endl)
 
-		if(ticks < ting::u32(-1) / 2){
-			if(this->warpFlag){
-				//Warp detected.
-				//clear all warp flags, remove timers which was not warped
-				for(T_TimerIter i = this->timers.begin(); i != this->timers.end();){
-					//if the timer was not warped and we are warping
-					//then this timer is surely expired, need to remove it and
-					//notify client calling OnExpire().
-					if(!(*i)->warp){
-						u32 newTimeout = (*i)->OnExpire();
-						if(newTimeout == 0){
-							(*i)->isStarted = false;
-							i = this->timers.erase(i);
-							continue;
-						}else{
-							this->UpdateTimer(*i, newTimeout);
-						}
-					}else{
-						(*i)->warp = false;
-					}
-					++i;
-				}
-			}
-			this->warpFlag = false;
-		}else{
-			this->warpFlag = true;
-		}
+        //TODO:
 
-		//notify expired timers
-		M_TIMER_TRACE(<<"TimerThread: search for expired timers, size = " << this->timers.size() << std::endl)
-		for(T_TimerIter i = this->timers.begin(); i != this->timers.end();){
-			if(!(*i)->warp){
-				M_TIMER_TRACE(<<"TimerThread: warp is not set, endTime = "<< (*i)->endTime << std::endl)
-				if((*i)->endTime <= ticks){
-					u32 newTimeout = (*i)->OnExpire();
-					if(newTimeout == 0){
-						(*i)->isStarted = false;
-						i = this->timers.erase(i);
-						continue;
-					}else{//set timer again
-						this->UpdateTimer(*i, newTimeout);
-					}
-				}
-			}else{
-				M_TIMER_TRACE(<<"TimerThread: warp is set" << std::endl)
-			}
-			++i;
-		}
-
-		if(this->timers.size() == 0){
-			this->mutex.Unlock();
-			M_TIMER_TRACE(<<"TimerThread: waiting forever" << std::endl)
-			this->sema.Wait();
-			M_TIMER_TRACE(<<"TimerThread: signalled" << std::endl)
-			this->mutex.Lock();
-			continue;
-		}
-
-		//calculate number of milliseconds to wait
-		ting::u32 minEndTime = ting::u32(-1);
-		for(T_TimerIter i = this->timers.begin(); i != this->timers.end(); ++i){
-			if(!(*i)->warp){
-				if((*i)->endTime < minEndTime){
-					minEndTime = (*i)->endTime;
-				}
-			}
-		}
-
-		unsigned millis = minEndTime - ticks;
-
-		//make sure we will update warpFlag at least 4 times
-		//per ticks cycle (ticks cycle = 0xffffffffff ticks)
-		millis = (std::min)(millis, ting::u32(-1) / 4);//NOTE: enclose (std::min) into parentheses in order to avoid compilation errors when using MSVC compiler, because windows.h defines min and max macros.
-		ASSERT(millis != 0)
-
-		this->mutex.Unlock();
-
-		M_TIMER_TRACE(<<"TimerThread: waiting for "<<millis<< " ms" << std::endl)
-		this->sema.Wait(millis);
-		M_TIMER_TRACE(<<"TimerThread: signalled" << std::endl)
-		//It does not matter signalled or timed out
-
-		this->mutex.Lock();
+//		this->mutex.Unlock();
+//
+//		M_TIMER_TRACE(<< "TimerThread: waiting for " << millis << " ms" << std::endl)
+//		this->sema.Wait(millis);
+//		M_TIMER_TRACE(<< "TimerThread: signalled" << std::endl)
+//		//It does not matter signalled or timed out
+//
+//		this->mutex.Lock();
 	}//~while
 
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
