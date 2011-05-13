@@ -1,8 +1,7 @@
 #!/usr/bin/make -f
 
 build:
-#TODO: remove compiler var setting as long as g++ 4.5 is released
-	$(MAKE) compiler=g++-4.5
+	$(MAKE)
 
 clean:
 	$(MAKE) clean
