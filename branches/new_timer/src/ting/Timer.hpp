@@ -139,7 +139,7 @@ class TimerLib : public Singleton<TimerLib>{
 			this->sema.Signal();
 		}
 
-		//override (inline is just to make possible method definition in hpp)
+		//override (inline is just to make possible method definition in header file)
 		inline void Run();
 
 	private:
@@ -150,6 +150,8 @@ class TimerLib : public Singleton<TimerLib>{
 public:
 	TimerLib(){
 		this->thread.Start();
+
+        //TODO: add timer for half of the max ticks
 	}
 
 	~TimerLib(){
@@ -193,6 +195,13 @@ public:
 			)
 	}
 
+    /**
+     * @brief Start timer.
+     * After calling this method one can be sure that the timer's state has been
+     * switched to RUNNING.
+     * @param millisec - timer timeout in milliseconds.
+     */
+    //TODO: add note about calling Start from expired signal handler.
 	inline void Start(ting::u32 millisec){
 		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
