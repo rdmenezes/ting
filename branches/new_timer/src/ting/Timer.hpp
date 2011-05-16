@@ -63,6 +63,7 @@ THE SOFTWARE. */
 #endif
 //~ ==System dependent headers inclusion==
 
+#include <vector>
 #include <map>
 #include <algorithm>
 
@@ -297,20 +298,50 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 //override
 inline void TimerLib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
-
-
+            
+    ting::Mutex::Guard mutexGuard(this->mutex);
+    
 	while(!this->quitFlag){
 
-        //TODO:
+        ting::u64 ticks = this->GetTicks();
 
-//		this->mutex.Unlock();
+        std::vector<Timer*> expiredTimers;
+        
+        for(T_TimerIter b = this->timers.begin(); ; ){
+            if(b.first <= ticks){
+                //add the timer to list of expired timers and change the timer state
+                ASSERT(b.second)
+                expiredTimers.push_back(b.second);
+                
+                b.second->state = Timer::EXPIRED;
+                
+                b = this->timers.erase(b);
+                continue;
+            }
+            break;
+        }
+        
+        //calculate new waiting time
+        ASSERT(this->timers.begin().first > ticks)
+        ASSERT(this->timers.begin().first - ticks <= ting::u64(ting::u32(-1)))
+        ting::u32 millis = ting::u32(this->timers.begin().first - ticks);
+        
+		this->mutex.Unlock();
 //
+        //emit expired signal
+        for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
+            (*i)->expired.Emit(*(*i));
+        }
+        
 //		M_TIMER_TRACE(<< "TimerThread: waiting for " << millis << " ms" << std::endl)
-//		this->sema.Wait(millis);
+        
+        //It does not matter signaled or timed out
+		this->sema.Wait(millis);
+        
 //		M_TIMER_TRACE(<< "TimerThread: signalled" << std::endl)
-//		//It does not matter signalled or timed out
+		
 //
-//		this->mutex.Lock();
+		this->mutex.Lock();
 	}//~while
 
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
