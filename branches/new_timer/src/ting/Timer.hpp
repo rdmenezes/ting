@@ -335,6 +335,8 @@ inline void TimerLib::TimerThread::Run(){
         
 //		M_TIMER_TRACE(<< "TimerThread: waiting for " << millis << " ms" << std::endl)
         
+        //TODO: recalculate new waiting time here getting ticks again???
+        
         //It does not matter signaled or timed out
 		this->sema.Wait(millis);
         
