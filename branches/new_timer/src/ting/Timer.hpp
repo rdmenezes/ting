@@ -143,13 +143,10 @@ class TimerLib : public Singleton<TimerLib>{
 		//override (inline is just to make possible method definition in header file)
 		inline void Run();
 
-	private:
-//		inline void UpdateTimer(Timer* timer, u32 newTimeout);
-
 	} thread;
 
 public:
-	TimerLib(){
+	inline TimerLib(){
 		this->thread.Start();
 
         //TODO: add timer for half of the max ticks
@@ -192,9 +189,9 @@ public:
      * After calling this method one can be sure that the timer state has been
      * switched to running. This means that if you call Stop() after that and it
      * returns false then this will mean that the timer has expired rather than not started.
+     * It is allowed to call the Start() method from within the handler of the timer expired signal.
      * @param millisec - timer timeout in milliseconds.
      */
-    //TODO: add note about calling Start from expired signal handler.
 	inline void Start(ting::u32 millisec){
 		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
@@ -292,55 +289,64 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 //override
 inline void TimerLib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
-            
-    ting::Mutex::Guard mutexGuard(this->mutex);
     
 	while(!this->quitFlag){
-
-        ting::u64 ticks = this->GetTicks();
-
         std::vector<Timer*> expiredTimers;
         
-        for(T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
-            if(b->first <= ticks){
-                Timer *timer = b->second;
-                //add the timer to list of expired timers and change the timer state to not running
-                ASSERT(timer)
-                expiredTimers.push_back(timer);
-                
-                timer->isRunning = false;
-                
-                this->timers.erase(b);
-                continue;
+        ting::u32 millis;
+        
+        {
+            ting::Mutex::Guard mutexGuard(this->mutex);
+            
+            ting::u64 ticks = this->GetTicks();
+
+            for(T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
+                if(b->first <= ticks){
+                    Timer *timer = b->second;
+                    //add the timer to list of expired timers and change the timer state to not running
+                    ASSERT(timer)
+                    expiredTimers.push_back(timer);
+
+                    timer->isRunning = false;
+
+                    this->timers.erase(b);
+                    continue;
+                }
+                break;
             }
-            break;
+
+            //calculate new waiting time
+            if(this->timers.size() > 0){
+                ASSERT(this->timers.begin()->first > ticks)
+                ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
+                millis = ting::u32(this->timers.begin()->first - ticks);
+            }else{
+                millis = 0;
+                
+                //NOTE: if we have 0 timers here then we do not recalculate the waiting time.
+                //      But, in that case the recurring timer will restart itself in its expired signal handler
+                //      and will signal the semaphore, thus it does not matter that we did not recalculate the
+                //      waiting time here, since the semaphore will be signaled anyway after all the expired
+                //      signal handlers are called.
+            }
+        
+            //TODO: zero out the semaphore
         }
-        
-        //calculate new waiting time
-        ASSERT(this->timers.begin()->first > ticks)
-        ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
-        ting::u32 millis = ting::u32(this->timers.begin()->first - ticks);
-        
-        //TODO: zero out the semaphore
-        
-		this->mutex.Unlock();
 //
         //emit expired signal
         for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
             (*i)->expired.Emit(*(*i));
         }
         
-//		M_TIMER_TRACE(<< "TimerThread: waiting for " << millis << " ms" << std::endl)
-        
-        //TODO: recalculate new waiting time here getting ticks again???
-        
-        //TODO: if was signaled, then only recalculate the waiting time?
+#ifdef DEBUG
+        {
+            ting::Mutex::Guard mutexGuard(this->mutex);
+            ASSERT(this->timers.size() > 0) //make sure we have at least 1 timer here
+        }
+#endif
+
         //It does not matter signaled or timed out
 		this->sema.Wait(millis);
-        
-//		M_TIMER_TRACE(<< "TimerThread: signalled" << std::endl)
-		
-		this->mutex.Lock();
 	}//~while
 
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
