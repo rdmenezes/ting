@@ -302,12 +302,9 @@ class Semaphore{
 #endif
 
 	//forbid copying
-	Semaphore(const Semaphore& ){
-		ASSERT(false)
-	}
-	Semaphore& operator=(const Semaphore& ){
-		return *this;
-	}
+	Semaphore(const Semaphore& );
+	Semaphore& operator=(const Semaphore& );
+    
 public:
 
 	/**
@@ -337,12 +334,12 @@ public:
 		this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
 		if (this->s == SEM_FAILED)
 #elif defined(__linux__)
-		if(sem_init(&this->s, 0, initialValue) < 0 )
+		if(sem_init(&this->s, 0, initialValue) < 0)
 #else
 #error "unknown system"
 #endif
 		{
-			LOG(<<"Semaphore::Semaphore(): failed"<<std::endl)
+			LOG(<< "Semaphore::Semaphore(): failed" << std::endl)
 			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
 		}
 	}
@@ -417,8 +414,8 @@ public:
 						struct timespec amount;
 						struct timespec result;
 						int resultsleep;
-						amount.tv_sec = timeoutMillis/1000;
-						amount.tv_nsec = (timeoutMillis%1000)*1000000;
+						amount.tv_sec = timeoutMillis / 1000;
+						amount.tv_nsec = (timeoutMillis % 1000) * 1000000;
 						resultsleep = nanosleep(&amount, &result);
 						// update timeoutMillis based on the output of the sleep call
 						// if nanosleep returns -1 the sleep was interrumped and result
@@ -426,8 +423,7 @@ public:
 						if(resultsleep == 0){
 							timeoutMillis = 0;
 						}else{
-							timeoutMillis = result.tv_sec * 1000
-									+ result.tv_nsec / 1000000;
+							timeoutMillis = result.tv_sec * 1000 + result.tv_nsec / 1000000;
 						}
 					}else if(errno != EINTR){
 						throw ting::Exc("Semaphore::Wait(): wait failed");

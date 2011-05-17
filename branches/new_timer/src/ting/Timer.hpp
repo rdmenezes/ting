@@ -232,7 +232,6 @@ inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 	ASSERT(timer->i != this->timers.end())
 
 	this->timers.erase(timer->i);
-	timer->i = this->timers.end();
 
 	//was running
 	return true;
@@ -255,6 +254,9 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
     timer->i = this->timers.insert(
             std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
         );
+    
+    ASSERT(timer->i != this->timers.end())
+    ASSERT(timer->i->second)
 
     //signal the semaphore about new timer addition in order to recalculate the waiting time
 	this->sema.Signal();
@@ -293,14 +295,14 @@ inline void TimerLib::TimerThread::Run(){
 
         std::vector<Timer*> expiredTimers;
         
-        for(;;){
-            T_TimerIter b = this->timers.begin();
+        for(T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
             if(b->first <= ticks){
+                Timer *timer = b->second;
                 //add the timer to list of expired timers and change the timer state to not running
-                ASSERT(b->second)
-                expiredTimers.push_back(b->second);
+                ASSERT(timer)
+                expiredTimers.push_back(timer);
                 
-                b->second->isRunning = false;
+                timer->isRunning = false;
                 
                 this->timers.erase(b);
                 continue;
@@ -312,6 +314,8 @@ inline void TimerLib::TimerThread::Run(){
         ASSERT(this->timers.begin()->first > ticks)
         ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
         ting::u32 millis = ting::u32(this->timers.begin()->first - ticks);
+        
+        //TODO: zero out the semaphore
         
 		this->mutex.Unlock();
 //
@@ -329,7 +333,6 @@ inline void TimerLib::TimerThread::Run(){
         
 //		M_TIMER_TRACE(<< "TimerThread: signalled" << std::endl)
 		
-//
 		this->mutex.Lock();
 	}//~while
 
