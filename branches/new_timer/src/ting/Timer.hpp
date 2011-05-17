@@ -231,8 +231,14 @@ inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 
 	ASSERT(timer->i != this->timers.end())
 
-	this->timers.erase(timer->i);
+    //if that was the first timer, signal the semaphore about timer deletion in order to recalculate the waiting time
+    //TODO: test this use case
+    if(this->timers.begin() == timer->i){
+        this->sema.Signal();
+    }
 
+	this->timers.erase(timer->i);
+    
 	//was running
 	return true;
 }
@@ -328,6 +334,7 @@ inline void TimerLib::TimerThread::Run(){
         
         //TODO: recalculate new waiting time here getting ticks again???
         
+        //TODO: if was signaled, then only recalculate the waiting time?
         //It does not matter signaled or timed out
 		this->sema.Wait(millis);
         
