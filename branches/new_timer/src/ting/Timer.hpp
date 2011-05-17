@@ -94,9 +94,53 @@ const unsigned DMaxTicks = 0xffffffff;// TODO: change to ting::u32(-1) after tes
 
 
 
+class Timer{
+	friend class TimerLib;
+
+    ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
+
+private:
+    typedef std::multimap<ting::u64, Timer*> T_TimerList;
+    typedef T_TimerList::iterator T_TimerIter;
+    
+	T_TimerIter i;//if timer is running, this is the iterator into the map of timers
+
+public:
+
+	ting::Signal1<Timer&> expired;
+
+	inline Timer(){
+		ASSERT(!this->isRunning)
+	}
+
+	virtual ~Timer();
+
+    /**
+     * @brief Start timer.
+     * After calling this method one can be sure that the timer state has been
+     * switched to running. This means that if you call Stop() after that and it
+     * returns false then this will mean that the timer has expired rather than not started.
+     * It is allowed to call the Start() method from within the handler of the timer expired signal.
+     * @param millisec - timer timeout in milliseconds.
+     */
+	inline void Start(ting::u32 millisec);
+
+	/**
+	 * @brief Stop the timer.
+	 * Stops the timer if it was started before. In case it was not started
+	 * or it has already expired this method does nothing.
+	 * @return true if timer was running and was stopped.
+     * @return false if timer was not running already when the Stop() method was called. I.e.
+     *         the timer has expired already or was not started.
+	 */
+	inline bool Stop();
+};
+
+
+
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
-
+    
 	class TimerThread : public ting::Thread{
 	public:
 		ting::Inited<bool, false> quitFlag;
@@ -106,9 +150,7 @@ class TimerLib : public Singleton<TimerLib>{
 
         //map requires key uniquiness, but in our case the key is a stop ticks,
         //so, use multimap to allow similar keys.
-		typedef std::multimap<ting::u64, Timer*> T_TimerList;
-		typedef T_TimerList::iterator T_TimerIter;
-		T_TimerList timers;
+		Timer::T_TimerList timers;
 
 
 
@@ -161,56 +203,27 @@ public:
 
 
 
-class Timer{
-	friend class TimerLib::TimerThread;
+inline Timer::~Timer(){
+    ASSERT(TimerLib::IsCreated())
+    this->Stop();
 
-    ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
+    ASSERT(!this->isRunning)
+}
 
-private:
-	ting::TimerLib::TimerThread::T_TimerIter i;//if timer is running, this is the iterator into the map of timers
 
-public:
 
-	ting::Signal1<Timer&> expired;
+inline void Timer::Start(ting::u32 millisec){
+    ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
-	inline Timer(){
-		ASSERT(!this->isRunning)
-	}
+    TimerLib::Inst().thread.AddTimer(this, millisec);
+}
 
-	virtual ~Timer(){
-		ASSERT(TimerLib::IsCreated())
-		this->Stop();
 
-		ASSERT(!this->isRunning)
-	}
 
-    /**
-     * @brief Start timer.
-     * After calling this method one can be sure that the timer state has been
-     * switched to running. This means that if you call Stop() after that and it
-     * returns false then this will mean that the timer has expired rather than not started.
-     * It is allowed to call the Start() method from within the handler of the timer expired signal.
-     * @param millisec - timer timeout in milliseconds.
-     */
-	inline void Start(ting::u32 millisec){
-		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
-
-        TimerLib::Inst().thread.AddTimer(this, millisec);
-	}
-
-	/**
-	 * @brief Stop the timer.
-	 * Stops the timer if it was started before. In case it was not started
-	 * or it has already expired this method does nothing.
-	 * @return true if timer was running and was stopped.
-     * @return false if timer was not running already when the Stop() method was called. I.e.
-     *         the timer has expired already or was not started.
-	 */
-	inline bool Stop(){
-		ASSERT(TimerLib::IsCreated())
-		return TimerLib::Inst().thread.RemoveTimer(this);
-	}
-};
+inline bool Timer::Stop(){
+    ASSERT(TimerLib::IsCreated())
+    return TimerLib::Inst().thread.RemoveTimer(this);
+}
 
 
 
@@ -300,7 +313,7 @@ inline void TimerLib::TimerThread::Run(){
             
             ting::u64 ticks = this->GetTicks();
 
-            for(T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
+            for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
                 if(b->first <= ticks){
                     Timer *timer = b->second;
                     //add the timer to list of expired timers and change the timer state to not running
