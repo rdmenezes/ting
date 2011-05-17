@@ -90,7 +90,9 @@ inline ting::u32 GetTicks();
 
 
 
-const unsigned DMaxTicks = 0xffffffff;// TODO: change to ting::u32(-1) after testing
+//This constant is for testing purposes.
+//Should be set to ting::u32(-1) in release.
+const unsigned DMaxTicks = ting::u32(-1);
 
 
 
@@ -107,6 +109,11 @@ private:
 
 public:
 
+    /**
+     * @brief Signal of timer expiration.
+     * This signal is emitted when timer expires.
+     * The reference to the expired timer is passed to signal handlers as argument.
+     */
 	ting::Signal1<Timer&> expired;
 
 	inline Timer(){
@@ -148,8 +155,9 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 
-        //map requires key uniquiness, but in our case the key is a stop ticks,
+        //map requires key uniqueness, but in our case the key is a stop ticks,
         //so, use multimap to allow similar keys.
+        //TODO: test similar keys
 		Timer::T_TimerList timers;
 
 
@@ -358,8 +366,8 @@ inline void TimerLib::TimerThread::Run(){
         
             //TODO: zero out the semaphore
         }
-//
-        //emit expired signal
+
+        //emit expired signal for expired timers
         for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
             (*i)->expired.Emit(*(*i));
         }
@@ -371,7 +379,7 @@ inline void TimerLib::TimerThread::Run(){
         }
 #endif
 
-        //It does not matter signaled or timed out
+        //It does not matter signaled or timed out, ignore return value.
 		this->sema.Wait(millis);
 	}//~while
 
