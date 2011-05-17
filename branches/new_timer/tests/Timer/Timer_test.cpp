@@ -48,6 +48,8 @@ int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<< "loop " << std::endl)
 	while(!exit){}
 
+    ting::Thread::Sleep(50);
+    
 	TRACE_ALWAYS(<<"[PASSED]: Timer test"<<std::endl)
 
 	return 0;

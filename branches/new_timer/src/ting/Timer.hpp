@@ -187,15 +187,28 @@ class TimerLib : public Singleton<TimerLib>{
 
 	} thread;
 
+    Timer halfMaxTicksTimer;
+    
+    void OnHalfMaxTicksTimerExpired(Timer& timer){
+        timer.Start(DMaxTicks / 2);
+    }
+    
 public:
 	inline TimerLib(){
 		this->thread.Start();
 
-        //TODO: add timer for half of the max ticks
+        //start timer for half of the max ticks
+        this->halfMaxTicksTimer.expired.Connect(this, &TimerLib::OnHalfMaxTicksTimerExpired);
+        this->OnHalfMaxTicksTimerExpired(this->halfMaxTicksTimer);
 	}
 
 	~TimerLib(){
-        ASSERT(this->thread.timers.size() == 0)
+#ifdef DEBUG
+        {
+            ting::Mutex::Guard mutexGuard(this->thread.mutex);
+            ASSERT(this->thread.timers.size() == 1) // 1 for half max ticks timer
+        }
+#endif
 		this->thread.SetQuitFlagAndSignalSemaphore();
 		this->thread.Join();
 	}
