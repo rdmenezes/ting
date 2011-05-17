@@ -133,7 +133,7 @@ class TimerLib : public Singleton<TimerLib>{
 
 		inline void AddTimer(Timer* timer, u32 timeout);
 
-		inline Timer::EState RemoveTimer(Timer* timer);
+		inline bool RemoveTimer(Timer* timer);
 
 		inline void SetQuitFlagAndSignalSemaphore(){
 			this->quitFlag = true;
@@ -167,47 +167,36 @@ public:
 class Timer{
 	friend class TimerLib::TimerThread;
 
-public:
-	enum EState{
-		NOT_STARTED,
-		RUNNING,
-		EXPIRED
-	};
+    ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
 
 private:
-	ting::TimerLib::TimerThread::T_TimerIter i;//if state is RUNNING, this is the iterator into the map of timers
+	ting::TimerLib::TimerThread::T_TimerIter i;//if timer is running, this is the iterator into the map of timers
 
-	ting::Inited<EState, NOT_STARTED> state;
 public:
 
 	ting::Signal1<Timer&> expired;
 
 	inline Timer(){
-		ASSERT(this->state == NOT_STARTED)
+		ASSERT(!this->isRunning)
 	}
 
 	virtual ~Timer(){
 		ASSERT(TimerLib::IsCreated())
 		this->Stop();
 
-		ASSERT(
-				this->state == NOT_STARTED ||
-				this->state == EXPIRED
-			)
+		ASSERT(!this->isRunning)
 	}
 
     /**
      * @brief Start timer.
-     * After calling this method one can be sure that the timer's state has been
-     * switched to RUNNING.
+     * After calling this method one can be sure that the timer state has been
+     * switched to running. This means that if you call Stop() after that and it
+     * returns false then this will mean that the timer has expired rather than not started.
      * @param millisec - timer timeout in milliseconds.
      */
     //TODO: add note about calling Start from expired signal handler.
 	inline void Start(ting::u32 millisec){
 		ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
-
-        //TODO: consider removing this call to Stop()
-//		this->Stop();//make sure the timer is not running already
 
         TimerLib::Inst().thread.AddTimer(this, millisec);
 	}
@@ -216,16 +205,11 @@ public:
 	 * @brief Stop the timer.
 	 * Stops the timer if it was started before. In case it was not started
 	 * or it has already expired this method does nothing.
-	 * @return the state in which the timer was at the moment of stopping. If returned state is
-	 *         RUNNING then the timer was started before the Stop() method was called, and, as a result
-	 *         of the method call, it was stopped before expiring and
-	 *         the exired signal was not emitted. If the returned state is EXPIRED
-	 *         then the timer has expired already at the moment the Stop() method was called
-	 *         and the expired signal has been emitted before stopping. If the returned state is NOT_STARTED
-	 *         then the timer has not been started yet at the moment the Stop() method was
-	 *         called and the expired signal was not emitted, of course.
+	 * @return true if timer was running and was stopped.
+     * @return false if timer was not running already when the Stop() method was called. I.e.
+     *         the timer has expired already or was not started.
 	 */
-	inline EState Stop(){
+	inline bool Stop(){
 		ASSERT(TimerLib::IsCreated())
 		return TimerLib::Inst().thread.RemoveTimer(this);
 	}
@@ -233,24 +217,25 @@ public:
 
 
 
-inline Timer::EState TimerLib::TimerThread::RemoveTimer(Timer* timer){
+inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
-	if(timer->state != Timer::RUNNING)
-		return timer->state;
+	if(!timer->isRunning){
+		return false;
+    }
 
 	//if isStarted flag is set then the timer will be stopped now, so
 	//change the flag
-	timer->state = Timer::NOT_STARTED;
+	timer->isRunning = false;
 
 	ASSERT(timer->i != this->timers.end())
 
 	this->timers.erase(timer->i);
 	timer->i = this->timers.end();
 
-	//was in RUNNING state
-	return Timer::RUNNING;
+	//was running
+	return true;
 }
 
 
@@ -259,10 +244,11 @@ inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
-	if(timer->state == Timer::RUNNING)
-		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already reunning!");
+	if(timer->isRunning){
+		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already running!");
+    }
 
-	timer->state = Timer::RUNNING;
+	timer->isRunning = true;
 
 	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
 
@@ -307,24 +293,25 @@ inline void TimerLib::TimerThread::Run(){
 
         std::vector<Timer*> expiredTimers;
         
-        for(T_TimerIter b = this->timers.begin(); ; ){
-            if(b.first <= ticks){
-                //add the timer to list of expired timers and change the timer state
-                ASSERT(b.second)
-                expiredTimers.push_back(b.second);
+        for(;;){
+            T_TimerIter b = this->timers.begin();
+            if(b->first <= ticks){
+                //add the timer to list of expired timers and change the timer state to not running
+                ASSERT(b->second)
+                expiredTimers.push_back(b->second);
                 
-                b.second->state = Timer::EXPIRED;
+                b->second->isRunning = false;
                 
-                b = this->timers.erase(b);
+                this->timers.erase(b);
                 continue;
             }
             break;
         }
         
         //calculate new waiting time
-        ASSERT(this->timers.begin().first > ticks)
-        ASSERT(this->timers.begin().first - ticks <= ting::u64(ting::u32(-1)))
-        ting::u32 millis = ting::u32(this->timers.begin().first - ticks);
+        ASSERT(this->timers.begin()->first > ticks)
+        ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
+        ting::u32 millis = ting::u32(this->timers.begin()->first - ticks);
         
 		this->mutex.Unlock();
 //
