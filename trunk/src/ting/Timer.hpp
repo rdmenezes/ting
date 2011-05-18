@@ -325,17 +325,21 @@ inline void TimerLib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
     
 	while(!this->quitFlag){
-        std::vector<Timer*> expiredTimers;
-        
         ting::u32 millis;
         
-        {
-            ting::Mutex::Guard mutexGuard(this->mutex);
-            
-            ting::u64 ticks = this->GetTicks();
+        while(true){
+            std::vector<Timer*> expiredTimers;
 
-            for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
-                if(b->first <= ticks){
+            {
+                ting::Mutex::Guard mutexGuard(this->mutex);
+
+                ting::u64 ticks = this->GetTicks();
+
+                for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
+                    if(b->first > ticks){
+                        break;//~for
+                    }
+                    
                     Timer *timer = b->second;
                     //add the timer to list of expired timers and change the timer state to not running
                     ASSERT(timer)
@@ -344,45 +348,29 @@ inline void TimerLib::TimerThread::Run(){
                     timer->isRunning = false;
 
                     this->timers.erase(b);
-                    continue;
                 }
-                break;
+
+                if(expiredTimers.size() == 0){
+                    ASSERT(this->timers.size() > 0) //if we have no expired timers here, then at least one timer should be running (the half-max-ticks timer).
+
+                    //calculate new waiting time
+                    ASSERT(this->timers.begin()->first > ticks)
+                    ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
+                    millis = ting::u32(this->timers.begin()->first - ticks);
+                    
+                    //TODO: zero out the semaphore
+                    break;//~while(true)
+                }
             }
 
-            //calculate new waiting time
-            if(this->timers.size() > 0){
-                ASSERT(this->timers.begin()->first > ticks)
-                ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
-                millis = ting::u32(this->timers.begin()->first - ticks);
-            }else{
-                millis = 0;
-                
-                //NOTE: if we have 0 timers here then we do not recalculate the waiting time.
-                //      But, in that case the recurring timer will restart itself in its expired signal handler
-                //      and will signal the semaphore, thus it does not matter that we did not recalculate the
-                //      waiting time here, since the semaphore will be signaled anyway after all the expired
-                //      signal handlers are called.
+            //emit expired signal for expired timers
+            for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
+                (*i)->expired.Emit(*(*i));
             }
-        
-            //TODO: zero out the semaphore
         }
-
-        //emit expired signal for expired timers
-        for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
-            (*i)->expired.Emit(*(*i));
-        }
-        
-        //TODO: skip waiting on the semaphore if there was expired timers, do that until there is no expired timers
-        
-#ifdef DEBUG
-        {
-            ting::Mutex::Guard mutexGuard(this->mutex);
-            ASSERT(this->timers.size() > 0) //make sure we have at least 1 timer here
-        }
-#endif
 
 		this->sema.Wait(millis);
-	}//~while
+	}//~while(!this->quitFlag)
 
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
 }//~Run()
