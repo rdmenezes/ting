@@ -372,6 +372,8 @@ inline void TimerLib::TimerThread::Run(){
             (*i)->expired.Emit(*(*i));
         }
         
+        //TODO: skip waiting on the semaphore if there was expired timers, do that until there is no expired timers
+        
 #ifdef DEBUG
         {
             ting::Mutex::Guard mutexGuard(this->mutex);
