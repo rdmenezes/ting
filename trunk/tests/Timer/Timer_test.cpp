@@ -22,6 +22,8 @@ struct TestTimer1 : public ting::Timer{
 	}
 };
 
+
+
 struct TestTimer2 : public ting::Timer{
 	TestTimer2(){}
 
@@ -32,6 +34,8 @@ struct TestTimer2 : public ting::Timer{
 		this->Start(2500);
 	}
 };
+
+
 
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning BasicTimerTest, it will take about 5 seconds..." << std::endl)
@@ -75,6 +79,8 @@ struct TestTimer : public ting::Timer{
 		++(*this->e);
 	}
 };
+
+
 
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning SeveralTimersForTheSameInterval, it will take about 1 second..." << std::endl)
@@ -123,6 +129,8 @@ struct TestTimer : public ting::Timer{
 	}
 };
 
+
+
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning StoppingTimers, it will take about 3 seconds..." << std::endl)
 	
@@ -162,6 +170,7 @@ void Run(){
 }
 
 }//~namespace
+
 
 
 int main(int argc, char *argv[]){
