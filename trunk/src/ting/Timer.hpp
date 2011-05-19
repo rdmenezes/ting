@@ -106,54 +106,54 @@ const unsigned DMaxTicks = ting::u32(-1);
 class Timer{
 	friend class TimerLib;
 
-    ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
+	ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
 
 private:
-    typedef std::multimap<ting::u64, Timer*> T_TimerList;
-    typedef T_TimerList::iterator T_TimerIter;
-    
+	typedef std::multimap<ting::u64, Timer*> T_TimerList;
+	typedef T_TimerList::iterator T_TimerIter;
+
 	T_TimerIter i;//if timer is running, this is the iterator into the map of timers
 
 public:
 
-    /**
-     * @brief Timer expiration handler.
-     * This method is called when timer expires.
-     * Note, that the method is called from a separate thread, so user should
-     * do all the necessary synchronization when implementing this method.
-     * Also, note that expired methods from different timers are called sequentially,
-     * that means that, for example, if two timers have expired simultaneously then
-     * the expired method of the first timer is called first, and only after it returns
-     * the expired method of the second timer is called.
-     * That means, that one should handle the timer expiration as fast as possible to
-     * avoid inaccuracy of other timers which have expired at the same time, since
-     * the longer your expired handler method is executed, the latter expired method of those other timers will be called.
-     * Do not do any heavy calculations of logics in the expired handler method. Do just
-     * quick initiation of the action which should be taken on timer expiration,
-     * for example, post a message to the message queue of another thread to be handled by that another thread.
-     */
-    virtual void OnExpired() = 0;
+	/**
+	 * @brief Timer expiration handler.
+	 * This method is called when timer expires.
+	 * Note, that the method is called from a separate thread, so user should
+	 * do all the necessary synchronization when implementing this method.
+	 * Also, note that expired methods from different timers are called sequentially,
+	 * that means that, for example, if two timers have expired simultaneously then
+	 * the expired method of the first timer is called first, and only after it returns
+	 * the expired method of the second timer is called.
+	 * That means, that one should handle the timer expiration as fast as possible to
+	 * avoid inaccuracy of other timers which have expired at the same time, since
+	 * the longer your expired handler method is executed, the latter expired method of those other timers will be called.
+	 * Do not do any heavy calculations of logics in the expired handler method. Do just
+	 * quick initiation of the action which should be taken on timer expiration,
+	 * for example, post a message to the message queue of another thread to be handled by that another thread.
+	 */
+	virtual void OnExpired() = 0;
 
-    /**
-     * @brief Constructor for new Timer instance.
-     * The newly created timer is initially not running.
-     */
+	/**
+	 * @brief Constructor for new Timer instance.
+	 * The newly created timer is initially not running.
+	 */
 	inline Timer(){
 		ASSERT(!this->isRunning)
 	}
 
 	virtual ~Timer();
 
-    /**
-     * @brief Start timer.
-     * After calling this method one can be sure that the timer state has been
-     * switched to running. This means that if you call Stop() after that and it
-     * returns false then this will mean that the timer has expired rather than not started.
-     * It is allowed to call the Start() method from within the handler of the timer expired signal.
-     * If the timer is already running (i.e. it was already started before and has not expired yet)
-     * the ting::Exc exception will be thrown.
-     * @param millisec - timer timeout in milliseconds.
-     */
+	/**
+	 * @brief Start timer.
+	 * After calling this method one can be sure that the timer state has been
+	 * switched to running. This means that if you call Stop() after that and it
+	 * returns false then this will mean that the timer has expired rather than not started.
+	 * It is allowed to call the Start() method from within the handler of the timer expired signal.
+	 * If the timer is already running (i.e. it was already started before and has not expired yet)
+	 * the ting::Exc exception will be thrown.
+	 * @param millisec - timer timeout in milliseconds.
+	 */
 	inline void Start(ting::u32 millisec);
 
 	/**
@@ -161,8 +161,8 @@ public:
 	 * Stops the timer if it was started before. In case it was not started
 	 * or it has already expired this method does nothing.
 	 * @return true if timer was running and was stopped.
-     * @return false if timer was not running already when the Stop() method was called. I.e.
-     *         the timer has expired already or was not started.
+	 * @return false if timer was not running already when the Stop() method was called. I.e.
+	 *         the timer has expired already or was not started.
 	 */
 	inline bool Stop();
 };
@@ -178,7 +178,7 @@ public:
  */
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
-    
+
 	class TimerThread : public ting::Thread{
 	public:
 		ting::Inited<bool, false> quitFlag;
@@ -186,9 +186,9 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 
-        //map requires key uniqueness, but in our case the key is a stop ticks,
-        //so, use multimap to allow similar keys.
-        //TODO: test similar keys
+		//map requires key uniqueness, but in our case the key is a stop ticks,
+		//so, use multimap to allow similar keys.
+		//TODO: test similar keys
 		Timer::T_TimerList timers;
 
 
@@ -196,10 +196,10 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Inited<ting::u64, 0> ticks;
 		ting::Inited<bool, false> incTicks;//flag indicates that high dword of ticks needs increment
 
-        //This function should be called at least once in 16 days.
-        //This should be achieved by having a repeating timer set to 16 days, which will do nothing but
-        //calling this function.
-        inline ting::u64 GetTicks();
+		//This function should be called at least once in 16 days.
+		//This should be achieved by having a repeating timer set to 16 days, which will do nothing but
+		//calling this function.
+		inline ting::u64 GetTicks();
 
 
 
@@ -226,33 +226,33 @@ class TimerLib : public Singleton<TimerLib>{
 
 	} thread;
 
-    class HalfMaxTicksTimer : public Timer{
-    public:
-        //override
-        void OnExpired(){
-            this->Start(DMaxTicks / 2);
-        }
-    } halfMaxTicksTimer;
-    
+	class HalfMaxTicksTimer : public Timer{
+	public:
+		//override
+		void OnExpired(){
+			this->Start(DMaxTicks / 2);
+		}
+	} halfMaxTicksTimer;
+
 public:
 	inline TimerLib(){
 		this->thread.Start();
 
-        //start timer for half of the max ticks
-        this->halfMaxTicksTimer.OnExpired();
+		//start timer for half of the max ticks
+		this->halfMaxTicksTimer.OnExpired();
 	}
 
-    /**
-     * @brief Destructor.
-     * Note, that before destroying the timer library singleton object all the
-     * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
-     */
+	/**
+	 * @brief Destructor.
+	 * Note, that before destroying the timer library singleton object all the
+	 * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
+	 */
 	~TimerLib(){
 #ifdef DEBUG
-        {
-            ting::Mutex::Guard mutexGuard(this->thread.mutex);
-            ASSERT(this->thread.timers.size() == 1) // 1 for half max ticks timer
-        }
+		{
+			ting::Mutex::Guard mutexGuard(this->thread.mutex);
+			ASSERT(this->thread.timers.size() == 1) // 1 for half max ticks timer
+		}
 #endif
 		this->thread.SetQuitFlagAndSignalSemaphore();
 		this->thread.Join();
@@ -262,25 +262,25 @@ public:
 
 
 inline Timer::~Timer(){
-    ASSERT(TimerLib::IsCreated())
-    this->Stop();
+	ASSERT(TimerLib::IsCreated())
+	this->Stop();
 
-    ASSERT(!this->isRunning)
+	ASSERT(!this->isRunning)
 }
 
 
 
 inline void Timer::Start(ting::u32 millisec){
-    ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
+	ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
-    TimerLib::Inst().thread.AddTimer_ts(this, millisec);
+	TimerLib::Inst().thread.AddTimer_ts(this, millisec);
 }
 
 
 
 inline bool Timer::Stop(){
-    ASSERT(TimerLib::IsCreated())
-    return TimerLib::Inst().thread.RemoveTimer_ts(this);
+	ASSERT(TimerLib::IsCreated())
+	return TimerLib::Inst().thread.RemoveTimer_ts(this);
 }
 
 
@@ -291,7 +291,7 @@ inline bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
 
 	if(!timer->isRunning){
 		return false;
-    }
+	}
 
 	//if isStarted flag is set then the timer will be stopped now, so
 	//change the flag
@@ -299,14 +299,14 @@ inline bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
 
 	ASSERT(timer->i != this->timers.end())
 
-    //if that was the first timer, signal the semaphore about timer deletion in order to recalculate the waiting time
-    //TODO: test this use case
-    if(this->timers.begin() == timer->i){
-        this->sema.Signal();
-    }
+	//if that was the first timer, signal the semaphore about timer deletion in order to recalculate the waiting time
+	//TODO: test this use case
+	if(this->timers.begin() == timer->i){
+		this->sema.Signal();
+	}
 
 	this->timers.erase(timer->i);
-    
+
 	//was running
 	return true;
 }
@@ -319,40 +319,40 @@ inline void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 
 	if(timer->isRunning){
 		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already running!");
-    }
+	}
 
 	timer->isRunning = true;
 
 	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
 
-    timer->i = this->timers.insert(
-            std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
-        );
-    
-    ASSERT(timer->i != this->timers.end())
-    ASSERT(timer->i->second)
+	timer->i = this->timers.insert(
+			std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
+		);
 
-    //signal the semaphore about new timer addition in order to recalculate the waiting time
+	ASSERT(timer->i != this->timers.end())
+	ASSERT(timer->i->second)
+
+	//signal the semaphore about new timer addition in order to recalculate the waiting time
 	this->sema.Signal();
 }
 
 
 
 inline ting::u64 TimerLib::TimerThread::GetTicks(){
-    ting::u32 ticks = ting::GetTicks() % DMaxTicks;
+	ting::u32 ticks = ting::GetTicks() % DMaxTicks;
 
-    if(this->incTicks){
-        if(ticks < DMaxTicks / 2){
-            this->incTicks = false;
-            this->ticks += (ting::u64(DMaxTicks) + 1); //update 64 bit ticks counter
-        }
-    }else{
-        if(ticks > DMaxTicks / 2){
-            this->incTicks = true;
-        }
-    }
+	if(this->incTicks){
+		if(ticks < DMaxTicks / 2){
+			this->incTicks = false;
+			this->ticks += (ting::u64(DMaxTicks) + 1); //update 64 bit ticks counter
+		}
+	}else{
+		if(ticks > DMaxTicks / 2){
+			this->incTicks = true;
+		}
+	}
 
-    return this->ticks + ting::u64(ticks);
+	return this->ticks + ting::u64(ticks);
 }
 
 
@@ -360,55 +360,55 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 //override
 inline void TimerLib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
-    
+
 	while(!this->quitFlag){
-        ting::u32 millis;
-        
-        while(true){
-            std::vector<Timer*> expiredTimers;
+		ting::u32 millis;
 
-            {
-                ting::Mutex::Guard mutexGuard(this->mutex);
+		while(true){
+			std::vector<Timer*> expiredTimers;
 
-                ting::u64 ticks = this->GetTicks();
+			{
+				ting::Mutex::Guard mutexGuard(this->mutex);
 
-                for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
-                    if(b->first > ticks){
-                        break;//~for
-                    }
-                    
-                    Timer *timer = b->second;
-                    //add the timer to list of expired timers
-                    ASSERT(timer)
-                    expiredTimers.push_back(timer);
+				ting::u64 ticks = this->GetTicks();
 
-                    //Change the expired timer state to not running.
-                    //This should be done before the expired signal of the timer will be emitted.
-                    timer->isRunning = false;
+				for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
+					if(b->first > ticks){
+						break;//~for
+					}
 
-                    this->timers.erase(b);
-                }
+					Timer *timer = b->second;
+					//add the timer to list of expired timers
+					ASSERT(timer)
+					expiredTimers.push_back(timer);
 
-                if(expiredTimers.size() == 0){
-                    ASSERT(this->timers.size() > 0) //if we have no expired timers here, then at least one timer should be running (the half-max-ticks timer).
+					//Change the expired timer state to not running.
+					//This should be done before the expired signal of the timer will be emitted.
+					timer->isRunning = false;
 
-                    //calculate new waiting time
-                    ASSERT(this->timers.begin()->first > ticks)
-                    ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
-                    millis = ting::u32(this->timers.begin()->first - ticks);
-                    
-                    //TODO: zero out the semaphore
-                    
-                    break;//~while(true)
-                }
-            }
+					this->timers.erase(b);
+				}
 
-            //emit expired signal for expired timers
-            for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
-                ASSERT(*i)
-                (*i)->OnExpired();
-            }
-        }
+				if(expiredTimers.size() == 0){
+					ASSERT(this->timers.size() > 0) //if we have no expired timers here, then at least one timer should be running (the half-max-ticks timer).
+
+					//calculate new waiting time
+					ASSERT(this->timers.begin()->first > ticks)
+					ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
+					millis = ting::u32(this->timers.begin()->first - ticks);
+
+					//TODO: zero out the semaphore
+
+					break;//~while(true)
+				}
+			}
+
+			//emit expired signal for expired timers
+			for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
+				ASSERT(*i)
+				(*i)->OnExpired();
+			}
+		}
 
 		this->sema.Wait(millis);
 	}//~while(!this->quitFlag)
