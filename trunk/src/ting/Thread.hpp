@@ -360,107 +360,131 @@ public:
 #endif
 	}
 
-
-
+	
+	
 	/**
 	 * @brief Wait on semaphore.
 	 * Decrements semaphore value. If current value is 0 then this method will wait
 	 * until some other thread signals the semaphore (i.e. increments the value)
 	 * by calling Semaphore::Signal() on that semaphore.
-	 * @param timeoutMillis - waiting timeout.
-	 *                        If timeoutMillis is 0 (the default value) then this
-	 *                        method will wait forever or until the semaphore is
-	 *                        signalled.
-	 * @return returns true if the semaphore value was decremented.
-	 * @return returns false if the timeout was hit.
 	 */
-	bool Wait(unsigned timeoutMillis = 0){
+	void Wait(){
 #ifdef WIN32
-		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == 0 ? INFINITE : timeoutMillis))){
+		switch(WaitForSingleObject(this->s, DWORD(INFINITE))){
 			case WAIT_OBJECT_0:
 //				LOG(<<"Semaphore::Wait(): exit"<<std::endl)
-				return true;
+				break;
 			case WAIT_TIMEOUT:
-				return false;
+				ASSERT(false)
 				break;
 			default:
 				throw ting::Exc("Semaphore::Wait(): wait failed");
 				break;
 		}
 #elif defined(__SYMBIAN32__)
-		if(timeoutMillis == 0){
-			this->s.Wait();
-		}else{
-			throw ting::Exc("Semaphore::Wait(): timeouted wait unimplemented on Symbian, TODO: implement");
-		}
+		this->s.Wait();
 #elif defined(__APPLE__)
 		int retVal = 0;
-		if(timeoutMillis == 0){
-			do{
-				retVal = sem_wait(this->s);
-			}while(retVal == -1 && errno == EINTR);
 
-			if(retVal < 0){
-				throw ting::Exc("Semaphore::Wait(): wait failed");
-			}
-		}else{
-			// simulate the behaviour of wait
-			while(timeoutMillis > 0){
-				retVal = sem_trywait(this->s);
-				if(retVal == 0){
-					break; // OK leave the loop
-				}else{
-					if(errno == EAGAIN){ // the semaphore was blocked
-						struct timespec amount;
-						struct timespec result;
-						int resultsleep;
-						amount.tv_sec = timeoutMillis / 1000;
-						amount.tv_nsec = (timeoutMillis % 1000) * 1000000;
-						resultsleep = nanosleep(&amount, &result);
-						// update timeoutMillis based on the output of the sleep call
-						// if nanosleep returns -1 the sleep was interrumped and result
-						// struct is updated with the remainin unsleept time.
-						if(resultsleep == 0){
-							timeoutMillis = 0;
-						}else{
-							timeoutMillis = result.tv_sec * 1000 + result.tv_nsec / 1000000;
-						}
-					}else if(errno != EINTR){
-						throw ting::Exc("Semaphore::Wait(): wait failed");
-					}
-				}
-			}//~while()
+		do{
+			retVal = sem_wait(this->s);
+		}while(retVal == -1 && errno == EINTR);
 
-			// no time left means we reached the timeout
-			if(timeoutMillis == 0){
-				return false;
-			}
+		if(retVal < 0){
+			throw ting::Exc("Semaphore::Wait(): wait failed");
 		}
 #elif defined(__linux__)
-		if(timeoutMillis == 0){
-			int retVal;
-			do{
-				retVal = sem_wait(&this->s);
-			}while(retVal == -1 && errno == EINTR);
-			if(retVal < 0){
-				throw ting::Exc("Semaphore::Wait(): wait failed");
+		int retVal;
+		do{
+			retVal = sem_wait(&this->s);
+		}while(retVal == -1 && errno == EINTR);
+		if(retVal < 0){
+			throw ting::Exc("Semaphore::Wait(): wait failed");
+		}
+#else
+#error "unknown system"
+#endif
+	}
+	
+
+
+	/**
+	 * @brief Wait on semaphore with timeout.
+	 * Decrements semaphore value. If current value is 0 then this method will wait
+	 * until some other thread signals the semaphore (i.e. increments the value)
+	 * by calling Semaphore::Signal() on that semaphore.
+	 * @param timeoutMillis - waiting timeout.
+	 *                        If timeoutMillis is 0 (the default value) then this
+	 *                        method will try to decrement the semaphore value and exit immediately.
+	 * @return returns true if the semaphore value was decremented.
+	 * @return returns false if the timeout was hit.
+	 */
+	bool Wait(ting::u32 timeoutMillis){
+#ifdef WIN32
+		STATIC_ASSERT(INFINITE == 0xffffffff)
+		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == INFINITE ? INFINITE - 1 : timeoutMillis))){
+			case WAIT_OBJECT_0:
+				return true;
+			case WAIT_TIMEOUT:
+				return false;
+			default:
+				throw ting::Exc("Semaphore::Wait(u32): wait failed");
+				break;
+		}
+#elif defined(__SYMBIAN32__)
+		throw ting::Exc("Semaphore::Wait(): wait with timeout is not implemented on Symbian, TODO: implement");
+#elif defined(__APPLE__)
+		int retVal = 0;
+
+		// simulate the behavior of wait
+		do{
+			retVal = sem_trywait(this->s);
+			if(retVal == 0){
+				break; // OK leave the loop
+			}else{
+				if(errno == EAGAIN){ // the semaphore was blocked
+					struct timespec amount;
+					struct timespec result;
+					int resultsleep;
+					amount.tv_sec = timeoutMillis / 1000;
+					amount.tv_nsec = (timeoutMillis % 1000) * 1000000;
+					resultsleep = nanosleep(&amount, &result);
+					// update timeoutMillis based on the output of the sleep call
+					// if nanosleep() returns -1 the sleep was interrupted and result
+					// struct is updated with the remaining un-slept time.
+					if(resultsleep == 0){
+						timeoutMillis = 0;
+					}else{
+						timeoutMillis = result.tv_sec * 1000 + result.tv_nsec / 1000000;
+					}
+				}else if(errno != EINTR){
+					throw ting::Exc("Semaphore::Wait(): wait failed");
+				}
 			}
-		}else{
-			timespec ts;
+		}while(timeoutMillis > 0);
 
-			if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
-				throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
+		// no time left means we reached the timeout
+		if(timeoutMillis == 0){
+			return false;
+		}
+#elif defined(__linux__)
+		//TODO: use sem_trywait() if requested timeout is 0
+		
+		timespec ts;
 
-			ts.tv_sec += timeoutMillis / 1000;
-			ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
-			ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
-			ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
+		if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
+			throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
 
-			if(sem_timedwait(&this->s, &ts) == -1){
-				if(errno == ETIMEDOUT)
-					return false;
-				else
-					throw ting::Exc("Semaphore::Wait(): error");
+		ts.tv_sec += timeoutMillis / 1000;
+		ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
+		ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
+		ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
+
+		if(sem_timedwait(&this->s, &ts) == -1){
+			if(errno == ETIMEDOUT){
+				return false;
+			}else{
+				throw ting::Exc("Semaphore::Wait(): error");
 			}
 		}
 #else
@@ -896,7 +920,9 @@ public:
 			}
 		}
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): waiting" << std::endl)
-		ASSERT_EXEC(this->sem.Wait())
+		
+		this->sem.Wait();
+		
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signalled" << std::endl)
 		{
 			Mutex::Guard mutexGuard(this->mut);

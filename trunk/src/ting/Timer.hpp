@@ -187,7 +187,7 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Semaphore sema;
 
 		//map requires key uniqueness, but in our case the key is a stop ticks,
-		//so, use multimap to allow similar keys.
+		//so, use std::multimap to allow similar keys.
 		//TODO: test similar keys
 		Timer::T_TimerList timers;
 
