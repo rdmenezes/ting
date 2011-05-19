@@ -9,22 +9,20 @@ struct TestTimer1 : public ting::Timer{
 
     TestTimer1(bool* exitFlag) :
             e(exitFlag)
-    {
-        this->expired.Connect(this, &TestTimer1::OnExpire);
-    }
+    {}
 
-    void OnExpire(){
+    //override
+    void OnExpired(){
         TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
         *this->e = true;
     }
 };
 
 struct TestTimer2 : public ting::Timer{
-    TestTimer2(){
-        this->expired.Connect(this, &TestTimer2::OnExpire);
-    }
+    TestTimer2(){}
 
-    void OnExpire(){
+    //override
+    void OnExpired(){
         TRACE_ALWAYS(<<"\t- timer2 fired!"<<std::endl)
 
         this->Start(2500);

@@ -117,23 +117,22 @@ private:
 public:
 
     /**
-     * @brief Signal of timer expiration.
-     * This signal is emitted when timer expires.
-     * The reference to the expired timer is passed to signal handlers as argument.
-     * Note, that the signal is emitted from a separate thread, so user should
-     * do all the necessary synchronization in signal handlers connected to it.
-     * Also, note that expired signals from different timers are emitted sequentially,
+     * @brief Timer expiration handler.
+     * This method is called when timer expires.
+     * Note, that the method is called from a separate thread, so user should
+     * do all the necessary synchronization when implementing this method.
+     * Also, note that expired methods from different timers are called sequentially,
      * that means that, for example, if two timers have expired simultaneously then
-     * the expired signal of the first timer will be emitted and only after all
-     * handlers connected to the signal return the expired signal of the second timer
-     * is emitted. In other words, handle the expired signal as fast as possible to
+     * the expired method of the first timer is called first, and only after it returns
+     * the expired method of the second timer is called.
+     * That means, that one should handle the timer expiration as fast as possible to
      * avoid inaccuracy of other timers which have expired at the same time, since
-     * the longer your handler is executed, the latter expired signal of those other timers will be emitted.
-     * Do not do any heavy calculations of logics in the signal handler. Do just
+     * the longer your expired handler method is executed, the latter expired method of those other timers will be called.
+     * Do not do any heavy calculations of logics in the expired handler method. Do just
      * quick initiation of the action which should be taken on timer expiration,
-     * for example, post a message to the message queue to be handled by some another thread.
+     * for example, post a message to the message queue of another thread to be handled by that another thread.
      */
-	ting::Signal1<Timer&> expired;
+    virtual void OnExpired() = 0;
 
     /**
      * @brief Constructor for new Timer instance.
@@ -227,19 +226,20 @@ class TimerLib : public Singleton<TimerLib>{
 
 	} thread;
 
-    Timer halfMaxTicksTimer;
-    
-    void OnHalfMaxTicksTimerExpired(Timer& timer){
-        timer.Start(DMaxTicks / 2);
-    }
+    class HalfMaxTicksTimer : public Timer{
+    public:
+        //override
+        void OnExpired(){
+            this->Start(DMaxTicks / 2);
+        }
+    } halfMaxTicksTimer;
     
 public:
 	inline TimerLib(){
 		this->thread.Start();
 
         //start timer for half of the max ticks
-        this->halfMaxTicksTimer.expired.Connect(this, &TimerLib::OnHalfMaxTicksTimerExpired);
-        this->OnHalfMaxTicksTimerExpired(this->halfMaxTicksTimer);
+        this->halfMaxTicksTimer.OnExpired();
 	}
 
     /**
@@ -405,7 +405,8 @@ inline void TimerLib::TimerThread::Run(){
 
             //emit expired signal for expired timers
             for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
-                (*i)->expired.Emit(*(*i));
+                ASSERT(*i)
+                (*i)->OnExpired();
             }
         }
 
