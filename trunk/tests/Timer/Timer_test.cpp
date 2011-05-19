@@ -124,7 +124,7 @@ struct TestTimer : public ting::Timer{
 };
 
 void Run(){
-	TRACE_ALWAYS(<< "\tRunning StoppingTimers, it will take about 5 seconds..." << std::endl)
+	TRACE_ALWAYS(<< "\tRunning StoppingTimers, it will take about 3 seconds..." << std::endl)
 	
 	bool exit1 = false;
 	bool exit2 = false;
