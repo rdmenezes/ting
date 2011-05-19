@@ -17,7 +17,7 @@ struct TestTimer1 : public ting::Timer{
 
 	//override
 	void OnExpired(){
-		TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
+		TRACE_ALWAYS(<< "\t- timer1 fired!" << std::endl)
 		*this->e = true;
 	}
 };
@@ -29,7 +29,7 @@ struct TestTimer2 : public ting::Timer{
 
 	//override
 	void OnExpired(){
-		TRACE_ALWAYS(<<"\t- timer2 fired!"<<std::endl)
+		TRACE_ALWAYS(<< "\t- timer2 fired!" << std::endl)
 
 		this->Start(2500);
 	}
@@ -49,7 +49,16 @@ void Run(){
 	timer2.Start(2500);
 
 //	TRACE_ALWAYS(<< "loop " << std::endl)
-	while(!exit){}
+	
+	//this doesn't work with -O3, apparently compiler evaluates expression in the while() only once and the loop never exits
+//	while(!exit){
+		//ting::Thread::Sleep(200);//if uncomment this line, then it starts workin ok with -O3. TODO: a compiler bug?
+//	}
+	
+	for(unsigned i = 0; !exit; ++i){
+		ting::Thread::Sleep(100);
+		ASSERT_ALWAYS(i != 60)
+	}
 
 	ting::Thread::Sleep(50);
 }
