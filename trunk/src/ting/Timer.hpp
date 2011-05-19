@@ -96,6 +96,13 @@ const unsigned DMaxTicks = ting::u32(-1);
 
 
 
+/**
+ * @brief General purpose timer.
+ * This is a class representing a timer. Its accuracy is not expected to be high,
+ * approximately it is tens of milliseconds, i.e. 0.01 second.
+ * Before using the timers it is necessary to initialize the timer library, see
+ * description of ting::TimerLib class for details.
+ */
 class Timer{
 	friend class TimerLib;
 
@@ -113,9 +120,25 @@ public:
      * @brief Signal of timer expiration.
      * This signal is emitted when timer expires.
      * The reference to the expired timer is passed to signal handlers as argument.
+     * Note, that the signal is emitted from a separate thread, so user should
+     * do all the necessary synchronization in signal handlers connected to it.
+     * Also, note that expired signals from different timers are emitted sequentially,
+     * that means that, for example, if two timers have expired simultaneously then
+     * the expired signal of the first timer will be emitted and only after all
+     * handlers connected to the signal return the expired signal of the second timer
+     * is emitted. In other words, handle the expired signal as fast as possible to
+     * avoid inaccuracy of other timers which have expired at the same time, since
+     * the longer your handler is executed, the latter expired signal of those other timers will be emitted.
+     * Do not do any heavy calculations of logics in the signal handler. Do just
+     * quick initiation of the action which should be taken on timer expiration,
+     * for example, post a message to the message queue to be handled by some another thread.
      */
 	ting::Signal1<Timer&> expired;
 
+    /**
+     * @brief Constructor for new Timer instance.
+     * The newly created timer is initially not running.
+     */
 	inline Timer(){
 		ASSERT(!this->isRunning)
 	}
@@ -128,6 +151,8 @@ public:
      * switched to running. This means that if you call Stop() after that and it
      * returns false then this will mean that the timer has expired rather than not started.
      * It is allowed to call the Start() method from within the handler of the timer expired signal.
+     * If the timer is already running (i.e. it was already started before and has not expired yet)
+     * the ting::Exc exception will be thrown.
      * @param millisec - timer timeout in milliseconds.
      */
 	inline void Start(ting::u32 millisec);
@@ -145,6 +170,13 @@ public:
 
 
 
+/**
+ * @brief Timer library singleton class.
+ * This is a singleton class which represents timer library which allows using
+ * timers (see ting::Timer class). Before using timers one needs to initialize
+ * the timer library, this is done just by creating the singleton object of
+ * the timer library class.
+ */
 class TimerLib : public Singleton<TimerLib>{
 	friend class ting::Timer;
     
@@ -181,9 +213,9 @@ class TimerLib : public Singleton<TimerLib>{
 			ASSERT(this->timers.size() == 0)
 		}
 
-		inline void AddTimer(Timer* timer, u32 timeout);
+		inline void AddTimer_ts(Timer* timer, u32 timeout);
 
-		inline bool RemoveTimer(Timer* timer);
+		inline bool RemoveTimer_ts(Timer* timer);
 
 		inline void SetQuitFlagAndSignalSemaphore(){
 			this->quitFlag = true;
@@ -210,6 +242,11 @@ public:
         this->OnHalfMaxTicksTimerExpired(this->halfMaxTicksTimer);
 	}
 
+    /**
+     * @brief Destructor.
+     * Note, that before destroying the timer library singleton object all the
+     * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
+     */
 	~TimerLib(){
 #ifdef DEBUG
         {
@@ -236,19 +273,19 @@ inline Timer::~Timer(){
 inline void Timer::Start(ting::u32 millisec){
     ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
-    TimerLib::Inst().thread.AddTimer(this, millisec);
+    TimerLib::Inst().thread.AddTimer_ts(this, millisec);
 }
 
 
 
 inline bool Timer::Stop(){
     ASSERT(TimerLib::IsCreated())
-    return TimerLib::Inst().thread.RemoveTimer(this);
+    return TimerLib::Inst().thread.RemoveTimer_ts(this);
 }
 
 
 
-inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
+inline bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
@@ -276,7 +313,7 @@ inline bool TimerLib::TimerThread::RemoveTimer(Timer* timer){
 
 
 
-inline void TimerLib::TimerThread::AddTimer(Timer* timer, u32 timeout){
+inline void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
@@ -341,10 +378,12 @@ inline void TimerLib::TimerThread::Run(){
                     }
                     
                     Timer *timer = b->second;
-                    //add the timer to list of expired timers and change the timer state to not running
+                    //add the timer to list of expired timers
                     ASSERT(timer)
                     expiredTimers.push_back(timer);
 
+                    //Change the expired timer state to not running.
+                    //This should be done before the expired signal of the timer will be emitted.
                     timer->isRunning = false;
 
                     this->timers.erase(b);
@@ -359,6 +398,7 @@ inline void TimerLib::TimerThread::Run(){
                     millis = ting::u32(this->timers.begin()->first - ticks);
                     
                     //TODO: zero out the semaphore
+                    
                     break;//~while(true)
                 }
             }
