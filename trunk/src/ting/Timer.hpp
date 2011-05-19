@@ -90,12 +90,6 @@ inline ting::u32 GetTicks();
 
 
 
-//This constant is for testing purposes.
-//Should be set to ting::u32(-1) in release.
-const unsigned DMaxTicks = ting::u32(-1);
-
-
-
 /**
  * @brief General purpose timer.
  * This is a class representing a timer. Its accuracy is not expected to be high,
@@ -106,6 +100,12 @@ const unsigned DMaxTicks = ting::u32(-1);
 class Timer{
 	friend class TimerLib;
 
+	//This constant is for testing purposes.
+	//Should be set to ting::u32(-1) in release.
+	inline static ting::u32 DMaxTicks(){
+		return ting::u32(-1);
+	}
+	
 	ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
 
 private:
@@ -196,7 +196,7 @@ class TimerLib : public Singleton<TimerLib>{
 		ting::Inited<ting::u64, 0> ticks;
 		ting::Inited<bool, false> incTicks;//flag indicates that high dword of ticks needs increment
 
-		//This function should be called at least once in 16 days.
+		//This function should be called at least once in 16 days (half of ting::u32(-1) milliseconds).
 		//This should be achieved by having a repeating timer set to 16 days, which will do nothing but
 		//calling this function.
 		inline ting::u64 GetTicks();
@@ -230,7 +230,7 @@ class TimerLib : public Singleton<TimerLib>{
 	public:
 		//override
 		void OnExpired(){
-			this->Start(DMaxTicks / 2);
+			this->Start(Timer::DMaxTicks() / 2);
 		}
 	} halfMaxTicksTimer;
 
@@ -339,15 +339,15 @@ inline void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 
 
 inline ting::u64 TimerLib::TimerThread::GetTicks(){
-	ting::u32 ticks = ting::GetTicks() % DMaxTicks;
+	ting::u32 ticks = ting::GetTicks() % Timer::DMaxTicks();
 
 	if(this->incTicks){
-		if(ticks < DMaxTicks / 2){
+		if(ticks < Timer::DMaxTicks() / 2){
 			this->incTicks = false;
-			this->ticks += (ting::u64(DMaxTicks) + 1); //update 64 bit ticks counter
+			this->ticks += (ting::u64(Timer::DMaxTicks()) + 1); //update 64 bit ticks counter
 		}
 	}else{
-		if(ticks > DMaxTicks / 2){
+		if(ticks > Timer::DMaxTicks() / 2){
 			this->incTicks = true;
 		}
 	}
