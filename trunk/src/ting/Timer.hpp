@@ -188,7 +188,6 @@ class TimerLib : public Singleton<TimerLib>{
 
 		//map requires key uniqueness, but in our case the key is a stop ticks,
 		//so, use std::multimap to allow similar keys.
-		//TODO: test similar keys
 		Timer::T_TimerList timers;
 
 
@@ -300,7 +299,6 @@ inline bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
 	ASSERT(timer->i != this->timers.end())
 
 	//if that was the first timer, signal the semaphore about timer deletion in order to recalculate the waiting time
-	//TODO: test this use case
 	if(this->timers.begin() == timer->i){
 		this->sema.Signal();
 	}
