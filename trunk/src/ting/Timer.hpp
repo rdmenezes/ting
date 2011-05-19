@@ -397,7 +397,8 @@ inline void TimerLib::TimerThread::Run(){
 					ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
 					millis = ting::u32(this->timers.begin()->first - ticks);
 
-					//TODO: zero out the semaphore
+					//zero out the semaphore for optimization purposes
+					while(this->sema.Wait(0)){}
 
 					break;//~while(true)
 				}

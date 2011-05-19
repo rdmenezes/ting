@@ -468,23 +468,32 @@ public:
 			return false;
 		}
 #elif defined(__linux__)
-		//TODO: use sem_trywait() if requested timeout is 0
-		
-		timespec ts;
+		//if timeoutMillis is 0 then use sem_trywait() to avoid unnecessary time calculation for sem_timedwait()
+		if(timeoutMillis == 0){
+			if(sem_trywait(&this->s) == -1){
+				if(errno == EAGAIN){
+					return false;
+				}else{
+					throw ting::Exc("Semaphore::Wait(u32): error: sem_trywait() failed");
+				}
+			}
+		}else{
+			timespec ts;
 
-		if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
-			throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
+			if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
+				throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
 
-		ts.tv_sec += timeoutMillis / 1000;
-		ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
-		ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
-		ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
+			ts.tv_sec += timeoutMillis / 1000;
+			ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
+			ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
+			ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
 
-		if(sem_timedwait(&this->s, &ts) == -1){
-			if(errno == ETIMEDOUT){
-				return false;
-			}else{
-				throw ting::Exc("Semaphore::Wait(): error");
+			if(sem_timedwait(&this->s, &ts) == -1){
+				if(errno == ETIMEDOUT){
+					return false;
+				}else{
+					throw ting::Exc("Semaphore::Wait(u32): error: sem_timedwait() failed");
+				}
 			}
 		}
 #else
