@@ -50,9 +50,9 @@ void Run(){
 
 //	TRACE_ALWAYS(<< "loop " << std::endl)
 	
-	//this doesn't work with -O3, apparently compiler evaluates expression in the while() only once and the loop never exits
+	//this doesn't work with -O3, apparently compiler evaluates expression in the while() only once because the body of the loop is empty, thus the loop never exits
 //	while(!exit){
-		//ting::Thread::Sleep(200);//if uncomment this line, then it starts workin ok with -O3. TODO: a compiler bug?
+		//ting::Thread::Sleep(200);//if uncomment this line, then it starts working ok with -O3
 //	}
 	
 	for(unsigned i = 0; !exit; ++i){
