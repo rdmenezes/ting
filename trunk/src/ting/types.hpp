@@ -93,57 +93,6 @@ STATIC_ASSERT(sizeof(s64) == 8)
 
 
 /**
- * @brief Thin wrapper above bool C++ built-in type.
- * Thin wrapper above bool type which allows declaration
- * of a bool type variable initialized to some value which is defined by template
- * parameter. This is useful when declaring class members of type bool, so you can
- * indicate to which value the variable should be initialized without using
- * constructor initialization list or assigning the value in the constructor body.
- * Auto-conversions to/from C++ built-in bool type are supported.
- *
- * Typical usage:
- * @code
- * #include <ting/types.hpp>
- *
- * //...
- *
- * class Widget{
- *     ting::Bool<false> isHidden; //initialized to false upon object construction
- * public:
- *     void Draw(){
- *         if(this->isHidden)
- *             return;
- *
- *         //object is visible, draw it on the screen
- *         //...
- *
- *     }
- *
- *     inline void SetHidden(bool hide){
- *         this->isHidden = hide;
- *     }
- *
- *     inline bool IsHidden()const{
- *         return this->isHidden;
- *     }
- * }
- * @endcode
- */
-template <bool Value> class Bool{
-	bool value;
-public:
-	inline Bool(bool value = Value) :
-			value(value)
-	{}
-
-	inline operator bool()const{
-		return this->value;
-	}
-};
-
-
-
-/**
  * @brief Thin wrapper above any C++ built-in type allowing initialization from int.
  * Thin wrapper above any C++ built-in type which allows initialization from C++ int type.
  * This wrapper allows initialize the variable to some int value right
@@ -165,6 +114,8 @@ public:
  *     ting::Inited<float, -10> y; //initialized to -10 upon object construction
  *     ting::Inited<float, 10> width; //initialized to 10 upon object construction
  *     ting::Inited<float, 20> height; //initialized to 20 upon object construction
+ *     ting::Inited<bool, false> visible; //bool variable initialized to false
+ *     ting::Inited<volatile bool, true> someFlag; //volatile bool variable initialized to true
  * }
  * @endcode
  */

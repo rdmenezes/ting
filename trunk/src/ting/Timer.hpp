@@ -181,7 +181,7 @@ class TimerLib : public Singleton<TimerLib>{
 
 	class TimerThread : public ting::Thread{
 	public:
-		ting::Inited<bool, false> quitFlag;
+		ting::Inited<volatile bool, false> quitFlag;
 
 		ting::Mutex mutex;
 		ting::Semaphore sema;

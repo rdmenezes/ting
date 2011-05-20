@@ -9,9 +9,9 @@
 namespace BasicTimerTest{
 
 struct TestTimer1 : public ting::Timer{
-	bool *e;
+	volatile bool *e;
 
-	TestTimer1(bool* exitFlag) :
+	TestTimer1(volatile bool* exitFlag) :
 			e(exitFlag)
 	{}
 
@@ -40,7 +40,8 @@ struct TestTimer2 : public ting::Timer{
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning BasicTimerTest, it will take about 5 seconds..." << std::endl)
 
-	bool exit = false;
+	//should be volatile since can be changed by another threads. This is to avoid the checks of this variable to be optimized away by compiler.
+	volatile bool exit = false;
 
 	TestTimer1 timer1(&exit);
 	TestTimer2 timer2;
@@ -49,11 +50,6 @@ void Run(){
 	timer2.Start(2500);
 
 //	TRACE_ALWAYS(<< "loop " << std::endl)
-	
-	//this doesn't work with -O3, apparently compiler evaluates expression in the while() only once because the body of the loop is empty, thus the loop never exits
-//	while(!exit){
-		//ting::Thread::Sleep(200);//if uncomment this line, then it starts working ok with -O3
-//	}
 	
 	for(unsigned i = 0; !exit; ++i){
 		ting::Thread::Sleep(100);

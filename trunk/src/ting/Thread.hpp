@@ -1351,14 +1351,31 @@ class MsgThread : public Thread{
 	friend class QuitMessage;
 	
 protected:
-	volatile bool quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
+	/**
+	 * @brief Flag indicating that the thread should exit.
+	 * This is a flag used to stop thread execution. The implementor of
+	 * Thread::Run() method usually would want to use this flag as indicator
+	 * of thread exit request. If this flag is set to true then the thread is requested to exit.
+	 * The typical usage of the flag is as follows:
+	 * @code
+	 * class MyThread : public ting::MsgThread{
+	 *     ...
+	 *     void MyThread::Run(){
+	 *         while(!this->quitFlag){
+	 *             //get and handle thread messages, etc.
+	 *             ...
+	 *         }
+	 *     }
+	 *     ...
+	 * };
+	 * @endcode
+	 */
+	ting::Inited<volatile bool, false> quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
 
 	Queue queue;
 
 public:
-	MsgThread() :
-			quitFlag(false)
-	{}
+	inline MsgThread(){}
 
 	/**
 	 * @brief Send 'Quit' message to thread's queue.
