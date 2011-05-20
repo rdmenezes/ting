@@ -1,3 +1,10 @@
+libting (0.8.0-1) stable; urgency=low
+
+  * Bug fixes
+  * New Timer implementation
+
+ -- Ivan Gagis <igagis@gmail.com>  Fri, 20 May 2011 12:10:00 +0200
+
 libting (0.7.0-1) stable; urgency=low
 
   * Bug fixes

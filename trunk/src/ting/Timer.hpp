@@ -152,6 +152,7 @@ public:
 	 * It is allowed to call the Start() method from within the handler of the timer expired signal.
 	 * If the timer is already running (i.e. it was already started before and has not expired yet)
 	 * the ting::Exc exception will be thrown.
+	 * This method is thread-safe.
 	 * @param millisec - timer timeout in milliseconds.
 	 */
 	inline void Start(ting::u32 millisec);
@@ -160,6 +161,7 @@ public:
 	 * @brief Stop the timer.
 	 * Stops the timer if it was started before. In case it was not started
 	 * or it has already expired this method does nothing.
+	 * This method is thread-safe.
 	 * @return true if timer was running and was stopped.
 	 * @return false if timer was not running already when the Stop() method was called. I.e.
 	 *         the timer has expired already or was not started.
