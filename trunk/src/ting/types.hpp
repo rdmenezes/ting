@@ -34,6 +34,25 @@ THE SOFTWARE. */
 
 namespace ting{
 
+
+
+/**
+ * @brief Maximal value of unsigned integer type.
+ */
+const unsigned DMaxUInt = unsigned(-1);
+
+/**
+ * @brief Maximal value of integer type.
+ */
+const int DMaxInt = int(DMaxUInt >> 1);
+
+/**
+ * @brief Minimal value of integer type.
+ */
+const int DMinInt = ~DMaxInt;
+
+
+
 /**
  * @brief Unsigned 8 bit type.
  */

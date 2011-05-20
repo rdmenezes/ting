@@ -1330,7 +1330,7 @@ public:
 			break;
 		}//~while
 
-		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
+		ASSERT(buf.Size() <= unsigned(ting::DMaxInt))
 		ASSERT_INFO(len <= int(buf.Size()), "res = " << len)
 		ASSERT_INFO((len == int(buf.Size())) || (len == 0), "res = " << len)
 
@@ -1417,7 +1417,7 @@ public:
 			break;
 		}//~while
 
-		ASSERT(buf.Size() <= unsigned(ting::DMaxInt()))
+		ASSERT(buf.Size() <= unsigned(ting::DMaxInt))
 		ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
 
 		out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
