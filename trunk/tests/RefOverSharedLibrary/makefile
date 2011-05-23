@@ -47,6 +47,7 @@ endif
 
 
 lib$(lib_name).$(lib_ext): testso.cpp
+#use -fPIC (position-independent code) for shared libraries.
 	@g++ $< -shared -fPIC -o lib$(lib_name).$(lib_ext) $(cf)
 
 

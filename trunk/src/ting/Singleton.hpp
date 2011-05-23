@@ -63,8 +63,9 @@ template <class T> class Singleton{
 
 protected://use only as a base class
 	Singleton(){
-		if(Singleton::StaticMemoryBlock() != 0)
+		if(Singleton::StaticMemoryBlock() != 0){
 			throw ting::Exc("Singleton::Singleton(): instance is already created");
+		}
 
 		Singleton::StaticMemoryBlock() = static_cast<T*>(this);
 	}
