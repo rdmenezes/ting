@@ -54,6 +54,17 @@ const int DMinInt = ~DMaxInt;
 
 
 /**
+ * @brief alias for unsigned long int type.
+ * Note, that 'long int' is the type which should be long enough to hold
+ * a pointer. For example, on x86 platform 'long' is 32 bits as well as 'int'.
+ * But on x86_64 platform 'long' is 64 bits where as 'int' is still 32 bits.
+ * On some 64 bit platforms 'int' is 64 bits.
+ */
+typedef unsigned long int ulong;
+
+
+
+/**
  * @brief Unsigned 8 bit type.
  */
 typedef unsigned char u8;

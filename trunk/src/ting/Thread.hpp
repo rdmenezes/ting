@@ -1326,15 +1326,16 @@ public:
 	 * Returns unique identifier of the currently executing thread. This ID can further be used
 	 * to make assertions to make sure that some code is executed in a specific thread. E.g.
 	 * assert that methods of some object are executed in the same thread where this object was
-	 * creatged.
-	 * @return uniqie thread identifier.
+	 * created.
+	 * @return unique thread identifier.
 	 */
-	static inline ting::u32 GetCurrentThreadID(){
+	static inline ting::ulong GetCurrentThreadID(){
 #ifdef WIN32
-		return ting::u32(GetCurrentThreadId());
+		return ting::ulong(GetCurrentThreadId());
 #elif defined(__APPLE__) || defined(__linux__)
-		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(ting::u32))
-		return ting::u32(pthread_self());
+		pthread_t t = pthread_self();
+		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(ting::ulong))
+		return ting::ulong(t);
 #else
 #error "Unsupported OS"
 #endif
