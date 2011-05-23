@@ -47,7 +47,7 @@ endif
 
 
 lib$(lib_name).$(lib_ext): testso.cpp
-	@g++ $< -shared -o lib$(lib_name).$(lib_ext) $(cf)
+	@g++ $< -shared -fPIC -o lib$(lib_name).$(lib_ext) $(cf)
 
 
 
