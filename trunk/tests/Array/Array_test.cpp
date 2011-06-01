@@ -1,6 +1,6 @@
-#include <ting/Buffer.hpp>
-#include <ting/Array.hpp>
-#include <ting/Exc.hpp>
+#include "../../src/ting/Buffer.hpp"
+#include "../../src/ting/Array.hpp"
+#include "../../src/ting/Exc.hpp"
 
 
 

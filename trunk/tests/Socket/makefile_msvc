@@ -4,7 +4,7 @@ binary_name := Socket_test.exe
 
 
 #compiler flags
-cf := /EHsc /W3 -I../../src
+cf := /EHsc /W3
 cf += /D"DEBUG"
 cf += /D"WIN32"
 

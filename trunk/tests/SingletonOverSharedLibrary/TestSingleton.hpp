@@ -3,6 +3,7 @@
 #include "../../src/ting/Singleton.hpp"
 
 
+
 class TestSingleton : public ting::Singleton<TestSingleton>{
 public:
 	int a;

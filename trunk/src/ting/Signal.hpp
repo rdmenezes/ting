@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2010 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2011 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -131,6 +131,11 @@ public: \
 };
 
 
+
+//===
+//======  "Connect()" family of functions.
+//===
+
 //func Connect
 #define M_CONNECT_FUNC(num_func_params, unused) \
 template <class T_Ret> void Connect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params))){ \
@@ -174,6 +179,10 @@ template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob> o, T_Ret(T_Ob::*m)
 }
 
 
+
+//===
+//======  "Search()" family of functions.
+//===
 
 //Search for existing connection to a given function
 #define M_SEARCH_FUNCSLOT(num_func_params, num_sig_params) \
@@ -245,6 +254,10 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 
 
 
+//===
+//======  "Disconnect()" family of functions.
+//===
+
 //Disconnect function slot
 #define M_DISCONNECT_FUNC(num_func_params, unused) \
 template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params))){ \
@@ -295,8 +308,56 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 
 
 
-//TODO:
-//  - add IsConnected(obj, method) family of functions
+//===
+//======  "IsConnected()" family of functions.
+//===
+
+//Disconnect function slot
+#define M_ISCONNECTED_FUNC(num_func_params, unused) \
+template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params))){ \
+	ASSERT(f) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
+	T_SlotLinkIter i = this->SearchFuncSlot(f); \
+	if(i != this->slotLink.end()){ \
+		return true; \
+	} \
+	return false; \
+}
+
+//Disconnect object-method slot
+#define M_ISCONNECTED_METH(num_meth_params, unused) \
+template <class T_Ob, class T_Ret> bool IsConnected( \
+		T_Ob* o, \
+		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
+	) \
+{ \
+	ASSERT(o) \
+	ASSERT(m) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
+	T_SlotLinkIter i = this->SearchMethSlot(o, m); \
+	if(i != this->slotLink.end()){ \
+		return true; \
+	} \
+	return false; \
+}
+
+//Disconnect WeakRef_object-method slot
+#define M_ISCONNECTED_METH_WEAKREF(num_meth_params, unused) \
+template <class T_Ob, class T_Ret> bool IsConnected( \
+		ting::WeakRef<T_Ob>& o, \
+		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
+	) \
+{ \
+	ASSERT(m) \
+	ting::Mutex::Guard mutexGuard(this->mutex); \
+	T_SlotLinkIter i = this->SearchWeakRefMethSlot(o, m); \
+	if(i != this->slotLink.end()){ \
+		return true; \
+	} \
+	return false; \
+}
+
+
 
 //
 // M   M        SSSS IIIII  GGG  N   N  AAA  L
@@ -350,6 +411,10 @@ public: \
 	M_REPEAT2(M_INCREMENT(n), M_DISCONNECT_FUNC, ) \
 	M_REPEAT2(M_INCREMENT(n), M_DISCONNECT_METH, ) \
 	M_REPEAT2(M_INCREMENT(n), M_DISCONNECT_METH_WEAKREF, ) \
+\
+	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_FUNC, ) \
+	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_METH, ) \
+	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_METH_WEAKREF, ) \
 \
 	void DisconnectAll(){ \
 		ting::Mutex::Guard mutexGuard(this->mutex); \

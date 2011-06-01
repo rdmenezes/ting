@@ -1,4 +1,4 @@
-#include <ting/debug.hpp>
+#include "../../src/ting/debug.hpp"
 
 #include "TestClass.hpp"
 #include "testso.hpp"

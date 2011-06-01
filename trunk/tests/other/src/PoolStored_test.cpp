@@ -1,8 +1,9 @@
 #include <vector>
 
-#include <ting/debug.hpp>
-#include <ting/PoolStored.hpp>
-#include <ting/Ptr.hpp>
+#include "../../../src/ting/debug.hpp"
+#include "../../../src/ting/PoolStored.hpp"
+#include "../../../src/ting/Ptr.hpp"
+
 
 
 class TestClass : public ting::PoolStored<TestClass>{

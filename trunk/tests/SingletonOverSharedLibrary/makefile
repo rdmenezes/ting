@@ -28,7 +28,7 @@ ecf :=
 
 #compiler flags
 cf := $(ecf)
-cf += -Wall -I../../src
+cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 

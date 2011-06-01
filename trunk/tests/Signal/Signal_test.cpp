@@ -1,5 +1,5 @@
-#include <ting/debug.hpp>
-#include <ting/Signal.hpp>
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/Signal.hpp"
 
 
 

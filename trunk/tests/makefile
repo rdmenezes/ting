@@ -1,8 +1,9 @@
 subdirs :=
-subdirs += other
-subdirs += Socket
 subdirs += Array
+subdirs += other
 subdirs += Ptr
+subdirs += Signal
+subdirs += Socket
 subdirs += Thread
 subdirs += Timer
 

@@ -1,8 +1,8 @@
 #include <vector>
 
-#include <ting/debug.hpp>
-#include <ting/WaitSet.hpp>
-#include <ting/Thread.hpp>
+#include "../../../src/ting/debug.hpp"
+#include "../../../src/ting/WaitSet.hpp"
+#include "../../../src/ting/Thread.hpp"
 
 
 

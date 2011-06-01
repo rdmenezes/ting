@@ -32,8 +32,6 @@
           <in>Buffer_test.cpp</in>
           <in>PoolStored_test.cpp</in>
           <in>Ref_test.cpp</in>
-          <in>Signal_test.cpp</in>
-          <in>Timer_test.cpp</in>
           <in>Types_test.cpp</in>
           <in>WaitSet_test.cpp</in>
           <in>debug_test.cpp</in>
@@ -49,6 +47,26 @@
         <in>testso.cpp</in>
         <in>testso.hpp</in>
       </df>
+      <df name="Signal">
+        <df name=".svn">
+          <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="tmp" kind="SOURCE_LOGICAL_FOLDER">
+            <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+          </df>
+          <in>entries</in>
+        </df>
+        <in>Signal_test.cpp</in>
+      </df>
       <df name="SingletonOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
         <in>Singleton_test.cpp</in>
         <in>TestSingleton.hpp</in>
@@ -60,6 +78,9 @@
       </df>
       <df name="Thread" kind="SOURCE_LOGICAL_FOLDER">
         <in>Thread_test.cpp</in>
+      </df>
+      <df name="Timer">
+        <in>Timer_test.cpp</in>
       </df>
     </df>
     <logicalFolder name="ExternalFiles"

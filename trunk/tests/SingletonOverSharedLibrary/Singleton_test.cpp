@@ -1,7 +1,8 @@
-#include <ting/debug.hpp>
+#include "../../src/ting/debug.hpp"
 
 #include "TestSingleton.hpp"
 #include "testso.hpp"
+
 
 
 int main(int argc, char *argv[]){

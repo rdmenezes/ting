@@ -1,27 +1,25 @@
 platform := linux
 
-binary_name := Ref_test
-lib_name := testso
+binary_name := Signal_test
 
 ifeq ($(platform),win32)
-
 binary_name := $(binary_name).exe
-lib_ext := dll
-
-else
-
-lib_ext := so
-
 endif
 
 
 ifeq ($(platform),win32)
-    libs := -mwindows
+    libs := -lws2_32
     remove := del /Q /F
-else
-    libs := 
+endif
+ifeq ($(platform),darwin)
+    libs := -lpthread
     remove := rm -rf
 endif
+ifeq ($(platform),linux)
+    libs := -lpthread -lrt
+    remove := rm -rf
+endif
+
 
 #external compiler flags (to be passed to make from command line)
 ecf :=
@@ -33,34 +31,21 @@ cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
 
+
 default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-ifeq ($(platform),win32)
 	@./$^
-else
-	@LD_LIBRARY_PATH=. ./$^
-endif
 
-
-
-
-lib$(lib_name).$(lib_ext): testso.cpp
-#use -fPIC (position-independent code) for shared libraries.
-	@g++ $< -shared -fPIC -o lib$(lib_name).$(lib_ext) $(cf)
-
-
-
-
-$(binary_name): Ref_test.cpp lib$(lib_name).$(lib_ext)
+$(binary_name): Signal_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs) -L. -l$(lib_name)
+	@g++ -o $@ $(cf) $< $(libs)
 
 
 
 clean:
 	@$(remove) $(binary_name)
-	@$(remove) lib$(lib_name).$(lib_ext)
 
 include ../../targets.mk
+

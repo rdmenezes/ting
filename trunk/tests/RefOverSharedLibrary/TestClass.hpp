@@ -3,6 +3,7 @@
 #include "../../src/ting/Ref.hpp"
 
 
+
 class TestClass : public ting::RefCounted{
 public:
 	int a;

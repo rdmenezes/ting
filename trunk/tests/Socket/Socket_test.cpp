@@ -1,9 +1,9 @@
-#include <ting/Timer.hpp>
-#include <ting/Thread.hpp>
-#include <ting/Socket.hpp>
-#include <ting/WaitSet.hpp>
-#include <ting/Buffer.hpp>
-#include <ting/Array.hpp>
+#include "../../src/ting/Timer.hpp"
+#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/Socket.hpp"
+#include "../../src/ting/WaitSet.hpp"
+#include "../../src/ting/Buffer.hpp"
+#include "../../src/ting/Array.hpp"
 
 
 

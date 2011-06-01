@@ -3,11 +3,11 @@ rtlib :=
 
 remove = del
 
-binary_name := Array_test.exe
+binary_name := Ptr_test.exe
 
 
 #compiler flags
-cf := /EHsc /W3 -I../../src
+cf := /EHsc /W3
 cf += /D"DEBUG"
 cf += /D"WIN32"
 
@@ -16,7 +16,7 @@ default: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): Array_test.cpp 
+$(binary_name): Ptr_test.cpp
 	@echo Building $@...
 	@cl $(cf) $(threadlib) $(rtlib) $<
 
