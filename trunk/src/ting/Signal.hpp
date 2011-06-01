@@ -112,7 +112,7 @@ public: \
 	WeakRef<T_Ob> o; \
 	T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)); \
 \
-	WeakRefMethodSlot##num_meth_params(WeakRef<T_Ob>& object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params))) : \
+	WeakRefMethodSlot##num_meth_params(const WeakRef<T_Ob>& object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params))) : \
 			o(object), \
 			m(method) \
 	{} \
@@ -161,7 +161,7 @@ template <class T_Ob, class T_Ret> void Connect(T_Ob* o, T_Ret(T_Ob::*m)(M_FUNC_
 
 //Weak ref and method Connect
 #define M_CONNECT_METH_WEAKREF(num_meth_params, unused) \
-template <class T_Ob, class T_Ret> void Connect(WeakRef<T_Ob> o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
+template <class T_Ob, class T_Ret> void Connect(const WeakRef<T_Ob>& o, T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params))){ \
 	ASSERT(m) \
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
@@ -230,13 +230,13 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 //Search for existing connection to a given WeakRef_object-method slot
 #define M_SEARCH_METHSLOT_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
-		ting::WeakRef<T_Ob>& o, \
+		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
 	) \
 { \
 	ASSERT(m) \
 	ting::Ref<T_Ob> ho(o); \
-	for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end(); ++i){ \
+	for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end();){ \
 		WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret> *slot = \
 				dynamic_cast<WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>* >( \
 						(*i).operator->() \
@@ -244,10 +244,15 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 			; \
 		if(slot){ \
 			ting::Ref<T_Ob> hso(slot->o); \
+			if(hso.IsNotValid()){ \
+				i = this->slotLink.erase(i); \
+				continue; \
+			} \
 			if(slot->m == m && ho == hso){ \
 				return i; \
 			} \
 		} \
+		++i; \
 	} \
 	return this->slotLink.end(); \
 }
@@ -292,7 +297,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 //Disconnect WeakRef_object-method slot
 #define M_DISCONNECT_METH_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool Disconnect( \
-		ting::WeakRef<T_Ob>& o, \
+		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
 	) \
 { \
@@ -344,7 +349,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 //Disconnect WeakRef_object-method slot
 #define M_ISCONNECTED_METH_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool IsConnected( \
-		ting::WeakRef<T_Ob>& o, \
+		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
 	) \
 { \

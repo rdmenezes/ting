@@ -543,6 +543,11 @@ public:
 
 
 
+	//TODO: consider adding GetWeakRef() method:
+	//      inline WeakRef GetWeakRef()const;
+
+
+
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
 	inline T& operator*()const{
@@ -732,7 +737,7 @@ template <class T> class WeakRef{
 
 	
 public:
-	//TODO:make it private and add static(?) method to RefCounted
+	//TODO: make it private and add static(?) method to RefCounted
 	inline WeakRef(T* rc = 0){
 		M_REF_PRINT(<< "WeakRef::WeakRef(T*): invoked" << std::endl)
 		this->InitFromRefCounted(rc);

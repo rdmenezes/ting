@@ -1,10 +1,11 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/Signal.hpp"
+#include "../../src/ting/Ref.hpp"
 
 
 
 //Test function signal-slot connections
-namespace funcConnection{
+namespace FuncConnectionTest{
 
 static unsigned a = 0;
 static int b = 100;
@@ -45,6 +46,8 @@ static void Test(){
 
 		sig.Connect(&FuncDoSomethingWithA);
 		ASSERT_ALWAYS(sig.NumConnections() == 1)
+		ASSERT_ALWAYS(sig.IsConnected(&FuncDoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected(&FuncDoSomethingWithB))
 
 		ASSERT_ALWAYS(a == 0)
 		sig.Emit();
@@ -54,6 +57,8 @@ static void Test(){
 
 		sig.Connect(&FuncDoSomethingWithB);
 		ASSERT_ALWAYS(sig.NumConnections() == 2)
+		ASSERT_ALWAYS(sig.IsConnected(&FuncDoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(&FuncDoSomethingWithB))
 
 		ASSERT_ALWAYS(a == 0)
 		ASSERT_ALWAYS(b == 100)
@@ -64,6 +69,8 @@ static void Test(){
 		ASSERT_ALWAYS(sig.NumConnections() == 2)
 		sig.DisconnectAll();
 		ASSERT_ALWAYS(sig.NumConnections() == 0)
+		ASSERT_ALWAYS(!sig.IsConnected(&FuncDoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected(&FuncDoSomethingWithB))
 
 		a = 0;
 		b = 100;
@@ -83,21 +90,45 @@ static void Test(){
 
 		sig.Connect((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1);
 		ASSERT_ALWAYS(sig.NumConnections() == 1)
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 		sig.Emit(3, 5002, 0);
 		ASSERT_ALWAYS(a == 3446)
 
 		sig.DisconnectAll();
 		ASSERT_ALWAYS(sig.NumConnections() == 0)
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 		sig.Connect((unsigned(*)()) &FuncDoSomethingWithA);
 		ASSERT_ALWAYS(sig.NumConnections() == 1)
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		sig.Connect((int(*)()) &FuncDoSomethingWithB);
 		ASSERT_ALWAYS(sig.NumConnections() == 2)
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		sig.Connect((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1);
 		ASSERT_ALWAYS(sig.NumConnections() == 3)
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		sig.Connect((unsigned(*)(int, long)) &FuncDoSomethingWithA1);
 		ASSERT_ALWAYS(sig.NumConnections() == 4)
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+		ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 		sig.Emit(3, 5002, 0);
 		ASSERT_ALWAYS(a == 344)
@@ -115,10 +146,18 @@ static void Test(){
 			bool res = sig.Disconnect(&FuncDoSomethingWithB);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 3)
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 			res = sig.Disconnect(&FuncDoSomethingWithB);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 3)
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		}
 
 		sig.Emit(3, 5002, 0);
@@ -134,10 +173,18 @@ static void Test(){
 			bool res = sig.Disconnect((unsigned(*)(int, long)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 2)
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 			res = sig.Disconnect((unsigned(*)(int, long)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 2)
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		}
 
 		sig.Emit(3, 5002, 0);
@@ -153,14 +200,26 @@ static void Test(){
 			bool res = sig.Disconnect((unsigned(*)()) &FuncDoSomethingWithA);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 1)
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 			res = sig.Disconnect((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 
 			res = sig.Disconnect((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)()) &FuncDoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected((int(*)()) &FuncDoSomethingWithB))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long, char*)) &FuncDoSomethingWithA1))
+			ASSERT_ALWAYS(!sig.IsConnected((unsigned(*)(int, long)) &FuncDoSomethingWithA1))
 		}
 
 		sig.Emit(3, 5002, 0);
@@ -185,7 +244,7 @@ static void Test(){
 
 
 //Test method signal-slot connections
-namespace methodConnection{
+namespace MethodConnectionTest{
 
 class TestClass{
 public:
@@ -231,6 +290,7 @@ public:
 };
 
 
+
 void Test(){
 	TestClass tc;
 
@@ -240,12 +300,20 @@ void Test(){
 
 		sig.Connect(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA);
 		ASSERT_ALWAYS(sig.NumConnections() == 1)
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 87)
 
 		sig.DisconnectAll();
 		ASSERT_ALWAYS(sig.NumConnections() == 0)
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 		//
 		tc.a = 0;
@@ -253,6 +321,10 @@ void Test(){
 
 		sig.Connect(&tc, &TestClass::DoSomethingWithB1);
 		ASSERT_ALWAYS(sig.NumConnections() == 1)
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 0)
@@ -261,6 +333,10 @@ void Test(){
 		sig.Connect(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB);
 		sig.Connect(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA);
 		ASSERT_ALWAYS(sig.NumConnections() == 3)
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+		ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 87)
@@ -268,6 +344,10 @@ void Test(){
 
 		sig.Connect(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB);
 		ASSERT_ALWAYS(sig.NumConnections() == 4)
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 		sig.Emit(7, 0, 8);
 		ASSERT_ALWAYS(tc.a == 87)
@@ -285,10 +365,18 @@ void Test(){
 			bool res = sig.Disconnect(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 3)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 			res = sig.Disconnect(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 3)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 		}
 
 		sig.Emit(7, 0, 8);
@@ -301,18 +389,34 @@ void Test(){
 			bool res = sig.Disconnect(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 2)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 			res = sig.Disconnect(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 1)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 			res = sig.Disconnect(&tc, &TestClass::DoSomethingWithB1);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 
 			res = sig.Disconnect(&tc, &TestClass::DoSomethingWithB1);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (void(TestClass::*)()) &TestClass::DoSomethingWithA))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, &TestClass::DoSomethingWithB1))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (unsigned(TestClass::*)()) &TestClass::DoSomethingWithB))
+			ASSERT_ALWAYS(!sig.IsConnected(&tc, (int(TestClass::*)(unsigned, char*, int)) &TestClass::DoSomethingWithB))
 		}
 	}
 }
@@ -330,7 +434,7 @@ void Test(){
 
 
 //Test WeakRef signal-slot connections
-namespace weakRefConnection{
+namespace WeakRefConnectionTest{
 
 class TestClass : public ting::RefCounted{
 public:
@@ -364,22 +468,16 @@ static void Test(){
 
 		ting::Ref<TestClass> a = TestClass::New();
 
-		{
-			ting::WeakRef<TestClass> wa(a);
+		ting::WeakRef<TestClass> wa(a);
 
-			signal0.Connect(
-					wa,
-					(int (TestClass::*)()) &TestClass::DoSomething
-				);
+		signal0.Connect(wa, (int (TestClass::*)()) &TestClass::DoSomething);
+		ASSERT_ALWAYS(signal0.IsConnected(wa, (int (TestClass::*)()) &TestClass::DoSomething))
 
-			signal1.Connect(
-					wa,
-					(int(TestClass::*)(int)) &TestClass::DoSomething
-				);
+		signal1.Connect(wa, (int(TestClass::*)(int)) &TestClass::DoSomething);
+		ASSERT_ALWAYS(signal1.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
 
-			ASSERT_ALWAYS(a.IsValid())
-			ASSERT_ALWAYS(a->a == 0)
-		}
+		ASSERT_ALWAYS(a.IsValid())
+		ASSERT_ALWAYS(a->a == 0)
 
 		signal0.Emit();
 		ASSERT_ALWAYS(a.IsValid())
@@ -393,13 +491,17 @@ static void Test(){
 		//after destroying last hard reference, the weak reference becomes invalid.
 		a.Reset();
 
+		//NOTE: at this point number of connections should be 1 because it has a weak reference connection,
+		//but after emitting the signal this connection should be removed because weak reference become invalid.
 		ASSERT_ALWAYS(signal0.NumConnections() == 1)
 		signal0.Emit();
 		ASSERT_ALWAYS(signal0.NumConnections() == 0)
 		ASSERT_ALWAYS(a.IsNotValid())
 
+		//NOTE: at this point number of connections should be 1 because it has a weak reference connection,
+		//but after checking for "is connected" this connection should be removed because weak reference become invalid.
 		ASSERT_ALWAYS(signal1.NumConnections() == 1)
-		signal1.Emit(245);
+		ASSERT_ALWAYS(!signal1.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
 		ASSERT_ALWAYS(signal1.NumConnections() == 0)
 		ASSERT_ALWAYS(a.IsNotValid())
 	}
@@ -412,16 +514,13 @@ static void Test(){
 		ting::WeakRef<TestClass> wa(tc);
 
 
-		sig.Connect(
-				wa,
-				(int(TestClass::*)(int)) &TestClass::DoSomething
-			);
+		sig.Connect(wa, (int(TestClass::*)(int)) &TestClass::DoSomething);
+		ASSERT_ALWAYS(sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
 
-		sig.Connect(
-				wa,
-				(int(TestClass::*)()) &TestClass::DoSomething
-			);
+		sig.Connect(wa, (int(TestClass::*)()) &TestClass::DoSomething);
 		ASSERT_ALWAYS(sig.NumConnections() == 2)
+		ASSERT_ALWAYS(sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
+		ASSERT_ALWAYS(sig.IsConnected(wa, (int(TestClass::*)()) &TestClass::DoSomething))
 
 
 		tc->a = 0;
@@ -430,19 +529,17 @@ static void Test(){
 		ASSERT_ALWAYS(tc->a == 10)
 
 		{
-			bool res = sig.Disconnect(
-					wa,
-					(int(TestClass::*)()) &TestClass::DoSomething
-				);
+			bool res = sig.Disconnect(wa, (int(TestClass::*)()) &TestClass::DoSomething);
 			ASSERT_ALWAYS(res == true)
 			ASSERT_ALWAYS(sig.NumConnections() == 1)
+			ASSERT_ALWAYS(sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)()) &TestClass::DoSomething))
 
-			res = sig.Disconnect(
-					wa,
-					(int(TestClass::*)()) &TestClass::DoSomething
-				);
+			res = sig.Disconnect(wa, (int(TestClass::*)()) &TestClass::DoSomething);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 1)
+			ASSERT_ALWAYS(sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)()) &TestClass::DoSomething))
 		}
 
 		sig.Emit(43, 0, 0);
@@ -457,12 +554,15 @@ static void Test(){
 		}
 
 		{
+			ASSERT_ALWAYS(sig.NumConnections() == 1)//There should be one connection with invalid weak reference
 			bool res = sig.Disconnect(
 					wa,
 					(int(TestClass::*)(int)) &TestClass::DoSomething
 				);
-			ASSERT_ALWAYS(res == true)
+			ASSERT_ALWAYS(res == false) //false because weak ref become invalid and the connection can't be identified anymore.
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)()) &TestClass::DoSomething))
 
 			res = sig.Disconnect(
 					wa,
@@ -470,6 +570,8 @@ static void Test(){
 				);
 			ASSERT_ALWAYS(res == false)
 			ASSERT_ALWAYS(sig.NumConnections() == 0)
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)(int)) &TestClass::DoSomething))
+			ASSERT_ALWAYS(!sig.IsConnected(wa, (int(TestClass::*)()) &TestClass::DoSomething))
 		}
 	}
 
@@ -485,14 +587,21 @@ static void Test(){
 					ting::WeakRef<TestClass>(a),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				);
-
 			ASSERT_ALWAYS(signal0.NumConnections() == 1)
+			ASSERT_ALWAYS(signal0.IsConnected(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				))
 
 			signal0.Connect(
 					ting::WeakRef<TestClass>(a),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				);
 			ASSERT_ALWAYS(signal0.NumConnections() == 2)
+			ASSERT_ALWAYS(signal0.IsConnected(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				))
 
 			a.Reset();
 			//Now we have 2 dead connections (weak refs are invalid)
@@ -506,6 +615,11 @@ static void Test(){
 				);
 			//should be only one alive connection
 			ASSERT_ALWAYS(signal0.NumConnections() == 1)
+
+			ASSERT_ALWAYS(signal0.IsConnected(
+					ting::WeakRef<TestClass>(a),
+					(int (TestClass::*)()) &TestClass::DoSomething
+				))
 		}
 	}
 }
@@ -518,7 +632,7 @@ static void Test(){
 
 
 
-namespace mixedConnection{
+namespace MixedConnectionTest{
 
 class TestRefClass : public ting::RefCounted{
 public:
@@ -563,6 +677,9 @@ static void Test(){
 
 	sig.Connect(&DoSomethingWithA);
 	ASSERT_ALWAYS(sig.NumConnections() == 1)
+	ASSERT_ALWAYS(sig.IsConnected(&DoSomethingWithA))
+	ASSERT_ALWAYS(!sig.IsConnected(&tc, &TestClass::DoSomethingWithA))
+	ASSERT_ALWAYS(!sig.IsConnected(ting::WeakRef<TestRefClass>(rc), &TestRefClass::DoSomethingWithA))
 
 	a = 0;
 	sig.Emit(0, 0);
@@ -570,6 +687,9 @@ static void Test(){
 
 	sig.Connect(&tc, &TestClass::DoSomethingWithA);
 	ASSERT_ALWAYS(sig.NumConnections() == 2)
+	ASSERT_ALWAYS(sig.IsConnected(&DoSomethingWithA))
+	ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithA))
+	ASSERT_ALWAYS(!sig.IsConnected(ting::WeakRef<TestRefClass>(rc), &TestRefClass::DoSomethingWithA))
 
 	a = 0;
 	tc.a = 0;
@@ -581,6 +701,9 @@ static void Test(){
 		ting::WeakRef<TestRefClass> wr(rc);
 		sig.Connect(wr, &TestRefClass::DoSomethingWithA);
 		ASSERT_ALWAYS(sig.NumConnections() == 3)
+		ASSERT_ALWAYS(sig.IsConnected(&DoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithA))
+		ASSERT_ALWAYS(sig.IsConnected(wr, &TestRefClass::DoSomethingWithA))
 	}
 
 	a = 0;
@@ -595,6 +718,9 @@ static void Test(){
 	rc.Reset();
 	sig.Emit(45, 25345);
 	ASSERT_ALWAYS(sig.NumConnections() == 2)
+	ASSERT_ALWAYS(sig.IsConnected(&DoSomethingWithA))
+	ASSERT_ALWAYS(sig.IsConnected(&tc, &TestClass::DoSomethingWithA))
+	ASSERT_ALWAYS(!sig.IsConnected(ting::WeakRef<TestRefClass>(rc), &TestRefClass::DoSomethingWithA))
 
 	sig.DisconnectAll();
 	ASSERT_ALWAYS(sig.NumConnections() == 0)
@@ -614,10 +740,10 @@ int main(int argc, char *argv[]){
 //	TRACE(<< "Signal test" << std::endl)
 
 
-	funcConnection::Test();
-	methodConnection::Test();
-	weakRefConnection::Test();
-	mixedConnection::Test();
+	FuncConnectionTest::Test();
+	MethodConnectionTest::Test();
+	WeakRefConnectionTest::Test();
+	MixedConnectionTest::Test();
 
 	TRACE_ALWAYS(<< "[PASSED]: Signal test" << std::endl)
 
