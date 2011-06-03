@@ -2,6 +2,7 @@ subdirs :=
 subdirs += Array
 subdirs += other
 subdirs += Ptr
+subdirs += Ref
 subdirs += Signal
 subdirs += Socket
 subdirs += Thread

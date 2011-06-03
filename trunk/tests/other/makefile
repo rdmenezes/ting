@@ -43,10 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Buffer_test$(ext) Types_test$(ext) Ref_test$(ext) WaitSet_test$(ext)
+default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Buffer_test$(ext) Types_test$(ext) WaitSet_test$(ext)
 
 
-test: run_debug_test run_utils_test run_PoolStored_test run_Buffer_test run_Types_test run_Ref_test run_WaitSet_test
+test: run_debug_test run_utils_test run_PoolStored_test run_Buffer_test run_Types_test run_WaitSet_test
 
 
 
@@ -102,16 +102,6 @@ Types_test$(ext): src/Types_test.cpp
 
 
 
-run_Ref_test: Ref_test$(ext)
-	@echo running $^...
-	@./$^
-
-Ref_test$(ext): src/Ref_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $<
-
-
-
 run_WaitSet_test: WaitSet_test$(ext)
 	@echo running $^...
 	@./$^
@@ -128,7 +118,6 @@ clean:
 	@$(remove) PoolStored_test$(ext)
 	@$(remove) Buffer_test$(ext)
 	@$(remove) Types_test$(ext)
-	@$(remove) Ref_test$(ext)
 	@$(remove) WaitSet_test$(ext)
 	
 include ../../targets.mk

@@ -1,7 +1,8 @@
-#include "../../../src/ting/debug.hpp"
-#include "../../../src/ting/Ref.hpp"
-#include "../../../src/ting/Exc.hpp"
-#include "../../../src/ting/Thread.hpp"
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/Ref.hpp"
+#include "../../src/ting/Exc.hpp"
+#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/Ref.hpp"
 
 
 
@@ -170,7 +171,7 @@ static void Run2(){
 
 	ASSERT_ALWAYS(ting::Ref<TestClass>(wr1).IsValid())
 	ASSERT_ALWAYS(ting::Ref<TestClass>(wr2).IsValid())
-	ASSERT_ALWAYS(ting::Ref<TestClass>(wr3).IsValid())
+	ASSERT_ALWAYS(wr3.GetRef().IsValid())
 
 	a.Reset();
 
@@ -179,7 +180,7 @@ static void Run2(){
 
 	ASSERT_ALWAYS(ting::Ref<TestClass>(wr1).IsNotValid())
 	ASSERT_ALWAYS(ting::Ref<TestClass>(wr2).IsNotValid())
-	ASSERT_ALWAYS(ting::Ref<TestClass>(wr3).IsNotValid())
+	ASSERT_ALWAYS(wr3.GetRef().IsNotValid())
 }
 
 }//~namespace
@@ -514,6 +515,7 @@ void Run1(){
 		ASSERT_ALWAYS(ting::Ref<TestClass>(wa)->a == 1234)
 		ASSERT_ALWAYS(ting::Ref<const TestClass>(wb)->a == 1234)
 		ASSERT_ALWAYS(ting::Ref<const TestClass>(wb1)->a == 1234)
+		ASSERT_ALWAYS(wb1.GetRef()->a == 1234)
 	}
 
 	{

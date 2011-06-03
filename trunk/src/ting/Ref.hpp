@@ -176,6 +176,7 @@ private:
 
 
 protected:
+	//TODO: write doxygen docs
 	//only base classes can construct this class
 	//i.e. use of this class is allowed only as a base class
 	inline RefCounted(){
@@ -193,6 +194,7 @@ protected:
 
 
 
+	//TODO: write doxygen docs
 	//operator new is protected to enforce objects creation
 	//through static New() method, to avoid using of RefCounted objects
 	//via ordinary pointers.
@@ -203,6 +205,12 @@ protected:
 protected:
 	//operator delete is protected because only ting::Ref can delete the
 	//RefCounted object.
+	//NOTE: cannot make operator delete private because it should have same
+	//      access level as operator new, because in case of failure in
+	//      the constructor of the object (i.e. it throws an exception) the
+	//      allocated memory should be freed with "delete", thus when using
+	//      operator new it implicitly needs to be possible to call operator delete
+	//      from the same place where the operator new is used.
 	inline static void operator delete(void *p){
 		::operator delete(p);
 	}
@@ -219,8 +227,10 @@ public:
 	}
 
 public:
+	//TODO: write doxygen docs
 	inline unsigned NumRefs()const{
-		return ASS(this->counter)->numStrongRefs;
+		ASSERT(this->counter)
+		return this->counter->numStrongRefs;
 	}
 
 private:
@@ -362,6 +372,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	//downcast / to-const cast constructor
 	template <class TS> inline Ref(const Ref<TS>& r){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
@@ -427,24 +438,28 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	template <class TS> inline bool operator<(const Ref<TS>& r)const{
 		return this->p < r.p;
 	}
 
 
 
+	//TODO: write doxygen docs
 	template <class TS> inline bool operator<=(const Ref<TS>& r)const{
 		return this->p <= r.p;
 	}
 
 
 
+	//TODO: write doxygen docs
 	template <class TS> inline bool operator>(const Ref<TS>& r)const{
 		return this->p > r.p;
 	}
 
 
 
+	//TODO: write doxygen docs
 	template <class TS> inline bool operator>=(const Ref<TS>& r)const{
 		return this->p >= r.p;
 	}
@@ -462,6 +477,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	typedef void (Ref::*unspecified_bool_type)();
 	
 
@@ -530,6 +546,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	//downcast / to-const assignment
 	template <class TS> Ref<T>& operator=(const Ref<TS>& r){
 		//self-assignment should be impossible
@@ -764,6 +781,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	inline WeakRef(const Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const Ref<T>&): invoked" << std::endl)
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
@@ -787,6 +805,18 @@ public:
 
 
 
+	/**
+	 * @brief Get strong reference.
+	 * This is just a convenience method which creates and returns a strong
+	 * reference from this weak reaference.
+     * @return Strong reference created from this weak reference.
+     */
+	inline Ref<T> GetRef()const{
+		return Ref<T>(*this);
+	}
+
+
+
 	inline ~WeakRef(){
 		M_REF_PRINT(<< "WeakRef::~WeakRef(): invoked" << std::endl)
 		this->Destroy();
@@ -794,6 +824,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	inline WeakRef& operator=(T* rc){
 		ASSERT(rc)
 		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
@@ -806,6 +837,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	inline WeakRef& operator=(const Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
@@ -816,6 +848,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	inline WeakRef& operator=(const WeakRef& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
@@ -826,7 +859,8 @@ public:
 
 
 
-	//template for downcasting
+	//TODO: write doxygen docs
+	//template for automatic downcasting
 	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
@@ -850,6 +884,7 @@ public:
 
 
 
+	//TODO: write doxygen docs
 	inline bool IsSurelyInvalid()const{
 		return this->counter == 0 || this->counter->p == 0;
 	}
