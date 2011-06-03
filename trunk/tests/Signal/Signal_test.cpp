@@ -584,22 +584,22 @@ static void Test(){
 			a = TestClass::New();
 
 			signal0.Connect(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				);
 			ASSERT_ALWAYS(signal0.NumConnections() == 1)
 			ASSERT_ALWAYS(signal0.IsConnected(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				))
 
 			signal0.Connect(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				);
 			ASSERT_ALWAYS(signal0.NumConnections() == 2)
 			ASSERT_ALWAYS(signal0.IsConnected(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				))
 
@@ -610,14 +610,14 @@ static void Test(){
 			a = TestClass::New();
 			//this connect should remove dead connections
 			signal0.Connect(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				);
 			//should be only one alive connection
 			ASSERT_ALWAYS(signal0.NumConnections() == 1)
 
 			ASSERT_ALWAYS(signal0.IsConnected(
-					ting::WeakRef<TestClass>(a),
+					a.GetWeakRef(),
 					(int (TestClass::*)()) &TestClass::DoSomething
 				))
 		}

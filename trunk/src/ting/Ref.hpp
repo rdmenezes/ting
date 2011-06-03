@@ -543,8 +543,15 @@ public:
 
 
 
-	//TODO: consider adding GetWeakRef() method:
-	//      inline WeakRef GetWeakRef()const;
+	/**
+	 * @brief Create a weak reference.
+	 * This is a convenience function which creates and returns a
+	 * weak reference.
+	 * @return weak reference created from this strong reference.
+	 */
+	inline WeakRef<T> GetWeakRef()const{
+		return WeakRef<T>(*this);
+	}
 
 
 
@@ -737,7 +744,19 @@ template <class T> class WeakRef{
 
 	
 public:
-	//TODO: make it private and add static(?) method to RefCounted
+	/**
+	 * @brief make weak reference from pointer to RefCounted.
+	 * This constructor makes a weak reference from ordinary pointer to a
+	 * RefCounted object. Mainly, weak references should be constructed this way
+	 * only from within the constructor of the class derived from RefCounted.
+	 * This is because in constructor it is sometimes needed to create a weak
+	 * reference to the object itself and there is no any strong references to
+	 * the object yet because the object is still under construction.
+	 * But, it is safe to create weak references already, since first strong
+	 * reference should normally be created shortly after the object has
+	 * finished construction.
+	 * @param rc - ordinary pointer to a RefCounted object.
+	 */
 	inline WeakRef(T* rc = 0){
 		M_REF_PRINT(<< "WeakRef::WeakRef(T*): invoked" << std::endl)
 		this->InitFromRefCounted(rc);
