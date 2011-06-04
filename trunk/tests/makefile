@@ -1,5 +1,6 @@
 subdirs :=
 subdirs += Array
+subdirs += Buffer
 subdirs += other
 subdirs += Ptr
 subdirs += Ref
