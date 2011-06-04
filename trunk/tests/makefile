@@ -2,6 +2,7 @@ subdirs :=
 subdirs += Array
 subdirs += Buffer
 subdirs += other
+subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
 subdirs += Signal

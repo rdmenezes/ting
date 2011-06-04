@@ -43,10 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: utils_test$(ext) debug_test$(ext) PoolStored_test$(ext) Types_test$(ext) WaitSet_test$(ext)
+default: utils_test$(ext) debug_test$(ext) Types_test$(ext) WaitSet_test$(ext)
 
 
-test: run_debug_test run_utils_test run_PoolStored_test run_Types_test run_WaitSet_test
+test: run_debug_test run_utils_test run_Types_test run_WaitSet_test
 
 
 
@@ -66,17 +66,6 @@ run_debug_test: debug_test$(ext)
 	@./$^
 
 debug_test$(ext): src/debug_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
-
-
-
-
-run_PoolStored_test: PoolStored_test$(ext)
-	@echo running $^...
-	@./$^
-
-PoolStored_test$(ext): src/PoolStored_test.cpp
 	@echo Building $@...
 	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
@@ -105,7 +94,6 @@ WaitSet_test$(ext): src/WaitSet_test.cpp
 clean:
 	@$(remove) debug_test$(ext)
 	@$(remove) utils_test$(ext)
-	@$(remove) PoolStored_test$(ext)
 	@$(remove) Types_test$(ext)
 	@$(remove) WaitSet_test$(ext)
 	

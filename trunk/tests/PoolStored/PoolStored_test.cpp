@@ -1,8 +1,8 @@
 #include <vector>
 
-#include "../../../src/ting/debug.hpp"
-#include "../../../src/ting/PoolStored.hpp"
-#include "../../../src/ting/Ptr.hpp"
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/PoolStored.hpp"
+#include "../../src/ting/Ptr.hpp"
 
 
 
