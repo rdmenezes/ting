@@ -3,9 +3,9 @@
 #define DEBUG
 #endif
 
-#include "../../../src/ting/debug.hpp"
-#include "../../../src/ting/Ref.hpp"
-#include "../../../src/ting/Ptr.hpp"
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/Ref.hpp"
+#include "../../src/ting/Ptr.hpp"
 
 
 

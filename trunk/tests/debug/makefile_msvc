@@ -3,7 +3,7 @@ rtlib :=
 
 remove = del
 
-binary_name := WaitSet_test.exe
+binary_name := debug_test.exe
 
 
 #compiler flags
@@ -16,7 +16,7 @@ default: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): WaitSet_test.cpp
+$(binary_name): debug_test.cpp
 	@echo Building $@...
 	@cl $(cf) $(threadlib) $(rtlib) $<
 

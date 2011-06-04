@@ -43,10 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: utils_test$(ext) debug_test$(ext) Types_test$(ext) 
+default: utils_test$(ext) Types_test$(ext) 
 
 
-test: run_debug_test run_utils_test run_Types_test
+test: run_utils_test run_Types_test
 
 
 
@@ -55,17 +55,6 @@ run_utils_test: utils_test$(ext)
 	@./$^
 
 utils_test$(ext): src/utils_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
-
-
-
-
-run_debug_test: debug_test$(ext)
-	@echo running  $^...
-	@./$^
-
-debug_test$(ext): src/debug_test.cpp
 	@echo Building $@...
 	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
 
@@ -82,7 +71,6 @@ Types_test$(ext): src/Types_test.cpp
 
 
 clean:
-	@$(remove) debug_test$(ext)
 	@$(remove) utils_test$(ext)
 	@$(remove) Types_test$(ext)
 	

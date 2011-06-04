@@ -92,6 +92,32 @@
       <df name="Timer">
         <in>Timer_test.cpp</in>
       </df>
+      <df name="WaitSet">
+        <df name=".svn">
+          <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            <in>WaitSet_test.cpp.svn-base</in>
+            <in>makefile.svn-base</in>
+            <in>makefile_msvc.svn-base</in>
+          </df>
+          <df name="tmp" kind="SOURCE_LOGICAL_FOLDER">
+            <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+          </df>
+          <in>all-wcprops</in>
+          <in>entries</in>
+        </df>
+        <in>WaitSet_test.cpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+      </df>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
