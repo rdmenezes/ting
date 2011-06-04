@@ -32,11 +32,31 @@
         <in>makefile</in>
         <in>makefile_msvc</in>
       </df>
+      <df name="debug">
+        <df name=".svn">
+          <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="tmp" kind="SOURCE_LOGICAL_FOLDER">
+            <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+          </df>
+          <in>entries</in>
+        </df>
+        <in>debug_test.cpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+      </df>
       <df name="other" kind="SOURCE_LOGICAL_FOLDER">
         <df name="src" kind="SOURCE_LOGICAL_FOLDER">
           <in>Types_test.cpp</in>
-          <in>WaitSet_test.cpp</in>
-          <in>debug_test.cpp</in>
           <in>utils_test.cpp</in>
         </df>
       </df>

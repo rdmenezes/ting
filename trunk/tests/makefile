@@ -10,6 +10,7 @@ subdirs += Signal
 subdirs += Socket
 subdirs += Thread
 subdirs += Timer
+subdirs += types
 subdirs += WaitSet
 
 

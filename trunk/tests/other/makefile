@@ -43,10 +43,10 @@ cf += -DDEBUG
 cf += -g
 
 
-default: utils_test$(ext) Types_test$(ext) 
+default: utils_test$(ext)
 
 
-test: run_utils_test run_Types_test
+test: run_utils_test
 
 
 
@@ -60,19 +60,9 @@ utils_test$(ext): src/utils_test.cpp
 
 
 
-run_Types_test: Types_test$(ext)
-	@echo running $^...
-	@./$^
-
-Types_test$(ext): src/Types_test.cpp
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $(threadlib) $(rtlib) $<
-
-
-
 clean:
 	@$(remove) utils_test$(ext)
-	@$(remove) Types_test$(ext)
+
 	
 include ../../targets.mk
 

@@ -1,4 +1,4 @@
-#include "../../../src/ting/types.hpp"
+#include "../../src/ting/types.hpp"
 
 
 
