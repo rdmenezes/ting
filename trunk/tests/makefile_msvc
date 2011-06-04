@@ -2,7 +2,6 @@ subdirs :=
 subdirs += Array
 subdirs += Buffer
 subdirs += debug
-subdirs += other
 subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
@@ -11,6 +10,7 @@ subdirs += Socket
 subdirs += Thread
 subdirs += Timer
 subdirs += types
+subdirs += utils
 subdirs += WaitSet
 
 

@@ -1,7 +1,7 @@
-#include "../../../src/ting/debug.hpp"
-#include "../../../src/ting/types.hpp"
-#include "../../../src/ting/utils.hpp"
-#include "../../../src/ting/Buffer.hpp"
+#include "../../src/ting/debug.hpp"
+#include "../../src/ting/types.hpp"
+#include "../../src/ting/utils.hpp"
+#include "../../src/ting/Buffer.hpp"
 
 
 
