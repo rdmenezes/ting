@@ -10,7 +10,7 @@ cf += /D"DEBUG"
 cf += /D"WIN32"
 
 
-default: run_Timer_test run_debug_test run_utils_test run_PoolStored_test run_Ref_test run_WaitSet_test run_Signal_test
+default: run_Timer_test run_debug_test run_utils_test run_PoolStored_test run_Ref_test run_Signal_test
 
 
 
@@ -76,16 +76,6 @@ Signal_test$(ext): src/Signal_test.cpp
 
 
 
-run_WaitSet_test: WaitSet_test$(ext)
-	@echo running $^...
-	@./$^
-
-WaitSet_test$(ext): src/WaitSet_test.cpp
-	@echo Building $@...
-	@cl $(cf) $(threadlib) $(rtlib) $<
-
-
-
 clean:
 	@$(remove) debug_test$(ext) debug_test.obj
 	@$(remove) utils_test$(ext) utils_test.obj
@@ -93,5 +83,5 @@ clean:
 	@$(remove) Timer_test$(ext) Timer_test.obj
 	@$(remove) Ref_test$(ext) Ref_test.obj
 	@$(remove) Signal_test$(ext) Signal_test.obj
-	@$(remove) WaitSet_test$(ext) WaitSet_test.obj
+
 

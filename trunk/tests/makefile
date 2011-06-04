@@ -9,6 +9,7 @@ subdirs += Signal
 subdirs += Socket
 subdirs += Thread
 subdirs += Timer
+subdirs += WaitSet
 
 
 #Looks like static variables are not shared between dll boundaries on win32,
