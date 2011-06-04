@@ -54,12 +54,6 @@
         <in>makefile</in>
         <in>makefile_msvc</in>
       </df>
-      <df name="other" kind="SOURCE_LOGICAL_FOLDER">
-        <df name="src" kind="SOURCE_LOGICAL_FOLDER">
-          <in>Types_test.cpp</in>
-          <in>utils_test.cpp</in>
-        </df>
-      </df>
       <df name="PoolStored">
         <df name=".svn">
           <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
@@ -137,6 +131,32 @@
         <in>makefile</in>
         <in>makefile_msvc</in>
         <in>types_test.cpp</in>
+      </df>
+      <df name="utils">
+        <df name=".svn">
+          <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+          </df>
+          <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            <in>makefile.svn-base</in>
+            <in>makefile_msvc.svn-base</in>
+            <in>utils_test.cpp.svn-base</in>
+          </df>
+          <df name="tmp" kind="SOURCE_LOGICAL_FOLDER">
+            <df name="prop-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="props" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+            <df name="text-base" kind="SOURCE_LOGICAL_FOLDER">
+            </df>
+          </df>
+          <in>all-wcprops</in>
+          <in>entries</in>
+        </df>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>utils_test.cpp</in>
       </df>
       <df name="WaitSet">
         <df name=".svn">

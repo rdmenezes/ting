@@ -829,7 +829,6 @@ public:
 		ASSERT(rc)
 		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
 
-		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromRefCounted(rc);
 		return *this;
@@ -840,7 +839,6 @@ public:
 	//TODO: write doxygen docs
 	inline WeakRef& operator=(const Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
-		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
 		return *this;
@@ -851,7 +849,6 @@ public:
 	//TODO: write doxygen docs
 	inline WeakRef& operator=(const WeakRef& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
-		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromWeakRef<T>(r);
 		return *this;
@@ -863,7 +860,6 @@ public:
 	//template for automatic downcasting
 	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
-		//TODO: double mutex lock/unlock (one in destructor and one in Init). Optimize?
 		this->Destroy();
 		this->InitFromWeakRef<TS>(r);
 		return *this;
