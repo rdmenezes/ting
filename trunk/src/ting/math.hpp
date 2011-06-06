@@ -34,6 +34,8 @@ THE SOFTWARE. */
 #include <cmath>
 #include <limits> //this is for std::numeric_limits<float>::quiet_NaN(); etc.
 
+
+
 namespace ting{
 
 //======================
@@ -235,12 +237,11 @@ template <> inline double Sin<double>(double x){
 
 
 
-/*
-//TODO:
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Sin<long double>(long double x){
 	return ::sin(x);
 }
-*/
+#endif
 
 
 
@@ -269,12 +270,11 @@ template <> inline double Cos<double>(double x){
 
 
 
-/*
-//TODO:
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Cos<long double>(long double x){
 	return ::cos(x);
 }
-*/
+#endif
 
 
 
@@ -321,12 +321,11 @@ template <> inline double Exp<double>(double x){
 
 
 
-/*
-//TODO:
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Exp<long double>(long double x){
 	return ::exp(x);
 }
-*/
+#endif
 
 
 
@@ -350,6 +349,14 @@ template <> inline float Ln<float>(float x){
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Ln<double>(double x){
+	return ::log(x);
+}
+#endif
+
+
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Ln<long double>(long double x){
 	return ::log(x);
 }
 #endif

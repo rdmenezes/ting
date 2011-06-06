@@ -3,8 +3,6 @@
 
 
 int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<<"Types test "<<std::endl)
-
 
 	{
 		ting::Inited<int, -10> a;
@@ -58,7 +56,7 @@ int main(int argc, char *argv[]){
 		ASSERT_ALWAYS(a == b)
 	}
 
-	TRACE_ALWAYS(<<"[PASSED]: Types test"<<std::endl)
+	TRACE_ALWAYS(<< "[PASSED]: types test" << std::endl)
 
 	return 0;
 }

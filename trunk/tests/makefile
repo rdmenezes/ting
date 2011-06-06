@@ -2,6 +2,7 @@ subdirs :=
 subdirs += Array
 subdirs += Buffer
 subdirs += debug
+subdirs += math
 subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
