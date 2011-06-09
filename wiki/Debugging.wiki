@@ -112,6 +112,11 @@ ASS(c)->a = 13;
 int b = ASS(c)->a;
 }}}
 
+NOTE: that due to implementation specifics, the ASS() macro evaluates the argument two times. So, one should be careful when using the macro for checking, for example, the value returned by function like this:
+{{{
+bool retVal = ASS(UpdateAndReturnResult());
+}}}
+Thus, in this case, the UpdateAndReturnResult() function will be called twice when debug mode is enabled (i.e. DEBUG macro is defined).
 
 <br>
 *STATIC_ASSERT(x)*<br>
