@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="69">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <df name="src" root="../src">
+      <df name="ting" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Array.hpp</in>
+        <in>Buffer.hpp</in>
+        <in>Exc.hpp</in>
+        <in>PoolStored.hpp</in>
+        <in>Ptr.hpp</in>
+        <in>Ref.hpp</in>
+        <in>Signal.hpp</in>
+        <in>Singleton.hpp</in>
+        <in>Socket.hpp</in>
+        <in>Thread.hpp</in>
+        <in>Timer.hpp</in>
+        <in>Vector3.hpp</in>
+        <in>WaitSet.hpp</in>
+        <in>codegen.h</in>
+        <in>debug.hpp</in>
+        <in>math.hpp</in>
+        <in>types.hpp</in>
+        <in>utils.hpp</in>
+      </df>
+    </df>
+    <df name="tests" root="../tests">
+      <df name="Array" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Array_test.cpp</in>
+      </df>
+      <df name="Buffer">
+        <in>Buffer_test.cpp</in>
+      </df>
+      <df name="debug">
+        <in>debug_test.cpp</in>
+      </df>
+      <df name="PoolStored">
+        <in>PoolStored_test.cpp</in>
+      </df>
+      <df name="Ptr" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Ptr_test.cpp</in>
+      </df>
+      <df name="Ref">
+        <in>Ref_test.cpp</in>
+      </df>
+      <df name="RefOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Ref_test.cpp</in>
+        <in>TestClass.hpp</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="Signal">
+        <in>Signal_test.cpp</in>
+      </df>
+      <df name="SingletonOverSharedLibrary" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Singleton_test.cpp</in>
+        <in>TestSingleton.hpp</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="Socket" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Socket_test.cpp</in>
+      </df>
+      <df name="Thread" kind="SOURCE_LOGICAL_FOLDER">
+        <in>Thread_test.cpp</in>
+      </df>
+      <df name="Timer">
+        <in>Timer_test.cpp</in>
+      </df>
+      <df name="types">
+        <in>types_test.cpp</in>
+      </df>
+      <df name="utils">
+        <in>utils_test.cpp</in>
+      </df>
+      <df name="WaitSet">
+        <in>WaitSet_test.cpp</in>
+      </df>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>ting_nb_project-Makefile.mk</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>../src</Elem>
+    <Elem>../tests</Elem>
+  </sourceRootList>
+  <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>GNU|GNU</compilerSet>
+        <platform>2</platform>
+      </toolsSet>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>../test</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f makefile</buildCommand>
+          <cleanCommand>${MAKE} -f makefile clean</cleanCommand>
+          <executablePath></executablePath>
+          <ccTool>
+            <incDir>
+              <pElem>../src</pElem>
+            </incDir>
+          </ccTool>
+        </makeTool>
+      </makefileType>
+    </conf>
+  </confs>
+</configurationDescriptor>
