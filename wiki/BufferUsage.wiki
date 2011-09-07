@@ -74,3 +74,11 @@ ting::StaticBuffer<int, 143> buf; //buffer of 143 int's
 
 ting::StaticBuffer<int, 143> copyBuf(buf);
 }}}
+
+
+
+
+<br>
+= ting::!Array =
+
+To use ting::Buffer with dynamically allocated buffers there is a ting::Array template. It inherits ting::Buffer. For more info about ting::Array see the AutoPtrUsage wiki page.
