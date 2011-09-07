@@ -392,6 +392,14 @@ public:
 		return this->size;
 	}
 
+	/**
+	 * @brief Get number of Waitables already added to this WaitSet.
+	 * @return number of Waitables added to this WaitSet.
+	 */
+	inline unsigned NumWaitables()const{
+		return this->numWaitables;
+	}
+
 
 	/**
 	 * @brief Add Waitable object to the wait set.
