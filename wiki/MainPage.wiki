@@ -3,6 +3,7 @@
 
 Following tutorials are available:
  * [Debugging] - debugging facilities
+ * [BufferUsage Buffer] - memory buffer encapsulation
  * [AutoPtrUsage Ptr/Array] - auto pointer
  * [RefCountedUsage RefCounted] - reference counting pointer
  * [tingUsageTutorial Thread] - multithreading (Threads, Mutexes, Semaphores, etc.)
