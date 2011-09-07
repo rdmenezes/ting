@@ -209,3 +209,10 @@ It is possible to connect signal to function-members slot using the _ting::!Weak
 Disconnecting a signal from a particular slot is done similarly to connecting. Just use Disconnect() instead of Connect().
 
 Note, the Disconnect() method returns bool value indicating that the slot was actually disconnected or not. If it is {{{true}}} then the slot was disconnected. If it is {{{false}}} then the slot was not disconnected, possibly, due to it was not connected before to this signal.
+
+
+
+<br>
+= Checking if slot is connected to a signal =
+
+There is a family of SignalX::!IsConnected() methods. The method arguments are quite similar to SignalX::Connect() ones. The !IsConnected() method checks if the slot is already connected to the given signal and returns true if it is connected, or false otherwise.
