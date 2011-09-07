@@ -2,7 +2,7 @@
 
 = Introduction =
 
-There is a ting::Buffer class which encapsulates pointer to the memory buffer and the size of this buffer.
+There is a ting::Buffer template class which encapsulates pointer to the memory buffer and the size of this buffer.
 <br>
 Why is it needed?
 <br>
@@ -50,4 +50,27 @@ for(unsigned i = 0; i < buf.Size(); ++i){
 for(int* i = buf.Begin(); i != buf.End(); ++i){
     *i = 14; //assign value of 14 to every element of the buffer.
 }
+}}}
+
+
+
+<br>
+= ting::!StaticBuffer =
+
+For using ting::Buffer along with static buffers created on stack or as a member of some class there is a ting::!StaticBuffer template. The ting::!StaticBuffer is directly derived from ting::Buffer and, thus, inherits all its stuff.
+
+Here is how to use it:
+{{{
+//create a static buffer object, e.g. on stack
+ting::StaticBuffer<int, 143> buf; //buffer of 143 int's
+
+//later we can use the buf as it would be ting::Buffer object.
+//...
+
+//In addition to that, we can create a copy of a static buffer,
+//using copy constructor, in which case the content of the buffer
+//will be copied to the newly created ting::StaticBuffer and
+//copy constructors will be called for every buffer element.
+
+ting::StaticBuffer<int, 143> copyBuf(buf);
 }}}
