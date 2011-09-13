@@ -1322,6 +1322,14 @@ public:
 
 
 	/**
+	 * @brief Thread ID type.
+	 * Thread ID type is used to identify a thread.
+	 * The type supports operator==() and operator!=() operators.
+	 */
+	typedef unsigned long int T_ThreadID;
+
+
+	/**
 	 * @brief get current thread ID.
 	 * Returns unique identifier of the currently executing thread. This ID can further be used
 	 * to make assertions to make sure that some code is executed in a specific thread. E.g.
@@ -1329,13 +1337,13 @@ public:
 	 * created.
 	 * @return unique thread identifier.
 	 */
-	static inline ting::ulong GetCurrentThreadID(){
+	static inline T_ThreadID GetCurrentThreadID(){
 #ifdef WIN32
-		return ting::ulong(GetCurrentThreadId());
+		return T_ThreadID(GetCurrentThreadId());
 #elif defined(__APPLE__) || defined(__linux__)
 		pthread_t t = pthread_self();
-		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(ting::ulong))
-		return ting::ulong(t);
+		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(T_ThreadID))
+		return T_ThreadID(t);
 #else
 #error "Unsupported OS"
 #endif
