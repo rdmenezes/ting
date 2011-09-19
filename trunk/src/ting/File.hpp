@@ -174,7 +174,7 @@ public:
 		throw ting::Exc("File::SeekBackward(): unsupported");
 	}
 
-	virtual void MkDir(){
+	virtual void MakeDir(){
 		throw File::Exc("Make directory is not supported");
 	}
 private:

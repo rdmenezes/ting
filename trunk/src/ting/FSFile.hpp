@@ -27,7 +27,7 @@ THE SOFTWARE. */
 
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
 #ifdef __linux__
@@ -228,7 +228,7 @@ public:
 
 
 	//override
-	virtual void MkDir(){
+	virtual void MakeDir(){
 		if(this->IsOpened())
 			throw File::Exc("illegal state");
 
