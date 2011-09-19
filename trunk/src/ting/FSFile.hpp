@@ -189,7 +189,7 @@ public:
 
 
 	//override
-	virtual void SeekFwd(unsigned numBytesToSeek){
+	virtual void SeekForward(unsigned numBytesToSeek){
 		if(!this->IsOpened()){
 			throw File::Exc("file is not opened, cannot seek");
 		}

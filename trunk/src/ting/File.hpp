@@ -159,15 +159,19 @@ public:
 			unsigned offset = 0
 		) = 0;
 
-	virtual void SeekFwd(unsigned numBytesToSeek){
+        //number of bytes actually skipped
+	virtual unsigned SeekForward(unsigned numBytesToSeek){
 		if(!this->IsOpened())
-			throw File::Exc("File::SeekFwd(): file is not opened");
+			throw File::Exc("File::SeekForward(): file is not opened");
 
 		//TODO: allocate limited size buffer and read in a loop
 		ting::Array<ting::u8> buf(numBytesToSeek);
-		if(this->Read(buf) != buf.Size()){
-			throw File::Exc("File::SeekFwd(): end of file reached");
-		}
+		unsigned numBytesRead = this->Read(buf);
+		return numBytesRead;
+	}
+        
+	virtual unsigned SeekBackward(unsigned numBytesToSeek){
+		throw ting::Exc("File::SeekBackward(): unsupported");
 	}
 
 	virtual void MkDir(){
