@@ -125,9 +125,9 @@ public:
 	 * This function just checks if the path finishes with '/'
 	 * character, and if it does then it is a directory.
 	 * Empty path refers to the current directory.
-     * @return true - if current path points to a directory.
+	 * @return true - if current path points to a directory.
 	 * @return false - otherwise.
-     */
+	 */
 	inline bool IsDir()const{
 		if(this->Path().size() == 0)
 			return true;
