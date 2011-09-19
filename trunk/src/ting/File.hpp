@@ -234,7 +234,7 @@ public:
 			return false;
 
 		if(this->Path()[this->Path().size() - 1] == '/')
-			throw File::Exc("Checking for directory existance is not supported");
+			throw File::Exc("Checking for directory existence is not supported");
 		
 		if(this->IsOpened())
 			return true;
