@@ -17,13 +17,13 @@ Description: cross-platform C++ utility library.
 Package: libting0-dbg
 Section: devel
 Architecture: any
-Depends: ${shlibs:Depends}, libcliser0 (= ${binary:Version})
+Depends: ${shlibs:Depends}, libting0 (= ${binary:Version})
 Description: debugging symbols for libting0 package.
 
 Package: libting-dev
 Section: devel
 Architecture: any
-Depends:
+Depends: libting0 (= ${binary:Version})
 Suggests: libting-doc
 Description: cross-platform C++ utility library.
  For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
