@@ -53,11 +53,12 @@ public:
 	//define exception class
 	class Exc : public ting::Exc{
 	public:
-		Exc() : ting::Exc("File::Exc: unknown")
+		Exc() :
+				ting::Exc("[File::Exc]: unknown")
 		{}
 
 		Exc(const std::string& descr):
-			ting::Exc((std::string("File::Exc: ") + descr).c_str())
+				ting::Exc((std::string("[File::Exc]: ") + descr).c_str())
 		{}
 	};
 

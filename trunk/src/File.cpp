@@ -63,7 +63,7 @@ ting::Array<std::string> File::ListDirContents(){
 
 unsigned File::SeekForward(unsigned numBytesToSeek){
 	if(!this->IsOpened())
-		throw File::Exc("File::SeekForward(): file is not opened");
+		throw File::Exc("SeekForward(): file is not opened");
 
 	//TODO: allocate limited size buffer and read in a loop
 	ting::Array<ting::u8> buf(numBytesToSeek);
@@ -74,7 +74,7 @@ unsigned File::SeekForward(unsigned numBytesToSeek){
 
 
 unsigned File::SeekBackward(unsigned numBytesToSeek){
-	throw ting::Exc("File::SeekBackward(): unsupported");
+	throw ting::Exc("SeekBackward(): unsupported");
 }
 
 
