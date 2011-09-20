@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 /**
- * @file Ordinary filesystem File implementation
+ * @file Ordinary file system File implementation
  * @author Ivan Gagis <igagis@gmail.com>
  */
 
@@ -41,10 +41,14 @@ THE SOFTWARE. */
 
 
 
+namespace ting{
+
+
+
 class FSFile : public File{
 	std::string rootDir;
 
-	FILE *handle;
+	ting::Inited<FILE*, 0> handle;
 
 protected:
 
@@ -54,8 +58,7 @@ protected:
 
 public:
 	FSFile(const std::string& pathName = std::string()) :
-			File(pathName),
-			handle(0)
+			File(pathName)
 	{}
 
 	~FSFile(){
@@ -63,14 +66,7 @@ public:
 	}
 
 
-	inline void SetRootDir(const std::string &dir){
-		if(dir.size() > 0){
-			if(dir[dir.size() - 1] != '/'){
-				throw File::Exc("FSFile::SetRootDir(): argument is not a directory, should have trailing '/'");
-			}
-		}
-		this->rootDir = std::string(dir.c_str());//immediate copy (we do not want copy-on-write)
-	}
+	void SetRootDir(const std::string &dir);
 
 	inline std::string GetRootDir()const{
 		return this->rootDir;
@@ -78,54 +74,12 @@ public:
 
 
 	//override
-	virtual void Open(EMode mode){
-		if(this->IsOpened())
-			throw File::Exc("file already opened");
-
-		const char* modeStr;
-		switch(mode){
-			case File::WRITE:
-				modeStr="r+b";
-				break;
-			case File::CREATE:
-				modeStr="w+b";
-				break;
-			case File::READ:
-				modeStr="rb";
-				break;
-			default:
-				throw File::Exc("unknown mode");
-				break;
-		}
-		this->handle = fopen(this->TruePath().c_str(), modeStr);
-		if(!this->handle){
-			TRACE(<< "FSFile::Open(): TruePath() = " << this->TruePath().c_str() << std::endl)
-			throw File::Exc("fopen() failed");
-		}
-
-		//set open mode
-		if(mode == CREATE)
-			this->ioMode = WRITE;
-		else
-			this->ioMode = mode;
-
-		this->isOpened = true;//set "opened" flag
-	}
+	virtual void Open(EMode mode);
 
 
 
 	//override
-	virtual void Close(){
-		if(!this->IsOpened())
-			return;
-
-		ASSERT(this->handle)
-
-		fclose(this->handle);
-		this->handle = 0;
-
-		this->isOpened = false;
-	}
+	virtual void Close();
 
 
 
@@ -134,26 +88,7 @@ public:
 			ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToRead = 0,
 			unsigned offset = 0
-		)
-	{
-		if(!this->IsOpened())
-			throw File::Exc("file is not opened, cannot read");
-
-		unsigned actualNumBytesToRead =
-				numBytesToRead == 0 ? buf.SizeInBytes() : numBytesToRead;
-
-		if(actualNumBytesToRead > buf.SizeInBytes() - offset)
-			throw File::Exc("attempt to read more bytes than output buffer size");
-
-		ASSERT(actualNumBytesToRead + offset <= buf.SizeInBytes())
-		ASSERT(this->handle)
-		unsigned numBytesRead = fread(&buf[offset], 1, actualNumBytesToRead, this->handle);
-		if(numBytesRead != actualNumBytesToRead){//something happened
-			if(!feof(this->handle))
-				throw File::Exc("fread() error");//if it is not an EndOfFile then it is error
-		}
-		return numBytesRead;
-	}
+		);
 
 
 
@@ -163,220 +98,35 @@ public:
 			const ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToWrite = 0,
 			unsigned offset = 0
-		)
-	{
-		if(!this->IsOpened())
-			throw File::Exc("file is not opened, cannot write");
-
-		if(this->ioMode != WRITE)
-			throw File::Exc("file is opened, but not in WRITE mode");
-
-		unsigned actualNumBytesToWrite =
-				numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
-
-		if(actualNumBytesToWrite > buf.SizeInBytes() - offset)
-			throw File::Exc("attempt to write more bytes than passed buffer contains");
-
-		ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-		ASSERT(this->handle)
-		unsigned bytesWritten = fwrite(&buf[offset], 1, actualNumBytesToWrite, this->handle);
-		if(bytesWritten != actualNumBytesToWrite)//something bad has happened
-			throw File::Exc("fwrite error");
-
-		return bytesWritten;
-	}
+		);
 
 
 
 	//override
-	virtual void SeekForward(unsigned numBytesToSeek){
-		if(!this->IsOpened()){
-			throw File::Exc("file is not opened, cannot seek");
-		}
-
-		ASSERT(this->handle)
-		if(fseek(this->handle, numBytesToSeek, SEEK_CUR) != 0){
-			throw File::Exc("fseek() failed");
-		}
-	}
+	virtual void SeekForward(unsigned numBytesToSeek);
 
 
 
 	//override
-	virtual bool Exists()const{
-		if(this->Path().size() == 0)
-			return false;
-
-		//if it is a directory, check directory existance
-		if(this->Path()[this->Path().size() - 1] == '/'){
-#if defined(__linux__)
-			DIR *pdir = opendir(this->TruePath().c_str());
-			if(!pdir){
-				return false;
-			}else{
-				closedir(pdir);
-				return true;
-			}
-#else
-			throw File::Exc("Checking for directory existance is not supported");
-#endif
-		}else{
-			return this->File::Exists();
-		}
-	}
+	virtual bool Exists()const;
 
 
 
 	//override
-	virtual void MakeDir(){
-		if(this->IsOpened())
-			throw File::Exc("illegal state");
+	virtual void MakeDir();
 
-		if(this->Path().size() == 0 || this->Path()[this->Path().size() - 1] != '/')
-			throw File::Exc("invalid directory name");
-
-#if defined(__linux__)
-//		TRACE(<< "creating directory = " << this->Path() << std::endl)
-		umask(0);//clear umask for proper permissions of newly created directory
-		if(mkdir(this->TruePath().c_str(), 0777) != 0)
-			throw File::Exc("mkdir() failed");
-#else
-		throw File::Exc("creating directory is not supported");
-#endif
-	}
 
 
 public:
-	//retuns string of format: "/home/user/"
-	static std::string GetHomeDir(){
-		char * home = getenv("HOME");
-		if(!home){
-			throw File::Exc("HOME environment variable does not exist");
-		}
-
-		std::string ret(home);
-
-		if(ret.size() != 0 && ret[ret.size() - 1] != '/'){
-			ret += '/';
-		}
-
-		return ret;
-	}
+	//returns string of format: "/home/user/"
+	static std::string GetHomeDir();
 
 
 
 	//override
-	virtual ting::Array<std::string> ListDirContents(){
-		if(!this->IsDir())
-			throw File::Exc("FSFile::ListDirContents(): this is not a directory");
-
-		std::vector<std::string> files;
-
-#ifdef __WIN32__
-#error "unimplemented"
-/*
-		C_Str pattern = this->Path();
-		if(pattern.Size()==0){
-			pattern += "*";
-		}else{
-			if( (pattern[pattern.Size()-1] != '/'))
-				pattern+="/";
-			pattern+="*";
-		}
-
-		//M_DEBUG_TRACE(<<"C_File::ListDirFiles(): pattern="<<pattern<<std::endl)
-
-		WIN32_FIND_DATA wfd;
-		HANDLE h = FindFirstFile(pattern.CBuf(), &wfd);
-		if(h == INVALID_HANDLE_VALUE)
-			throw C_Exc("C_File::ListDirFiles(): cannot find first file");
-
-		//create Find Closer to automatically call FindClose on exit from the function in case of exceptions etc...
-		{
-			struct C_FindCloser{
-				HANDLE hnd;
-				C_FindCloser(HANDLE h) : hnd(h){};
-				~C_FindCloser(){FindClose(this->hnd);};
-			} findCloser(h);
-
-			do{
-				C_Str s(wfd.cFileName);
-				M_ASSERT(s.Size()!=0)
-				if(s=="." || s=="..") continue;//do not add ./ and ../ directories, we are not interested in them
-				if( (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY !=0) && s[s.Size()-1]!='/')
-					s+="/";
-				files.PushBack(s);
-			}while(FindNextFile(h, &wfd) != 0);
-
-			if(GetLastError() != ERROR_NO_MORE_FILES)
-				throw C_Exc("C_File::ListDirFiles(): find next file failed");
-		}
-*/
-#elif defined(__linux__)
-		{
-			DIR *pdir = opendir(this->TruePath().c_str());
-
-			if(!pdir){
-				//TODO: check errno for failure reason
-				throw File::Exc("FSFile::ListDirContents(): opendir() failure");
-			}
-
-			//create DirentCloser to automatically call closedir on exit from the function in case of exceptions etc...
-			struct DirCloser{
-				DIR *pdir;
-
-				DirCloser(DIR *pDirToClose) :
-						pdir(pDirToClose)
-				{}
-
-				~DirCloser(){
-					int ret;
-					do{
-						ret = closedir(this->pdir);
-						ASSERT_INFO(ret == 0 || errno == EINTR, "FSFile::ListDirContents(): closedir() failed: " << strerror(errno))
-					}while(ret != 0 && errno == EINTR);
-				}
-			} dirCloser(pdir);
-
-			errno = 0;//clear errno
-			while(dirent *pent = readdir(pdir)){
-				std::string s(pent->d_name);
-				if(s == "." || s == "..")
-					continue;//do not add ./ and ../ directories, we are not interested in them
-
-				struct stat fileStats;
-				//TRACE(<< s << std::endl)
-				if(stat((this->TruePath() + s).c_str(), &fileStats) < 0){
-					//TODO: check errno for failure reason
-					throw File::Exc("FSFile::ListDirContents(): stat() failure");
-				}
-
-				if(fileStats.st_mode & S_IFDIR)//if this entry is a directory append '/' symbol to its end
-					s += "/";
-
-				files.push_back(s);
-			}//~while()
-
-			//check if we exited the while() loop because of readdir() failed
-			if(errno != 0){
-				//TODO: check errno for failure reason
-				throw File::Exc("FSFile::ListDirContents(): readdir() failure");
-			}
-		}
-#elif defined(__MACOSX__)
-
-#error "FSFile::ListDirContents(): MacOSx version is not implemented yet"
-
-#else
-
-#error "FSFile::ListDirContents(): version is not implemented yet for this os"
-
-#endif
-		ting::Array<std::string> filesArray(files.size());
-		for(unsigned i = 0; i < files.size(); ++i)
-			filesArray[i] = files[i];
-		
-		return filesArray;
-	}//~ListDirContents()
+	virtual ting::Array<std::string> ListDirContents();
 };
 
+
+
+}//~namespace

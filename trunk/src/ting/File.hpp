@@ -39,6 +39,10 @@ THE SOFTWARE. */
 
 
 
+namespace ting{
+
+
+
 //TODO: add doxygen docs throughout the file
 class File{
 	std::string path;
@@ -118,7 +122,7 @@ public:
 	 * @return true - if current path points to a directory.
 	 * @return false - otherwise.
 	 */
-	inline bool IsDir()const;
+	bool IsDir()const;
 
 	virtual ting::Array<std::string> ListDirContents();
 
@@ -137,10 +141,10 @@ public:
 		) = 0;
 
 	//returns number of bytes actually skipped
-	virtual unsigned SeekForward(unsigned numBytesToSeek);
+	virtual void SeekForward(unsigned numBytesToSeek);
 
 	//returns number of bytes actually skipped
-	virtual unsigned SeekBackward(unsigned numBytesToSeek);
+	virtual void SeekBackward(unsigned numBytesToSeek);
 
 	virtual void MakeDir();
 	
@@ -164,3 +168,6 @@ public:
 	};
 };
 
+
+
+}//~namespace
