@@ -29,16 +29,18 @@ cf := $(ecf)
 cf += -Wall
 cf += -g
 
+#linker flags
+lf := ../../src/libting.so
 
 default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-	@./$^
+	@LD_LIBRARY_PATH=../../src ./$^
 
 $(binary_name): Socket_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+	@g++ -o $@ $(cf) $(lf) $< $(libs)
 
 
 

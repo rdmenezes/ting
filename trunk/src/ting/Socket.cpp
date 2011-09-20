@@ -24,7 +24,7 @@ THE SOFTWARE. */
 
 
 
-#include "ting/Socket.hpp"
+#include "Socket.hpp"
 
 
 
@@ -693,7 +693,7 @@ void TCPSocket::SetWaitingEvents(u32 flagsToWaitFor){
 
 
 
-void TCPServerSocket::Open(u16 port, bool disableNaggle = false, u16 queueLength = 50){
+void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	if(this->IsValid())
 		throw Socket::Exc("TCPServerSocket::Open(): socket already opened");
 

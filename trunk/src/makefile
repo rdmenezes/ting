@@ -217,6 +217,7 @@ ifeq ($(platform),win32)
 	@rmdir /S /Q obj
 else
 	@$(remove) $(name)
+	@$(remove) $(patsubst %.so,%.a,$(name))
 	@$(remove) $(name).$(so_name)
 	@$(remove) -rf $(dir $(obj_dir))
 	@$(remove) -rf $(remove_on_clean)
