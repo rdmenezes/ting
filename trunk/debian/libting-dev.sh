@@ -2,6 +2,10 @@
 
 packageName=libting-dev
 
+libFileName=libting.so
+soName=0
+
+
 baseDir=debian/out/$packageName
 mkdir -p $baseDir
 
@@ -12,6 +16,9 @@ mkdir -p $incDir
 cp src/ting/*.hpp $incDir
 cp src/ting/*.h $incDir
 
+libDir=$baseDir/usr/lib
+mkdir -p $libDir
+ln -s /usr/lib/$libFileName.$soName $libDir/$libFileName
 
 
 #create dir where the output 'control' will be placed

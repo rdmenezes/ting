@@ -5,16 +5,30 @@ Maintainer: Ivan Gagis <igagis@gmail.com>
 Build-Depends: doxygen
 Standards-Version: 3.7.2
 
+Package: libting0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: cross-platform C++ utility library.
+ For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
+ For network development it provides TCPSocket, UDPSocket classes, etc.
+ It also provides reference counted pointers, smart pointers for buffers.
+
+Package: libting0-dbg
+Section: devel
+Architecture: any
+Depends: ${shlibs:Depends}, libcliser0 (= ${binary:Version})
+Description: debugging symbols for libting0 package.
+
 Package: libting-dev
 Section: devel
 Architecture: any
 Depends:
 Suggests: libting-doc
-Description: simple cross-platform C++ library.
+Description: cross-platform C++ utility library.
  For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
  For network development it provides TCPSocket, UDPSocket classes, etc.
  It also provides reference counted pointers, smart pointers for buffers.
- The library code is entirely in .hpp files.
 
 Package: libting-doc
 Section: devel
