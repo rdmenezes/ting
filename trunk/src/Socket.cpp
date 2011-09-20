@@ -28,6 +28,10 @@ THE SOFTWARE. */
 
 
 
+using namespace ting;
+
+
+
 SocketLib::SocketLib(){
 #ifdef WIN32
 	WORD versionWanted = MAKEWORD(2,2);
@@ -89,9 +93,9 @@ IPAddress SocketLib::GetHostByName(const char *hostName, u16 port){
 
 
 Socket::Socket(const Socket& s) :
-		Waitable(),
+		ting::Waitable(),
 		//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
-		//Therefore, init variables to invalid values.
+		//Therefore, initialize variables to invalid values.
 #ifdef WIN32
 		eventForWaitable(WSA_INVALID_EVENT),
 #endif
@@ -345,9 +349,11 @@ ting::u32 IPAddress::ParseString(const char* ip){
 	if(!ip)
 		throw Socket::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
 
-	inline void ThrowInvalidIP(){
-		throw Socket::Exc("IPAddress::ParseString(): string is not a valid IP address");
-	}
+	struct lf{ //local functions
+		inline static void ThrowInvalidIP(){
+			throw Socket::Exc("IPAddress::ParseString(): string is not a valid IP address");
+		}
+	};
 	
 	u32 h = 0;//parsed host
 	const char *curp = ip;
@@ -357,20 +363,20 @@ ting::u32 IPAddress::ParseString(const char* ip){
 		for(numDgts = 0; numDgts < 3; ++numDgts){
 			if( *curp == '.' || *curp == 0 ){
 				if(numDgts==0)
-					ThrowInvalidIP();
+					lf::ThrowInvalidIP();
 				break;
 			}else{
 				if(*curp < '0' || *curp > '9')
-					ThrowInvalidIP();
+					lf::ThrowInvalidIP();
 				digits[numDgts] = unsigned(*curp) - unsigned('0');
 			}
 			++curp;
 		}
 
 		if(t < 3 && *curp != '.')//unexpected delimiter or unexpected end of string
-			ThrowInvalidIP();
+			lf::ThrowInvalidIP();
 		else if(t == 3 && *curp != 0)
-			ThrowInvalidIP();
+			lf::ThrowInvalidIP();
 
 		unsigned xxx = 0;
 		for(unsigned i = 0; i < numDgts; ++i){
@@ -380,7 +386,7 @@ ting::u32 IPAddress::ParseString(const char* ip){
 			xxx += digits[i] * ord;
 		}
 		if(xxx > 255)
-			ThrowInvalidIP();
+			lf::ThrowInvalidIP();
 
 		h |= (xxx << (8 * (3 - t)));
 
