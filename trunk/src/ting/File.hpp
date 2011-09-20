@@ -47,7 +47,7 @@ class File{
 	//add file permissions
 
 protected:
-	bool isOpened;
+	ting::Inited<bool, false> isOpened;
 
 public:
 	//define exception class
@@ -74,8 +74,7 @@ protected:
 public:
 
 	inline File(const std::string& pathName = std::string()) :
-			path(pathName),
-			isOpened(false)
+			path(pathName)
 	{}
 
 private:
@@ -99,22 +98,12 @@ public:
 		return this->path;
 	}
 
-	std::string ExtractExtension()const{
-		size_t dotPos = this->Path().rfind('.');
-		if(dotPos == std::string::npos || dotPos == 0){//NOTE: dotPos is 0 for hidden files in *nix systems
-			return std::string();
-		}else{
-			ASSERT(this->Path().size() > 0)
-			ASSERT(this->Path().size() >= dotPos + 1)
-			return std::string(this->Path(), dotPos + 1, this->Path().size() - (dotPos + 1));
-		}
-		ASSERT(false)
-	}
-	
+	std::string ExtractExtension()const;
+
 	virtual void Open(EMode mode) = 0;
 
 	virtual void Close() = 0;
-	
+
 	inline bool IsOpened()const{
 		return this->isOpened;
 	}
@@ -128,22 +117,9 @@ public:
 	 * @return true - if current path points to a directory.
 	 * @return false - otherwise.
 	 */
-	inline bool IsDir()const{
-		if(this->Path().size() == 0)
-			return true;
+	inline bool IsDir()const;
 
-		ASSERT(this->Path().size() > 0)
-		char lastChar = this->Path()[this->Path().size() - 1];
-		
-		if(lastChar == '/')
-			return true;
-
-		return false;
-	}
-
-	virtual ting::Array<std::string> ListDirContents(){
-		throw File::Exc("File::ListDirContents(): not supported for this File instance");
-	}
+	virtual ting::Array<std::string> ListDirContents();
 
 	//returns number of bytes actually read
 	virtual unsigned Read(
@@ -159,109 +135,31 @@ public:
 			unsigned offset = 0
 		) = 0;
 
-        //number of bytes actually skipped
-	virtual unsigned SeekForward(unsigned numBytesToSeek){
-		if(!this->IsOpened())
-			throw File::Exc("File::SeekForward(): file is not opened");
+	//returns number of bytes actually skipped
+	virtual unsigned SeekForward(unsigned numBytesToSeek);
 
-		//TODO: allocate limited size buffer and read in a loop
-		ting::Array<ting::u8> buf(numBytesToSeek);
-		unsigned numBytesRead = this->Read(buf);
-		return numBytesRead;
-	}
-        
-	virtual unsigned SeekBackward(unsigned numBytesToSeek){
-		throw ting::Exc("File::SeekBackward(): unsupported");
-	}
+	//returns number of bytes actually skipped
+	virtual unsigned SeekBackward(unsigned numBytesToSeek);
 
-	virtual void MakeDir(){
-		throw File::Exc("Make directory is not supported");
-	}
+	virtual void MakeDir();
+	
 private:
 	static inline unsigned DReadBlockSize(){
 		return 4096;
 	}
 public:
-	ting::Array<ting::u8> LoadWholeFileIntoMemory(){
-		if(this->IsOpened())
-			throw File::Exc("file should not be opened");
+	ting::Array<ting::u8> LoadWholeFileIntoMemory();
 
-		File::Guard fileCloser(*this);//make sure we close the file upon exit from the function
-
-//		TRACE(<< "Opening file..." <<std::endl)
-
-		//try to open the file
-		this->Open(File::READ);
-
-//		TRACE(<< "File opened" <<std::endl)
-
-		//two arrays
-		ting::Array<ting::u8> a(DReadBlockSize()); //start with 4kb
-		ting::Array<ting::u8> b;
-
-		//two pointers
-		ting::Array<ting::u8> *currArr = &a;
-		ting::Array<ting::u8> *freeArr = &b;
- 
-		unsigned numBytesRead = 0;
-		unsigned numBytesReadLastOp = 0;
-		for(;;){
-			if( currArr->Size() < (numBytesRead + DReadBlockSize()) ){
-				freeArr->Init( currArr->Size() + DReadBlockSize() );
-				ASSERT(freeArr->Size() > numBytesRead);
-				memcpy(freeArr->Begin(), currArr->Begin(), numBytesRead);
-				currArr->Reset();//free memory
-				std::swap(currArr, freeArr);
-			}
-
-			numBytesReadLastOp = this->Read(*currArr, DReadBlockSize(), numBytesRead);
-
-			numBytesRead += numBytesReadLastOp;//update number of bytes read
-
-			if(numBytesReadLastOp != DReadBlockSize())
-				break;
-		}//~for
-		freeArr->Init(numBytesRead);
-		memcpy(freeArr->Begin(), currArr->Begin(), numBytesRead);
-
-//		TRACE(<< "File loaded" <<std::endl)
-
-		return *freeArr;
-	}
-
-	virtual bool Exists()const{
-		if(this->Path().size() == 0)
-			return false;
-
-		if(this->Path()[this->Path().size() - 1] == '/')
-			throw File::Exc("Checking for directory existence is not supported");
-		
-		if(this->IsOpened())
-			return true;
-
-		//try opening and closing the file to find out if it exists or not
-		ASSERT(!this->IsOpened())
-		try{
-			File::Guard fileCloser(const_cast<File&>(*this));//make sure we close the file upon exit from try/catch block
-			const_cast<File* const>(this)->Open(READ);
-		}catch(File::Exc &e){
-			return false;//file opening failed, assume the file does not exist
-		}
-		return true;//file open succeeded => file exists
-	}
-private:
+	virtual bool Exists()const;
 
 public:
+	//TODO: doxygen
 	class Guard{
 		File& f;
 	public:
-		Guard(File &file) :
-				f(file)
-		{}
+		Guard(File &file, EMode mode);
 		
-		~Guard(){
-			f.Close();
-		}
+		~Guard();
 	};
 };
 
