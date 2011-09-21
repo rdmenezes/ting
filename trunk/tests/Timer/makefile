@@ -34,7 +34,7 @@ default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-	@./$^
+	@LD_LIBRARY_PATH=../../src ./$^
 
 $(binary_name): Timer_test.cpp
 	@echo Building $@...

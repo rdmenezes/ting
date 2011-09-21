@@ -157,6 +157,14 @@ public:
 		return this->value;
 	}
 
+	inline T operator->(){
+		return this->value;
+	}
+	
+	inline const T operator->()const{
+		return this->value;
+	}
+	
 	inline T& operator+=(const T& val){
 		return (this->value += val);
 	}

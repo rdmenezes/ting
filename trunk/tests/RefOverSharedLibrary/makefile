@@ -40,7 +40,7 @@ test: $(binary_name)
 ifeq ($(platform),win32)
 	@./$^
 else
-	@LD_LIBRARY_PATH=. ./$^
+	@LD_LIBRARY_PATH=../../src:. ./$^
 endif
 
 

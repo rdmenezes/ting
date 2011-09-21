@@ -33,7 +33,7 @@ default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-	@./$^
+	@LD_LIBRARY_PATH=../../src ./$^
 
 $(binary_name): PoolStored_test.cpp
 	@echo Building $@...

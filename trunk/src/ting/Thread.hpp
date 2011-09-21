@@ -265,57 +265,10 @@ public:
 	/**
 	 * @brief Create the semaphore with given initial value.
 	 */
-	Semaphore(unsigned initialValue = 0){
-#ifdef WIN32
-		if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
-#elif defined(__SYMBIAN32__)
-		if(this->s.CreateLocal(initialValue) != KErrNone)
-#elif defined(__APPLE__)
-		// Darwin/BSD/... semaphores are named semaphores, we need to create a 
-		// different name for new semaphores.
-		char name[256];
-		// this n_name is shared among all semaphores, maybe it will be worth protect it
-		// by a mutex or a CAS operation;
-		static unsigned int n_name = 0;
-		unsigned char p = 0;
-		// fill the name
-		for(unsigned char n = ++n_name, p = 0; n > 0;){
-			unsigned char idx = n%('Z'-'A'+1);
-			name[++p] = 'A'+idx;
-			n -= idx;
-		}
-		// end it with null and create the semaphore
-		name[p] = '\0';
-		this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
-		if (this->s == SEM_FAILED)
-#elif defined(__linux__)
-		if(sem_init(&this->s, 0, initialValue) < 0)
-#else
-#error "unknown system"
-#endif
-		{
-			LOG(<< "Semaphore::Semaphore(): failed" << std::endl)
-			throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
-		}
-	}
+	Semaphore(unsigned initialValue = 0);
 
+	~Semaphore();
 
-
-	~Semaphore(){
-#ifdef WIN32
-		CloseHandle(this->s);
-#elif defined(__SYMBIAN32__)
-		this->s.Close();
-#elif defined(__APPLE__)
-		sem_close(this->s);
-#elif defined(__linux__)
-		sem_destroy(&this->s);
-#else
-#error "unknown system"
-#endif
-	}
-
-	
 	
 	/**
 	 * @brief Wait on semaphore.
@@ -374,88 +327,7 @@ public:
 	 * @return returns true if the semaphore value was decremented.
 	 * @return returns false if the timeout was hit.
 	 */
-	bool Wait(ting::u32 timeoutMillis){
-#ifdef WIN32
-		STATIC_ASSERT(INFINITE == 0xffffffff)
-		switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == INFINITE ? INFINITE - 1 : timeoutMillis))){
-			case WAIT_OBJECT_0:
-				return true;
-			case WAIT_TIMEOUT:
-				return false;
-			default:
-				throw ting::Exc("Semaphore::Wait(u32): wait failed");
-				break;
-		}
-#elif defined(__SYMBIAN32__)
-		throw ting::Exc("Semaphore::Wait(): wait with timeout is not implemented on Symbian, TODO: implement");
-#elif defined(__APPLE__)
-		int retVal = 0;
-
-		// simulate the behavior of wait
-		do{
-			retVal = sem_trywait(this->s);
-			if(retVal == 0){
-				break; // OK leave the loop
-			}else{
-				if(errno == EAGAIN){ // the semaphore was blocked
-					struct timespec amount;
-					struct timespec result;
-					int resultsleep;
-					amount.tv_sec = timeoutMillis / 1000;
-					amount.tv_nsec = (timeoutMillis % 1000) * 1000000;
-					resultsleep = nanosleep(&amount, &result);
-					// update timeoutMillis based on the output of the sleep call
-					// if nanosleep() returns -1 the sleep was interrupted and result
-					// struct is updated with the remaining un-slept time.
-					if(resultsleep == 0){
-						timeoutMillis = 0;
-					}else{
-						timeoutMillis = result.tv_sec * 1000 + result.tv_nsec / 1000000;
-					}
-				}else if(errno != EINTR){
-					throw ting::Exc("Semaphore::Wait(): wait failed");
-				}
-			}
-		}while(timeoutMillis > 0);
-
-		// no time left means we reached the timeout
-		if(timeoutMillis == 0){
-			return false;
-		}
-#elif defined(__linux__)
-		//if timeoutMillis is 0 then use sem_trywait() to avoid unnecessary time calculation for sem_timedwait()
-		if(timeoutMillis == 0){
-			if(sem_trywait(&this->s) == -1){
-				if(errno == EAGAIN){
-					return false;
-				}else{
-					throw ting::Exc("Semaphore::Wait(u32): error: sem_trywait() failed");
-				}
-			}
-		}else{
-			timespec ts;
-
-			if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
-				throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
-
-			ts.tv_sec += timeoutMillis / 1000;
-			ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
-			ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
-			ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
-
-			if(sem_timedwait(&this->s, &ts) == -1){
-				if(errno == ETIMEDOUT){
-					return false;
-				}else{
-					throw ting::Exc("Semaphore::Wait(u32): error: sem_timedwait() failed");
-				}
-			}
-		}
-#else
-#error "unknown system"
-#endif
-		return true;
-	}
+	bool Wait(ting::u32 timeoutMillis);
 
 
 
@@ -502,35 +374,14 @@ class CondVar{
 #endif
 
 	//forbid copying
-	CondVar(const CondVar& ){
-		ASSERT(false)
-	}
-	CondVar& operator=(const CondVar& ){
-		return *this;
-	}
+	CondVar(const CondVar& );
+	CondVar& operator=(const CondVar& );
 	
 public:
 
-	CondVar(){
-#if defined(WIN32) || defined(__SYMBIAN32__)
-		this->numWaiters = 0;
-		this->numSignals = 0;
-#elif defined(__linux__) || defined(__APPLE__)
-		pthread_cond_init(&this->cond, NULL);
-#else
-#error "unknown system"
-#endif
-	}
+	CondVar();
 
-	~CondVar(){
-#if defined(WIN32) || defined(__SYMBIAN32__)
-		//do nothing
-#elif defined(__linux__) || defined(__APPLE__)
-	pthread_cond_destroy(&this->cond);
-#else
-#error "unknown system"
-#endif
-	}
+	~CondVar();
 
 	void Wait(Mutex& mutex){
 #if defined(WIN32) || defined(__SYMBIAN32__)
@@ -626,8 +477,8 @@ class Queue : public Waitable{
 
 	Mutex mut;
 
-	Message *first,
-			*last;
+	ting::Inited<Message*, 0> first;
+	ting::Inited<Message*, 0> last;
 
 #if defined(WIN32)
 	//use additional semaphore to implement Waitable on Windows
@@ -650,76 +501,14 @@ public:
 	/**
 	 * @brief Constructor, creates empty message queue.
 	 */
-	Queue() :
-			first(0),
-			last(0)
-	{
-		//can write will always be set because it is always possible to post a message to the queue
-		this->SetCanWriteFlag();
+	Queue();
 
-#if defined(WIN32)
-		this->eventForWaitable = CreateEvent(
-				NULL, //security attributes
-				TRUE, //manual-reset
-				FALSE, //not signalled initially
-				NULL //no name
-			);
-		if(this->eventForWaitable == NULL){
-			throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
-		}
-#elif defined(__linux__)
-		this->eventFD = eventfd(0, EFD_NONBLOCK);
-		if(this->eventFD < 0){
-			std::stringstream ss;
-			ss << "Queue::Queue(): could not create eventfd (linux) for implementing Waitable,"
-					<< " error code = " << errno << ": " << strerror(errno);
-			throw ting::Exc(ss.str().c_str());
-		}
-#elif defined(__APPLE__)
-		if(::pipe(&this->pipeEnds[0]) < 0){
-			std::stringstream ss;
-			ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
-					<< " error code = " << errno << ": " << strerror(errno);
-			throw ting::Exc(ss.str().c_str());
-		}
-#else
-#error "Unsupported OS"
-#endif
-	}
-
-
-
+	
 	/**
 	 * @brief Destructor.
 	 * When called, it also destroys all messages on the queue.
 	 */
-	~Queue(){
-		//destroy messages which are currently on the queue
-		{
-			Mutex::Guard mutexGuard(this->mut);
-			Message *msg = this->first;
-			Message	*nextMsg;
-			while(msg){
-				nextMsg = msg->next;
-				//use Ptr to kill messages instead of "delete msg;" because
-				//the messages are passed to PushMessage() as Ptr, and thus, it is better
-				//to use Ptr to delete them.
-				{Ptr<Message> killer(msg);}
-
-				msg = nextMsg;
-			}
-		}
-#if defined(WIN32)
-		CloseHandle(this->eventForWaitable);
-#elif defined(__linux__)
-		close(this->eventFD);
-#elif defined(__APPLE__)
-		close(this->pipeEnds[0]);
-		close(this->pipeEnds[1]);
-#else
-#error "Unsupported OS"
-#endif
-	}
+	~Queue();
 
 
 
@@ -727,48 +516,7 @@ public:
 	 * @brief Pushes a new message to the queue.
 	 * @param msg - the message to push into the queue.
 	 */
-	void PushMessage(Ptr<Message> msg){
-		ASSERT(msg.IsValid())
-		Mutex::Guard mutexGuard(this->mut);
-		if(this->first){
-			ASSERT(this->last && this->last->next == 0)
-			this->last = this->last->next = msg.Extract();
-			ASSERT(this->last->next == 0)
-		}else{
-			ASSERT(msg.IsValid())
-			this->last = this->first = msg.Extract();
-
-			//Set CanRead flag.
-			//NOTE: in linux imlementation with epoll(), the CanRead
-			//flag will also be set in WaitSet::Wait() method.
-			//NOTE: set CanRead flag before event notification/pipe write, because
-			//if do it after then some other thread which was waiting on the WaitSet
-			//may read the CanRead flag while it was not set yet.
-			ASSERT(!this->CanRead())
-			this->SetCanReadFlag();
-			
-#if defined(WIN32)
-			if(SetEvent(this->eventForWaitable) == 0){
-				throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
-			}
-#elif defined(__linux__)
-			if(eventfd_write(this->eventFD, 1) < 0){
-				throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
-			}
-#elif defined(__APPLE__)
-			{
-				u8 oneByteBuf[1];
-				write(this->pipeEnds[1], oneByteBuf, 1);
-			}
-#else
-#error "Unsupported OS"
-#endif
-		}
-
-		ASSERT(this->CanRead())
-		//NOTE: must do signalling while mutex is locked!!!
-		this->sem.Signal();
-	}
+	void PushMessage(Ptr<Message> msg);
 
 
 
@@ -779,50 +527,7 @@ public:
 	 * @return auto-pointer to Message instance.
 	 * @return invalid auto-pointer if there are no messares in the queue.
 	 */
-	Ptr<Message> PeekMsg(){
-		Mutex::Guard mutexGuard(this->mut);
-		if(this->first){
-			ASSERT(this->CanRead())
-			//NOTE: Decrement semaphore value, because we take one message from queue.
-			//      The semaphore value should be > 0 here, so there will be no hang
-			//      in Wait().
-			//      The semaphore value actually reflects the number of Messages in
-			//      the queue.
-			this->sem.Wait();
-			Message* ret = this->first;
-			this->first = this->first->next;
-
-			if(this->first == 0){
-#if defined(WIN32)
-				if(ResetEvent(this->eventForWaitable) == 0){
-					ASSERT(false)
-					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
-				}
-#elif defined(__linux__)
-				{
-					eventfd_t value;
-					if(eventfd_read(this->eventFD, &value) < 0){
-						throw ting::Exc("Queue::Wait(): eventfd_read() failed");
-					}
-					ASSERT(value == 1)
-				}
-#elif defined(__APPLE__)
-				{
-					u8 oneByteBuf[1];
-					read(this->pipeEnds[0], oneByteBuf, 1);
-				}
-#else
-#error "Unsupported OS"
-#endif
-				this->ClearCanReadFlag();
-			}else{
-				ASSERT(this->CanRead())
-			}
-
-			return Ptr<Message>(ret);
-		}
-		return Ptr<Message>();
-	}
+	Ptr<Message> PeekMsg();
 
 
 
@@ -837,165 +542,30 @@ public:
 	 * thread on the same Queue instance, because it will also lead to undefined behavior.
 	 * @return auto-pointer to Message instance.
 	 */
-	Ptr<Message> GetMsg(){
-		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): enter" << std::endl)
-		{
-			Mutex::Guard mutexGuard(this->mut);
-			if(this->first){
-				ASSERT(this->CanRead())
-				//NOTE: Decrement semaphore value, because we take one message from queue.
-				//      The semaphore value should be > 0 here, so there will be no hang
-				//      in Wait().
-				//      The semaphore value actually reflects the number of Messages in
-				//      the queue.
-				this->sem.Wait();
-				Message* ret = this->first;
-				this->first = this->first->next;
-
-				if(this->first == 0){
-#if defined(WIN32)
-					if(ResetEvent(this->eventForWaitable) == 0){
-						ASSERT(false)
-						throw ting::Exc("Queue::Wait(): ResetEvent() failed");
-					}
-#elif defined(__linux__)
-					{
-						eventfd_t value;
-						if(eventfd_read(this->eventFD, &value) < 0){
-							throw ting::Exc("Queue::Wait(): eventfd_read() failed");
-						}
-						ASSERT(value == 1)
-					}
-#elif defined(__APPLE__)
-					{
-						u8 oneByteBuf[1];
-						read(this->pipeEnds[0], oneByteBuf, 1);
-					}
-#else
-#error "Unsupported OS"
-#endif
-					this->ClearCanReadFlag();
-				}else{
-					ASSERT(this->CanRead())
-				}
-
-				M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit without waiting on semaphore" << std::endl)
-				return Ptr<Message>(ret);
-			}
-		}
-		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): waiting" << std::endl)
-		
-		this->sem.Wait();
-		
-		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signalled" << std::endl)
-		{
-			Mutex::Guard mutexGuard(this->mut);
-			ASSERT(this->CanRead())
-			ASSERT(this->first)
-			Message* ret = this->first;
-			this->first = this->first->next;
-
-			if(this->first == 0){
-#if defined(WIN32)
-				if(ResetEvent(this->eventForWaitable) == 0){
-					ASSERT(false)
-					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
-				}
-#elif defined(__linux__)
-				{
-					eventfd_t value;
-					if(eventfd_read(this->eventFD, &value) < 0){
-						throw ting::Exc("Queue::Wait(): eventfd_read() failed");
-					}
-					ASSERT(value == 1)
-				}
-#elif defined(__APPLE__)
-				{
-					u8 oneByteBuf[1];
-					read(this->pipeEnds[0], oneByteBuf, 1);
-				}
-#else
-#error "Unsupported OS"
-#endif
-				this->ClearCanReadFlag();
-			}else{
-				ASSERT(this->CanRead())
-			}
-
-			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit after waiting on semaphore" << std::endl)
-			return Ptr<Message>(ret);
-		}
-	}
+	Ptr<Message> GetMsg();
 
 private:
 #ifdef WIN32
 	//override
-	HANDLE GetHandle(){
-		//return event handle
-		return this->eventForWaitable;
-	}
+	HANDLE GetHandle();
 
 	u32 flagsMask;//flags to wait for
 
 	//override
-	virtual void SetWaitingEvents(u32 flagsToWaitFor){
-		//It is not allowed to wait on queue for write,
-		//because it is always possible to push new message to queue.
-		//Error condition is not possible for Queue.
-		//Thus, only possible flag values are READ and 0 (NOT_READY)
-		if(flagsToWaitFor != 0 && flagsToWaitFor != ting::Waitable::READ){
-			ASSERT_INFO(false, "flagsToWaitFor = " << flagsToWaitFor)
-			throw ting::Exc("Queue::SetWaitingEvents(): flagsToWaitFor should be ting::Waitable::READ or 0, other values are not allowed");
-		}
-
-		this->flagsMask = flagsToWaitFor;
-	}
+	virtual void SetWaitingEvents(u32 flagsToWaitFor);
 
 	//returns true if signalled
-	virtual bool CheckSignalled(){
-		//error condition is not possible for queue
-		ASSERT((this->readinessFlags & ting::Waitable::ERROR_CONDITION) == 0)
+	//override
+	virtual bool CheckSignalled();
 
-/*
-#ifdef DEBUG
-		{
-			Mutex::Guard mutexGuard(this->mut);
-			if(this->first){
-				ASSERT_ALWAYS(this->CanRead())
-
-				//event should be in signalled state
-				ASSERT_ALWAYS(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0)
-			}
-
-			if(this->CanRead()){
-				ASSERT_ALWAYS(this->first)
-
-				//event should be in signalled state
-				ASSERT_ALWAYS(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0)
-			}
-
-			//if event is in signalled state
-			if(WaitForSingleObject(this->eventForWaitable, 0) == WAIT_OBJECT_0){
-				ASSERT_ALWAYS(this->CanRead())
-				ASSERT_ALWAYS(this->first)
-			}
-		}
-#endif
-*/
-
-		return (this->readinessFlags & this->flagsMask) != 0;
-	}
 #elif defined(__linux__)
 	//override
-	int GetHandle(){
-		return this->eventFD;
-	}
+	int GetHandle();
+
 #elif defined(__APPLE__) //Mac OS
 	//override
-	int GetHandle(){
-		//return read end of pipe
-		return this->pipeEnds[0];
-	}
+	int GetHandle();
+
 #else
 #error "Unsupported OS"
 #endif
@@ -1011,44 +581,15 @@ private:
 class Thread{
 //Tread Run function
 #ifdef WIN32
-	static unsigned int __stdcall RunThread(void *data)
+	static unsigned int __stdcall RunThread(void *data);
 #elif defined(__SYMBIAN32__)
-	static TInt RunThread(TAny *data)
+	static TInt RunThread(TAny *data);
 #elif defined(__linux__) || defined(__APPLE__)
-	static void* RunThread(void *data)
+	static void* RunThread(void *data);
 #else
 #error "Unsupported OS"
 #endif
-	{
-		ting::Thread *thr = reinterpret_cast<ting::Thread*>(data);
-		try{
-			thr->Run();
-		}catch(ting::Exc& e){
-			ASSERT_INFO(false, "uncaught ting::Exc exception in Thread::Run(): " << e.What())
-		}catch(std::exception& e){
-			ASSERT_INFO(false, "uncaught std::exception exception in Thread::Run(): " << e.what())
-		}catch(...){
-			ASSERT_INFO(false, "uncaught unknown exception in Thread::Run()")
-		}
 
-		{
-			//protect by mutex to avoid changing the
-			//this->state variable before Join() or Start() has finished.
-			ting::Mutex::Guard mutexGuard(Thread::Mutex2());
-			
-			thr->state = STOPPED;
-		}
-
-#ifdef WIN32
-		//Do nothing, _endthreadex() will be called   automatically
-		//upon returning from the thread routine.
-#elif defined(__linux__) || defined(__APPLE__)
-		pthread_exit(0);
-#else
-#error "Unsupported OS"
-#endif
-		return 0;
-	}
 
 	ting::Mutex mutex1;
 
@@ -1062,7 +603,9 @@ class Thread{
 		RUNNING,
 		STOPPED,
 		JOINED
-	} state;
+	};
+	
+	ting::Inited<E_State, NEW> state;
 
 	//system dependent handle
 #if defined(WIN32)
@@ -1076,44 +619,14 @@ class Thread{
 #endif
 
 	//forbid copying
-	Thread(const Thread& ){
-		ASSERT(false)
-	}
-	
-	Thread& operator=(const Thread& ){
-		return *this;
-	}
+	Thread(const Thread& );
+	Thread& operator=(const Thread& );
 
 public:
-	inline Thread() :
-			state(Thread::NEW)
-	{
-#if defined(WIN32)
-		this->th = NULL;
-#elif defined(__SYMBIAN32__)
-		//do nothing
-#elif defined(__linux__) || defined(__APPLE__)
-		//do nothing
-#else
-#error "Unsuported OS"
-#endif
-	}
-
-	virtual ~Thread(){
-		ASSERT_INFO(
-				this->state == JOINED || this->state == NEW,
-				"~Thread() destructor is called while the thread was not joined before. "
-				<< "Make sure the thread is joined by calling Thread::Join() "
-				<< "before destroying the thread object."
-			)
-
-		//NOTE: it is incorrect to put this->Join() to this destructor, because
-		//thread shall already be stopped at the moment when this destructor
-		//is called. If it is not, then the thread will be still running
-		//when part of the thread object is already destroyed, since thread object is
-		//usually a derived object from Thread class and the destructor of this derived
-		//object will be called before ~Thread() destructor.
-	}
+	Thread();
+	
+	
+	virtual ~Thread();
 
 
 
@@ -1133,65 +646,7 @@ public:
 	 *                    If stackSize is 0 then system default stack size is used.
 	 */
 	//0 stacksize stands for default stack size (platform dependent)
-	void Start(unsigned stackSize = 0){
-		//Protect by mutex to avoid several Start() methods to be called
-		//by concurrent threads simultaneously and to protect call to Join() before Start()
-		//has returned.
-		ting::Mutex::Guard mutexGuard1(this->mutex1);
-		//Protect by mutex to avoid incorrect state changing in case when thread
-		//exits before the Start() method retruned.
-		ting::Mutex::Guard mutexGuard2(Thread::Mutex2());
-
-		if(this->state != NEW)
-			throw ting::Exc("Thread::Start(): Thread is already running or stopped");
-
-#ifdef WIN32
-		this->th = reinterpret_cast<HANDLE>(
-				_beginthreadex(
-						NULL,
-						unsigned(stackSize),
-						&RunThread,
-						reinterpret_cast<void*>(this),
-						0,
-						NULL
-					)
-			);
-		if(this->th == NULL)
-			throw ting::Exc("Thread::Start(): starting thread failed");
-#elif defined(__SYMBIAN32__)
-		if(this->th.Create(_L("ting thread"), &RunThread,
-					stackSize == 0 ? KDefaultStackSize : stackSize,
-					NULL, reinterpret_cast<TAny*>(this)) != KErrNone
-				)
-		{
-			throw ting::Exc("Thread::Start(): starting thread failed");
-		}
-		this->th.Resume();//start the thread execution
-#elif defined(__linux__) || defined(__APPLE__)
-		{
-			pthread_attr_t attr;
-
-			pthread_attr_init(&attr);
-			pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-			pthread_attr_setstacksize(&attr, size_t(stackSize));
-
-			int res = pthread_create(&this->th, &attr, &RunThread, this);
-			if(res != 0){
-				pthread_attr_destroy(&attr);
-				TRACE_AND_LOG(<< "Thread::Start(): pthread_create() failed, error code = " << res
-						<< " meaning: " << strerror(res) << std::endl)
-				std::stringstream ss;
-				ss << "Thread::Start(): starting thread failed,"
-						<< " error code = " << res << ": " << strerror(res);
-				throw ting::Exc(ss.str().c_str());
-			}
-			pthread_attr_destroy(&attr);
-		}
-#else
-#error "Unsupported OS"
-#endif
-		this->state = RUNNING;
-	}
+	void Start(unsigned stackSize = 0);
 
 
 
@@ -1202,46 +657,7 @@ public:
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
 	 */
-	void Join(){
-//		TRACE(<< "Thread::Join(): enter" << std::endl)
-
-		//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
-		ting::Mutex::Guard mutexGuard(this->mutex1);
-
-		if(this->state == NEW){
-			//thread was not started, do nothing
-			return;
-		}
-
-		if(this->state == JOINED){
-			throw ting::Exc("Thread::Join(): thread is already joined");
-		}
-
-		ASSERT(this->state == RUNNING || this->state == STOPPED)
-
-#ifdef WIN32
-		WaitForSingleObject(this->th, INFINITE);
-		CloseHandle(this->th);
-		this->th = NULL;
-#elif defined(__SYMBIAN32__)
-		TRequestStatus reqStat;
-		this->th.Logon(reqStat);
-		User::WaitForRequest(reqStat);
-		this->th.Close();
-#elif defined(__linux__) || defined(__APPLE__)
-		pthread_join(this->th, 0);
-#else
-#error "Unsupported OS"
-#endif
-
-		//NOTE: at this point the thread's Run() method should already exit and state
-		//should be set to STOPPED
-		ASSERT(this->state == STOPPED)
-
-		this->state = JOINED;
-
-//		TRACE(<< "Thread::Join(): exit" << std::endl)
-	}
+	void Join();
 
 
 
@@ -1282,6 +698,7 @@ public:
 	 * The type supports operator==() and operator!=() operators.
 	 */
 	typedef unsigned long int T_ThreadID;
+
 
 
 	/**
