@@ -8,15 +8,15 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := -lws2_32
+    libs := 
     remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
-    libs := -lpthread
+    libs := 
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := -lpthread -lrt
+    libs := ../../src/libting.so
     remove := rm -rf
 endif
 
@@ -29,8 +29,7 @@ cf := $(ecf)
 cf += -Wall
 cf += -g
 
-#linker flags
-lf := ../../src/libting.so
+
 
 default: $(binary_name)
 
@@ -40,7 +39,7 @@ test: $(binary_name)
 
 $(binary_name): Socket_test.cpp
 	@echo Building $@...
-	@g++ -o $@ $(cf) $(lf) $< $(libs)
+	@g++ -o $@ $(cf) $< $(libs)
 
 
 

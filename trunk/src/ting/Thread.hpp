@@ -151,59 +151,18 @@ class Mutex{
 #error "unknown system"
 #endif
 
+private:
 	//forbid copying
-	Mutex(const Mutex& ){
-		ASSERT(false)
-	}
-	Mutex& operator=(const Mutex& ){
-		return *this;
-	}
+	Mutex(const Mutex& );
+	Mutex& operator=(const Mutex& );
 
 public:
 	/**
 	 * @brief Creates initially unlocked mutex.
 	 */
-	Mutex(){
-		M_MUTEX_TRACE(<< "Mutex::Mutex(): invoked " << this << std::endl)
-#ifdef WIN32
-		InitializeCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
-		if(this->m.CreateLocal() != KErrNone){
-			throw ting::Exc("Mutex::Mutex(): failed creating mutex (CreateLocal() failed)");
-		}
-#elif defined(__linux__) || defined(__APPLE__)
-		if(pthread_mutex_init(&this->m, NULL) != 0){
-			throw ting::Exc("Mutex::Mutex(): failed creating mutex (pthread_mutex_init() failed)");
-		}
-#else
-#error "unknown system"
-#endif
-	}
+	Mutex();
 
-
-
-	~Mutex(){
-		M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
-#ifdef WIN32
-		DeleteCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
-		this->m.Close();
-#elif defined(__linux__) || defined(__APPLE__)
-		int ret = pthread_mutex_destroy(&this->m);
-		if(ret != 0){
-			std::stringstream ss;
-			ss << "Mutex::~Mutex(): pthread_mutex_destroy() failed"
-					<< " error code = " << ret << ": " << strerror(ret) << ".";
-			if(ret == EBUSY){
-				ss << " You are trying to destroy locked mutex.";
-			}
-			ASSERT_INFO_ALWAYS(false, ss.str())
-		}
-#else
-#error "unknown system"
-#endif
-	}
-
+	~Mutex();
 
 
 	/**
@@ -212,7 +171,7 @@ public:
 	 * attempting to acquire the lock on the same mutex will wait until the
 	 * mutex lock will be released with Mutex::Unlock().
 	 */
-	void Lock(){
+	inline void Lock(){
 		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #ifdef WIN32
 		EnterCriticalSection(&this->m);
@@ -230,7 +189,7 @@ public:
 	/**
 	 * @brief Release mutex lock.
 	 */
-	void Unlock(){
+	inline void Unlock(){
 		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #ifdef WIN32
 		LeaveCriticalSection(&this->m);
@@ -256,12 +215,8 @@ public:
 		Mutex *mut;
 
 		//forbid copying
-		Guard(const Guard& ){
-			ASSERT(false)
-		}
-		Guard& operator=(const Guard& ){
-			return *this;
-		}
+		Guard(const Guard& );
+		Guard& operator=(const Guard& );
 	public:
 		Guard(Mutex &m):
 				mut(&m)

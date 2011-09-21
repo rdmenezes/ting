@@ -45,6 +45,7 @@ namespace ting{
 
 
 
+//TODO: add doxygen docs throughout the file
 class FSFile : public File{
 	std::string rootDir;
 

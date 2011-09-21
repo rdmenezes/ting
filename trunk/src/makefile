@@ -40,6 +40,7 @@ srcs :=
 srcs += ting/File.cpp
 srcs += ting/FSFile.cpp
 srcs += ting/Socket.cpp
+srcs += ting/Thread.cpp
 
 
 

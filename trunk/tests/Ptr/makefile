@@ -8,15 +8,15 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := -lws2_32
+    libs := 
     remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
-    libs := -lpthread
+    libs := 
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := -lpthread -lrt
+    libs := 
     remove := rm -rf
 endif
 

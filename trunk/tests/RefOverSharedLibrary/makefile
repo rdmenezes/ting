@@ -19,7 +19,7 @@ ifeq ($(platform),win32)
     libs := -mwindows
     remove := del /Q /F
 else
-    libs := 
+    libs := ../../src/libting.so
     remove := rm -rf
 endif
 

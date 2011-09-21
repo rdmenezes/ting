@@ -2,17 +2,28 @@
 <configurationDescriptor version="79">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df name="src" root="../src">
+      <df name="obj">
+        <df name="1">
+          <df name="2">
+            <df name="ting">
+            </df>
+          </df>
+        </df>
+      </df>
       <df name="ting">
         <in>Array.hpp</in>
         <in>Buffer.hpp</in>
         <in>Exc.hpp</in>
+        <in>FSFile.cpp</in>
         <in>FSFile.hpp</in>
+        <in>File.cpp</in>
         <in>File.hpp</in>
         <in>PoolStored.hpp</in>
         <in>Ptr.hpp</in>
         <in>Ref.hpp</in>
         <in>Signal.hpp</in>
         <in>Singleton.hpp</in>
+        <in>Socket.cpp</in>
         <in>Socket.hpp</in>
         <in>Thread.hpp</in>
         <in>Timer.hpp</in>
