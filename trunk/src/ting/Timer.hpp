@@ -80,13 +80,41 @@ namespace ting{
 
 
 
-//forward declarations
-class Timer;
+/**
+ * @brief Get constantly increasing millisecond ticks.
+ * It is not guaranteed that the ticks counting started at the system start.
+ * @return constantly increasing millisecond ticks.
+ */
+inline ting::u32 GetTicks(){
+#ifdef __WIN32__
+	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
+	if(perfCounterFreq.QuadPart == 0){
+		if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
+			//looks like the system does not support high resolution tick counter
+			return GetTickCount();
+		}
+	}
+	LARGE_INTEGER ticks;
+	if(QueryPerformanceCounter(&ticks) == FALSE){
+		return GetTickCount();
+	}
 
+	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
+#elif defined(__APPLE__)
+	//Mac os X doesn't support clock_gettime
+	timeval t;
+	gettimeofday(&t, 0);
+	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
+#elif defined(__linux__)
+	timespec ts;
+	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+		throw ting::Exc("GetTicks(): clock_gettime() returned error");
 
-
-//function prototypes
-inline ting::u32 GetTicks();
+	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
+#else
+#error "Unsupported OS"
+#endif
+}
 
 
 
@@ -213,17 +241,17 @@ class TimerLib : public Singleton<TimerLib>{
 			ASSERT(this->timers.size() == 0)
 		}
 
-		inline void AddTimer_ts(Timer* timer, u32 timeout);
+		void AddTimer_ts(Timer* timer, u32 timeout);
 
-		inline bool RemoveTimer_ts(Timer* timer);
+		bool RemoveTimer_ts(Timer* timer);
 
 		inline void SetQuitFlagAndSignalSemaphore(){
 			this->quitFlag = true;
 			this->sema.Signal();
 		}
 
-		//override (inline is just to make possible method definition in header file)
-		inline void Run();
+		//override
+		void Run();
 
 	} thread;
 
@@ -286,58 +314,6 @@ inline bool Timer::Stop(){
 
 
 
-inline bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
-	ASSERT(timer)
-	ting::Mutex::Guard mutexGuard(this->mutex);
-
-	if(!timer->isRunning){
-		return false;
-	}
-
-	//if isStarted flag is set then the timer will be stopped now, so
-	//change the flag
-	timer->isRunning = false;
-
-	ASSERT(timer->i != this->timers.end())
-
-	//if that was the first timer, signal the semaphore about timer deletion in order to recalculate the waiting time
-	if(this->timers.begin() == timer->i){
-		this->sema.Signal();
-	}
-
-	this->timers.erase(timer->i);
-
-	//was running
-	return true;
-}
-
-
-
-inline void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
-	ASSERT(timer)
-	ting::Mutex::Guard mutexGuard(this->mutex);
-
-	if(timer->isRunning){
-		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already running!");
-	}
-
-	timer->isRunning = true;
-
-	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
-
-	timer->i = this->timers.insert(
-			std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
-		);
-
-	ASSERT(timer->i != this->timers.end())
-	ASSERT(timer->i->second)
-
-	//signal the semaphore about new timer addition in order to recalculate the waiting time
-	this->sema.Signal();
-}
-
-
-
 inline ting::u64 TimerLib::TimerThread::GetTicks(){
 	ting::u32 ticks = ting::GetTicks() % Timer::DMaxTicks();
 
@@ -353,106 +329,6 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 	}
 
 	return this->ticks + ting::u64(ticks);
-}
-
-
-
-//override
-inline void TimerLib::TimerThread::Run(){
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
-
-	while(!this->quitFlag){
-		ting::u32 millis;
-
-		while(true){
-			std::vector<Timer*> expiredTimers;
-
-			{
-				ting::Mutex::Guard mutexGuard(this->mutex);
-
-				ting::u64 ticks = this->GetTicks();
-
-				for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
-					if(b->first > ticks){
-						break;//~for
-					}
-
-					Timer *timer = b->second;
-					//add the timer to list of expired timers
-					ASSERT(timer)
-					expiredTimers.push_back(timer);
-
-					//Change the expired timer state to not running.
-					//This should be done before the expired signal of the timer will be emitted.
-					timer->isRunning = false;
-
-					this->timers.erase(b);
-				}
-
-				if(expiredTimers.size() == 0){
-					ASSERT(this->timers.size() > 0) //if we have no expired timers here, then at least one timer should be running (the half-max-ticks timer).
-
-					//calculate new waiting time
-					ASSERT(this->timers.begin()->first > ticks)
-					ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
-					millis = ting::u32(this->timers.begin()->first - ticks);
-
-					//zero out the semaphore for optimization purposes
-					while(this->sema.Wait(0)){}
-
-					break;//~while(true)
-				}
-			}
-
-			//emit expired signal for expired timers
-			for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
-				ASSERT(*i)
-				(*i)->OnExpired();
-			}
-		}
-
-		this->sema.Wait(millis);
-	}//~while(!this->quitFlag)
-
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
-}//~Run()
-
-
-
-/**
- * @brief Get constantly increasing millisecond ticks.
- * It is not guaranteed that the ticks counting started at the system start.
- * @return constantly increasing millisecond ticks.
- */
-inline ting::u32 GetTicks(){
-#ifdef __WIN32__
-	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
-	if(perfCounterFreq.QuadPart == 0){
-		if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
-			//looks like the system does not support high resolution tick counter
-			return GetTickCount();
-		}
-	}
-	LARGE_INTEGER ticks;
-	if(QueryPerformanceCounter(&ticks) == FALSE){
-		return GetTickCount();
-	}
-
-	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
-#elif defined(__APPLE__)
-	//Mac os X doesn't support clock_gettime
-	timeval t;
-	gettimeofday(&t, 0);
-	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
-#elif defined(__linux__)
-	timespec ts;
-	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
-		throw ting::Exc("GetTicks(): clock_gettime() returned error");
-
-	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
-#else
-#error "Unsupported OS"
-#endif
 }
 
 

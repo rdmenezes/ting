@@ -44,6 +44,8 @@ namespace ting{
 
 
 //TODO: add doxygen docs throughout the file
+
+//TODO: make File a Waitable?
 class File{
 	std::string path;
 
