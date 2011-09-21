@@ -94,9 +94,9 @@ namespace ting{
 class Waitable{
 	friend class WaitSet;
 
-	bool isAdded;
+	ting::Inited<bool, false> isAdded;
 
-	void* userData;
+	ting::Inited<void*, 0> userData;
 
 public:
 	enum EReadinessFlags{
@@ -108,13 +108,9 @@ public:
 	};
 
 protected:
-	u32 readinessFlags;
+	ting::Inited<u32, NOT_READY> readinessFlags;
 
-	inline Waitable() :
-			isAdded(false),
-			userData(0),
-			readinessFlags(NOT_READY)
-	{}
+	inline Waitable(){}
 
 
 
@@ -268,7 +264,7 @@ protected:
  */
 class WaitSet{
 	const unsigned size;
-	unsigned numWaitables;//number of Waitables added
+	ting::Inited<unsigned, 0> numWaitables;//number of Waitables added
 
 #if defined(__WIN32__)
 	Array<Waitable*> waitables;
@@ -282,6 +278,7 @@ class WaitSet{
 	int kq_queue; // kqueue, file descriptor
 	Array<struct kevent> kq_output; // events (size*2)
 
+	//TODO: move to .cpp?
 	void SetEvent(Waitable *w, bool read_write, bool add_remove){
 		int16_t filter = (read_write) ? EVFILT_READ : EVFILT_WRITE;
 		uint16_t flags = (add_remove) ? EV_ADD : EV_DELETE;
@@ -327,8 +324,7 @@ public:
 	 * @param maxSize - maximum number of Waitable objects can be added to this wait set.
 	 */
 	WaitSet(unsigned maxSize) :
-			size(maxSize),
-			numWaitables(0)
+			size(maxSize)
 #if defined(__WIN32__)
 			,waitables(maxSize)
 			,handles(maxSize)
@@ -407,57 +403,7 @@ public:
 	 * @param flagsToWaitFor - determine events waiting for which we are interested.
 	 * @throw ting::Exc - in case the wait set is full or other error occurs.
 	 */
-	inline void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
-//		TRACE(<< "WaitSet::Add(): enter" << std::endl)
-		ASSERT(w)
-
-		ASSERT(!w->isAdded)
-
-#if defined(__WIN32__)
-		ASSERT(this->numWaitables <= this->handles.Size())
-		if(this->numWaitables == this->handles.Size())
-			throw ting::Exc("WaitSet::Add(): wait set is full");
-
-		//NOTE: Setting wait flags may throw an exception, so do that before
-		//adding object to the array and incrementing number of added objects.
-		w->SetWaitingEvents(flagsToWaitFor);
-
-		this->handles[this->numWaitables] = w->GetHandle();
-		this->waitables[this->numWaitables] = w;
-
-#elif defined(__linux__)
-		epoll_event e;
-		e.data.fd = w->GetHandle();
-		e.data.ptr = w;
-		e.events =
-				(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
-				| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
-				| (EPOLLERR);
-		int res = epoll_ctl(
-				this->epollSet,
-				EPOLL_CTL_ADD,
-				w->GetHandle(),
-				&e
-			);
-		if(res < 0)
-			throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
-#elif defined(__APPLE__)
-		if(u32(flagsToWaitFor) & Waitable::READ){
-			AddEvent(w, EVENT_READ);
-		}
-
-		if(u32(flagsToWaitFor) & Waitable::WRITE){
-			AddEvent(w, EVENT_WRITE);
-		}
-#else
-#error "Unsupported OS"
-#endif
-
-		++this->numWaitables;
-
-		w->isAdded = true;
-//		TRACE(<< "WaitSet::Add(): exit" << std::endl)
-	}
+	void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor);
 
 
 
@@ -469,55 +415,7 @@ public:
 	 * @throw ting::Exc - in case the given Waitable object is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	inline void Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
-		ASSERT(w)
-
-		ASSERT(w->isAdded)
-
-#if defined(__WIN32__)
-		//check if the Waitable object is added to this wait set
-		{
-			unsigned i;
-			for(i = 0; i < this->numWaitables; ++i){
-				if(this->waitables[i] == w)
-					break;
-			}
-			ASSERT(i <= this->numWaitables)
-			if(i == this->numWaitables)
-				throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
-		}
-
-		//set new wait flags
-		w->SetWaitingEvents(flagsToWaitFor);
-
-#elif defined(__linux__)
-		epoll_event e;
-		e.data.fd = w->GetHandle();
-		e.data.ptr = w;
-		e.events =
-				(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
-				| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
-				| (EPOLLERR);
-		int res = epoll_ctl(
-				this->epollSet,
-				EPOLL_CTL_MOD,
-				w->GetHandle(),
-				&e
-			);
-		if(res < 0)
-			throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
-#elif defined(__APPLE__)
-		if(u32(flagsToWaitFor) & Waitable::READ){
-			AddEvent(w, EVENT_READ);
-		}
-
-		if(u32(flagsToWaitFor) & Waitable::WRITE){
-			AddEvent(w, EVENT_WRITE);
-		}
-#else
-#error "Unsupported OS"
-#endif
-	}
+	void Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor);
 
 
 
@@ -527,55 +425,7 @@ public:
 	 * @throw ting::Exc - in case the given Waitable is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	inline void Remove(Waitable* w){
-		ASSERT(w)
-
-		ASSERT(w->isAdded)
-
-#if defined(__WIN32__)
-		//remove object from array
-		{
-			unsigned i;
-			for(i = 0; i < this->numWaitables; ++i){
-				if(this->waitables[i] == w)
-					break;
-			}
-			ASSERT(i <= this->numWaitables)
-			if(i == this->numWaitables)
-				throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
-
-			unsigned numObjects = this->numWaitables - 1;//decrease number of objects before shifting the object handles in the array
-			//shift object handles in the array
-			for(; i < numObjects; ++i){
-				this->handles[i] = this->handles[i + 1];
-				this->waitables[i] = this->waitables[i + 1];
-			}
-		}
-
-		//clear wait flags (disassociate socket and Windows event)
-		w->SetWaitingEvents(0);
-
-#elif defined(__linux__)
-		int res = epoll_ctl(
-				this->epollSet,
-				EPOLL_CTL_DEL,
-				w->GetHandle(),
-				0
-			);
-		if(res < 0)
-			throw ting::Exc("WaitSet::Remove(): epoll_ctl() failed");
-#elif defined(__APPLE__)
-			RemoveEvent(w, EVENT_READ);
-			RemoveEvent(w, EVENT_WRITE);
-#else
-#error "Unsupported OS"
-#endif
-
-		--this->numWaitables;
-
-		w->isAdded = false;
-//		TRACE(<< "WaitSet::Remove(): completed successfuly" << std::endl)
-	}
+	void Remove(Waitable* w);
 
 
 
@@ -622,167 +472,7 @@ public:
 
 
 private:
-	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
-		if(this->numWaitables == 0){
-			throw ting::Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
-		}
-
-		if(out_events){
-			if(out_events->Size() < this->numWaitables){
-				throw ting::Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
-			}
-		}
-
-#if defined(__WIN32__)
-		DWORD waitTimeout = waitInfinitly ? (INFINITE) : DWORD(timeout);
-
-		DWORD res = WaitForMultipleObjectsEx(
-				this->numWaitables,
-				this->handles.Begin(),
-				FALSE, //do not wait for all objects, wait for at least one
-				waitTimeout,
-				FALSE
-			);
-
-		ASSERT(res != WAIT_IO_COMPLETION)//it is impossible because we supplied FALSE as last parameter to WaitForMultipleObjectsEx()
-
-		//we are not expecting abandoned mutexes
-		ASSERT(res < WAIT_ABANDONED_0 || (WAIT_ABANDONED_0 + this->numWaitables) <= res)
-
-		if(res == WAIT_FAILED)
-			throw ting::Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");
-
-		if(res == WAIT_TIMEOUT)
-			return 0;
-
-		ASSERT(WAIT_OBJECT_0 <= res && res < (WAIT_OBJECT_0 + this->numWaitables ))
-
-		//check for activities
-		unsigned numEvents = 0;
-		for(unsigned i = 0; i < this->numWaitables; ++i){
-			if(this->waitables[i]->CheckSignalled()){
-				if(out_events){
-					ASSERT(numEvents < out_events->Size())
-					out_events->operator[](numEvents) = this->waitables[i];
-				}
-				++numEvents;
-			}else{
-				//NOTE: sometimes the event is reported as signalled, but no read/write events indicated.
-				//      Don't know why it happens.
-//				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
-			}
-		}
-
-		//NOTE: Sometimes the event is reported as signalled, but no actual activity is there.
-		//      Don't know why.
-//		ASSERT(numEvents > 0)
-
-		return numEvents;
-
-#elif defined(__linux__)
-		ASSERT(int(timeout) >= 0)
-		int epollTimeout = waitInfinitly ? (-1) : int(timeout);
-
-//		TRACE(<< "going to epoll_wait() with timeout = " << epollTimeout << std::endl)
-
-		int res;
-
-		while(true){
-			res = epoll_wait(
-					this->epollSet,
-					this->revents.Begin(),
-					this->revents.Size(),
-					epollTimeout
-				);
-
-//			TRACE(<< "epoll_wait() returned " << res << std::endl)
-
-			if(res < 0){
-				//if interrupted by signal, try waiting again.
-				if(errno == EINTR){
-					continue;
-				}
-
-				std::stringstream ss;
-				ss << "WaitSet::Wait(): epoll_wait() failed, error code = " << errno << ": " << strerror(errno);
-				throw ting::Exc(ss.str().c_str());
-			}
-			break;
-		};
-
-		ASSERT(unsigned(res) <= this->revents.Size())
-
-		unsigned numEvents = 0;
-		for(
-				epoll_event *e = this->revents.Begin();
-				e < this->revents.Begin() + res;
-				++e
-			)
-		{
-			Waitable* w = static_cast<Waitable*>(e->data.ptr);
-			ASSERT(w)
-			if((e->events & EPOLLERR) != 0){
-				w->SetErrorFlag();
-			}
-			if((e->events & (EPOLLIN | EPOLLPRI)) != 0){
-				w->SetCanReadFlag();
-			}
-			if((e->events & EPOLLOUT) != 0){
-				w->SetCanWriteFlag();
-			}
-			ASSERT(w->CanRead() || w->CanWrite() || w->ErrorCondition())
-			if(out_events){
-				ASSERT(numEvents < out_events->Size())
-				out_events->operator[](numEvents) = w;
-				++numEvents;
-			}
-		}
-
-		ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
-		return unsigned(res);
-#elif defined(__APPLE__)
-		struct timespec tmout = {
-			timeout / 1000, //seconds
-			(timeout % 1000) * 1000000 //nanoseconds
-		};
-
-		//loop forever
-		for(;;){
-			int nev = kevent(
-					kq_queue,
-					0,
-					0,
-					&kq_output[0],
-					kq_output.Size(),
-					(waitInfinitly) ? 0 : &tmout
-				);
-
-			if(nev == -1 && errno != EINTR){
-				throw ting::Exc("Error on kevent");
-			}else if(nev == 0){
-				return 0; // timeout
-			}else if(nev > 0){
-				for(int i = 0; i < nev; ++i){
-					struct kevent &evt = kq_output[i];
-					Waitable *w = reinterpret_cast<Waitable*>(evt.udata);
-					if(evt.filter & EVFILT_WRITE){
-						w->SetCanWriteFlag();
-					}
-					if(evt.filter & EVENT_READ){
-						w->SetCanReadFlag();
-					}
-					//TODO: check for error condition?
-					if(out_events){
-						out_events->operator[](i) = w;
-					}
-				}
-				return nev;
-			}
-		}
-#else
-#error "Unsupported OS"
-#endif
-	}
+	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events);
 };//~class WaitSet
 
 

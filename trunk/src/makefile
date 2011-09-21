@@ -42,6 +42,7 @@ srcs += ting/FSFile.cpp
 srcs += ting/Socket.cpp
 srcs += ting/Thread.cpp
 srcs += ting/Timer.cpp
+srcs += ting/WaitSet.cpp
 
 
 
