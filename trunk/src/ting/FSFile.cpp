@@ -46,6 +46,9 @@ void FSFile::Open(EMode mode){
 	if(this->IsOpened())
 		throw File::Exc("file already opened");
 
+	if(this->IsDir())
+		throw File::Exc("path refers to a directory, directories can't be opened");
+	
 	const char* modeStr;
 	switch(mode){
 		case File::WRITE:
@@ -200,7 +203,7 @@ void FSFile::MakeDir(){
 		throw File::Exc("invalid directory name");
 
 #if defined(__linux__)
-//		TRACE(<< "creating directory = " << this->Path() << std::endl)
+//	TRACE(<< "creating directory = " << this->Path() << std::endl)
 	umask(0);//clear umask for proper permissions of newly created directory
 	if(mkdir(this->TruePath().c_str(), 0777) != 0)
 		throw File::Exc("mkdir() failed");
@@ -237,45 +240,45 @@ ting::Array<std::string> FSFile::ListDirContents(){
 	std::vector<std::string> files;
 
 #ifdef __WIN32__
-#error "unimplemented"
-/*
-	C_Str pattern = this->Path();
-	if(pattern.Size()==0){
-		pattern += "*";
-	}else{
-		if( (pattern[pattern.Size()-1] != '/'))
-			pattern+="/";
-		pattern+="*";
-	}
+	std::string pattern = this->TruePath();
+	pattern += '*';
 
-	//M_DEBUG_TRACE(<<"C_File::ListDirFiles(): pattern="<<pattern<<std::endl)
+	TRACE(<< "FSFile::ListDirContents(): pattern = " << pattern << std::endl)
 
 	WIN32_FIND_DATA wfd;
-	HANDLE h = FindFirstFile(pattern.CBuf(), &wfd);
+	HANDLE h = FindFirstFile(pattern.c_str(), &wfd);
 	if(h == INVALID_HANDLE_VALUE)
-		throw C_Exc("C_File::ListDirFiles(): cannot find first file");
+		throw File::Exc("ListDirContents(): cannot find first file");
 
 	//create Find Closer to automatically call FindClose on exit from the function in case of exceptions etc...
 	{
-		struct C_FindCloser{
+		struct FindCloser{
 			HANDLE hnd;
-			C_FindCloser(HANDLE h) : hnd(h){};
-			~C_FindCloser(){FindClose(this->hnd);};
+			FindCloser(HANDLE h) :
+				hnd(h)
+			{}
+			~FindCloser(){
+				FindClose(this->hnd);
+			}
 		} findCloser(h);
 
 		do{
-			C_Str s(wfd.cFileName);
-			M_ASSERT(s.Size()!=0)
-			if(s=="." || s=="..") continue;//do not add ./ and ../ directories, we are not interested in them
-			if( (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY !=0) && s[s.Size()-1]!='/')
-				s+="/";
+			std::string s(wfd.cFileName);
+			ASSERT(s.size() > 0)
+			
+			//do not add ./ and ../ directories, we are not interested in them
+			if(s == "." || s == "..")
+				continue;
+			
+			if((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) && s[s.size() - 1] != '/')
+				s += '/';
 			files.PushBack(s);
 		}while(FindNextFile(h, &wfd) != 0);
 
 		if(GetLastError() != ERROR_NO_MORE_FILES)
-			throw C_Exc("C_File::ListDirFiles(): find next file failed");
+			throw File::Exc("ListDirContents(): find next file failed");
 	}
-*/
+
 #elif defined(__linux__)
 	{
 		DIR *pdir = opendir(this->TruePath().c_str());

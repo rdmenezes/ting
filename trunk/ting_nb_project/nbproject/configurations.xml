@@ -6,6 +6,7 @@
         <df name="1">
           <df name="2">
             <df name="ting">
+              <in>File.d</in>
             </df>
           </df>
         </df>
@@ -25,9 +26,12 @@
         <in>Singleton.hpp</in>
         <in>Socket.cpp</in>
         <in>Socket.hpp</in>
+        <in>Thread.cpp</in>
         <in>Thread.hpp</in>
+        <in>Timer.cpp</in>
         <in>Timer.hpp</in>
         <in>Vector3.hpp</in>
+        <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
         <in>codegen.h</in>
         <in>debug.hpp</in>
