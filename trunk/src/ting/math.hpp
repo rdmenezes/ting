@@ -47,7 +47,7 @@ namespace ting{
  * Template function which returns the sign of a number.
  * General implementation of this template is as easy as:
  * @code
- * template <typename T_Type> inline T_Type Sign(T_Type n){
+ * template <typename T> inline T Sign(T n){
  *     return n > 0 ? (1) : (-1);
  * }
  * @endcode
@@ -55,7 +55,7 @@ namespace ting{
  * @return -1 if the argument is negative.
  * @return 1 if the number is positive.
  */
-template <typename T_Type> inline T_Type Sign(T_Type n){
+template <typename T> inline T Sign(T n){
 	return n < 0 ? (-1) : (1);
 }
 
@@ -65,14 +65,14 @@ template <typename T_Type> inline T_Type Sign(T_Type n){
  * @brief Get absolute value of a number.
  * General implementation of this function is as follows:
  * @code
- * template <typename T_Type> inline T_Type Abs(T_Type n){
+ * template <typename T> inline T Abs(T n){
  *     return n > 0 ? n : (-n);
  * }
  * @endcode
  * @param n - number to get absolute value of.
  * @return absolute value of the passed argument.
  */
-template <typename T_Type> inline T_Type Abs(T_Type n){
+template <typename T> inline T Abs(T n){
 	return n < 0 ? (-n) : (n);
 }
 
@@ -135,28 +135,28 @@ template <typename T> inline T DInf(){
  * @param x - value.
  * @return x * x.
  */
-template <typename T_Type> inline T_Type Pow2(T_Type x){
+template <typename T> inline T Pow2(T x){
 	return x * x;
 }
 
 /**
  * @brief Calculate x^3.
  */
-template <typename T_Type> inline T_Type Pow3(T_Type x){
+template <typename T> inline T Pow3(T x){
 	return Pow2(x) * x;
 }
 
 /**
  * @brief Calculate x^4.
  */
-template <typename T_Type> inline T_Type Pow4(T_Type x){
+template <typename T> inline T Pow4(T x){
 	return Pow2(Pow2(x));
 }
 
 /**
  * @brief Calculate x^5.
  */
-template <typename T_Type> inline T_Type Pow5(T_Type x){
+template <typename T> inline T Pow5(T x){
 	return Pow2(x) * Pow3(x);
 }
 
@@ -168,46 +168,6 @@ template <typename T_Type> inline T_Type Pow5(T_Type x){
  */
 template <typename T> inline T Pow(T x, T p){
 	return ::pow(x, p);
-}
-
-/**
- * @brief Calculate cubic root of a number.
- */
-template <typename T_Type> inline T_Type CubicRoot(T_Type x){
-	if(x > 0)
-		return exp(::log(x) / 3);
-	else if(x == 0)
-		return 0;
-	else
-		return -exp(::log(-x) / 3);
-}
-
-
-
-/**
- * @brief Calculate argument of a complex number.
- * Any complex number
- *     C = x + i * y
- * can be represented in the form
- *     C = |C| * exp(i * arg)
- * where 'arg' is the argument of a complex number.
- * @param x - real part of a complex number.
- * @param y - imaginary part of a complex number.
- * @return argument of a complex number.
- */
-template <typename T_Type> inline T_Type Arg(T_Type x, T_Type y){
-	T_Type a;
-	if(x == 0)
-		a = DPi<T_Type>() / 2;
-	else if(x > 0)
-		a = T_Type(::atan(Abs(y / x)));
-	else
-		a = DPi<T_Type>() - T_Type(::atan(Abs(y / x)));
-
-	if(y >= 0)
-		return a;
-	else
-		return -a;
 }
 
 
@@ -288,6 +248,15 @@ template <typename T> inline T Acos(T x){
 
 
 /**
+ * @brief Calculate arctangent of a number.
+ */
+template <typename T> inline T Atan(T x){
+	return T(::atan(x));
+}
+
+
+
+/**
  * @brief Calculate square root of a number.
  */
 template <typename T> inline T Sqrt(T x){
@@ -360,6 +329,52 @@ template <> inline long double Ln<long double>(long double x){
 	return ::log(x);
 }
 #endif
+
+
+
+/**
+ * @brief Calculate cubic root of a number.
+ */
+template <typename T> inline T CubicRoot(T x){
+	if(x > 0)
+		return ting::Exp<T>(ting::Ln<T>(x) / 3);
+	
+	if(x == 0)
+		return 0;
+	
+	return -ting::Exp<T>(ting::Ln<T>(-x) / 3);
+}
+
+
+
+/**
+ * @brief Calculate argument of a complex number.
+ * Any complex number
+ *     C = x + i * y
+ * can be represented in the form
+ *     C = |C| * exp(i * arg)
+ * where 'arg' is the argument of a complex number.
+ * @param x - real part of a complex number.
+ * @param y - imaginary part of a complex number.
+ * @return argument of a complex number.
+ */
+//TODO: overloaded function which would accept class Complex or something like that
+template <typename T> inline T Arg(T x, T y){
+	T a;
+	if(x == 0){
+		a = DPi<T>() / 2;
+	}else if(x > 0){
+		a = T(ting::Atan(Abs(y / x)));
+	}else{
+		a = DPi<T>() - T(ting::Atan(Abs(y / x)));
+	}
+
+	if(y >= 0){
+		return a;
+	}else{
+		return -a;
+	}
+}
 
 
 
