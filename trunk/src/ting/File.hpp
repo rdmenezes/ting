@@ -150,10 +150,6 @@ public:
 
 	virtual void MakeDir();
 	
-private:
-	static inline unsigned DReadBlockSize(){
-		return 4096;
-	}
 public:
 	ting::Array<ting::u8> LoadWholeFileIntoMemory();
 

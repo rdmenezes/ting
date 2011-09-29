@@ -84,6 +84,12 @@ void File::MakeDir(){
 
 
 
+namespace{
+unsigned DReadBlockSize = 4096;
+}
+
+
+
 ting::Array<ting::u8> File::LoadWholeFileIntoMemory(){
 	if(this->IsOpened())
 		throw File::Exc("file should not be opened");
@@ -91,7 +97,7 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(){
 	File::Guard fileGuard(*this, File::READ);//make sure we close the file upon exit from the function
 
 	//two arrays
-	ting::Array<ting::u8> a(DReadBlockSize()); //start with 4kb
+	ting::Array<ting::u8> a(DReadBlockSize); //start with 4kb
 	ting::Array<ting::u8> b;
 
 	//two pointers
@@ -101,19 +107,19 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(){
 	unsigned numBytesRead = 0;
 	unsigned numBytesReadLastOp = 0;
 	for(;;){
-		if( currArr->Size() < (numBytesRead + DReadBlockSize()) ){
-			freeArr->Init( currArr->Size() + DReadBlockSize() );
+		if( currArr->Size() < (numBytesRead + DReadBlockSize) ){
+			freeArr->Init( currArr->Size() + DReadBlockSize );
 			ASSERT(freeArr->Size() > numBytesRead);
 			memcpy(freeArr->Begin(), currArr->Begin(), numBytesRead);
 			currArr->Reset();//free memory
 			std::swap(currArr, freeArr);
 		}
 
-		numBytesReadLastOp = this->Read(*currArr, DReadBlockSize(), numBytesRead);
+		numBytesReadLastOp = this->Read(*currArr, DReadBlockSize, numBytesRead);
 
 		numBytesRead += numBytesReadLastOp;//update number of bytes read
 
-		if(numBytesReadLastOp != DReadBlockSize())
+		if(numBytesReadLastOp != DReadBlockSize)
 			break;
 	}//~for
 	freeArr->Init(numBytesRead);
