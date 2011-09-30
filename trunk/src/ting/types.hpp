@@ -141,9 +141,6 @@ STATIC_ASSERT(sizeof(s64) == 8)
 template <class T, int V> class Inited{
 	T value;
 	
-	//no copy constructor, as it contradicts to the concept of Inited.
-	Inited(const Inited&);
-	
 public:
 	inline Inited() :
 			value(T(V))
