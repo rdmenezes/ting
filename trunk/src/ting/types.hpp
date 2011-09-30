@@ -181,41 +181,50 @@ public:
 		return this->value;
 	}
 	
-	inline T& operator+=(const T& val){
-		return (this->value += val);
+	inline Inited& operator+=(const T& val){
+		this->value += val;
+		return *this;
 	}
 
-	inline T& operator-=(const T& val){
-		return (this->value -= val);
+	inline Inited& operator-=(const T& val){
+		this->value -= val;
+		return *this;
 	}
 
-	inline T& operator*=(const T& val){
-		return (this->value *= val);
+	inline Inited& operator*=(const T& val){
+		this->value *= val;
+		return *this;
 	}
 
-	inline T& operator/=(const T& val){
-		return (this->value /= val);
+	inline Inited& operator/=(const T& val){
+		this->value /= val;
+		return *this;
 	}
 
-	inline T& operator%=(const T& val){
-		return (this->value %= val);
+	inline Inited& operator%=(const T& val){
+		this->value %= val;
+		return *this;
 	}
 
-	inline T& operator^=(const T& val){
-		return (this->value ^= val);
+	inline Inited& operator^=(const T& val){
+		this->value ^= val;
+		return *this;
 	}
 
-	inline T& operator&=(const T& val){
-		return (this->value &= val);
+	inline Inited& operator&=(const T& val){
+		this->value &= val;
+		return *this;
 	}
 
-	inline T& operator|=(const T& val){
-		return (this->value |= val);
+	inline Inited& operator|=(const T& val){
+		this->value |= val;
+		return *this;
 	}
 
 	//prefix increment
-	inline T& operator++(){
-		return (++this->value);
+	inline Inited& operator++(){
+		++this->value;
+		return *this;
 	}
 
 	//postfix increment
@@ -224,8 +233,9 @@ public:
 	}
 
 	//prefix decrement
-	inline T& operator--(){
-		return (--this->value);
+	inline Inited& operator--(){
+		--this->value;
+		return *this;
 	}
 
 	//postfix decrement
