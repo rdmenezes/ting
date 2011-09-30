@@ -6,10 +6,6 @@
         <df name="1">
           <df name="2">
             <df name="ting">
-              <in>FSFile.d</in>
-              <in>File.d</in>
-              <in>Socket.d</in>
-              <in>Thread.d</in>
             </df>
           </df>
         </df>

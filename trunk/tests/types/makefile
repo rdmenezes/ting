@@ -26,6 +26,7 @@ ecf :=
 #compiler flags
 cf := $(ecf)
 cf += -Wall
+cf += -Werror #treat warnings as errors
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
