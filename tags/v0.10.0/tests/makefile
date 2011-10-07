@@ -1,0 +1,40 @@
+subdirs :=
+subdirs += Array
+subdirs += Buffer
+subdirs += debug
+subdirs += math
+subdirs += PoolStored
+subdirs += Ptr
+subdirs += Ref
+subdirs += Signal
+subdirs += Socket
+subdirs += Thread
+subdirs += Timer
+subdirs += types
+subdirs += utils
+subdirs += WaitSet
+
+
+#Looks like static variables are not shared between dll boundaries on win32,
+#so exclude these tests
+ifeq ($(platform),win32)
+
+else
+
+subdirs += SingletonOverSharedLibrary
+subdirs += RefOverSharedLibrary
+
+endif
+
+
+
+include ../targets.mk
+
+$(possible_targets_list):
+	@$(MAKE) $(subdirs) target=$@
+
+.PHONY: $(subdirs)
+$(subdirs):
+	@$(MAKE) -C $@ $(target)
+
+
