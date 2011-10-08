@@ -97,7 +97,8 @@
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
-                   projectFiles="false">
+                   projectFiles="false"
+                   root=".">
       <itemPath>ting_nb_project-Makefile.mk</itemPath>
     </logicalFolder>
   </logicalFolder>
@@ -121,11 +122,101 @@
           <executablePath></executablePath>
           <ccTool>
             <incDir>
+              <pElem>../src/ting</pElem>
               <pElem>../src</pElem>
             </incDir>
           </ccTool>
         </makeTool>
       </makefileType>
+      <item path="../src/ting/PoolStored.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/Ptr.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/Ref.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/Signal.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/Timer.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/Vector3.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/codegen.h" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/math.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../src/ting/utils.hpp" ex="true" tool="3" flavor="0">
+      </item>
+      <item path="../tests/Array/Array_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/Buffer/Buffer_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/PoolStored/PoolStored_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="../tests/Ptr/Ptr_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/Ref/Ref_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/RefOverSharedLibrary/Ref_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="../tests/RefOverSharedLibrary/TestClass.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="../tests/RefOverSharedLibrary/testso.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="../tests/RefOverSharedLibrary/testso.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="../tests/Signal/Signal_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/SingletonOverSharedLibrary/Singleton_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="../tests/SingletonOverSharedLibrary/TestSingleton.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="../tests/SingletonOverSharedLibrary/testso.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="../tests/SingletonOverSharedLibrary/testso.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="../tests/Socket/Socket_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/Thread/Thread_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/Timer/Timer_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/WaitSet/WaitSet_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/debug/debug_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/math/math_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/types/types_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
+      <item path="../tests/utils/utils_test.cpp" ex="true" tool="1" flavor="0">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>
