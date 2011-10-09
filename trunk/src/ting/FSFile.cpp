@@ -22,6 +22,11 @@ THE SOFTWARE. */
 
 
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+
 #include "FSFile.hpp"
 
 
@@ -270,9 +275,9 @@ ting::Array<std::string> FSFile::ListDirContents(){
 			if(s == "." || s == "..")
 				continue;
 			
-			if((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) && s[s.size() - 1] != '/')
+			if(((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) && s[s.size() - 1] != '/')
 				s += '/';
-			files.PushBack(s);
+			files.push_back(s);
 		}while(FindNextFile(h, &wfd) != 0);
 
 		if(GetLastError() != ERROR_NO_MORE_FILES)

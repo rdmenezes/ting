@@ -8,7 +8,7 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := 
+    libs := ../../src/libting.a -lws2_32
     remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
@@ -35,7 +35,12 @@ default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
+ifeq ($(platform),win32)
+	@./$^
+else
 	@LD_LIBRARY_PATH=../../src ./$^
+endif
+
 
 $(binary_name): Socket_test.cpp
 	@echo Building $@...
