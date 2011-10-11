@@ -563,8 +563,8 @@ unsigned TCPSocket::Recv(ting::Buffer<u8>& buf, unsigned offset){
 	if(!this->IsValid())
 		throw Socket::Exc("TCPSocket::Send(): socket is not opened");
 
-	ASSERT_INFO((
-			(buf.Begin() + offset) <= (buf.End() - 1)) ||
+	ASSERT_INFO(
+			((buf.Begin() + offset) <= (buf.End() - 1)) ||
 			((buf.Size() == 0) && (offset == 0))
 		,
 			"buf.Begin() = " << reinterpret_cast<void*>(buf.Begin())
