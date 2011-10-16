@@ -27,6 +27,8 @@ try{
     ting::TCPSocket sock;
     while(!sock.IsValid()){
         sock = listenSock.Accept();
+        //NOTE: it is a busy-loop which is not good.
+        //Here we use it just to simplify the example.
     }
     
     //if we get here then new connection is accepted.
@@ -55,9 +57,15 @@ try{
     
     ting::TCPSocket sock;
     
-    //connect to remote listening socket
+    //connect to remote listening socket.
+    //It is an asynchronous operation, so we will use WaitSet
+    //to wait for its completion.
     sock.Open(ip);
     
+    ting::WaitSet waitSet(1);
+    waitSet.Add(&sock, ting::Waitable::READ);
+    waitSet.Wait(); //Wait for connection to complete.
+
     //receive data (expecting 4 bytes)
     ting::StaticBuffer<ting::u8, 4> data;
     unsigned bytesReceived = 0;
