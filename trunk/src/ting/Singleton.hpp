@@ -73,12 +73,8 @@ protected://use only as a base class
 private:
 
 	//copying is not allowed
-	Singleton(const Singleton&){
-		ASSERT(false)
-	}
-	Singleton& operator=(const Singleton&){
-		ASSERT(false)
-	}
+	Singleton(const Singleton&);
+	Singleton& operator=(const Singleton&);
 
 public:
 	/**
