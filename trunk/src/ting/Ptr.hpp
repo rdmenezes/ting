@@ -91,7 +91,7 @@ public:
 		return this->p;
 	}
 
-	inline const T* operator->()const{
+	inline T* operator->()const{
 		ASSERT_INFO(this->p, "const Ptr::operator->(): this->p is zero")
 		return this->p;
 	}
@@ -101,7 +101,7 @@ public:
 		return *(this->operator->());
 	}
 
-	inline const T& operator*()const{
+	inline T& operator*()const{
 		ASSERT_INFO(this->p, "const Ptr::operator*(): this->p is zero")
 		return *(this->operator->());
 	}

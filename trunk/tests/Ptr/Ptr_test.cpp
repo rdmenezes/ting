@@ -120,11 +120,47 @@ void Run(){
 }//~namespace
 
 
+
+namespace ConstPtrTest{
+
+class TestClass{
+public:
+	int a;
+
+};
+
+void Run(){
+	{
+		const ting::Ptr<TestClass> obj(new TestClass());
+
+		obj->a = 10;
+		
+		(*obj).a = 20;
+
+		//not allowed, since pointer is constant
+//		obj.Reset();
+	}
+	
+	{
+		ting::Ptr<const TestClass> obj(new TestClass());
+
+		//not allowed, since pointer points to constant data
+//		obj->a = 10;
+//		(*obj).a = 20;
+		
+		obj.Reset();
+	}
+}
+
+}//~namespace
+
+
 int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<< "Ptr test " << std::endl)
 
 	BasicTest::Run();
 	TypeCastTest::Run();
+	ConstPtrTest::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Ptr test" << std::endl)
 
