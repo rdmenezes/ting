@@ -9,6 +9,8 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 
+#include <ting/debug.hpp>
+
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
 
@@ -212,6 +214,9 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app* state) {
+	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
+	ASSERT(true)
+	
     struct engine engine;
 
     // Make sure glue isn't stripped.
