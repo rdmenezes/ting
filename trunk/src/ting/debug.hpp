@@ -23,7 +23,6 @@ THE SOFTWARE. */
 // Homepage: http://code.google.com/p/ting
 
 /**
- * @file debug.hpp
  * @author Ivan Gagis <igagis@gmail.com>
  * @brief Debug utilities.
  */
@@ -34,6 +33,8 @@ THE SOFTWARE. */
 #include <e32std.h>
 
 #elif defined(__ANDROID__)
+#include <iostream>
+#include <cassert>
 
 #else //assume more or less standard system
 #include <iostream>
@@ -65,22 +66,31 @@ inline std::ofstream& DebugLogger(){
 	//order is undetermined in C++ if these variables are located in separate cpp files!
 	static std::ofstream* logger = new std::ofstream("output.log");
 	return *logger;
-};
+}
 #endif
 }//~namespace ting_debug
 }//~namespace ting
 #endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
-#if defined(__SYMBIAN32__) || defined(__ANDROID__)
+
+
+#if defined(__SYMBIAN32__)
 #define LOG_ALWAYS(x)
 #define TRACE_ALWAYS(x)
-#define TRACE_AND_LOG_ALWAYS(x)
+
+#elif defined(__ANDROID__)
+#define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
+#define LOG_ALWAYS(x) TRACE_ALWAYS(x) //On Android logging is same as tracing
 
 #else
 #define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
 #define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
-#define TRACE_AND_LOG_ALWAYS(x) LOG_ALWAYS(x) TRACE_ALWAYS(x)
+
 #endif
+
+#define TRACE_AND_LOG_ALWAYS(x) LOG_ALWAYS(x) TRACE_ALWAYS(x)
+
+
 
 #ifdef DEBUG
 
@@ -103,6 +113,7 @@ inline std::ofstream& DebugLogger(){
 #endif//~#ifdef DEBUG
 
 
+
 //
 //
 //  Assertion definitions
@@ -110,36 +121,29 @@ inline std::ofstream& DebugLogger(){
 //
 
 #if defined(__SYMBIAN32__)
+#define ASSERT_INFO_ALWAYS(x, y) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 
-#define ASSERT_ALWAYS(x) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
-#define ASSERT_INFO_ALWAYS(x, y) ASSERT_ALWAYS(x)
-
-#elif defined(__ANDROID__)
-//TODO: implement android assertions
-#define ASSERT_ALWAYS(x)
-#define ASSERT_INFO_ALWAYS(x, y)
-
-#else //Assume system supporting standard assert()
+#else //Assume system supporting standard assert() (includeing Android)
 
 #define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
-						LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
-						TRACE_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
+						TRACE_AND_LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
 						assert(false); \
 					}
-#define ASSERT_ALWAYS(x) ASSERT_INFO_ALWAYS((x), "no additional info")
 
 #endif
+
+#define ASSERT_ALWAYS(x) ASSERT_INFO_ALWAYS((x), "no additional info")
+
 
 
 #ifdef DEBUG
 #define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
 #define ASSERT(x) ASSERT_ALWAYS(x)
-#define ASSERT_EXEC(x) ASSERT(x)
 namespace ting{
 namespace ting_debug{
 inline void LogAssert(const char* file, int line){
 	LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"<< file << ":" << line << "| ASS() assertion macro" << std::endl) \
-};
+}
 }
 }
 
@@ -147,12 +151,7 @@ inline void LogAssert(const char* file, int line){
 #define ASS(x) (x)
 #define ASSCOND(x, cond) (x)
 
-#elif defined(__ANDROID__)
-//TODO: implement assertions
-#define ASS(x) (x)
-#define ASSCOND(x, cond) (x)
-
-#else
+#else //Assume system supporting standard assert() (includeing Android)
 #define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
 #define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
 
@@ -161,7 +160,6 @@ inline void LogAssert(const char* file, int line){
 #else //No DEBUG macro defined
 #define ASSERT_INFO(x, y)
 #define ASSERT(x)
-#define ASSERT_EXEC(x) x;
 #define ASS(x) (x)
 #define ASSCOND(x, cond) (x)
 
