@@ -215,7 +215,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
  */
 void android_main(struct android_app* state) {
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
-	ASSERT(true)
+	ASSERT_ALWAYS(true)
 	
     struct engine engine;
 
