@@ -30,11 +30,17 @@ THE SOFTWARE. */
 
 #pragma once
 
-#ifdef __SYMBIAN32__
-#else
+#if defined(__SYMBIAN32__)
+#include <e32std.h>
+
+#elif defined(__ANDROID__)
+
+#else //assume more or less standard system
 #include <iostream>
 #include <fstream>
 #include <typeinfo>
+#include <cassert>
+
 #endif
 
 #if defined(_DEBUG) && !defined(DEBUG)
@@ -50,7 +56,8 @@ THE SOFTWARE. */
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__)
+#elif defined(__ANDROID__)
 #else
 inline std::ofstream& DebugLogger(){
 	//this allows to make debug output even if main() is not called yet and even if
@@ -64,10 +71,11 @@ inline std::ofstream& DebugLogger(){
 }//~namespace ting
 #endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__) || defined(__ANDROID__)
 #define LOG_ALWAYS(x)
 #define TRACE_ALWAYS(x)
 #define TRACE_AND_LOG_ALWAYS(x)
+
 #else
 #define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
 #define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
@@ -101,16 +109,17 @@ inline std::ofstream& DebugLogger(){
 //
 //
 
-#ifdef __SYMBIAN32__
-
-#include <e32std.h>
+#if defined(__SYMBIAN32__)
 
 #define ASSERT_ALWAYS(x) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 #define ASSERT_INFO_ALWAYS(x, y) ASSERT_ALWAYS(x)
 
-#else //Non symbian
+#elif defined(__ANDROID__)
+//TODO: implement android assertions
+#define ASSERT_ALWAYS(x)
+#define ASSERT_INFO_ALWAYS(x, y)
 
-#include <cassert>
+#else //Assume system supporting standard assert()
 
 #define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
 						LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
@@ -134,20 +143,28 @@ inline void LogAssert(const char* file, int line){
 }
 }
 
-#ifdef __SYMBIAN32__
+#if defined(__SYMBIAN32__)
 #define ASS(x) (x)
 #define ASSCOND(x, cond) (x)
+
+#elif defined(__ANDROID__)
+//TODO: implement assertions
+#define ASS(x) (x)
+#define ASSCOND(x, cond) (x)
+
 #else
 #define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
 #define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
+
 #endif
 
-#else
+#else //No DEBUG macro defined
 #define ASSERT_INFO(x, y)
 #define ASSERT(x)
 #define ASSERT_EXEC(x) x;
 #define ASS(x) (x)
 #define ASSCOND(x, cond) (x)
+
 #endif//~#ifdef DEBUG
 
 //==================
