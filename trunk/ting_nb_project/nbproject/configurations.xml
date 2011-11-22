@@ -29,7 +29,6 @@
         <in>Thread.hpp</in>
         <in>Timer.cpp</in>
         <in>Timer.hpp</in>
-        <in>Vector3.hpp</in>
         <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
         <in>codegen.h</in>
@@ -137,8 +136,6 @@
       <item path="../src/ting/Signal.hpp" ex="true" tool="3" flavor="0">
       </item>
       <item path="../src/ting/Timer.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/Vector3.hpp" ex="true" tool="3" flavor="0">
       </item>
       <item path="../src/ting/codegen.h" ex="true" tool="3" flavor="0">
       </item>
