@@ -675,7 +675,7 @@ public:
 		User::After(msec * 1000);
 #elif defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__linux__)
 		if(msec == 0){
-	#if defined(sun) || defined(__sun) || defined(__APPLE__)
+	#if defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__ANDROID__)
 			sched_yield();
 	#elif defined(__linux__)
 			pthread_yield();
