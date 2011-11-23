@@ -50,10 +50,6 @@ int main(int argc, char *argv[]){
 	}
 
 	{
-		ASSERT_EXEC(DoSomethingAndReturnTrueOnSuccess())
-	}
-
-	{
 		TestClass *c = new TestClass();
 
 		//make sure, "c" is not 0 before accessing member a.
