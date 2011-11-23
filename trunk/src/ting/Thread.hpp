@@ -88,11 +88,11 @@ THE SOFTWARE. */
 #include <sched.h>	//	for sched_yield();
 #endif
 
-#if defined(__linux__)
+#if defined(__ANDROID__)
+//TODO: revert to using sys/eventfd.h when it becomes available in Android NDK
+#elif defined(__linux__)
 #include <sys/eventfd.h>
 #endif
-
-
 
 #else
 #error "Unsupported OS"
@@ -483,12 +483,12 @@ class Queue : public Waitable{
 #if defined(WIN32)
 	//use additional semaphore to implement Waitable on Windows
 	HANDLE eventForWaitable;
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+	//use pipe to implement Waitable in *nix systems
+	int pipeEnds[2];
 #elif defined(__linux__)
 	//use eventfd()
 	int eventFD;
-#elif defined(__APPLE__)
-	//use pipe to implement Waitable in *nix systems
-	int pipeEnds[2];
 #else
 #error "Unsupported OS"
 #endif

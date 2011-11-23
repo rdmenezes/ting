@@ -251,18 +251,18 @@ Queue::Queue(){
 	if(this->eventForWaitable == NULL){
 		throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
 	}
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+	if(::pipe(&this->pipeEnds[0]) < 0){
+		std::stringstream ss;
+		ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
+				<< " error code = " << errno << ": " << strerror(errno);
+		throw ting::Exc(ss.str().c_str());
+	}
 #elif defined(__linux__)
 	this->eventFD = eventfd(0, EFD_NONBLOCK);
 	if(this->eventFD < 0){
 		std::stringstream ss;
 		ss << "Queue::Queue(): could not create eventfd (linux) for implementing Waitable,"
-				<< " error code = " << errno << ": " << strerror(errno);
-		throw ting::Exc(ss.str().c_str());
-	}
-#elif defined(__APPLE__)
-	if(::pipe(&this->pipeEnds[0]) < 0){
-		std::stringstream ss;
-		ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
 				<< " error code = " << errno << ": " << strerror(errno);
 		throw ting::Exc(ss.str().c_str());
 	}
@@ -291,11 +291,11 @@ Queue::~Queue(){
 	}
 #if defined(WIN32)
 	CloseHandle(this->eventForWaitable);
-#elif defined(__linux__)
-	close(this->eventFD);
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	close(this->pipeEnds[0]);
 	close(this->pipeEnds[1]);
+#elif defined(__linux__)
+	close(this->eventFD);
 #else
 #error "Unsupported OS"
 #endif
@@ -327,14 +327,14 @@ void Queue::PushMessage(Ptr<Message> msg){
 		if(SetEvent(this->eventForWaitable) == 0){
 			throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
 		}
-#elif defined(__linux__)
-		if(eventfd_write(this->eventFD, 1) < 0){
-			throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
-		}
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 		{
 			u8 oneByteBuf[1];
 			write(this->pipeEnds[1], oneByteBuf, 1);
+		}
+#elif defined(__linux__)
+		if(eventfd_write(this->eventFD, 1) < 0){
+			throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
 		}
 #else
 #error "Unsupported OS"
@@ -367,6 +367,11 @@ Ptr<Message> Queue::PeekMsg(){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+			{
+				u8 oneByteBuf[1];
+				read(this->pipeEnds[0], oneByteBuf, 1);
+			}
 #elif defined(__linux__)
 			{
 				eventfd_t value;
@@ -374,11 +379,6 @@ Ptr<Message> Queue::PeekMsg(){
 					throw ting::Exc("Queue::Wait(): eventfd_read() failed");
 				}
 				ASSERT(value == 1)
-			}
-#elif defined(__APPLE__)
-			{
-				u8 oneByteBuf[1];
-				read(this->pipeEnds[0], oneByteBuf, 1);
 			}
 #else
 #error "Unsupported OS"
@@ -416,6 +416,11 @@ Ptr<Message> Queue::GetMsg(){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+				{
+					u8 oneByteBuf[1];
+					read(this->pipeEnds[0], oneByteBuf, 1);
+				}
 #elif defined(__linux__)
 				{
 					eventfd_t value;
@@ -423,11 +428,6 @@ Ptr<Message> Queue::GetMsg(){
 						throw ting::Exc("Queue::Wait(): eventfd_read() failed");
 					}
 					ASSERT(value == 1)
-				}
-#elif defined(__APPLE__)
-				{
-					u8 oneByteBuf[1];
-					read(this->pipeEnds[0], oneByteBuf, 1);
 				}
 #else
 #error "Unsupported OS"
@@ -459,6 +459,11 @@ Ptr<Message> Queue::GetMsg(){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+			{
+				u8 oneByteBuf[1];
+				read(this->pipeEnds[0], oneByteBuf, 1);
+			}
 #elif defined(__linux__)
 			{
 				eventfd_t value;
@@ -466,11 +471,6 @@ Ptr<Message> Queue::GetMsg(){
 					throw ting::Exc("Queue::Wait(): eventfd_read() failed");
 				}
 				ASSERT(value == 1)
-			}
-#elif defined(__APPLE__)
-			{
-				u8 oneByteBuf[1];
-				read(this->pipeEnds[0], oneByteBuf, 1);
 			}
 #else
 #error "Unsupported OS"
@@ -548,24 +548,18 @@ bool Queue::CheckSignalled(){
 	return (this->readinessFlags & this->flagsMask) != 0;
 }
 
-
-
-#elif defined(__linux__)
-//override
-int Queue::GetHandle(){
-	return this->eventFD;
-}
-
-
-
-#elif defined(__APPLE__) //Mac OS
+#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 //override
 int Queue::GetHandle(){
 	//return read end of pipe
 	return this->pipeEnds[0];
 }
 
-
+#elif defined(__linux__)
+//override
+int Queue::GetHandle(){
+	return this->eventFD;
+}
 
 #else
 #error "Unsupported OS"
