@@ -9,8 +9,26 @@
 #include <android/log.h>
 #include <android_native_app_glue.h>
 
+#include <ting/Array.hpp>
+#include <ting/Buffer.hpp>
 #include <ting/debug.hpp>
+#include <ting/Exc.hpp>
+#include <ting/File.hpp>
+#include <ting/FSFile.hpp>
+#include <ting/math.hpp>
+#include <ting/PoolStored.hpp>
+#include <ting/Ptr.hpp>
+#include <ting/Ref.hpp>
+#include <ting/Signal.hpp>
+#include <ting/Singleton.hpp>
+#include <ting/Socket.hpp>
 #include <ting/Thread.hpp>
+#include <ting/Timer.hpp>
+#include <ting/types.hpp>
+#include <ting/utils.hpp>
+#include <ting/WaitSet.hpp>
+
+
 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "native-activity", __VA_ARGS__))
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "native-activity", __VA_ARGS__))
@@ -217,6 +235,22 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
 void android_main(struct android_app* state) {
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
 	ASSERT_ALWAYS(true)
+	
+	ting::Mutex testMutex;
+	
+	ting::WaitSet testWaitset(3);
+	
+	ting::FSFile testFSFile("testfile.txt");
+	
+	ting::TCPSocket testSocket;
+	testSocket.Open(ting::IPAddress("127.0.0.1", 80));
+	
+	
+	ting::TimerLib timerLib;
+	
+	
+	
+	
 	
     struct engine engine;
 
