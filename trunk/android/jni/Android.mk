@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := native-activity
+LOCAL_MODULE    := ting_test
 
 LOCAL_SRC_FILES := main.cpp
 LOCAL_SRC_FILES += ting/Thread.cpp

@@ -233,6 +233,15 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd) {
  * event loop for receiving input events and doing other things.
  */
 void android_main(struct android_app* state) {
+    struct engine engine;
+
+    // Make sure glue isn't stripped.
+    app_dummy();
+	
+	
+	
+	
+	
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
 	ASSERT_ALWAYS(true)
 	
@@ -251,11 +260,6 @@ void android_main(struct android_app* state) {
 	
 	
 	
-	
-    struct engine engine;
-
-    // Make sure glue isn't stripped.
-    app_dummy();
 
     memset(&engine, 0, sizeof(engine));
     state->userData = &engine;
