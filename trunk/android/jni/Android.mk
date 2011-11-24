@@ -2,6 +2,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+#TARGET_BUILD_TYPE := debug
+
 LOCAL_MODULE    := ting_test
 
 LOCAL_SRC_FILES := main.cpp

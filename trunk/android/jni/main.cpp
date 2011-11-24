@@ -243,7 +243,8 @@ void android_main(struct android_app* state) {
 	
 	
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
-	ASSERT_ALWAYS(true)
+	ASSERT_ALWAYS(false)
+	/*
 	
 	ting::Mutex testMutex;
 	
@@ -256,7 +257,7 @@ void android_main(struct android_app* state) {
 	
 	
 	ting::TimerLib timerLib;
-	
+	*/
 	
 	
 	
