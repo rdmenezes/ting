@@ -81,18 +81,6 @@ Note, that std::endl is not required as well as leading operator <<.
 
 
 <br>
-*ASSERT_EXEC(x)*<br>
-where *x* is a boolean expression.
-
-This assertion type guarantees that the expression will be executed. In debug build the expression value will be checked for true, in release build it will not be checked.
-
-Example:
-{{{
-ASSERT_EXEC(DoSomethingAndReturnTrueOnSuccess())
-}}}
-
-
-<br>
 *ASS(x)*<br>
 where *x* is a *pointer* or _ting::Ref_, or _ting::Ptr_. Generally speaking, *x* is any value which can be automatically converted to bool-like type and which has operator->() defined.
 
