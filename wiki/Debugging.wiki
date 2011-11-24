@@ -207,7 +207,7 @@ To achieve that, one can use the _ting::Thread::GetCurrentThreadID()_ static fun
 Example:
 {{{
 //save thread ID
-unsigned long threadID = ting::Thread::GetCurrentThreadID();
+ting::Thread::T_ThreadID threadID = ting::Thread::GetCurrentThreadID();
 
 //...
 
