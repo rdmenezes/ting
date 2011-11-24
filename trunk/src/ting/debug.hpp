@@ -33,8 +33,9 @@ THE SOFTWARE. */
 #include <e32std.h>
 
 #elif defined(__ANDROID__)
-#include <iostream>
+#include <sstream>
 #include <cassert>
+#include <android/log.h>
 
 #else //assume more or less standard system
 #include <iostream>
@@ -79,8 +80,13 @@ inline std::ofstream& DebugLogger(){
 #define TRACE_ALWAYS(x)
 
 #elif defined(__ANDROID__)
-#define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
-#define LOG_ALWAYS(x) TRACE_ALWAYS(x) //On Android logging is same as tracing
+#define TRACE_ALWAYS(x) \
+	{ \
+		std::stringstream ss; \
+		ss x; \
+		__android_log_print(ANDROID_LOG_INFO, "ting_debug", ss.str().c_str()); \
+	}
+#define LOG_ALWAYS(x) //logging is not supported on Android, yet.
 
 #else
 #define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
@@ -119,14 +125,22 @@ inline std::ofstream& DebugLogger(){
 //  Assertion definitions
 //
 //
-
+namespace ting{
+namespace ting_debug{
+inline void LogAssert(const char* msg, const char* file, int line){
+	TRACE_AND_LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"<< file << ":" << line << "| " << msg << std::endl)
+}
+}
+}
 #if defined(__SYMBIAN32__)
 #define ASSERT_INFO_ALWAYS(x, y) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 
-#else //Assume system supporting standard assert() (includeing Android)
+#else //Assume system supporting standard assert() (including Android)
 
 #define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
-						TRACE_AND_LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"__FILE__ << ":" << __LINE__ << "| " << y << std::endl) \
+						std::stringstream ss; \
+						ss << y; \
+						ting::ting_debug::LogAssert(ss.str().c_str(), __FILE__, __LINE__); \
 						assert(false); \
 					}
 
@@ -139,21 +153,14 @@ inline std::ofstream& DebugLogger(){
 #ifdef DEBUG
 #define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
 #define ASSERT(x) ASSERT_ALWAYS(x)
-namespace ting{
-namespace ting_debug{
-inline void LogAssert(const char* file, int line){
-	LOG_ALWAYS(<< "[!!!fatal] Assertion failed at:\n\t"<< file << ":" << line << "| ASS() assertion macro" << std::endl) \
-}
-}
-}
 
 #if defined(__SYMBIAN32__)
 #define ASS(x) (x)
 #define ASSCOND(x, cond) (x)
 
-#else //Assume system supporting standard assert() (includeing Android)
-#define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
-#define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert(__FILE__, __LINE__), (assert(false)), (x)) )
+#else //Assume system supporting standard assert() (including Android)
+#define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
+#define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
 
 #endif
 
