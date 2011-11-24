@@ -243,21 +243,23 @@ void android_main(struct android_app* state) {
 	
 	
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
-	ASSERT_ALWAYS(false)
-	/*
+
+	ting::TimerLib timerLib;
 	
 	ting::Mutex testMutex;
-	
+
 	ting::WaitSet testWaitset(3);
-	
+
 	ting::FSFile testFSFile("testfile.txt");
-	
+
+
 	ting::TCPSocket testSocket;
-	testSocket.Open(ting::IPAddress("127.0.0.1", 80));
 	
-	
-	ting::TimerLib timerLib;
-	*/
+	try{
+		testSocket.Open(ting::IPAddress("127.0.0.1", 80));
+	}catch(std::exception& e){
+		TRACE_ALWAYS(<< "exception caught: " << e.what() << std::endl)
+	}
 	
 	
 	
