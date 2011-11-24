@@ -38,6 +38,7 @@ THE SOFTWARE. */
 #include <android/log.h>
 
 #else //assume more or less standard system
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <typeinfo>
