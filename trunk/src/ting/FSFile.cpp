@@ -24,8 +24,16 @@ THE SOFTWARE. */
 
 #ifdef WIN32
 #include <windows.h>
+
+#elif defined(__linux__)
+#include <dirent.h>
+#include <sys/stat.h>
+#include <cerrno>
+
 #endif
 
+#include <vector>
+#include <cstdlib>
 
 #include "FSFile.hpp"
 
@@ -36,6 +44,10 @@ using namespace ting;
 
 
 void FSFile::SetRootDir(const std::string &dir){
+	if(this->IsOpened()){
+		throw File::Exc("FSFile::SetRootDir(): can't set root directory when file is opened");
+	}
+	
 	if(dir.size() > 0){
 		if(dir[dir.size() - 1] != '/'){
 			throw File::Exc("FSFile::SetRootDir(): argument is not a directory, should have trailing '/'");
@@ -224,16 +236,23 @@ void FSFile::MakeDir(){
 
 //static
 std::string FSFile::GetHomeDir(){
+	std::string ret;
+	
+#ifdef __linux__
 	char * home = getenv("HOME");
 	if(!home){
 		throw File::Exc("HOME environment variable does not exist");
 	}
 
-	std::string ret(home);
+	ret = std::string(home);
 
-	if(ret.size() != 0 && ret[ret.size() - 1] != '/'){
+	//append trailing '/' if needed
+	if(ret.size() == 0 || ret[ret.size() - 1] != '/'){
 		ret += '/';
 	}
+#else
+#error "unsupported os"
+#endif
 
 	return ret;
 }
@@ -248,45 +267,46 @@ ting::Array<std::string> FSFile::ListDirContents(){
 	std::vector<std::string> files;
 
 #ifdef __WIN32__
-	std::string pattern = this->TruePath();
-	pattern += '*';
-
-	TRACE(<< "FSFile::ListDirContents(): pattern = " << pattern << std::endl)
-
-	WIN32_FIND_DATA wfd;
-	HANDLE h = FindFirstFile(pattern.c_str(), &wfd);
-	if(h == INVALID_HANDLE_VALUE)
-		throw File::Exc("ListDirContents(): cannot find first file");
-
-	//create Find Closer to automatically call FindClose on exit from the function in case of exceptions etc...
 	{
-		struct FindCloser{
-			HANDLE hnd;
-			FindCloser(HANDLE h) :
-				hnd(h)
-			{}
-			~FindCloser(){
-				FindClose(this->hnd);
-			}
-		} findCloser(h);
+		std::string pattern = this->TruePath();
+		pattern += '*';
 
-		do{
-			std::string s(wfd.cFileName);
-			ASSERT(s.size() > 0)
-			
-			//do not add ./ and ../ directories, we are not interested in them
-			if(s == "." || s == "..")
-				continue;
-			
-			if(((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) && s[s.size() - 1] != '/')
-				s += '/';
-			files.push_back(s);
-		}while(FindNextFile(h, &wfd) != 0);
+		TRACE(<< "FSFile::ListDirContents(): pattern = " << pattern << std::endl)
 
-		if(GetLastError() != ERROR_NO_MORE_FILES)
-			throw File::Exc("ListDirContents(): find next file failed");
+		WIN32_FIND_DATA wfd;
+		HANDLE h = FindFirstFile(pattern.c_str(), &wfd);
+		if(h == INVALID_HANDLE_VALUE)
+			throw File::Exc("ListDirContents(): cannot find first file");
+
+		//create Find Closer to automatically call FindClose on exit from the function in case of exceptions etc...
+		{
+			struct FindCloser{
+				HANDLE hnd;
+				FindCloser(HANDLE h) :
+					hnd(h)
+				{}
+				~FindCloser(){
+					FindClose(this->hnd);
+				}
+			} findCloser(h);
+
+			do{
+				std::string s(wfd.cFileName);
+				ASSERT(s.size() > 0)
+
+				//do not add ./ and ../ directories, we are not interested in them
+				if(s == "." || s == "..")
+					continue;
+
+				if(((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) && s[s.size() - 1] != '/')
+					s += '/';
+				files.push_back(s);
+			}while(FindNextFile(h, &wfd) != 0);
+
+			if(GetLastError() != ERROR_NO_MORE_FILES)
+				throw File::Exc("ListDirContents(): find next file failed");
+		}
 	}
-
 #elif defined(__linux__)
 	{
 		DIR *pdir = opendir(this->TruePath().c_str());

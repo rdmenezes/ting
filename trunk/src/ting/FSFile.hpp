@@ -28,13 +28,6 @@ THE SOFTWARE. */
 #pragma once
 
 #include <cstdio>
-#include <vector>
-
-#ifdef __linux__
-#include <dirent.h>
-#include <sys/stat.h>
-#include <cerrno>
-#endif
 
 #include "debug.hpp"
 #include "File.hpp"
@@ -45,7 +38,10 @@ namespace ting{
 
 
 
-//TODO: add doxygen docs throughout the file
+/**
+ * @brief Native OS file system implementation of File interface.
+ * Implementation of a ting::File interface for native file system of the OS.
+ */
 class FSFile : public File{
 	std::string rootDir;
 
@@ -58,16 +54,39 @@ protected:
 	}
 
 public:
+	/**
+	 * @brief Constructor.
+     * @param pathName - initial path to set passed to File constructor.
+     */
 	FSFile(const std::string& pathName = std::string()) :
 			File(pathName)
 	{}
 	
+	/**
+	 * @brief Destructor.
+	 * This destructor calls the Close() method.
+	 */
 	~FSFile(){
 		this->Close();
 	}
 
+	/**
+	 * @brief Set root directory.
+	 * Sets the root directory which holds the file system subtree. The file path
+	 * set by SetPath() method will refer to a file path relative to the root directory.
+	 * That means that all file operations like opening the file and other will be 
+	 * performed on the actual file/directory referred by the final path which is a concatenation of
+	 * the root directory and the path returned by Path() method. 
+     * @param dir - path to the root directory to set. It should have trailing '/' character.
+     */
 	void SetRootDir(const std::string &dir);
 
+	/**
+	 * @brief Get current root directory.
+	 * Returns the current rot directory. See description of SetRootDir() method
+	 * for more details.
+     * @return Current root directory.
+     */
 	inline std::string GetRootDir()const{
 		return this->rootDir;
 	}
@@ -93,7 +112,6 @@ public:
 
 
 	//override
-	//returns number of bytes actually written
 	virtual unsigned Write(
 			const ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToWrite = 0,
@@ -118,7 +136,12 @@ public:
 
 
 public:
-	//returns string of format: "/home/user/"
+	/**
+	 * @brief Get user home directory.
+	 * Returns an absolute path to the current user's home directory.
+	 * On *nix systems it will be something like "/home/user/".
+     * @return Absolute path to the user's home directory.
+     */
 	static std::string GetHomeDir();
 
 

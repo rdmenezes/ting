@@ -28,8 +28,6 @@ THE SOFTWARE. */
 #pragma once
 
 #include <string>
-#include <algorithm>
-#include <cstdlib>
 
 #include "debug.hpp"
 #include "types.hpp"
