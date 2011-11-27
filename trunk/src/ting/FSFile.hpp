@@ -61,11 +61,10 @@ public:
 	FSFile(const std::string& pathName = std::string()) :
 			File(pathName)
 	{}
-
+	
 	~FSFile(){
 		this->Close();
 	}
-
 
 	void SetRootDir(const std::string &dir);
 

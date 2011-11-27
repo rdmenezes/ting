@@ -33,8 +33,15 @@ std::string File::ExtractExtension()const{
 	if(dotPos == std::string::npos || dotPos == 0){//NOTE: dotPos is 0 for hidden files in *nix systems
 		return std::string();
 	}else{
+		ASSERT(dotPos > 0)
 		ASSERT(this->Path().size() > 0)
 		ASSERT(this->Path().size() >= dotPos + 1)
+		
+		//Check for hidden file on *nix systems
+		if(this->Path()[dotPos - 1] == '/'){
+			return std::string();
+		}
+		
 		return std::string(this->Path(), dotPos + 1, this->Path().size() - (dotPos + 1));
 	}
 	ASSERT(false)
@@ -65,7 +72,7 @@ void File::SeekForward(unsigned numBytesToSeek){
 	if(!this->IsOpened())
 		throw File::Exc("SeekForward(): file is not opened");
 
-	//TODO: allocate limited size buffer and read in a loop
+	//TODO: allocate limited size buffer and read in a loop and use try catch to throw EOF exception
 	ting::Array<ting::u8> buf(numBytesToSeek);
 	this->Read(buf);
 }
@@ -74,6 +81,11 @@ void File::SeekForward(unsigned numBytesToSeek){
 
 void File::SeekBackward(unsigned numBytesToSeek){
 	throw ting::Exc("SeekBackward(): unsupported");
+}
+
+
+void File::Rewind(){
+	throw ting::Exc("Rewind(): unsupported");
 }
 
 

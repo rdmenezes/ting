@@ -43,8 +43,10 @@ namespace ting{
 
 
 
-//TODO: add doxygen docs throughout the file
-
+/**
+ * @brief Abstract interface to a file system.
+ * This class represents an abstract interface to a file system.
+ */
 //TODO: make File a Waitable?
 class File{
 	std::string path;
@@ -56,30 +58,45 @@ protected:
 	ting::Inited<bool, false> isOpened;
 
 public:
-	//define exception class
+	/**
+	 * @brief Basic exception class.
+	 */
 	class Exc : public ting::Exc{
 	public:
+		/**
+		 * @brief Constructor.
+		 * Creates an exception without and error description.
+         */
 		Exc() :
 				ting::Exc("[File::Exc]: unknown")
 		{}
 
+		/**
+		 * @brief Constructor.
+         * @param descr - human readable description of the error.
+         */
 		Exc(const std::string& descr):
 				ting::Exc((std::string("[File::Exc]: ") + descr).c_str())
 		{}
 	};
 
-	//modes of file opening
+	/**
+	 * @brief Modes of opening the file.
+	 */
 	enum EMode{
-		READ,  //Open existing file for read only
-		WRITE, //Open existing file for read and write
-		CREATE //Create new file and open it for read and write. If file exists it will be replaced by empty file.
-			   //This mode is used for C_File::Open() method only. Later the mode is stored as WRITE in the this->mode variable
+		READ,  ///Open existing file for read only
+		WRITE, ///Open existing file for read and write
+		CREATE ///Create new file and open it for read and write. If file exists it will be replaced by empty file.
 	};
 
 protected:
 	EMode ioMode;//mode only matters when file is opened
 public:
 
+	/**
+	 * @brief Constructor.
+     * @param pathName - initial path to set to the newly created File instance.
+     */
 	inline File(const std::string& pathName = std::string()) :
 			path(pathName)
 	{}
@@ -92,25 +109,67 @@ private:
 	File& operator=(const File& f);
 public:
 
-	virtual ~File(){}
+	/**
+	 * @brief Destructor.
+	 * This destructor does not call Close() method, but it has an ASSERT which checks if the file is closed.
+	 * The file shall be closed upon the object destruction, all the implementations should
+	 * assure that.
+     */
+	virtual ~File(){
+		ASSERT(!this->IsOpened())
+	}
 
+	/**
+	 * @brief Set the path for this File instance.
+     * @param pathName - the path to a file or directory.
+     */
 	inline void SetPath(const std::string& pathName){
-		if(this->isOpened)
+		if(this->IsOpened())
 			throw File::Exc("cannot set path while file is opened");
 
 		this->path = pathName;
 	}
 
+	/**
+	 * @brief Get the current path being held by this File instance.
+     * @return The path this File instance holds.
+     */
 	inline const std::string& Path()const{
 		return this->path;
 	}
 
+	/**
+	 * @brief Get file extension.
+	 * Returns a string containing the tail part of the file path, everything that
+	 * goes after the last dot character ('.') in the file path string.
+	 * I.e. if the file path is '/home/user/some.file.txt' then the return value
+	 * will be 'txt'.
+	 * Note, that on *nix systems if the file name starts with a dot then this file is treated as hidden,
+	 * in that case it is thought that the file has no extension. I.e., for example
+	 * , if the file path is '/home/user/.myfile' then the file has no extension and this function
+	 * will return an empty string. Although, if the file path is '/home/user/.myfile.txt' then the file
+	 * does have an extension and the function will return 'txt'.
+     * @return String representing file extension.
+     */
 	std::string ExtractExtension()const;
 
+	/**
+	 * @brief Open file.
+	 * Opens file for reading/writing or creates the file.
+     * @param mode - file opening mode (reading/writing/create).
+     */
 	virtual void Open(EMode mode) = 0;
 
+	/**
+	 * @brief Close file.
+     */
 	virtual void Close() = 0;
 
+	/**
+	 * @brief Check if the file is opened.
+     * @return true - if the file is opened.
+	 * @return false - otherwise.
+     */
 	inline bool IsOpened()const{
 		return this->isOpened;
 	}
@@ -126,37 +185,116 @@ public:
 	 */
 	bool IsDir()const;
 
+	/**
+	 * @brief Get list of files and subdirectories of a directory.
+	 * If this File instance holds a path to a directory then this method
+	 * can be used to obtain the contents of the directory.
+     * @return The array of string objects representing the directory entries.
+     */
+	//TODO: add an argument to limit the maximum number of entries to get. The default value should be 0 meaning no limit.
 	virtual ting::Array<std::string> ListDirContents();
 
-	//returns number of bytes actually read
+	/**
+	 * @brief Read data from file.
+	 * All sane file systems should support file reading. 
+     * @param buf - buffer where to store the read data.
+     * @param numBytesToRead - number of bytes to read.
+     * @param offset - offset into the buffer from where to start storing the read data.
+     * @return Number of bytes actually read.
+     */
 	virtual unsigned Read(
 			ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToRead = 0, //0 means the whole buffer size
 			unsigned offset = 0
 		) = 0;
 
-	//returns number of bytes actually written
+	/**
+	 * @brief Write data to file.
+	 * Not all file systems support writing to a file, some file systems are read-only.
+     * @param buf - buffer holding the data to write.
+     * @param numBytesToWrite - number of bytes to write.
+     * @param offset - offset into the buffer from where to start taking the data for writing.
+     * @return Number of bytes actually written.
+     */
 	virtual unsigned Write(
 			const ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToWrite = 0, //0 means the whole buffer size
 			unsigned offset = 0
 		) = 0;
 
-	//returns number of bytes actually skipped
+	/**
+	 * @brief Seek forward.
+	 * Seek file pointer forward relatively to current position.
+	 * There is a default implementation of this function which uses Read() method
+	 * to skip the specified number of bytes by reading the data and wasting it away.
+     * @param numBytesToSeek - number of bytes to skip.
+	 * @return number of bytes actually skipped.
+     */
 	virtual void SeekForward(unsigned numBytesToSeek);
 
-	//returns number of bytes actually skipped
+	/**
+	 * @brief Seek backwards.
+	 * Seek file pointer backwards relatively to he current position. Not all file systems
+	 * support seeking backwards.
+     * @param numBytesToSeek - number of bytes to skip.
+	 * @return number of bytes actually skipped.
+     */
 	virtual void SeekBackward(unsigned numBytesToSeek);
 
+	/**
+	 * @brief Seek to the beginning of the file.
+	 * Not all file systems support rewinding.
+     */
+	virtual void Rewind();
+	
+	/**
+	 * @brief Create directory.
+	 * If this File instance is a directory then try to create that directory on
+	 * file system. Not all file systems are writable, so not all of them support
+	 * directory creation.
+     */
 	virtual void MakeDir();
 	
 public:
+	/**
+	 * @brief Load the entire file into the RAM.
+     * @return Array containing loaded file data.
+     */
+	//TODO: add optional limit of maximum bytes to load as a function argument with default value of 0 meaning no limit.
 	ting::Array<ting::u8> LoadWholeFileIntoMemory();
 
+	/**
+	 * @brief Check for file/directory existence.
+     * @return true - if file/directory exists.
+	 * @return false - otherwise.
+     */
 	virtual bool Exists()const;
 
 public:
-	//TODO: doxygen
+	/**
+	 * @brief File guard class.
+	 * Use this class to open the file within the particular scope.
+	 * As the file guard object goes out of the scope it will close the file in its destructor.
+	 * Usage:
+	 * @code
+	 *	File& fi;//assume we have some ting::File object visible in current scope.
+	 *	...
+	 *	{
+	 *		//assume the 'fi' is closed.
+	 *		//Let's create the file guard object. This will open the file 'fi'
+	 *		// for reading by calling fi.Open(ting::File::READ) method.
+	 *		ting::File::Guard fileGuard(fi, ting::File::READ);
+	 * 
+	 *		...
+	 *		//do some reading
+	 *		fi.Read(...);
+	 *		
+	 *		//going out of scope will destroy the 'fileGuard' object. In turn,
+	 *		//it will automatically close the file 'fi' in its destructor by
+	 *		//calling fi.Close() method.
+	 *	}
+	 * @endcode
+	 */
 	class Guard{
 		File& f;
 	public:

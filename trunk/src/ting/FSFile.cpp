@@ -176,6 +176,9 @@ void FSFile::SeekForward(unsigned numBytesToSeek){
 
 //override
 bool FSFile::Exists()const{
+	if(this->IsOpened()) //file is opened => it exists
+		return true;
+	
 	if(this->Path().size() == 0)
 		return false;
 
