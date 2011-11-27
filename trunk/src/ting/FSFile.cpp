@@ -126,8 +126,13 @@ unsigned FSFile::Read(
 	unsigned actualNumBytesToRead =
 			numBytesToRead == 0 ? buf.SizeInBytes() : numBytesToRead;
 
-	if(actualNumBytesToRead > buf.SizeInBytes() - offset)
+	if(offset > buf.Size()){
+		throw File::Exc("offset is out of buffer bounds");
+	}
+	
+	if(actualNumBytesToRead > buf.Size() - offset){
 		throw File::Exc("attempt to read more bytes than output buffer size");
+	}
 
 	ASSERT(actualNumBytesToRead + offset <= buf.SizeInBytes())
 	ASSERT(this->handle)
@@ -158,8 +163,13 @@ unsigned FSFile::Write(
 	unsigned actualNumBytesToWrite =
 			numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
 
-	if(actualNumBytesToWrite > buf.SizeInBytes() - offset)
+	if(offset > buf.Size()){
+		throw File::Exc("offset is out of buffer bounds");
+	}
+	
+	if(actualNumBytesToWrite > buf.Size() - offset){
 		throw File::Exc("attempt to write more bytes than passed buffer contains");
+	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
 	ASSERT(this->handle)

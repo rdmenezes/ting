@@ -195,8 +195,10 @@ public:
 	 * @brief Read data from file.
 	 * All sane file systems should support file reading. 
      * @param buf - buffer where to store the read data.
-     * @param numBytesToRead - number of bytes to read.
-     * @param offset - offset into the buffer from where to start storing the read data.
+     * @param numBytesToRead - number of bytes to read. If this value is more than
+	 *                         the buffer holds (minus the offset) then an exception will be thrown.
+     * @param offset - offset into the buffer from where to start storing the read data. Offset should
+	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
      * @return Number of bytes actually read.
      */
 	virtual unsigned Read(
@@ -209,8 +211,10 @@ public:
 	 * @brief Write data to file.
 	 * Not all file systems support writing to a file, some file systems are read-only.
      * @param buf - buffer holding the data to write.
-     * @param numBytesToWrite - number of bytes to write.
-     * @param offset - offset into the buffer from where to start taking the data for writing.
+     * @param numBytesToWrite - number of bytes to write. If this value is more than
+	 *                          the buffer holds (minus the offset) then an exception will be thrown.
+     * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
+	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
      * @return Number of bytes actually written.
      */
 	virtual unsigned Write(
