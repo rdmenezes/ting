@@ -147,7 +147,7 @@ public:
 
 
 	//override
-	virtual ting::Array<std::string> ListDirContents();
+	virtual ting::Array<std::string> ListDirContents(unsigned maxEntries = 0);
 };
 
 

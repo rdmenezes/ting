@@ -49,8 +49,7 @@ namespace ting{
 class File{
 	std::string path;
 
-	//TODO:
-	//add file permissions
+	//TODO: add file permissions
 
 protected:
 	ting::Inited<bool, false> isOpened;
@@ -187,10 +186,10 @@ public:
 	 * @brief Get list of files and subdirectories of a directory.
 	 * If this File instance holds a path to a directory then this method
 	 * can be used to obtain the contents of the directory.
+	 * @param maxEntries - maximum number of entries in the returned list. 0 means no limit.
      * @return The array of string objects representing the directory entries.
      */
-	//TODO: add an argument to limit the maximum number of entries to get. The default value should be 0 meaning no limit.
-	virtual ting::Array<std::string> ListDirContents();
+	virtual ting::Array<std::string> ListDirContents(unsigned maxEntries = 0);
 
 	/**
 	 * @brief Read data from file.

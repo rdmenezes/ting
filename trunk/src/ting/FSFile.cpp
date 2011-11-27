@@ -260,7 +260,7 @@ std::string FSFile::GetHomeDir(){
 
 
 //override
-ting::Array<std::string> FSFile::ListDirContents(){
+ting::Array<std::string> FSFile::ListDirContents(unsigned maxEntries){
 	if(!this->IsDir())
 		throw File::Exc("FSFile::ListDirContents(): this is not a directory");
 
@@ -301,6 +301,10 @@ ting::Array<std::string> FSFile::ListDirContents(){
 				if(((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) && s[s.size() - 1] != '/')
 					s += '/';
 				files.push_back(s);
+				
+				if(files.size() == maxEntries){
+					break;
+				}
 			}while(FindNextFile(h, &wfd) != 0);
 
 			if(GetLastError() != ERROR_NO_MORE_FILES)
@@ -350,6 +354,10 @@ ting::Array<std::string> FSFile::ListDirContents(){
 				s += "/";
 
 			files.push_back(s);
+			
+			if(files.size() == maxEntries){
+				break;
+			}
 		}//~while()
 
 		//check if we exited the while() loop because of readdir() failed

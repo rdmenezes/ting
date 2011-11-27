@@ -63,7 +63,7 @@ bool File::IsDir()const{
 
 
 
-ting::Array<std::string> File::ListDirContents(){
+ting::Array<std::string> File::ListDirContents(unsigned maxEntries){
 	throw File::Exc("File::ListDirContents(): not supported for this File instance");
 }
 

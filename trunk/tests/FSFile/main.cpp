@@ -60,9 +60,31 @@ void Run(){
 
 
 
+namespace TestListDirContents{
+void Run(){
+	ting::FSFile curDir("./");
+	ting::File& f = curDir;
+	
+	ting::Array<std::string> r = f.ListDirContents();
+	ASSERT_ALWAYS(r.Size() >= 3)
+//	TRACE_ALWAYS(<< "list = " << r << std::endl)
+	
+	ting::Array<std::string> r1 = f.ListDirContents(1);
+	ASSERT_ALWAYS(r1.Size() == 1)
+	ASSERT_ALWAYS(r[0] == r1[0])
+	
+	ting::Array<std::string> r2 = f.ListDirContents(2);
+	ASSERT_ALWAYS(r2.Size() == 2)
+	ASSERT_ALWAYS(r[0] == r2[0])
+	ASSERT_ALWAYS(r[1] == r2[1])
+}
+}//~namespace
+
+
 int main(int argc, char *argv[]){
 
 	TestSeekForward::Run();
+	TestListDirContents::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 
