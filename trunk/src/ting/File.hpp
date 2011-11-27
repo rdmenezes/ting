@@ -63,15 +63,15 @@ public:
 		/**
 		 * @brief Constructor.
 		 * Creates an exception without and error description.
-         */
+		 */
 		Exc() :
 				ting::Exc("[File::Exc]: unknown")
 		{}
 
 		/**
 		 * @brief Constructor.
-         * @param descr - human readable description of the error.
-         */
+		 * @param descr - human readable description of the error.
+		 */
 		Exc(const std::string& descr):
 				ting::Exc((std::string("[File::Exc]: ") + descr).c_str())
 		{}
@@ -92,8 +92,8 @@ public:
 
 	/**
 	 * @brief Constructor.
-     * @param pathName - initial path to set to the newly created File instance.
-     */
+	 * @param pathName - initial path to set to the newly created File instance.
+	 */
 	inline File(const std::string& pathName = std::string()) :
 			path(pathName)
 	{}
@@ -111,15 +111,15 @@ public:
 	 * This destructor does not call Close() method, but it has an ASSERT which checks if the file is closed.
 	 * The file shall be closed upon the object destruction, all the implementations should
 	 * assure that.
-     */
+	 */
 	virtual ~File(){
 		ASSERT(!this->IsOpened())
 	}
 
 	/**
 	 * @brief Set the path for this File instance.
-     * @param pathName - the path to a file or directory.
-     */
+	 * @param pathName - the path to a file or directory.
+	 */
 	inline void SetPath(const std::string& pathName){
 		if(this->IsOpened())
 			throw File::Exc("cannot set path while file is opened");
@@ -129,8 +129,8 @@ public:
 
 	/**
 	 * @brief Get the current path being held by this File instance.
-     * @return The path this File instance holds.
-     */
+	 * @return The path this File instance holds.
+	 */
 	inline const std::string& Path()const{
 		return this->path;
 	}
@@ -146,27 +146,27 @@ public:
 	 * , if the file path is '/home/user/.myfile' then the file has no extension and this function
 	 * will return an empty string. Although, if the file path is '/home/user/.myfile.txt' then the file
 	 * does have an extension and the function will return 'txt'.
-     * @return String representing file extension.
-     */
+	 * @return String representing file extension.
+	 */
 	std::string ExtractExtension()const;
 
 	/**
 	 * @brief Open file.
 	 * Opens file for reading/writing or creates the file.
-     * @param mode - file opening mode (reading/writing/create).
-     */
+	 * @param mode - file opening mode (reading/writing/create).
+	 */
 	virtual void Open(EMode mode) = 0;
 
 	/**
 	 * @brief Close file.
-     */
+	 */
 	virtual void Close() = 0;
 
 	/**
 	 * @brief Check if the file is opened.
-     * @return true - if the file is opened.
+	 * @return true - if the file is opened.
 	 * @return false - otherwise.
-     */
+	 */
 	inline bool IsOpened()const{
 		return this->isOpened;
 	}
@@ -187,20 +187,20 @@ public:
 	 * If this File instance holds a path to a directory then this method
 	 * can be used to obtain the contents of the directory.
 	 * @param maxEntries - maximum number of entries in the returned list. 0 means no limit.
-     * @return The array of string objects representing the directory entries.
-     */
+	 * @return The array of string objects representing the directory entries.
+	 */
 	virtual ting::Array<std::string> ListDirContents(unsigned maxEntries = 0);
 
 	/**
 	 * @brief Read data from file.
 	 * All sane file systems should support file reading. 
-     * @param buf - buffer where to store the read data.
-     * @param numBytesToRead - number of bytes to read. If this value is more than
+	 * @param buf - buffer where to store the read data.
+	 * @param numBytesToRead - number of bytes to read. If this value is more than
 	 *                         the buffer holds (minus the offset) then an exception will be thrown.
-     * @param offset - offset into the buffer from where to start storing the read data. Offset should
+	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
-     * @return Number of bytes actually read.
-     */
+	 * @return Number of bytes actually read.
+	 */
 	virtual unsigned Read(
 			ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToRead = 0, //0 means the whole buffer size
@@ -210,13 +210,13 @@ public:
 	/**
 	 * @brief Write data to file.
 	 * Not all file systems support writing to a file, some file systems are read-only.
-     * @param buf - buffer holding the data to write.
-     * @param numBytesToWrite - number of bytes to write. If this value is more than
+	 * @param buf - buffer holding the data to write.
+	 * @param numBytesToWrite - number of bytes to write. If this value is more than
 	 *                          the buffer holds (minus the offset) then an exception will be thrown.
-     * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
+	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
-     * @return Number of bytes actually written.
-     */
+	 * @return Number of bytes actually written.
+	 */
 	virtual unsigned Write(
 			const ting::Buffer<ting::u8>& buf,
 			unsigned numBytesToWrite = 0, //0 means the whole buffer size
@@ -228,47 +228,47 @@ public:
 	 * Seek file pointer forward relatively to current position.
 	 * There is a default implementation of this function which uses Read() method
 	 * to skip the specified number of bytes by reading the data and wasting it away.
-     * @param numBytesToSeek - number of bytes to skip.
+	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
-     */
+	 */
 	virtual void SeekForward(unsigned numBytesToSeek);
 
 	/**
 	 * @brief Seek backwards.
 	 * Seek file pointer backwards relatively to he current position. Not all file systems
 	 * support seeking backwards.
-     * @param numBytesToSeek - number of bytes to skip.
+	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
-     */
+	 */
 	virtual void SeekBackward(unsigned numBytesToSeek);
 
 	/**
 	 * @brief Seek to the beginning of the file.
 	 * Not all file systems support rewinding.
-     */
+	 */
 	virtual void Rewind();
-	
+
 	/**
 	 * @brief Create directory.
 	 * If this File instance is a directory then try to create that directory on
 	 * file system. Not all file systems are writable, so not all of them support
 	 * directory creation.
-     */
+	 */
 	virtual void MakeDir();
-	
+
 public:
 	/**
 	 * @brief Load the entire file into the RAM.
-     * @return Array containing loaded file data.
-     */
+	 * @return Array containing loaded file data.
+	 */
 	//TODO: add optional limit of maximum bytes to load as a function argument with default value of 0 meaning no limit.
 	ting::Array<ting::u8> LoadWholeFileIntoMemory();
 
 	/**
 	 * @brief Check for file/directory existence.
-     * @return true - if file/directory exists.
+	 * @return true - if file/directory exists.
 	 * @return false - otherwise.
-     */
+	 */
 	virtual bool Exists()const;
 
 public:
@@ -300,7 +300,7 @@ public:
 		File& f;
 	public:
 		Guard(File &file, EMode mode);
-		
+
 		~Guard();
 	};
 };
