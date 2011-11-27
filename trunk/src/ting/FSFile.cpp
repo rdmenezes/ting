@@ -131,7 +131,7 @@ unsigned FSFile::Read(
 
 	ASSERT(actualNumBytesToRead + offset <= buf.SizeInBytes())
 	ASSERT(this->handle)
-	unsigned numBytesRead = fread(&buf[offset], 1, actualNumBytesToRead, this->handle);
+	unsigned numBytesRead = fread(buf.Begin() + offset, 1, actualNumBytesToRead, this->handle);
 	if(numBytesRead != actualNumBytesToRead){//something happened
 		if(!feof(this->handle))
 			throw File::Exc("fread() error");//if it is not an EndOfFile then it is error
@@ -163,7 +163,7 @@ unsigned FSFile::Write(
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
 	ASSERT(this->handle)
-	unsigned bytesWritten = fwrite(&buf[offset], 1, actualNumBytesToWrite, this->handle);
+	unsigned bytesWritten = fwrite(buf.Begin() + offset, 1, actualNumBytesToWrite, this->handle);
 	if(bytesWritten != actualNumBytesToWrite)//something bad has happened
 		throw File::Exc("fwrite error");
 

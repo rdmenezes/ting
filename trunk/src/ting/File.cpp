@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 #include "File.hpp"
+#include "utils.hpp"
 
 
 
@@ -71,10 +72,21 @@ ting::Array<std::string> File::ListDirContents(){
 void File::SeekForward(unsigned numBytesToSeek){
 	if(!this->IsOpened())
 		throw File::Exc("SeekForward(): file is not opened");
-
-	//TODO: allocate limited size buffer and read in a loop and use try catch to throw EOF exception
-	ting::Array<ting::u8> buf(numBytesToSeek);
-	this->Read(buf);
+	
+	ting::StaticBuffer<ting::u8, 0xfff> buf;//4kb buffer
+	
+	for(unsigned bytesRead = 0; bytesRead != numBytesToSeek;){
+		unsigned curNumToRead = numBytesToSeek - bytesRead;
+		ting::ClampTop(curNumToRead, buf.Size());
+		unsigned res = this->Read(buf, curNumToRead);
+		if(res != curNumToRead){//if end of file reached
+			throw ting::Exc("File::SeekForward(): end of file reached, seeking did not complete");
+		}
+		ASSERT(bytesRead < numBytesToSeek)
+		ASSERT(numBytesToSeek >= res)
+		ASSERT(bytesRead <= numBytesToSeek - res)
+		bytesRead += res;
+	}
 }
 
 
