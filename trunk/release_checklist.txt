@@ -2,4 +2,6 @@
 
 * update the PROJECT_NUMBER variable in the docs/doxygen.cfg file to latest version number
 
+* update Version in pkg-config/ting.pc file
+
 * generate debian package using dpkg-buildpackage

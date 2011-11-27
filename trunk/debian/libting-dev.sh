@@ -9,17 +9,30 @@ soName=0
 baseDir=debian/out/$packageName
 mkdir -p $baseDir
 
+#==========
 #copy files
+
+#create include dir
 incDir=$baseDir/usr/include/ting
 mkdir -p $incDir
 
+#copy header files
 cp src/ting/*.hpp $incDir
 cp src/ting/*.h $incDir
 
+#create symbolic .so link to latest .so name
 libDir=$baseDir/usr/lib
 mkdir -p $libDir
 ln -s /usr/lib/$libFileName.$soName $libDir/$libFileName
 
+#copy pkg-config .pc file
+pkgConfigDir=$libDir/pkgconfig/
+mkdir -p $pkgConfigDir
+cp pkg-config/*.pc $pkgConfigDir
+
+
+#====================
+#Generate deb package
 
 #create dir where the output 'control' will be placed
 mkdir -p $baseDir/DEBIAN
