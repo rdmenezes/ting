@@ -71,7 +71,7 @@ STATIC_ASSERT(sizeof(int) == 4)
  */
 template <class T> class PoolStored{
 	
-	template <unsigned ElemSize, unsigned NumElemsInChunk> class MemPool{
+	template <size_t ElemSize, size_t NumElemsInChunk> class MemPool{
 		struct BufHolder{
 			u8 buf[ElemSize];
 		};
@@ -89,7 +89,7 @@ template <class T> class PoolStored{
 
 
 		struct Chunk : public ting::Array<PoolElem>{
-			unsigned numAllocated;
+			size_t numAllocated;
 			Chunk() :
 					ting::Array<PoolElem>(NumElemsInChunk),
 					numAllocated(0)

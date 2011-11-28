@@ -109,7 +109,7 @@ void File::MakeDir(){
 
 
 namespace{
-unsigned DReadBlockSize = 4096;
+size_t DReadBlockSize = 4096;
 }
 
 
@@ -128,8 +128,8 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(){
 	ting::Array<ting::u8> *currArr = &a;
 	ting::Array<ting::u8> *freeArr = &b;
 
-	unsigned numBytesRead = 0;
-	unsigned numBytesReadLastOp = 0;
+	size_t numBytesRead = 0;
+	size_t numBytesReadLastOp = 0;
 	for(;;){
 		if( currArr->Size() < (numBytesRead + DReadBlockSize) ){
 			freeArr->Init( currArr->Size() + DReadBlockSize );
