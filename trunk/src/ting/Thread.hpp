@@ -646,7 +646,7 @@ public:
 	 *                    If stackSize is 0 then system default stack size is used.
 	 */
 	//0 stacksize stands for default stack size (platform dependent)
-	void Start(unsigned stackSize = 0);
+	void Start(size_t stackSize = 0);
 
 
 

@@ -643,7 +643,7 @@ Thread::~Thread(){
 
 
 
-void Thread::Start(unsigned stackSize){
+void Thread::Start(size_t stackSize){
 	//Protect by mutex to avoid several Start() methods to be called
 	//by concurrent threads simultaneously and to protect call to Join() before Start()
 	//has returned.
@@ -659,7 +659,7 @@ void Thread::Start(unsigned stackSize){
 	this->th = reinterpret_cast<HANDLE>(
 			_beginthreadex(
 					NULL,
-					unsigned(stackSize),
+					stackSize > size_t(unsigned(-1)) ? unsigned(-1) : unsigned(stackSize),
 					&RunThread,
 					reinterpret_cast<void*>(this),
 					0,
@@ -683,7 +683,7 @@ void Thread::Start(unsigned stackSize){
 
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-		pthread_attr_setstacksize(&attr, size_t(stackSize));
+		pthread_attr_setstacksize(&attr, stackSize);
 
 		int res = pthread_create(&this->th, &attr, &RunThread, this);
 		if(res != 0){
