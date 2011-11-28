@@ -450,7 +450,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 			ss << "TCPSocket::Open(): connect() failed, error code = " << errorCode << ": ";
 #ifdef _MSC_VER //if MSVC compiler
 			{
-				const unsigned msgbufSize = 0xff;
+				const size_t msgbufSize = 0xff;
 				char msgbuf[msgbufSize];
 				strerror_s(msgbuf, msgbufSize, errorCode);
 				msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
@@ -467,9 +467,10 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 
 
-unsigned TCPSocket::Send(const ting::Buffer<u8>& buf, unsigned offset){
-	if(!this->IsValid())
+size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
+	if(!this->IsValid()){
 		throw Socket::Exc("TCPSocket::Send(): socket is not opened");
+	}
 
 	this->ClearCanWriteFlag();
 
@@ -482,7 +483,7 @@ unsigned TCPSocket::Send(const ting::Buffer<u8>& buf, unsigned offset){
 			<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
 		)
 
-	int len;
+	ssize_t len;
 
 	while(true){
 		len = send(
@@ -507,7 +508,7 @@ unsigned TCPSocket::Send(const ting::Buffer<u8>& buf, unsigned offset){
 				ss << "TCPSocket::Send(): send() failed, error code = " << errorCode << ": ";
 #ifdef _MSC_VER //if MSVC compiler
 				{
-					const unsigned msgbufSize = 0xff;
+					const size_t msgbufSize = 0xff;
 					char msgbuf[msgbufSize];
 					strerror_s(msgbuf, msgbufSize, errorCode);
 					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
@@ -523,7 +524,7 @@ unsigned TCPSocket::Send(const ting::Buffer<u8>& buf, unsigned offset){
 	}//~while
 
 	ASSERT(len >= 0)
-	return unsigned(len);
+	return size_t(len);
 }
 
 
@@ -535,7 +536,7 @@ void TCPSocket::SendAll(const ting::Buffer<u8>& buf){
 	DEBUG_CODE(int left = int(buf.Size());)
 	ASSERT(left >= 0)
 
-	unsigned offset = 0;
+	size_t offset = 0;
 
 	while(true){
 		int res = this->Send(buf, offset);
@@ -554,7 +555,7 @@ void TCPSocket::SendAll(const ting::Buffer<u8>& buf){
 
 
 
-unsigned TCPSocket::Recv(ting::Buffer<u8>& buf, unsigned offset){
+size_t TCPSocket::Recv(ting::Buffer<u8>& buf, size_t offset){
 	//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 	//calls to Recv() because it indicates that there's activity.
 	//So, do it at the beginning of the function.
@@ -572,7 +573,7 @@ unsigned TCPSocket::Recv(ting::Buffer<u8>& buf, unsigned offset){
 			<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
 		)
 
-	int len;
+	ssize_t len;
 
 	while(true){
 		len = recv(
@@ -597,7 +598,7 @@ unsigned TCPSocket::Recv(ting::Buffer<u8>& buf, unsigned offset){
 				ss << "TCPSocket::Recv(): recv() failed, error code = " << errorCode << ": ";
 #ifdef _MSC_VER //if MSVC compiler
 				{
-					const unsigned msgbufSize = 0xff;
+					const size_t msgbufSize = 0xff;
 					char msgbuf[msgbufSize];
 					strerror_s(msgbuf, msgbufSize, errorCode);
 					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
@@ -613,7 +614,7 @@ unsigned TCPSocket::Recv(ting::Buffer<u8>& buf, unsigned offset){
 	}//~while
 
 	ASSERT(len >= 0)
-	return unsigned(len);
+	return size_t(len);
 }
 
 
@@ -871,7 +872,7 @@ void UDPSocket::Open(u16 port){
 
 
 
-unsigned UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
+size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
 	if(!this->IsValid())
 		throw Socket::Exc("UDPSocket::Send(): socket is not opened");
 
@@ -885,7 +886,7 @@ unsigned UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinati
 	sockAddr.sin_family = AF_INET;
 
 
-	int len;
+	ssize_t len;
 
 	while(true){
 		len = ::sendto(
@@ -913,7 +914,7 @@ unsigned UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinati
 				ss << "UDPSocket::Send(): sendto() failed, error code = " << errorCode << ": ";
 #ifdef _MSC_VER //if MSVC compiler
 				{
-					const unsigned msgbufSize = 0xff;
+					const size_t msgbufSize = 0xff;
 					char msgbuf[msgbufSize];
 					strerror_s(msgbuf, msgbufSize, errorCode);
 					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
@@ -928,16 +929,17 @@ unsigned UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinati
 		break;
 	}//~while
 
-	ASSERT(buf.Size() <= unsigned(ting::DMaxInt))
+	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
 	ASSERT_INFO(len <= int(buf.Size()), "res = " << len)
 	ASSERT_INFO((len == int(buf.Size())) || (len == 0), "res = " << len)
 
-	return len;
+	ASSERT(len >= 0)
+	return size_t(len);
 }
 
 
 
-unsigned UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
+size_t UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 	if(!this->IsValid())
 		throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
 
@@ -957,7 +959,7 @@ unsigned UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 #error "Unsupported OS"
 #endif
 
-	int len;
+	ssize_t len;
 
 	while(true){
 		len = ::recvfrom(
@@ -985,7 +987,7 @@ unsigned UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 				ss << "UDPSocket::Recv(): recvfrom() failed, error code = " << errorCode << ": ";
 #ifdef _MSC_VER //if MSVC compiler
 				{
-					const unsigned msgbufSize = 0xff;
+					const size_t msgbufSize = 0xff;
 					char msgbuf[msgbufSize];
 					strerror_s(msgbuf, msgbufSize, errorCode);
 					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
@@ -1000,12 +1002,14 @@ unsigned UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 		break;
 	}//~while
 
-	ASSERT(buf.Size() <= unsigned(ting::DMaxInt))
+	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
 	ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
 
 	out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
 	out_SenderIP.port = ntohs(sockAddr.sin_port);
-	return len;
+	
+	ASSERT(len >= 0)
+	return size_t(len);
 }
 
 

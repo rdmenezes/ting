@@ -396,7 +396,7 @@ public:
 	 * @param offset - offset inside the buffer from where to start sending the data.
 	 * @return the number of bytes actually sent.
 	 */
-	unsigned Send(const ting::Buffer<u8>& buf, unsigned offset = 0);
+	size_t Send(const ting::Buffer<u8>& buf, size_t offset = 0);
 
 
 
@@ -420,7 +420,7 @@ public:
 	 * @param offset - offset inside the buffer where to start putting data from.
 	 * @return the number of bytes written to the buffer.
 	 */
-	unsigned Recv(ting::Buffer<u8>& buf, unsigned offset = 0);
+	size_t Recv(ting::Buffer<u8>& buf, size_t offset = 0);
 
 	/**
 	 * @brief Get local IP address and port.
@@ -575,7 +575,7 @@ public:
 	 * @return number of bytes actually sent. Actually it is either 0 or the size of the
 	 *         datagram passed in as argument.
 	 */
-	unsigned Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP);
+	size_t Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP);
 
 
 
@@ -594,7 +594,7 @@ public:
 	 *                       of the sender will be stored.
      * @return number of bytes stored in the output buffer.
      */
-	unsigned Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP);
+	size_t Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP);
 
 
 
