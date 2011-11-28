@@ -114,30 +114,10 @@ void FSFile::Close(){
 
 
 //override
-unsigned FSFile::Read(
-		ting::Buffer<ting::u8>& buf,
-		unsigned numBytesToRead,
-		unsigned offset
-	)
-{
-	if(!this->IsOpened())
-		throw File::Exc("file is not opened, cannot read");
-
-	unsigned actualNumBytesToRead =
-			numBytesToRead == 0 ? buf.SizeInBytes() : numBytesToRead;
-
-	if(offset > buf.Size()){
-		throw File::Exc("offset is out of buffer bounds");
-	}
-	
-	if(actualNumBytesToRead > buf.Size() - offset){
-		throw File::Exc("attempt to read more bytes than output buffer size");
-	}
-
-	ASSERT(actualNumBytesToRead + offset <= buf.SizeInBytes())
+size_t FSFile::ReadInternal(ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
-	unsigned numBytesRead = fread(buf.Begin() + offset, 1, actualNumBytesToRead, this->handle);
-	if(numBytesRead != actualNumBytesToRead){//something happened
+	size_t numBytesRead = fread(buf.Begin(), 1, buf.Size(), this->handle);
+	if(numBytesRead != buf.Size()){//something happened
 		if(!feof(this->handle))
 			throw File::Exc("fread() error");//if it is not an EndOfFile then it is error
 	}
@@ -147,35 +127,12 @@ unsigned FSFile::Read(
 
 
 //override
-//returns number of bytes actually written
-unsigned FSFile::Write(
-		const ting::Buffer<ting::u8>& buf,
-		unsigned numBytesToWrite,
-		unsigned offset
-	)
-{
-	if(!this->IsOpened())
-		throw File::Exc("file is not opened, cannot write");
-
-	if(this->ioMode != WRITE)
-		throw File::Exc("file is opened, but not in WRITE mode");
-
-	unsigned actualNumBytesToWrite =
-			numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
-
-	if(offset > buf.Size()){
-		throw File::Exc("offset is out of buffer bounds");
-	}
-	
-	if(actualNumBytesToWrite > buf.Size() - offset){
-		throw File::Exc("attempt to write more bytes than passed buffer contains");
-	}
-
-	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
+size_t FSFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
-	unsigned bytesWritten = fwrite(buf.Begin() + offset, 1, actualNumBytesToWrite, this->handle);
-	if(bytesWritten != actualNumBytesToWrite)//something bad has happened
+	size_t bytesWritten = fwrite(buf.Begin(), 1, buf.Size(), this->handle);
+	if(bytesWritten != buf.Size()){//something bad has happened
 		throw File::Exc("fwrite error");
+	}
 
 	return bytesWritten;
 }
@@ -183,7 +140,7 @@ unsigned FSFile::Write(
 
 
 //override
-void FSFile::SeekForward(unsigned numBytesToSeek){
+void FSFile::SeekForward(size_t numBytesToSeek){
 	if(!this->IsOpened()){
 		throw File::Exc("file is not opened, cannot seek");
 	}
@@ -270,7 +227,7 @@ std::string FSFile::GetHomeDir(){
 
 
 //override
-ting::Array<std::string> FSFile::ListDirContents(unsigned maxEntries){
+ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 	if(!this->IsDir())
 		throw File::Exc("FSFile::ListDirContents(): this is not a directory");
 
@@ -388,7 +345,7 @@ ting::Array<std::string> FSFile::ListDirContents(unsigned maxEntries){
 	
 	ting::Array<std::string> filesArray(files.size());
 	
-	for(unsigned i = 0; i < files.size(); ++i)
+	for(size_t i = 0; i < files.size(); ++i)
 		filesArray[i] = files[i];
 
 	return filesArray;

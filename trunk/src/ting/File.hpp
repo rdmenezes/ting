@@ -189,7 +189,7 @@ public:
 	 * @param maxEntries - maximum number of entries in the returned list. 0 means no limit.
 	 * @return The array of string objects representing the directory entries.
 	 */
-	virtual ting::Array<std::string> ListDirContents(unsigned maxEntries = 0);
+	virtual ting::Array<std::string> ListDirContents(size_t maxEntries = 0);
 
 	/**
 	 * @brief Read data from file.
@@ -197,32 +197,101 @@ public:
 	 * @param buf - buffer where to store the read data.
 	 * @param numBytesToRead - number of bytes to read. If this value is more than
 	 *                         the buffer holds (minus the offset) then an exception will be thrown.
+	 *                         Zero passed value means the whole buffer size.
 	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually read.
 	 */
-	virtual unsigned Read(
+	size_t Read(
 			ting::Buffer<ting::u8>& buf,
-			unsigned numBytesToRead = 0, //0 means the whole buffer size
-			unsigned offset = 0
-		) = 0;
+			size_t numBytesToRead = 0, //0 means the whole buffer size
+			size_t offset = 0
+		)
+	{
+		if(!this->IsOpened()){
+			throw File::Exc("file is not opened, cannot read");
+		}
 
+		size_t actualNumBytesToRead =
+				numBytesToRead == 0 ? buf.Size() : numBytesToRead;
+
+		if(offset > buf.Size()){
+			throw File::Exc("offset is out of buffer bounds");
+		}
+
+		if(actualNumBytesToRead > buf.Size() - offset){
+			throw File::Exc("attempt to read more bytes than the number of bytes from offset to the buffer end");
+		}
+
+		ASSERT(actualNumBytesToRead + offset <= buf.Size())
+		ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
+		return this->ReadInternal(b);
+	}
+
+protected:
+	/**
+	 * @brief Read data from file.
+	 * Override this function to implement reading routine. This function is called
+	 * by Read() method after it has done some safety checks.
+	 * It is assumed that the whole passed buffer needs to be filled with data.
+     * @param buf - buffer to fill with read data.
+     * @return number of bytes actually read.
+     */
+	virtual size_t ReadInternal(ting::Buffer<ting::u8>& buf) = 0;
+	
+public:
 	/**
 	 * @brief Write data to file.
 	 * Not all file systems support writing to a file, some file systems are read-only.
 	 * @param buf - buffer holding the data to write.
 	 * @param numBytesToWrite - number of bytes to write. If this value is more than
 	 *                          the buffer holds (minus the offset) then an exception will be thrown.
+	 *                          Zero passed value means the whole buffer size.
 	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually written.
 	 */
-	virtual unsigned Write(
+	size_t Write(
 			const ting::Buffer<ting::u8>& buf,
-			unsigned numBytesToWrite = 0, //0 means the whole buffer size
-			unsigned offset = 0
-		) = 0;
+			size_t numBytesToWrite = 0, //0 means the whole buffer size
+			size_t offset = 0
+		)
+	{
+		if(!this->IsOpened()){
+			throw File::Exc("file is not opened, cannot write");
+		}
 
+		if(this->ioMode != WRITE){
+			throw File::Exc("file is opened, but not in WRITE mode");
+		}
+
+		size_t actualNumBytesToWrite =
+				numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
+
+		if(offset > buf.Size()){
+			throw File::Exc("offset is out of buffer bounds");
+		}
+
+		if(actualNumBytesToWrite > buf.Size() - offset){
+			throw File::Exc("attempt to write more bytes than passed buffer contains");
+		}
+
+		ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
+		return this->WriteInternal(ting::Buffer<ting::u8>(const_cast<ting::u8*>(buf.Begin() + offset), actualNumBytesToWrite));
+	}
+
+protected:
+	/**
+	 * @brief Write data to file.
+	 * Override this function to implement writing routine. This function is called
+	 * by Write() method after it has done some safety checks.
+	 * It is assumed that the whole passed buffer needs to be written to the file.
+     * @param buf - buffer containing the data to write.
+     * @return number of bytes actually written.
+     */
+	virtual size_t WriteInternal(const ting::Buffer<ting::u8>& buf) = 0;
+	
+public:
 	/**
 	 * @brief Seek forward.
 	 * Seek file pointer forward relatively to current position.
@@ -231,7 +300,7 @@ public:
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
 	 */
-	virtual void SeekForward(unsigned numBytesToSeek);
+	virtual void SeekForward(size_t numBytesToSeek);
 
 	/**
 	 * @brief Seek backwards.
@@ -240,7 +309,7 @@ public:
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
 	 */
-	virtual void SeekBackward(unsigned numBytesToSeek);
+	virtual void SeekBackward(size_t numBytesToSeek);
 
 	/**
 	 * @brief Seek to the beginning of the file.

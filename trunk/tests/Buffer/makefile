@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := Buffer_test
+binary_name := tests
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -35,7 +35,7 @@ test: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): Buffer_test.cpp
+$(binary_name): main.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $< $(libs)
 

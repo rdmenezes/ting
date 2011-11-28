@@ -6,6 +6,7 @@
         <df name="1">
           <df name="2">
             <df name="ting">
+              <in>File.d</in>
             </df>
           </df>
         </df>
@@ -47,6 +48,11 @@
       </df>
       <df name="debug">
         <in>debug_test.cpp</in>
+      </df>
+      <df name="FSFile">
+        <in>main.cpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
       </df>
       <df name="math">
         <in>math_test.cpp</in>

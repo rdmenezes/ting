@@ -103,25 +103,17 @@ public:
 
 
 	//override
-	virtual unsigned Read(
-			ting::Buffer<ting::u8>& buf,
-			unsigned numBytesToRead = 0,
-			unsigned offset = 0
-		);
+	virtual size_t ReadInternal(ting::Buffer<ting::u8>& buf);
 
 
 
 	//override
-	virtual unsigned Write(
-			const ting::Buffer<ting::u8>& buf,
-			unsigned numBytesToWrite = 0,
-			unsigned offset = 0
-		);
+	virtual size_t WriteInternal(const ting::Buffer<ting::u8>& buf);
 
 
 
 	//override
-	virtual void SeekForward(unsigned numBytesToSeek);
+	virtual void SeekForward(size_t numBytesToSeek);
 
 
 
@@ -147,7 +139,7 @@ public:
 
 
 	//override
-	virtual ting::Array<std::string> ListDirContents(unsigned maxEntries = 0);
+	virtual ting::Array<std::string> ListDirContents(size_t maxEntries = 0);
 };
 
 

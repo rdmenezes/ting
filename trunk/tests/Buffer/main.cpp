@@ -27,7 +27,7 @@ static void Run(){
 	T_TestStaticBuffer brr(arr);
 
 	ASSERT_ALWAYS(arr.Size() == brr.Size())
-	for(unsigned i = 0; i < arr.Size(); ++i){
+	for(size_t i = 0; i < arr.Size(); ++i){
 		ASSERT_ALWAYS(arr[i].a == 0)
 		ASSERT_ALWAYS(brr[i].a == 1)
 	}
@@ -57,15 +57,23 @@ static void Run(){
 	typedef ting::StaticBuffer<TestClass, 20> T_TestStaticBuffer;
 	T_TestStaticBuffer arr;
 
-	for(unsigned i = 0; i < arr.Size(); ++i){
+	for(size_t i = 0; i < arr.Size(); ++i){
 		arr[i].id = i;
 	}
 
 	T_TestStaticBuffer brr;
+	TestClass* oldArrBegin = arr.Begin();
+	TestClass* oldBrrBegin = brr.Begin();
+	ASSERT_ALWAYS(brr.Begin() != arr.Begin())
+	
 	brr = arr;
+	
+	ASSERT_ALWAYS(brr.Begin() != arr.Begin())
+	ASSERT_ALWAYS(arr.Begin() == oldArrBegin)
+	ASSERT_ALWAYS(brr.Begin() == oldBrrBegin)
 
 	ASSERT_ALWAYS(arr.Size() == brr.Size())
-	for(unsigned i = 0; i < arr.Size(); ++i){
+	for(size_t i = 0; i < arr.Size(); ++i){
 		ASSERT_ALWAYS(arr[i].a == 0)
 		ASSERT_INFO_ALWAYS(brr[i].a == 0, "brr[i].a = " << brr[i].a)
 		ASSERT_INFO_ALWAYS(arr[i].id == brr[i].id, "arr[i].id = " << arr[i].id << " brr[i].id = " << brr[i].id)
@@ -83,8 +91,7 @@ int main(int argc, char *argv[]){
 	TestStaticBufferCopyConstructor::Run();
 	TestStaticBufferOperatorEquals::Run();
 
-
-	TRACE_ALWAYS(<<"[PASSED]: Buffer test"<<std::endl)
+	TRACE_ALWAYS(<<"[PASSED]"<<std::endl)
 
 	return 0;
 }

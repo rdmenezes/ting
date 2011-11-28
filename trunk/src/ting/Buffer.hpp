@@ -25,7 +25,6 @@ THE SOFTWARE. */
 // Created on January 31, 2009, 11:04 PM
 
 /**
- * @file Buffer.hpp
  * @author Ivan Gagis <igagis@gmail.com>
  * @brief buffer abstract class and static buffer wrapper.
  */
@@ -54,22 +53,32 @@ template <class T> class Buffer{
 	
 	//forbid copying
 	inline Buffer(const Buffer&);
-
+	
 protected:
 	T* buf;
-	unsigned size;
+	size_t size;
 
 
-	
+	/**
+	 * @brief Default constructor.
+	 * It is protected, so only accessible by subclasses.
+     */
 	inline Buffer(){}
 
-
-
-	Buffer& operator=(const Buffer&){
+	/**
+	 * @brief Assignment operator.
+	 * This operator implementation does nothing.
+	 * This operator is defined because it should not be available for outside use,
+	 * so make it protected. But it should be defined, because some subclass may have
+	 * meaningful automatically generated operator=() (e.g. StaticBuffer)
+	 * which subsequently will call this operator=().
+     * @param - Buffer to assign from.
+     * @return reference to this Buffer object.
+     */
+	inline Buffer& operator=(const Buffer&){
 		//do nothing
 		return *this;
 	}
-
 public:
 	/**
 	 * @brief Create a Buffer object.
@@ -78,7 +87,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	inline Buffer(T* bufPtr, unsigned bufSize) :
+	inline Buffer(T* bufPtr, size_t bufSize) :
 			buf(bufPtr),
 			size(bufSize)
 	{}
@@ -89,7 +98,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	inline unsigned Size()const{
+	inline size_t Size()const{
 		return this->size;
 	}
 
@@ -99,7 +108,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	inline unsigned SizeOfElem()const{
+	inline size_t SizeOfElem()const{
 		return sizeof(this->buf[0]);
 	}
 
@@ -109,7 +118,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	inline unsigned SizeInBytes()const{
+	inline size_t SizeInBytes()const{
 		return this->Size() * this->SizeOfElem();
 	}
 
@@ -119,9 +128,9 @@ public:
 	 * @brief access specified element of the buffer.
 	 * Const version of Buffer::operator[].
 	 * @param i - element index.
-	 * @return const reference to i'th element of the buffer.
+	 * @return reference to i'th element of the buffer.
 	 */
-	inline const T& operator[](unsigned i)const{
+	inline const T& operator[](size_t i)const{
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -133,7 +142,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline T& operator[](unsigned i){
+	inline T& operator[](size_t i){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -151,8 +160,8 @@ public:
 
 
 	/**
-	 * @brief get const pointer to first element of the buffer.
-	 * @return const pointer to first element of the buffer.
+	 * @brief get pointer to first element of the buffer.
+	 * @return pointer to first element of the buffer.
 	 */
 	inline const T* Begin()const{
 		return this->buf;
@@ -182,7 +191,7 @@ public:
 
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
-		for(unsigned i = 0; i < buf.Size(); ++i){
+		for(size_t i = 0; i < buf.Size(); ++i){
 			s << "\t" << buf[i] << std::endl;
 		}
 		return s;
@@ -197,7 +206,7 @@ public:
  * @brief static buffer class template.
  * The static buffer template.
  */
-template <class T, unsigned bufSize> class StaticBuffer : public ting::Buffer<T>{
+template <class T, size_t bufSize> class StaticBuffer : public ting::Buffer<T>{
 	T staticBuffer[bufSize];
 public:
 	inline StaticBuffer() :

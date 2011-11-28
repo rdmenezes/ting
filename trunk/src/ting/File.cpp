@@ -63,22 +63,22 @@ bool File::IsDir()const{
 
 
 
-ting::Array<std::string> File::ListDirContents(unsigned maxEntries){
+ting::Array<std::string> File::ListDirContents(size_t maxEntries){
 	throw File::Exc("File::ListDirContents(): not supported for this File instance");
 }
 
 
 
-void File::SeekForward(unsigned numBytesToSeek){
+void File::SeekForward(size_t numBytesToSeek){
 	if(!this->IsOpened())
 		throw File::Exc("SeekForward(): file is not opened");
 	
 	ting::StaticBuffer<ting::u8, 0xfff> buf;//4kb buffer
 	
-	for(unsigned bytesRead = 0; bytesRead != numBytesToSeek;){
-		unsigned curNumToRead = numBytesToSeek - bytesRead;
+	for(size_t bytesRead = 0; bytesRead != numBytesToSeek;){
+		size_t curNumToRead = numBytesToSeek - bytesRead;
 		ting::ClampTop(curNumToRead, buf.Size());
-		unsigned res = this->Read(buf, curNumToRead);
+		size_t res = this->Read(buf, curNumToRead);
 		if(res != curNumToRead){//if end of file reached
 			throw ting::Exc("File::SeekForward(): end of file reached, seeking did not complete");
 		}
@@ -91,7 +91,7 @@ void File::SeekForward(unsigned numBytesToSeek){
 
 
 
-void File::SeekBackward(unsigned numBytesToSeek){
+void File::SeekBackward(size_t numBytesToSeek){
 	throw ting::Exc("SeekBackward(): unsupported");
 }
 

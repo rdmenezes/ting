@@ -56,7 +56,7 @@ namespace ting{
  */
 template <class T> class Array : public ting::Buffer<T>{
 
-	inline void AllocateMemory(unsigned arraySize){
+	inline void AllocateMemory(size_t arraySize){
 		if(arraySize == 0){
 			this->size = 0;
 			this->buf = 0;
@@ -141,8 +141,8 @@ public:
 	 *                    Array object is not valid (Array::IsValid() will return false).
 	 */
 	//NOTE: the constructor is explicit to avoid undesired automatic
-	//conversions from unsigned to Array.
-	explicit inline Array(unsigned arraySize = 0){
+	//conversions from size_t to Array.
+	explicit inline Array(size_t arraySize = 0){
 		this->AllocateMemory(arraySize);
 		try{
 			this->InitObjectsByDefaultConstructor();
@@ -243,7 +243,7 @@ public:
 	 * @param arraySize - number of elements this array should hold.
 	 *                    If 0 is supplied then array will become invalid.
 	 */
-	void Init(unsigned arraySize){
+	void Init(size_t arraySize){
 		M_ARRAY_PRINT(<< "Array::Init(): buf = " << static_cast<void*>(this->buf) << std::endl)
 		this->Destroy();
 		this->AllocateMemory(arraySize);
