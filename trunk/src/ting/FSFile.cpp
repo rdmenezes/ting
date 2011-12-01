@@ -139,50 +139,8 @@ size_t FSFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 
 
 
-//override
-void FSFile::SeekForward(size_t numBytesToSeek){
-	if(!this->IsOpened()){
-		throw File::Exc("file is not opened, cannot seek");
-	}
-
-	ASSERT(this->handle)
-	
-	//NOTE: fseek() accepts 'long int' as offset argument which is signed and can be
-	//      less than size_t value passed as argument to this function.
-	//      Therefore, do several seek operations with smaller offset if necessary.
-	
-	typedef long int T_FSeekOffset;
-	const size_t DMax = ((size_t(T_FSeekOffset(-1))) >> 1);
-	ASSERT((size_t(1) << ((sizeof(T_FSeekOffset) * 8) - 1)) - 1 == DMax)
-	
-	for(size_t numBytesLeft = numBytesToSeek; numBytesLeft != 0;){
-		ASSERT(numBytesLeft <= numBytesToSeek)
-		
-		T_FSeekOffset offset;
-		if(numBytesLeft > DMax){
-			offset = T_FSeekOffset(DMax);
-		}else{
-			offset = T_FSeekOffset(numBytesLeft);
-		}
-		
-		ASSERT(offset > 0)
-		
-		if(fseek(this->handle, offset, SEEK_CUR) != 0){
-			throw File::Exc("fseek() failed");
-		}
-		
-		ASSERT(size_t(offset) < size_t(-1))
-		ASSERT(numBytesLeft >= size_t(offset))
-		
-		numBytesLeft -= size_t(offset);
-	}
-}
-
-
-
-//override
-void FSFile::SeekBackward(size_t numBytesToSeek){
-	if(!this->IsOpened()){
+void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
+		if(!this->IsOpened()){
 		throw File::Exc("file is not opened, cannot seek");
 	}
 
@@ -209,7 +167,7 @@ void FSFile::SeekBackward(size_t numBytesToSeek){
 		
 		ASSERT(offset > 0)
 		
-		if(fseek(this->handle, -offset, SEEK_CUR) != 0){
+		if(fseek(this->handle, seekForward ? offset : (-offset), SEEK_CUR) != 0){
 			throw File::Exc("fseek() failed");
 		}
 		
@@ -218,6 +176,20 @@ void FSFile::SeekBackward(size_t numBytesToSeek){
 		
 		numBytesLeft -= size_t(offset);
 	}
+}
+
+
+
+//override
+void FSFile::SeekForward(size_t numBytesToSeek){
+	this->Seek(numBytesToSeek, true);
+}
+
+
+
+//override
+void FSFile::SeekBackward(size_t numBytesToSeek){
+	this->Seek(numBytesToSeek, false);
 }
 
 

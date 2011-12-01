@@ -122,6 +122,15 @@ public:
 
 	
 	
+	/**
+	 * @brief Seek forward or backward.
+     * @param numBytesToSeek - number of bytes to seek.
+     * @param seekForward - if true, then the seeking will be done forward.
+	 *                      If false, then the seeking will be done backward.
+     */
+	void Seek(size_t numBytesToSeek, bool seekForward);
+	
+	
 	//override
 	virtual void Rewind();
 	
