@@ -146,7 +146,58 @@ void FSFile::SeekForward(size_t numBytesToSeek){
 	}
 
 	ASSERT(this->handle)
-	if(fseek(this->handle, numBytesToSeek, SEEK_CUR) != 0){
+	
+	typedef long int T_FSeekOffset;
+	const size_t DMax = ((size_t(T_FSeekOffset(-1))) >> 1);
+	ASSERT((size_t(1) << ((sizeof(T_FSeekOffset) * 8) - 1)) - 1 == DMax)
+	
+	for(size_t numBytesLeft = numBytesToSeek; numBytesLeft != 0;){
+		ASSERT(numBytesLeft <= numBytesToSeek)
+		
+		T_FSeekOffset offset;
+		if(numBytesLeft > DMax){
+			offset = T_FSeekOffset(DMax);
+		}else{
+			offset = T_FSeekOffset(numBytesLeft);
+		}
+		
+		ASSERT(offset > 0)
+		
+		if(fseek(this->handle, offset, SEEK_CUR) != 0){
+			throw File::Exc("fseek() failed");
+		}
+		
+		ASSERT(size_t(offset) < size_t(-1))
+		ASSERT(numBytesLeft >= size_t(offset))
+		
+		numBytesLeft -= size_t(offset);
+	}
+}
+
+
+
+//override
+void FSFile::SeekBackward(size_t numBytesToSeek){
+	if(!this->IsOpened()){
+		throw File::Exc("file is not opened, cannot seek");
+	}
+
+	ASSERT(this->handle)
+	if(fseek(this->handle, -numBytesToSeek, SEEK_CUR) != 0){
+		throw File::Exc("fseek() failed");
+	}
+}
+
+
+
+//override
+void FSFile::Rewind(){
+	if(!this->IsOpened()){
+		throw File::Exc("file is not opened, cannot rewind");
+	}
+
+	ASSERT(this->handle)
+	if(fseek(this->handle, 0, SEEK_SET) != 0){
 		throw File::Exc("fseek() failed");
 	}
 }

@@ -114,7 +114,17 @@ public:
 
 	//override
 	virtual void SeekForward(size_t numBytesToSeek);
+	
+	
+	
+	//override
+	virtual void SeekBackward(size_t numBytesToSeek);
 
+	
+	
+	//override
+	virtual void Rewind();
+	
 
 
 	//override
