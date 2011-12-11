@@ -2,9 +2,9 @@
 
 packageName=libting-dev
 
-libFileName=libting.so
 soName=0
 
+libFileName=libting.so
 
 baseDir=debian/out/$packageName
 mkdir -p $baseDir
@@ -12,11 +12,9 @@ mkdir -p $baseDir
 #==========
 #copy files
 
-#create include dir
+#copy header files
 incDir=$baseDir/usr/include/ting
 mkdir -p $incDir
-
-#copy header files
 cp src/ting/*.hpp $incDir
 cp src/ting/*.h $incDir
 
