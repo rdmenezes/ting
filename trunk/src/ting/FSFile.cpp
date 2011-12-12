@@ -272,6 +272,9 @@ std::string FSFile::GetHomeDir(){
 	if(ret.size() == 0 || ret[ret.size() - 1] != '/'){
 		ret += '/';
 	}
+#elif defined(WIN32)
+	ASSERT_ALWAYS(false)
+	//TODO:
 #else
 #error "unsupported os"
 #endif
