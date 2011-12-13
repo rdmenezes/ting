@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2011 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -235,13 +235,13 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 			}
 			++numEvents;
 		}else{
-			//NOTE: sometimes the event is reported as signalled, but no read/write events indicated.
+			//NOTE: sometimes the event is reported as signaled, but no read/write events indicated.
 			//      Don't know why it happens.
-//				ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
+//			ASSERT_INFO(i != (res - WAIT_OBJECT_0), "i = " << i << " (res - WAIT_OBJECT_0) = " << (res - WAIT_OBJECT_0) << " waitflags = " << this->waitables[i]->readinessFlags)
 		}
 	}
 
-	//NOTE: Sometimes the event is reported as signalled, but no actual activity is there.
+	//NOTE: Sometimes the event is reported as signaled, but no actual activity is there.
 	//      Don't know why.
 //		ASSERT(numEvents > 0)
 

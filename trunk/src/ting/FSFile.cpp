@@ -260,24 +260,29 @@ void FSFile::MakeDir(){
 std::string FSFile::GetHomeDir(){
 	std::string ret;
 	
-#ifdef __linux__
+#if defined(__linux__) || defined(WIN32)
+	
+#if defined(__linux__)
 	char * home = getenv("HOME");
+#elif defined(WIN32)
+	char * home = getenv("USERPROFILE");
+#else
+#error "ASSERTION FAILURE: should never get here"
+#endif
+	
 	if(!home){
 		throw File::Exc("HOME environment variable does not exist");
 	}
 
 	ret = std::string(home);
-
+#else
+#error "unsupported os"
+#endif
+	
 	//append trailing '/' if needed
 	if(ret.size() == 0 || ret[ret.size() - 1] != '/'){
 		ret += '/';
 	}
-#elif defined(WIN32)
-	ASSERT_ALWAYS(false)
-	//TODO:
-#else
-#error "unsupported os"
-#endif
 
 	return ret;
 }

@@ -81,10 +81,25 @@ void Run(){
 }//~namespace
 
 
+
+namespace TestHomeDir{
+void Run(){
+	std::string hd = FSFile::GetHomeDir();
+	
+	ASSERT_ALWAYS(hd.size() > 1) //There is always a trailing '/' character, so make sure there is something else besides that.
+	ASSERT_ALWAYS(hd[hd.size() - 1] == '/')
+	
+	TRACE_ALWAYS(<< "\tHome dir = " << hd << std::endl)
+}
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 
 	TestSeekForward::Run();
 	TestListDirContents::Run();
+	TestHomeDir::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 
