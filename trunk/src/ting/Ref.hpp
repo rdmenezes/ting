@@ -98,7 +98,7 @@ class RefCounted{
 private:
 	//NOTE: reference may be added to a constant instance of the object, this is
 	//why this method should be const.
-	inline unsigned AddRef(){
+	inline unsigned AddRef()const{
 		ASSERT(this->counter)
 		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
 		Mutex::Guard mutexGuard(this->counter->mutex);
