@@ -35,7 +35,7 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "utils.hpp"
 
-#if defined(__GNUG__) && __i386__==1
+#if defined(__GNUG__) && defined(__i386__)
 //gcc atomic stuff available
 
 #elif defined(WIN32)
@@ -58,7 +58,7 @@ namespace atomic{
 //Microsoft's Interlocked* functions require that the value to be aligned on 32bit boundary
 M_DECLARE_ALIGNED_MSVC(4) class S32{
 
-#if defined(__GNUG__) && __i386__==1
+#if defined(__GNUG__) && defined(__i386__)
 	//gcc atomic stuff available		
 #elif defined(WIN32)
 	//Win32 Interlocked* stuff available
@@ -86,7 +86,7 @@ public:
 	 * @return initial value of this atomic variable.
 	 */
 	inline ting::s32 FetchAndAdd(ting::s32 value){
-#if defined(__GNUG__) && __i386__==1
+#if defined(__GNUG__) && defined(__i386__)
 		//gcc atomic stuff available
 		return __sync_fetch_and_add(&this->v, value);
 		
