@@ -20,9 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// Homepage: http://code.google.com/p/ting
+// Homepage: http://ting.googlecode.com
 
-// Created on January 31, 2009, 11:04 PM
+
 
 /**
  * @author Ivan Gagis <igagis@gmail.com>
