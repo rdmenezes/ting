@@ -34,8 +34,9 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "types.hpp"
-#include "Thread.hpp"
+#include "atomic.hpp"
 #include "PoolStored.hpp"
+#include "Thread.hpp"
 
 //#define M_ENABLE_REF_PRINT
 #ifdef M_ENABLE_REF_PRINT
@@ -94,74 +95,23 @@ class RefCounted{
 	template <class T> friend class Ref;
 	template <class T> friend class WeakRef;
 
-	
+
 private:
-	//NOTE: reference may be added to a constant instance of the object, this is
-	//why this method should be const.
-	inline unsigned AddRef()const{
-		ASSERT(this->counter)
-		M_REF_PRINT(<< "RefCounted::AddRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
-		Mutex::Guard mutexGuard(this->counter->mutex);
-		M_REF_PRINT(<< "RefCounted::AddRef(): mutex locked " << std::endl)
-		return ++(this->counter->numStrongRefs);
-	}
-
-
-
-	//NOTE: reference may be removed from a constant instance of the object, this is
-	//why this method should be const.
-	inline unsigned RemRef()const{
-		ASSERT(this->counter)
-		M_REF_PRINT(<< "RefCounted::RemRef(): invoked, old numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
-		this->counter->mutex.Lock();
-		M_REF_PRINT(<< "RefCounted::RemRef(): mutex locked" << std::endl)
-		ASSERT(this->counter->numStrongRefs != 0)//if someone has called RemRef() then there should be at least 1 strong reference
-		M_REF_PRINT(<< "RefCounted::RemRef(): decrementing" << std::endl)
-		unsigned n = --(this->counter->numStrongRefs);
-		M_REF_PRINT(<< "RefCounted::RemRef(): decremented, new numStrongRefs = " << (this->counter->numStrongRefs) << std::endl)
-
-		if(n == 0){//if no more strong references to the RefCounted
-			if(this->counter->numWeakRefs > 0){
-				//there are weak references, they will now own the Counter object,
-				//therefore, do not delete Counter, just clear the pointer to RefCounted.
-
-				//Zero the pointer to object in the counter. This will indicate to WeakRef that the
-				//object is not existing and the Counter object is owned by WeakRefs now.
-				//It is possible that there are no strong refs to the object but the object is still
-				//existing and the counter object is owned by object, not by WeakRefs. This happens when
-				//object was just created and no strong refs were created to the object, in that case,
-				//it is possible that WeakRef will be created and destroyed before any strong refs
-				//are created.
-				this->counter->p = 0;
-
-				ASS(this->counter)->mutex.Unlock();
-				const_cast<RefCounted*>(this)->counter = 0;//zero the pointer to counter to prevent it from deleting in destructor
-			}else{//no weak references
-				//Unlock before deleting because the mutex object is in Counter.
-				//The Counter object will be deleted in destructor, as the destructor will be called shortly
-				//because number of strong references reached 0.
-				this->counter->mutex.Unlock();
-				M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
-			}
-			return 0;//zero strong references left
-		}
-		ASS(this->counter)->mutex.Unlock();
-		M_REF_PRINT(<< "RefCounted::RemRef(): mutex unlocked" << std::endl)
-
-		return n;
-	}
-
-
 
 	struct Counter : public PoolStored<Counter>{
-		RefCounted *p;
-		Mutex mutex;
-		unsigned numStrongRefs;
-		unsigned numWeakRefs;
-		inline Counter(RefCounted *ptr) :
-				p(ptr),
-				numStrongRefs(0),
-				numWeakRefs(0)
+		ting::atomic::S32 numStrongRefs;
+
+		//WeakRef's are the references which control the life time of the Counter object.
+		//I.e. WeakRef's are playing role of _strong_ references for Counter object.
+		//Think of RefCounted object as additional _strong_ reference to the Counter object,
+		//this is why number of WeakRef's is initialized to 1.
+		ting::atomic::S32 numWeakRefs;
+
+		//Mutex is required for creating strong reference from weak reference.
+		ting::Mutex mutex;
+
+		inline Counter() :
+				numWeakRefs(1)//1 because RefCounted acts as weak reference.
 		{
 			M_REF_PRINT(<< "Counter::Counter(): counter object created" << std::endl)
 		}
@@ -178,61 +128,85 @@ private:
 
 
 protected:
-	//TODO: write doxygen docs
+	/**
+	 * @brief Constructor.
+	 * This class is only supposed to be as base class, this is why this
+	 * constructor is protected.
+	 */
 	//only base classes can construct this class
 	//i.e. use of this class is allowed only as a base class
 	inline RefCounted(){
 		//NOTE: do not create Counter object in RefCounted constructor
 		//      initializer list because MSVC complains about usage of "this"
 		//      keyword in initializer list.
-		this->counter = new Counter(this);
-		ASSERT(this->counter)
-		
-		ASSERT_INFO(
-				this->counter->p == this,
-				"this->counter->p = " << this->counter->p << " this = " << this
-			)
+		this->counter = new Counter();
 	}
 
 
 
-	//TODO: write doxygen docs
-	//operator new is protected to enforce objects creation
-	//through static New() method, to avoid using of RefCounted objects
-	//via ordinary pointers.
+	/**
+	 * @brief new operator.
+	 * This operator new just calls and returns the result of global ::new.
+	 * This operator new is protected to enforce objects creation
+	 * through static New() method, to avoid using of RefCounted objects
+	 * via ordinary pointers. See description of the RefCounted class for more
+	 * info.
+	 * @param s - size of the memory block to allocate.
+	 * @return address of the allocated memory block.
+	 */
 	inline static void* operator new(size_t s){
 		return ::operator new(s);
 	}
 
 protected:
-	//operator delete is protected because only ting::Ref can delete the
-	//RefCounted object.
-	//NOTE: cannot make operator delete private because it should have same
-	//      access level as operator new, because in case of failure in
-	//      the constructor of the object (i.e. it throws an exception) the
-	//      allocated memory should be freed with "delete", thus when using
-	//      operator new it implicitly needs to be possible to call operator delete
-	//      from the same place where the operator new is used.
+	/**
+	 * @brief operator delete.
+	 * Releases allocated memory.
+	 * This operator delete is protected because only ting::Ref can delete the
+	 * RefCounted object.
+	 * NOTE: cannot make operator delete private because it should have same
+	 *       access level as operator new, because in case of failure in
+	 *       the constructor of the object (i.e. it throws an exception) the
+	 *       allocated memory should be freed with "delete", thus when using
+	 *       operator new it implicitly needs to be possible to call operator delete
+	 *       from the same place where the operator new is used.
+	 * @param p - address of the memory block to release.
+	 */
 	inline static void operator delete(void *p){
 		::operator delete(p);
 	}
 
-
-public:
-	//destructor shall be virtual!!!
+	/**
+	 * @brief Destructor.
+	 * Destructor is protected because of the same reason as operator delete is.
+	 */
 	virtual ~RefCounted(){
-		//Pointer to counter object can be 0 if there were weak references left upon the
-		//moment of the object destruction. So, check for 0.
-		if(this->counter){
+		//Remove reference to Counter object held by this RefCounted
+		ASSERT(this->counter)
+
+		//since RefCounted is being destroyed, that means that there are no strong ref's left
+		ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
+		ASSERT(this->counter->numWeakRefs.FetchAndAdd(0) >= 1)
+
+		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//there was only 1 weak ref
 			delete this->counter;
 		}
 	}
 
 public:
-	//TODO: write doxygen docs
+	/**
+	 * @brief Returns current number of strong references pointing to this object.
+	 * This method returns the current number of strong references.
+	 * It is not guaranteed that the returned number is actual, since new references
+	 * may be constructed and some may be destroyed meanwhile.
+	 * One should not rely on the returned value unless he knows what he is doing!
+	 * @return number of strong references.
+	 */
 	inline unsigned NumRefs()const{
 		ASSERT(this->counter)
-		return this->counter->numStrongRefs;
+		ting::s32 ret = this->counter->numStrongRefs.FetchAndAdd(0);
+		ASSERT(ret > 0)
+		return unsigned(ret);
 	}
 
 private:
@@ -258,7 +232,7 @@ template <class T> class Ref{
 	T *p;
 
 
-	
+
 public:
 	/**
 	 * @brief cast statically to another class.
@@ -330,7 +304,7 @@ public:
 		if(this->p){
 			const_cast<RefCounted*>(
 					static_cast<const RefCounted*>(this->p)
-				)->AddRef();
+				)->counter->numStrongRefs.FetchAndAdd(1);
 		}
 		M_REF_PRINT(<< "Ref::Ref(rc): exiting" << (this->p) << std::endl)
 	}
@@ -347,15 +321,14 @@ public:
 
 private:
 	template <class TS>inline void InitFromStrongRef(const Ref<TS>& r){
-		this->p = r.p; //should downcast automaticly
+		this->p = r.p; //should downcast automatically
 		if(this->p){
 			//NOTE: first, static cast to const RefCounted, because even if T is a const type
-			//it is possible to do. After that we can cast to non-const RefCounted and call the
-			//AddRef() method which is not const.
+			//it is possible to do. After that we can cast to non-const RefCounted and increment number of strong references.
 			//Thus, we also ensure at compile time that T inherits RefCounted.
 			const_cast<RefCounted*>(
 					static_cast<const RefCounted*>(this->p)
-				)->AddRef();
+				)->counter->numStrongRefs.FetchAndAdd(1);
 		}
 	}
 
@@ -374,7 +347,11 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Constructor for automatic down-casting and const-casting.
+	 * Normally, this constructor is not supposed to be used explicitly.
+	 * @param r - strong reference to cast.
+	 */
 	//downcast / to-const cast constructor
 	template <class TS> inline Ref(const Ref<TS>& r){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
@@ -383,6 +360,9 @@ public:
 
 
 
+	/**
+	 * @brief Destructor.
+	 */
 	inline ~Ref(){
 		M_REF_PRINT(<< "Ref::~Ref(): invoked, p = " << (this->p) << std::endl)
 		this->Destroy();
@@ -440,28 +420,52 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Compares two references.
+	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * @param r - reference to compare to.
+	 * @return true if the address of this object is less than the address of object referred by 'r'.
+	 * @return false otherwise.
+	 */
 	template <class TS> inline bool operator<(const Ref<TS>& r)const{
 		return this->p < r.p;
 	}
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Compares two references.
+	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * @param r - reference to compare to.
+	 * @return true if the address of this object is less or equal to the address of object referred by 'r'.
+	 * @return false otherwise.
+	 */
 	template <class TS> inline bool operator<=(const Ref<TS>& r)const{
 		return this->p <= r.p;
 	}
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Compares two references.
+	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * @param r - reference to compare to.
+	 * @return true if the address of this object is greater than the address of object referred by 'r'.
+	 * @return false otherwise.
+	 */
 	template <class TS> inline bool operator>(const Ref<TS>& r)const{
 		return this->p > r.p;
 	}
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Compares two references.
+	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * @param r - reference to compare to.
+	 * @return true if the address of this object is greater or equal to the address of object referred by 'r'.
+	 * @return false otherwise.
+	 */
 	template <class TS> inline bool operator>=(const Ref<TS>& r)const{
 		return this->p >= r.p;
 	}
@@ -479,9 +483,14 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief A bool-like type.
+	 * This type is used instead of bool for automatic conversion of reference to
+	 * this bool-like type. The advantage of using this instead of ordinary bool type is
+	 * that it prevents further undesired automatic conversions to, for example, int.
+	 */
 	typedef void (Ref::*unspecified_bool_type)();
-	
+
 
 
 	/**
@@ -514,7 +523,7 @@ public:
 //		return this->IsValid();
 //	}
 
-	
+
 
 	/**
 	 * @brief make this ting::Ref invalid.
@@ -548,7 +557,12 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief operator =.
+	 * Assignment operator which also does automatic downcast and const cast if needed.
+     * @param r - strong reference to assign from.
+     * @return reference to this strong reference object.
+     */
 	//downcast / to-const assignment
 	template <class TS> Ref<T>& operator=(const Ref<TS>& r){
 		//self-assignment should be impossible
@@ -574,6 +588,11 @@ public:
 
 
 
+	/**
+	 * @brief operator *.
+	 * Works the same way as operator * for ordinary pointers.
+     * @return reference to RefCounted object pointed by this strong reference object.
+     */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
 	inline T& operator*()const{
@@ -584,6 +603,10 @@ public:
 
 
 
+	/**
+	 * @brief opearator->.
+     * @return pointer to the RefCounted object pointed by this strong reference.
+     */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
 	inline T* operator->()const{
@@ -597,8 +620,8 @@ public:
 private:
 	inline void Destroy(){
 		if(this->IsValid()){
-			if(this->p->RemRef() == 0){
-				ASSERT(this->IsValid())
+			ASSERT(this->p->counter)
+			if(this->p->counter->numStrongRefs.FetchAndAdd(-1) == 1){//if there was only one strong ref
 				M_REF_PRINT(<< "Ref::Destroy(): deleting " << (this->p) << std::endl)
 				//deleting should be ok without type casting, because RefCounted
 				//destructor is virtual.
@@ -658,8 +681,8 @@ template <class T> class WeakRef{
 	template <class TS> friend class WeakRef;
 
 	RefCounted::Counter *counter;
-	T* p;//this pointer is only valid if counter is not 0 and counter->p is not 0
-	
+	T* p;//this pointer is only valid if counter is not 0 and there are strong references in the counter
+
 
 
 	inline void InitFromRefCounted(T *rc){
@@ -671,36 +694,25 @@ template <class T> class WeakRef{
 
 		ASSERT(rc->counter)
 
-		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): rc->counter->p = " << rc->counter->p << " rc = " << rc << std::endl)
-		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): casted rc = " << static_cast<const RefCounted*>(rc) << std::endl)
+		this->counter = rc->counter;
+		this->p = rc;//should cast automatically
+		//NOTE: if you get 'invalid conversion' error here, then you must be trying
+		//to do automatic cast to unrelated type.
 
-		ASSERT_INFO(
-				rc->counter->p == static_cast<const RefCounted*>(rc),
-				"rc->counter->p = " << rc->counter->p
-						<< " rc = " << static_cast<const RefCounted*>(rc)
-			)
-		
-		this->InitFromCounter(ASS(rc->counter));
-
-		this->p = rc;
-		
-		ASSERT_INFO(
-				this->counter->p == static_cast<const RefCounted*>(this->p),
-				"this->counter->p = " << this->counter->p
-						<< " this->p = " << static_cast<const RefCounted*>(this->p)
-			)
+		//increment number of weak references
+		{
+			ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
+		}
 	}
 
 
-	
+
 	inline void InitFromStrongRef(Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::InitFromStrongRef(): invoked " << std::endl)
-		if(r.IsNotValid()){
-			this->counter = 0;
-			return;
-		}
 
-		this->InitFromRefCounted(r.operator->());
+		//it is ok if 'r' is not valid, InitFromRefCounted() does check for zero pointer.
+		this->InitFromRefCounted(r.p);
 	}
 
 
@@ -712,24 +724,18 @@ template <class T> class WeakRef{
 			return;
 		}
 		ASSERT(r.counter)
-		this->InitFromCounter(r.counter);
 
-		this->p = r.p;//should cast automaticly
+		this->counter = r.counter;
+
+		this->p = r.p;//should cast automatically
 		//NOTE: if you get 'invalid conversion' error here, then you must be trying
 		//to do automatic cast to unrelated type.
-	}
 
-
-
-	inline void InitFromCounter(RefCounted::Counter *c){
-		ASSERT(c)
-		ASSERT(c->p)
-		this->counter = c;
-
-		this->counter->mutex.Lock();
-		++(this->counter->numWeakRefs);
-		M_REF_PRINT(<< "WeakRef::InitFromCounter(): new numWeakRefs = " << (this->counter->numWeakRefs) << std::endl)
-		this->counter->mutex.Unlock();
+		//increment number of weak references
+		{
+			ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
+		}
 	}
 
 
@@ -738,30 +744,14 @@ template <class T> class WeakRef{
 		if(this->counter == 0)
 			return;
 
-		this->counter->mutex.Lock();
-		ASSERT(this->counter->numWeakRefs > 0)
-
-		--this->counter->numWeakRefs;
-
-		M_REF_PRINT(<< "WeakRef::Destroy(): new numWeakRefs = " << (this->counter->numWeakRefs) << std::endl)
-
-		if(
-				this->counter->numWeakRefs == 0 &&
-				this->counter->numStrongRefs == 0 &&
-				this->counter->p == 0 //this means that the Counter object is owned by WeakRef's
-			)
-		{
-			this->counter->mutex.Unlock();
-			M_REF_PRINT(<< "WeakRef::Destroy(): deleting counter" << std::endl)
+		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//if there was only 1 weak reference before decrement
+			ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
 			delete this->counter;
-			return;
-		}else{
-			this->counter->mutex.Unlock();
 		}
 	}
 
 
-	
+
 public:
 	/**
 	 * @brief make weak reference from pointer to RefCounted.
@@ -783,7 +773,11 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Constructor.
+	 * Creates weak reference from strong reference.
+     * @param r
+     */
 	inline WeakRef(const Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const Ref<T>&): invoked" << std::endl)
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
@@ -791,7 +785,10 @@ public:
 
 
 
-	//copy constructor
+	/**
+	 * @brief Copy constructor.
+     * @param r - weak reference to copy from.
+     */
 	inline WeakRef(const WeakRef& r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef&): invoked" << std::endl)
 		this->InitFromWeakRef<T>(r);
@@ -799,6 +796,12 @@ public:
 
 
 
+	/**
+	 * @brief Constructor.
+	 * Template constructor for automatic type down-casting and const-casting.
+	 * Normally, this constructor should not be used explicitly.
+     * @param r - weak reference to copy from.
+     */
 	//downcast / to-const cast constructor
 	template <class TS> inline WeakRef(const WeakRef<TS>& r){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TS>&): invoked" << std::endl)
@@ -811,14 +814,17 @@ public:
 	 * @brief Get strong reference.
 	 * This is just a convenience method which creates and returns a strong
 	 * reference from this weak reaference.
-     * @return Strong reference created from this weak reference.
-     */
+	 * @return Strong reference created from this weak reference.
+	 */
 	inline Ref<T> GetRef()const{
 		return Ref<T>(*this);
 	}
 
 
 
+	/**
+	 * @brief Destructor.
+	 */
 	inline ~WeakRef(){
 		M_REF_PRINT(<< "WeakRef::~WeakRef(): invoked" << std::endl)
 		this->Destroy();
@@ -826,7 +832,15 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief operator =.
+	 * Re-initializes this weak reference object by assignment of RefCounted pointer.
+	 * This operator is useful when it is necessary to init some weak reference from
+	 * right within the constructor of RefCounted-derived object, thus it is possible
+	 * to just assign 'this' to the weak reference.
+     * @param rc - pointer to RefCounted object.
+     * @return reference to this weak reference object.
+     */
 	inline WeakRef& operator=(T* rc){
 		ASSERT(rc)
 		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
@@ -838,7 +852,12 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief operator =.
+	 * Assign this weak reference from a strong reference.
+     * @param r - strong reference to assign from.
+     * @return reference to this weak reference object.
+     */
 	inline WeakRef& operator=(const Ref<T> &r){
 		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
 		this->Destroy();
@@ -848,7 +867,12 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief operator =.
+	 * Assign this weak reference from another weak reference.
+     * @param r - weak reference to assign from.
+     * @return reference to this weak reference object.
+     */
 	inline WeakRef& operator=(const WeakRef& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
@@ -858,8 +882,13 @@ public:
 
 
 
-	//TODO: write doxygen docs
-	//template for automatic downcasting
+	/**
+	 * @brief Template operator =.
+	 * Template operator = for automatic down-casting and const-casting when assigning
+	 * this weak reference from another weak reference.
+     * @param r - weak reference to assign from.
+     * @return reference to this weak reference object.
+     */
 	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
@@ -882,9 +911,13 @@ public:
 
 
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Check if this weak reference is invalid.
+     * @return true if this weak reference is invalid for sure.
+	 * @return false otherwise which means that is is unknown if this weak ref is valid or not.
+     */
 	inline bool IsSurelyInvalid()const{
-		return this->counter == 0 || this->counter->p == 0;
+		return this->counter == 0 || this->counter->numStrongRefs.FetchAndAdd(0) == 0;
 	}
 
 
@@ -892,7 +925,7 @@ private:
 	inline static void* operator new(size_t size){
 		ASSERT_ALWAYS(false)//forbidden
 		//WeakRef objects can only be created on stack
-		//or as a memer of other object or array
+		//or as a member of other object or array
 		return 0;
 	}
 };//~class WeakRef
@@ -905,18 +938,40 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 		return;
 	}
 
-	ASS(r.counter)->mutex.Lock();
+	//Here we need the mutex because the following situation is possible:
+	//There are 2 weak references owned by 2 separate threads.
+	//Both these weak references are invalid, but still point to the same Counter
+	//object. Then if these 2 threads start creating strong references from their weak references
+	//simultaneously, then here we might increment number of strong references
+	//twice, thus corrupting the counter of strong references.
+	//It would be ideal if there were a such atomic operation which would
+	//increment the variable only if it is no 0, but we don't have such operation so far,
+	//thus use mutex.
+	ting::Mutex::Guard mutexGuard(r.counter->mutex);
 
-	if(r.counter->p){
-		//NOTE: static_cast() to const(!) RefCounted because T may be a const type.
-		ASSERT(r.counter->p == static_cast<const RefCounted*>(r.p))
-		this->p = ASS(r.p);
-		++(r.counter->numStrongRefs);
-	}else{
+	//increment number of strong references
+	ting::s32 oldNumStrongRefs = r.counter->numStrongRefs.FetchAndAdd(1);
+	ASSERT(oldNumStrongRefs >= 0)
+
+	if(oldNumStrongRefs == 0){
+		//There was no strong references before increment.
+		//That means that the weak reference is invalid, the object it points to does not exist.
+		//And there are no any strong references and passed weak reference is invalid.
+
+		//decrement the strong references counter back to 0.
+		{
+			ting::u32 res = r.counter->numStrongRefs.FetchAndAdd(-1);
+			ASSERT(res == 1)//was 1
+		}
+
 		this->p = 0;
+		return;
 	}
-	
-	r.counter->mutex.Unlock();
+
+	//The weak ref was valid and since we incremented the strong reference counter the
+	//object cannot be deleted meanwhile.
+	//Thus, r.p is valid.
+	this->p = r.p;
 }
 
 
