@@ -1,5 +1,6 @@
 subdirs :=
 subdirs += Array
+subdirs += atomic
 subdirs += Buffer
 subdirs += debug
 subdirs += FSFile

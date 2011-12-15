@@ -100,7 +100,7 @@ public:
 #else
 		//no native atomic operations support detected, will be using plain mutex
 		{
-			ting::Mutex::Guard mutexGuard(this->mutex);
+			//ting::Mutex::Guard mutexGuard(this->mutex);
 			ting::s32 ret = this->v;
 			this->v += value;
 			return ret;
