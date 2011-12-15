@@ -56,7 +56,10 @@ namespace atomic{
  * @brief Atomic signed 32bit integer.
  */
 //Microsoft's Interlocked* functions require that the value to be aligned on 32bit boundary
-M_DECLARE_ALIGNED_MSVC(4) class S32{
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+M_DECLARE_ALIGNED_MSVC(4)
+#endif
+class S32{
 
 #if defined(__GNUG__) && defined(__i386__)
 	//gcc atomic stuff available		
