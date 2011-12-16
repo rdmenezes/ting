@@ -35,19 +35,26 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "utils.hpp"
 
-#if defined(__GNUG__) && defined(__i386__)
+#if defined(__GNUG__) && (defined(__i386__) || defined(__x86_64__))
 //gcc atomic stuff available
+#define M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE
+
+//#elif defined(__GNUG__) && defined(__arm__) //TODO: support something for ARM
 
 #elif defined(WIN32)
+#define M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE
 #include <windows.h>
 
 #elif defined(__APPLE__)
+#define M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE
 #include <CoreServices/CoreServices.h>
 
 #else
 //no native atomic operations support detected, will be using plain mutex
 #include "Thread.hpp"
 #endif
+
+
 
 namespace ting{
 namespace atomic{
@@ -61,11 +68,11 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if defined(__GNUG__) && defined(__i386__)
-	//gcc atomic stuff available		
-#elif defined(WIN32)
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+	//gcc atomic stuff available
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 	//Win32 Interlocked* stuff available
-#elif defined(__APPLE__)
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 	//Mac os *Atomic stuff available
 #else
 	//no native atomic operations support detected, will be using plain mutex
@@ -89,24 +96,56 @@ public:
 	 * @return initial value of this atomic variable.
 	 */
 	inline ting::s32 FetchAndAdd(ting::s32 value){
-#if defined(__GNUG__) && defined(__i386__)
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		//gcc atomic stuff available
 		return __sync_fetch_and_add(&this->v, value);
 		
-#elif defined(WIN32)
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(&this->v, value);
 
-#elif defined(__APPLE__)
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		return AddAtomic(value, &this->v);
 		
 #else
 		//no native atomic operations support detected, will be using plain mutex
 		{
-			//ting::Mutex::Guard mutexGuard(this->mutex);
+			ting::Mutex::Guard mutexGuard(this->mutex);
 			ting::s32 ret = this->v;
 			this->v += value;
 			return ret;
+		}
+#endif
+	}
+	
+	inline ting::s32 FetchCompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+		//gcc atomic stuff available
+		return __sync_val_compare_and_swap(&this->v, compareTo, exchangeBy);
+		
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		ASSERT(sizeof(LONG) == sizeof(this->v))
+		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
+
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		{
+			if(CompareAndSwap(compareTo, exchangeBy, &this->v)){
+				return oldValue;
+			}else{
+#error "TODO:"	
+			}
+		}
+		
+#else
+		//no native atomic operations support detected, will be using plain mutex
+		{
+			ting::Mutex::Guard mutexGuard(this->mutex);
+			if(this->v == compareTo){
+				this->v = exchangeBy;
+				return compareTo;
+			}else{
+				return this->v;
+			}
 		}
 #endif
 	}
