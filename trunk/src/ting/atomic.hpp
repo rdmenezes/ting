@@ -47,7 +47,7 @@ THE SOFTWARE. */
 
 #elif defined(__APPLE__)
 #define M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE
-#include <CoreServices/CoreServices.h>
+#include <libkern/OSAtomic.h>
 
 #else
 //no native atomic operations support detected, will be using plain mutex
@@ -105,7 +105,7 @@ public:
 		return InterlockedExchangeAdd(&this->v, value);
 
 #elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
-		return AddAtomic(value, &this->v);
+		return (OSAtomicAdd32(value, &this->v) - value);
 		
 #else
 		//no native atomic operations support detected, will be using plain mutex
@@ -128,12 +128,10 @@ public:
 		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
 
 #elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
-		{
-			if(CompareAndSwap(compareTo, exchangeBy, &this->v)){
-				return oldValue;
-			}else{
-#error "TODO:"	
-			}
+		if(OSAtomicCompareAndSwap32(compareTo, exchangeBy, &this->v)){
+			return oldValue;
+		}else{
+			return this->v;//v is volatile, should be ok
 		}
 		
 #else
