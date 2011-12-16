@@ -107,9 +107,6 @@ private:
 		//this is why number of WeakRef's is initialized to 1.
 		ting::atomic::S32 numWeakRefs;
 
-		//Mutex is required for creating strong reference from weak reference.
-		ting::Mutex mutex;
-
 		inline Counter() :
 				numWeakRefs(1)//1 because RefCounted acts as weak reference.
 		{
@@ -938,40 +935,21 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 		return;
 	}
 
-	//Here we need the mutex because the following situation is possible:
-	//There are 2 weak references owned by 2 separate threads.
-	//Both these weak references are invalid, but still point to the same Counter
-	//object. Then if these 2 threads start creating strong references from their weak references
-	//simultaneously, then here we might increment number of strong references
-	//twice, thus corrupting the counter of strong references.
-	//It would be ideal if there were a such atomic operation which would
-	//increment the variable only if it is no 0, but we don't have such operation so far,
-	//thus use mutex.
-	ting::Mutex::Guard mutexGuard(r.counter->mutex);
-
-	//increment number of strong references
-	ting::s32 oldNumStrongRefs = r.counter->numStrongRefs.FetchAndAdd(1);
-	ASSERT(oldNumStrongRefs >= 0)
-
-	if(oldNumStrongRefs == 0){
-		//There was no strong references before increment.
-		//That means that the weak reference is invalid, the object it points to does not exist.
-		//And there are no any strong references and passed weak reference is invalid.
-
-		//decrement the strong references counter back to 0.
-		{
-			ting::u32 res = r.counter->numStrongRefs.FetchAndAdd(-1);
-			ASSERT(res == 1)//was 1
+	//try incrementing number of strong references
+	for(ting::s32 guess = 1; ;){
+		ting::s32 oldVal = r.counter->numStrongRefs.FetchCompareAndExchange(guess, guess + 1);
+		if(oldVal == 0){
+			//there are no strong references, weak ref is invalid
+			this->p = 0;
+			return;
 		}
-
-		this->p = 0;
-		return;
+		if(oldVal == guess){
+			//successfully incremented the number of strong references, weak ref is valid
+			this->p = r.p;
+			return;
+		}
+		guess = oldVal;
 	}
-
-	//The weak ref was valid and since we incremented the strong reference counter the
-	//object cannot be deleted meanwhile.
-	//Thus, r.p is valid.
-	this->p = r.p;
 }
 
 
