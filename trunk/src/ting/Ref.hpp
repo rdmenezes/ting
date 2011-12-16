@@ -142,8 +142,8 @@ protected:
 
 
 	/**
-	 * @brief new operator.
-	 * This operator new just calls and returns the result of global ::new.
+	 * @brief operator new.
+	 * This operator new just calls and returns the result of global 'new'.
 	 * This operator new is protected to enforce objects creation
 	 * through static New() method, to avoid using of RefCounted objects
 	 * via ordinary pointers. See description of the RefCounted class for more
