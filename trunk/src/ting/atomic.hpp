@@ -129,7 +129,7 @@ public:
 
 #elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		if(OSAtomicCompareAndSwap32(compareTo, exchangeBy, &this->v)){
-			return oldValue;
+			return compareTo;
 		}else{
 			return this->v;//v is volatile, should be ok
 		}
