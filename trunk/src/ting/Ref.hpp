@@ -936,7 +936,7 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
 	}
 
 	//try incrementing number of strong references
-	for(ting::s32 guess = 1; ;){
+	for(ting::s32 guess = 1; ;){//start with 1, not with 0, since we don't want to increment if value is 0.
 		ting::s32 oldVal = r.counter->numStrongRefs.FetchCompareAndExchange(guess, guess + 1);
 		if(oldVal == 0){
 			//there are no strong references, weak ref is invalid
