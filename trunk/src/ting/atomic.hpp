@@ -64,6 +64,10 @@ namespace atomic{
  */
 //On most architectures, atomic operations require that the value to be naturally aligned (4 bytes = sizeof(int)).
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+
+//make sure theat we align by int size when using MSVC compiler.
+STATIC_ASSERT(sizeof(int) == 4)
+
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
