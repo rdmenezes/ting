@@ -62,7 +62,7 @@ namespace atomic{
 /**
  * @brief Atomic signed 32bit integer.
  */
-//Microsoft's Interlocked* functions require that the value to be aligned on 32bit boundary
+//On most architectures, atomic operations require that the value to be naturally aligned (4 bytes = sizeof(int)).
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
@@ -149,7 +149,7 @@ public:
 		}
 #endif
 	}
-};
+} M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
 }//~namespace atomic
 }//~namespace ting
