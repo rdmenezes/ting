@@ -285,13 +285,14 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-	//gcc atomic stuff available
-#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
-	//Win32 Interlocked* stuff available
-#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
-	//Mac os *Atomic stuff available
-#else
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM) || \
+		defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE) || \
+		defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+	
+	//no additional variables required
+#else //unknown cpu architecture, will be using plain mutex
 	//no native atomic operations support detected, will be using plain mutex
 	ting::Mutex mutex;
 #endif
@@ -315,10 +316,23 @@ public:
 	 * @return initial value of this atomic variable.
 	 */
 	inline ting::s32 FetchAndAdd(ting::s32 value){
-#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-		//gcc atomic stuff available
-		return __sync_fetch_and_add(&this->v, value);
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64)
 		
+		{
+			ting::s32 old;
+			
+			__asm__ __volatile__ (
+					"lock; xaddl %0, %1"
+							: "=r"(old), "=m"(this->v)
+							: "0"(value), "m"(this->v)
+							: "memory"
+				);
+			return old;
+		}
+		
+#elif defined(M_ATOMIC_ARCHITECTURE_ARM)
+		//TODO:
 #elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(&this->v, value);
@@ -349,10 +363,21 @@ public:
      * @return old current value.
      */
 	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
-#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-		//gcc atomic stuff available
-		return __sync_val_compare_and_swap(&this->v, compareTo, exchangeBy);
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64)
 		
+		ting::s32 old;
+		__asm__ __volatile__(
+				"lock; cmpxchgl %3, %2"
+						: "=m"(this->v), "=a"(old)
+						: "m"(this->v), "r"(exchangeBy), "a"(compareTo)
+						: "memory"
+			);
+		TRACE(<< "old = " << old << std::endl)
+		return old;
+		
+#elif defined(M_ATOMIC_ARCHITECTURE_ARM)
+		//TODO:
 #elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);

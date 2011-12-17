@@ -69,9 +69,23 @@ void Run(){
 
 
 
+namespace TestCompareAndExchange{
+void Run(){
+
+	ting::atomic::S32 a(10);
+	
+	ASSERT_ALWAYS(a.CompareAndExchange(10, 9) == 10)
+	ASSERT_ALWAYS(a.CompareAndExchange(9, 10) == 9)
+	
+	
+}
+}//~namespace
+
+
 int main(int argc, char *argv[]){
 
 	TestFetchAndAdd::Run();
+	TestCompareAndExchange::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 
