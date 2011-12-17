@@ -63,6 +63,14 @@ namespace atomic{
 
 
 
+/**
+ * @brief Spinlock class.
+ * Spinlock is the same thing as mutex, except that when trying to lock a locked
+ * spinlock it enters a busy-loop until the spinlock is unlocked by previous locker so
+ * it can be locked. But, in return, spinlock is much more lightweight than mutex,
+ * because it does not do any syscalls.
+ * Use spinlock to synchronize only very short and rare operations. In other cases, use mutex.
+ */
 //On most architectures, atomic operations require that the value to be naturally aligned (4 bytes = sizeof(int)).
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 
@@ -83,6 +91,10 @@ class SpinLock{
 #endif
 
 public:
+	/**
+	 * @brief Constructor.
+	 * Creates an initially unlocked spinlock.
+     */
 	inline SpinLock(){
 #if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		this->sl = 0; // 0 means unlocked state
@@ -96,9 +108,14 @@ public:
 	}
 	
 	
+	
 	inline ~SpinLock(){}
 	
 	
+	
+	/**
+	 * @brief Lock the spinlock.
+     */
 	inline void Lock(){
 #if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		while(__sync_lock_test_and_set(&this->sl, 1)){ //__sync_lock_test_and_set() generates acquire memory barrier, i.e. references after it cannot go before, but not vice versa.
@@ -116,6 +133,10 @@ public:
 	}
 	
 	
+	
+	/**
+	 * @brief Unlock the spinlock.
+     */
 	inline void Unlock(){
 #if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		__sync_lock_release(&this->sl); //__sync_lock_release() generates release memory barrier, i.e. references before it cannot go after, but not vice versa.
@@ -166,6 +187,8 @@ public:
 			v(initialValue)
 	{}
 
+	
+	
 	/**
 	 * @brief Adds the value to this atomic variable and returns its initial value.
 	 * @param value - the value to add to this atomic variable.
@@ -194,6 +217,8 @@ public:
 #endif
 	}
 	
+	
+	
 	/**
 	 * @brief Atomic compare and exchange operation
 	 * Compares the current value to the 'compareTo' value and if they are equal
@@ -214,24 +239,23 @@ public:
 
 #elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		for(;;){
-			ting::s32 old = this->v;
-			if(OSAtomicCompareAndSwap32Barrier(compareTo, exchangeBy, &this->v)){ //memory barrier since we are reading this->v before atomic operation.
-				//operation succeeded, return previous value.
-				return compareTo;
+			//No memory barrier is needed, since we don't care when the old
+			//value will be read because we are checking anyway if it is equal
+			//to 'compareTo' before returning.
+			if(OSAtomicCompareAndSwap32(compareTo, exchangeBy, &this->v)){
+				return compareTo; //operation succeeded, return previous value.
 			}else{
 				//The following scenario is still possible:
-				// - The value of this->v was equal to 'compareTo'.
-				// - After saving the old value and before issuing the atomic operation,
-				//   the real value of this->v, in parallel, has changed to something which is
-				//   not equal to 'compareTo'.
-				// - Thus, the atomic operation fails, i.e. returns false.
-				// - But saved old value is equal to 'compareTo', we can't return it, since it will
-				//   indicate that atomic operation succeeded. Therefore, saved old value should
-				//   not be equal to 'compareTo' here. If it is, then try to do the procedure again.
+				// - The value of this->v was not equal to 'compareTo'. Thus, the atomic
+				//   operation returned false.
+				// - Right after the real value of this->v, in parallel,
+				//   has changed to something which is equal to 'compareTo'.
+				// - Thus, we need to check if we are returning the value which is equal to 'compareTo'
+				//   and prevent it by repeating the procedure again.
+				volatile ting::s32 old = this->v;
 				if(old == compareTo){
 					continue;
 				}
-				
 				return old;
 			}
 		}
@@ -250,6 +274,8 @@ public:
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
+
+
 
 }//~namespace atomic
 }//~namespace ting
