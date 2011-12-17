@@ -35,6 +35,8 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "utils.hpp"
 
+//TODO: don't use OS specific atomic ops, implement atomics for different architectures instead
+
 #if defined(__GNUG__) && (defined(__i386__) || defined(__x86_64__))
 //gcc atomic stuff available
 #define M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE
@@ -58,6 +60,76 @@ THE SOFTWARE. */
 
 namespace ting{
 namespace atomic{
+
+
+
+//On most architectures, atomic operations require that the value to be naturally aligned (4 bytes = sizeof(int)).
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+
+//make sure theat we align by int size when using MSVC compiler.
+STATIC_ASSERT(sizeof(int) == 4)
+
+M_DECLARE_ALIGNED_MSVC(4)
+#endif
+class SpinLock{
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+	volatile int sl;
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+	volatile LONG sl;
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+	volatile OSSpinLock sl;
+#else //no native atomic operations support detected, will be using plain mutex
+	ting::Mutex mutex;
+#endif
+
+public:
+	inline SpinLock(){
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+		this->sl = 0; // 0 means unlocked state
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		this->sl = 0; // 0 means unlocked state
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		this->sl = 0; // 0 means unlocked state
+#else
+		//no need to initialize mutex, it is unlocked initially itself.
+#endif
+	}
+	
+	
+	inline ~SpinLock(){}
+	
+	
+	inline void Lock(){
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+		while(__sync_lock_test_and_set(&this->sl, 1)){ //__sync_lock_test_and_set() generates acquire memory barrier, i.e. references after it cannot go before, but not vice versa.
+			while(this->sl != 0){}
+		}
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		while(InterlockedExchange(&this->sl, 1) != 0){ //InterlockedExchange() generates full memory barrier
+			while(this->sl != 0){}
+		}
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		OSSpinLockLock(&this->sl);
+#else //no native atomic operations support detected, will be using plain mutex
+		this->mutex.Lock();
+#endif
+	}
+	
+	
+	inline void Unlock(){
+#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+		__sync_lock_release(&this->sl); //__sync_lock_release() generates release memory barrier, i.e. references before it cannot go after, but not vice versa.
+#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		InterlockedExchange(&this->sl, 0); //InterlockedExchange() generates full memory barrier
+#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		OSSpinLockUnlock(&this->sl);
+#else //no native atomic operations support detected, will be using plain mutex
+		this->mutex.Unlock();
+#endif
+	}
+} M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
+
+
 
 /**
  * @brief Atomic signed 32bit integer.
@@ -122,7 +194,16 @@ public:
 #endif
 	}
 	
-	inline ting::s32 FetchCompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
+	/**
+	 * @brief Atomic compare and exchange operation
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+     * @param compareTo - the value to compare the current value to.
+     * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+     * @return old current value.
+     */
+	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
 #if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		//gcc atomic stuff available
 		return __sync_val_compare_and_swap(&this->v, compareTo, exchangeBy);
@@ -132,10 +213,27 @@ public:
 		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
 
 #elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
-		if(OSAtomicCompareAndSwap32(compareTo, exchangeBy, &this->v)){
-			return compareTo;
-		}else{
-			return this->v;//v is volatile, should be ok
+		for(;;){
+			ting::s32 old = this->v;
+			if(OSAtomicCompareAndSwap32Barrier(compareTo, exchangeBy, &this->v)){ //memory barrier since we are reading this->v before atomic operation.
+				//operation succeeded, return previous value.
+				return compareTo;
+			}else{
+				//The following scenario is still possible:
+				// - The value of this->v was equal to 'compareTo'.
+				// - After saving the old value and before issuing the atomic operation,
+				//   the real value of this->v, in parallel, has changed to something which is
+				//   not equal to 'compareTo'.
+				// - Thus, the atomic operation fails, i.e. returns false.
+				// - But saved old value is equal to 'compareTo', we can't return it, since it will
+				//   indicate that atomic operation succeeded. Therefore, saved old value should
+				//   not be equal to 'compareTo' here. If it is, then try to do the procedure again.
+				if(old == compareTo){
+					continue;
+				}
+				
+				return old;
+			}
 		}
 		
 #else
