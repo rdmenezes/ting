@@ -99,9 +99,9 @@ void Run(){
 
 int main(int argc, char *argv[]){
 
-	TestFetchAndAdd::Run();
-	TestCompareAndExchange::Run();
 	TestFlag::Run();
+	TestCompareAndExchange::Run();
+	TestFetchAndAdd::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 

@@ -71,6 +71,14 @@ THE SOFTWARE. */
 		#define M_CPU M_CPU_UNKNOWN
 	#endif
 
+#elif M_COMPILER == M_COMPILER_MSVC
+	#if defined(_M_IX86)
+		#define M_CPU M_CPU_X86
+	#elif defined(_M_AMD64) || defined(_M_X64)
+		#define M_CPU M_CPU_X86_64
+	#else
+		#define M_CPU M_CPU_UNKNOWN
+	#endif
 #else
 	#define M_CPU M_CPU_UNKNOWN
 #endif

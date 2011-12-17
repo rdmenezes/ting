@@ -132,6 +132,16 @@ public:
 	inline bool Set(bool value = true){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 		int old;
+	#if M_COMPILER == M_COMPILER_MSVC
+		__asm{
+			mov ebx, this
+			xor eax, eax
+			mov al, value
+			lock xchg eax, [ebx].flag
+			mov [old], eax
+		}
+		return old == 0 ? false : true; // this ternary ? : stuff is to avoid compiler warning
+	#else
 		__asm__ __volatile__(
 				"lock; xchgl %0, %1"
 						: "=r"(old), "=m"(this->flag)
@@ -139,6 +149,7 @@ public:
 						: "memory"
 			);
 		return old;
+	#endif
 
 #elif M_CPU == M_CPU_ARM
 		int old;
@@ -325,13 +336,21 @@ public:
 		
 		{
 			ting::s32 old;
-			
+	#if M_COMPILER == M_COMPILER_MSVC
+			__asm{
+				mov ebx, this
+				mov eax, [value]
+				lock xadd [ebx].v, eax
+				mov [old], eax
+			}
+	#else
 			__asm__ __volatile__ (
 					"lock; xaddl %0, %1"
 							: "=r"(old), "=m"(this->v)
 							: "0"(value), "m"(this->v)
 							: "memory"
 				);
+	#endif
 			return old;
 		}
 		
@@ -374,12 +393,22 @@ public:
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 		
 		ting::s32 old;
+	#if M_COMPILER == M_COMPILER_MSVC
+		__asm{
+			mov ebx, this
+			mov eax, [compareTo]
+			mov edx, [exchangeBy]
+			lock cmpxchg [ebx].v, edx
+			mov [old], eax
+		}
+	#else
 		__asm__ __volatile__(
 				"lock; cmpxchgl %3, %2"
 						: "=m"(this->v), "=a"(old)
 						: "m"(this->v), "r"(exchangeBy), "a"(compareTo)
 						: "memory"
 			);
+	#endif
 		return old;
 		
 #elif M_CPU == M_CPU_ARM
