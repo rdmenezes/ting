@@ -1,5 +1,4 @@
-threadlib := 
-rtlib :=
+libs := ../../src/ting/Thread.cpp
 
 remove = del
 
@@ -18,7 +17,7 @@ default: $(binary_name)
 
 $(binary_name): main.cpp
 	@echo Building $@...
-	@cl $(cf) $(threadlib) $(rtlib) $<
+	@cl $(cf) $(libs) $< /Fe$@
 
 clean:
 	@$(remove) $(binary_name)

@@ -112,10 +112,14 @@ public:
 	 * @brief Gets the current flag value.
 	 * Note, that the returned value may be not actual, since the flag value can
 	 * be changed in parallel. It does not set any memory barrier.
-     * @return current flag value.
-     */
+	 * @return current flag value.
+	 */
 	inline bool Get()const{
+#if M_COMPILER == M_COMPILER_MSVC
+		return this->flag == 0 ? false : true;
+#else
 		return this->flag;
+#endif
 	}
 	
 	
@@ -146,7 +150,7 @@ public:
 			);
 		return old;
 #elif M_OS == M_OS_WIN32
-		return bool(InterlockedExchange(&this->flag, value));
+		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
 #elif M_OS == M_OS_MACOSX
 		if(value){
 			return !OSAtomicCompareAndSwap32(!value, value, &this->flag);
@@ -339,7 +343,7 @@ public:
 		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
-		return InterlockedExchangeAdd(&this->v, value);
+		return InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&this->v), LONG(value));
 
 #elif M_OS == M_OS_MACOSX
 		return (OSAtomicAdd32(value, &this->v) - value);
@@ -388,7 +392,7 @@ public:
 		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
-		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
+		return InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(&this->v), exchangeBy, compareTo);
 
 #elif M_OS == M_OS_MACOSX
 		for(;;){

@@ -36,6 +36,7 @@ THE SOFTWARE. */
 #include <cstring>
 #include <sstream>
 
+#include "config.hpp"
 #include "debug.hpp"
 #include "Ptr.hpp"
 #include "types.hpp"
@@ -104,7 +105,7 @@ THE SOFTWARE. */
 
 //if Microsoft MSVC compiler,
 //then disable warning about throw specification is ignored.
-#ifdef _MSC_VER
+#if M_COMPILER == M_COMPILER_MSVC
 #pragma warning(push) //push warnings state
 #pragma warning( disable : 4290)
 #endif
@@ -845,7 +846,7 @@ inline void MsgThread::PushQuitMessage(){
 
 
 //if Microsoft MSVC compiler, restore warnings state
-#ifdef _MSC_VER
+#if M_COMPILER == M_COMPILER_MSVC
 #pragma warning(pop) //pop warnings state
 #endif
 

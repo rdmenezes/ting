@@ -32,16 +32,35 @@ THE SOFTWARE. */
 #pragma once
 
 
+
+//====================================================|
+//            Compiler definitions                    |
+//                                                    |
+
+#define M_COMPILER_UNKNOWN                            0
+#define M_COMPILER_GCC                                1
+#define M_COMPILER_MSVC                               2
+
+#if defined(__GNUC__) || defined(__GNUG__)
+	#define M_COMPILER M_COMPILER_GCC
+#elif defined(_MSC_VER)
+	#define M_COMPILER M_COMPILER_MSVC
+#else
+	#define M_COMPILER M_COMPILER_UNKNOWN
+#endif
+
+
+
 //====================================================|
 //            CPU architecture definitions            |
 //                                                    |
 
-#define M_CPU_UNKNOWN						0
-#define M_CPU_X86							1
-#define M_CPU_X86_64						2
-#define M_CPU_ARM							3
+#define M_CPU_UNKNOWN                                 0
+#define M_CPU_X86                                     1
+#define M_CPU_X86_64                                  2
+#define M_CPU_ARM                                     3
 
-#if defined(__GNUG__)
+#if M_COMPILER == M_COMPILER_GCC
 	#if defined(__i386__)
 		#define M_CPU M_CPU_X86
 	#elif defined(__x86_64__)
@@ -62,10 +81,10 @@ THE SOFTWARE. */
 //            OS definitions            |
 //                                      |
 
-#define M_OS_UNKNOWN						0
-#define M_OS_LINUX							1
-#define M_OS_WIN32							2
-#define M_OS_MACOSX							3
+#define M_OS_UNKNOWN                    0
+#define M_OS_LINUX                      1
+#define M_OS_WIN32                      2
+#define M_OS_MACOSX                     3
 
 #if defined(__linux__)
 	#define M_OS M_OS_LINUX

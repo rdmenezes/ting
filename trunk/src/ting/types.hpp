@@ -34,6 +34,16 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 
+
+
+//disable warning about ignored volatile in type cast when T is some volatile type
+#if M_COMPILER == M_COMPILER_MSVC
+#pragma warning(push) //push warnings state
+#pragma warning( disable : 4197)
+#endif
+
+
+
 namespace ting{
 
 
@@ -144,9 +154,13 @@ template <class T, int V> class Inited{
 	T value;
 	
 public:
+
+
 	inline Inited() :
 			value(T(V))
 	{}
+
+
 
 	inline Inited(T value) :
 			value(value)
@@ -254,3 +268,10 @@ public:
 
 
 }//~namespace ting
+
+
+
+//restore MSVC compiler warnings state
+#if M_COMPILER == M_COMPILER_MSVC
+#pragma warning(pop) //pop warnings state
+#endif
