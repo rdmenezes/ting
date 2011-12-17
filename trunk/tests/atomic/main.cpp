@@ -71,7 +71,6 @@ void Run(){
 
 namespace TestCompareAndExchange{
 void Run(){
-
 	ting::atomic::S32 a(10);
 	
 	ASSERT_ALWAYS(a.CompareAndExchange(10, 9) == 10)
@@ -82,10 +81,27 @@ void Run(){
 }//~namespace
 
 
+
+namespace TestFlag{
+void Run(){
+	ting::atomic::Flag f;
+	
+	ASSERT_ALWAYS(f.Get() == false)
+	
+	ASSERT_ALWAYS(f.Set(false) == false)
+	ASSERT_ALWAYS(f.Set(true) == false)
+	ASSERT_ALWAYS(f.Set(true) == true)
+	ASSERT_ALWAYS(f.Set(false) == true)
+}
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 
 	TestFetchAndAdd::Run();
 	TestCompareAndExchange::Run();
+	TestFlag::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 
