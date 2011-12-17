@@ -6,10 +6,6 @@
         <df name="1">
           <df name="2">
             <df name="ting">
-              <in>FSFile.d</in>
-              <in>File.d</in>
-              <in>Socket.d</in>
-              <in>Thread.d</in>
             </df>
           </df>
         </df>
@@ -48,8 +44,6 @@
         <in>Array_test.cpp</in>
       </df>
       <df name="atomic">
-        <df name=".svn">
-        </df>
         <in>main.cpp</in>
       </df>
       <df name="Buffer">

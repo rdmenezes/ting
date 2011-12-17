@@ -38,28 +38,144 @@ THE SOFTWARE. */
 //TODO: don't use OS specific atomic ops, implement atomics for different architectures instead
 
 #if defined(__GNUG__) && (defined(__i386__) || defined(__x86_64__))
-//gcc atomic stuff available
-#define M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE
+	#define M_ATOMIC_ARCHITECTURE_X86
+	#define M_ATOMIC_ARCHITECTURE_X86_64
 
-//#elif defined(__GNUG__) && defined(__arm__) //TODO: support something for ARM
+	//gcc atomic stuff available
+	#define M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE //TODO: remove this when asm implemntations are done
+
+#elif defined(__GNUG__) && defined(__arm__)
+	#define M_ATOMIC_ARCHITECTURE_ARM
 
 #elif defined(WIN32)
-#define M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE
-#include <windows.h>
+	#define M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE
+	#include <windows.h>
 
 #elif defined(__APPLE__)
-#define M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE
-#include <libkern/OSAtomic.h>
+	#define M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE
+	#include <libkern/OSAtomic.h>
 
 #else
-//no native atomic operations support detected, will be using plain mutex
-#include "Thread.hpp"
+	//no native atomic operations support detected, will be using plain mutex
+	#include "Thread.hpp"
 #endif
 
 
 
 namespace ting{
 namespace atomic{
+
+
+
+/**
+ * @brief Atomic flag.
+ * Atomic flag is a bool-like value whose set and clear operations are atomic.
+ */
+//On most architectures, atomic operations require that the value to be naturally aligned (4 bytes = sizeof(int)).
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+
+//make sure theat we align by int size when using MSVC compiler.
+STATIC_ASSERT(sizeof(int) == 4)
+
+M_DECLARE_ALIGNED_MSVC(4)
+#endif
+class Flag{
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || defined(M_ATOMIC_ARCHITECTURE_ARM)
+	volatile int flag;
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+	volatile LONG flag;
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+	volatile int flag;
+#else //unknown cpu architecture, will be using plain mutex
+	ting::Mutex mutex;
+	bool flag;
+#endif
+
+public:
+	/**
+	 * @brief Constructor.
+	 * @param initialValue - initial value of the flag.
+     */
+	inline Flag(bool initialValue = false){
+#if defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		this->flag = initialValue;
+#else
+		this->Set(initialValue);
+#endif
+	}
+	
+	
+	
+	/**
+	 * @brief Set the flag value.
+	 * Sets the flag to the new value and returns its previous value as atomic operation.
+	 * @param value - the flag value to set.
+	 * @return old flag value.
+     */
+	inline bool Set(bool value = true){
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || defined(M_ATOMIC_ARCHITECTURE_X86_64)
+		int old;
+		__asm__ __volatile__(
+				"lock; xchgl %0, %1"
+						: "=r"(old), "=m"(this->flag)
+						: "0"(int(value)), "m"(this->flag)
+						: "memory"
+			);
+		return old;
+
+#elif defined(M_ATOMIC_ARCHITECTURE_ARM)
+		int old;
+		__asm__ __volatile__(
+				"swp %0, %2, [%3]"
+						: "=&r"(old), "=&r"(&this->flag)
+						: "r"(value), "1"(&this->flag)
+						: "memory"
+			);
+		return old;
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		return bool(InterlockedExchange(&this->flag, value));
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		if(value){
+			return !OSAtomicCompareAndSwap32(!value, value, &this->flag);
+		}else{
+			return OSAtomicCompareAndSwap32(!value, value, &this->flag);
+		}
+#else //unknown cpu architecture, will be using plain mutex
+		{
+			ting::Mutex::Guard mutexGuard(this->mutex);
+			bool old = this->flag;
+			this->flag = value;
+			return old;
+		}
+#endif
+	}
+	
+	
+	
+	/**
+	 * @brief Clear flag.
+	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
+	 * its implementation can be faster.
+     */
+	inline void Clear(){
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM)
+		
+		this->Set(false);
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		InterlockedExchange(&this->flag, 0);
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+		OSAtomicCompareAndSwap32(true, false, &this->flag);
+#else //unknown cpu architecture, will be using plain mutex
+		{
+			//still need to lock the mutex to generate the memory barrier.
+			ting::Mutex::Guard mutexGuard(this->mutex);
+			this->flag = false;
+		}
+#endif
+	}
+} M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
 
 
@@ -80,15 +196,19 @@ STATIC_ASSERT(sizeof(int) == 4)
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class SpinLock{
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-	volatile int sl;
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
-	volatile LONG sl;
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM) || \
+		defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		
+	atomic::Flag flag;
+	
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 	volatile OSSpinLock sl;
-#else //no native atomic operations support detected, will be using plain mutex
+#else //unknown cpu architecture, will be using plain mutex
 	ting::Mutex mutex;
 #endif
+
 
 public:
 	/**
@@ -96,20 +216,18 @@ public:
 	 * Creates an initially unlocked spinlock.
      */
 	inline SpinLock(){
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM) || \
+		defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		
+		//initially unlocked.
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		this->sl = 0; // 0 means unlocked state
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
-		this->sl = 0; // 0 means unlocked state
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
-		this->sl = 0; // 0 means unlocked state
-#else
+#else //unknown cpu architecture, will be using plain mutex
 		//no need to initialize mutex, it is unlocked initially itself.
 #endif
 	}
-	
-	
-	
-	inline ~SpinLock(){}
 	
 	
 	
@@ -117,17 +235,17 @@ public:
 	 * @brief Lock the spinlock.
      */
 	inline void Lock(){
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-		while(__sync_lock_test_and_set(&this->sl, 1)){ //__sync_lock_test_and_set() generates acquire memory barrier, i.e. references after it cannot go before, but not vice versa.
-			while(this->sl != 0){}
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM) || \
+		defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		
+		while(this->flag.Set(true)){
+			//TODO: while(this->flag.Get()){}
 		}
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
-		while(InterlockedExchange(&this->sl, 1) != 0){ //InterlockedExchange() generates full memory barrier
-			while(this->sl != 0){}
-		}
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		OSSpinLockLock(&this->sl);
-#else //no native atomic operations support detected, will be using plain mutex
+#else //unknown cpu architecture, will be using plain mutex
 		this->mutex.Lock();
 #endif
 	}
@@ -138,13 +256,15 @@ public:
 	 * @brief Unlock the spinlock.
      */
 	inline void Unlock(){
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
-		__sync_lock_release(&this->sl); //__sync_lock_release() generates release memory barrier, i.e. references before it cannot go after, but not vice versa.
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
-		InterlockedExchange(&this->sl, 0); //InterlockedExchange() generates full memory barrier
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_ARCHITECTURE_X86) || \
+		defined(M_ATOMIC_ARCHITECTURE_X86_64) || \
+		defined(M_ATOMIC_ARCHITECTURE_ARM) || \
+		defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+		
+		this->flag.Clear();
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		OSSpinLockUnlock(&this->sl);
-#else //no native atomic operations support detected, will be using plain mutex
+#else //unknown cpu architecture, will be using plain mutex
 		this->mutex.Unlock();
 #endif
 	}
@@ -165,11 +285,11 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 	//gcc atomic stuff available
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 	//Win32 Interlocked* stuff available
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 	//Mac os *Atomic stuff available
 #else
 	//no native atomic operations support detected, will be using plain mutex
@@ -195,15 +315,15 @@ public:
 	 * @return initial value of this atomic variable.
 	 */
 	inline ting::s32 FetchAndAdd(ting::s32 value){
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		//gcc atomic stuff available
 		return __sync_fetch_and_add(&this->v, value);
 		
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(&this->v, value);
 
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		return (OSAtomicAdd32(value, &this->v) - value);
 		
 #else
@@ -229,15 +349,15 @@ public:
      * @return old current value.
      */
 	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
-#if defined(M_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
+#if defined(M_ATOMIC_GCC_ATOMIC_BUILTINS_ARE_AVAILABLE)
 		//gcc atomic stuff available
 		return __sync_val_compare_and_swap(&this->v, compareTo, exchangeBy);
 		
-#elif defined(M_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_WIN32_INTERLOCKED_FUNCTIONS_ARE_AVAILABLE)
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
 
-#elif defined(M_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
+#elif defined(M_ATOMIC_APPLE_CORESERVICES_ATOMIC_FUNCTIONS_ARE_AVAILABLE)
 		for(;;){
 			//No memory barrier is needed, since we don't care when the old
 			//value will be read because we are checking anyway if it is equal
