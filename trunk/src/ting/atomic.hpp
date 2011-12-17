@@ -109,6 +109,17 @@ public:
 	
 	
 	/**
+	 * @brief Gets the current flag value.
+	 * Note, that the returned value may be not actual, since the flag value can
+	 * be changed in parallel. It does not set any memory barrier.
+     * @return current flag value.
+     */
+	inline bool Get()const{
+		return this->flag;
+	}
+	
+	
+	/**
 	 * @brief Set the flag value.
 	 * Sets the flag to the new value and returns its previous value as atomic operation.
 	 * @param value - the flag value to set.
@@ -234,7 +245,7 @@ public:
 		M_OS == M_OS_WIN32
 		
 		while(this->flag.Set(true)){
-			//TODO: while(this->flag.Get()){}
+			while(this->flag.Get()){}
 		}
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
@@ -276,10 +287,12 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
 		M_OS == M_OS_WIN32 || M_OS == M_OS_MACOSX
 		
 	//no additional variables required
+#elif M_CPU == M_CPU_ARM
+	atomic::SpinLock spinLock;
 #else //unknown cpu architecture, will be using plain mutex
 	//no native atomic operations support detected, will be using plain mutex
 	ting::Mutex mutex;
@@ -319,7 +332,11 @@ public:
 		}
 		
 #elif M_CPU == M_CPU_ARM
-		//TODO:
+		this->spinLock.Lock();
+		ting::s32 old = this->v;
+		this->v += value;
+		this->spinLock.Unlock();
+		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(&this->v, value);
@@ -331,9 +348,9 @@ public:
 		//no native atomic operations support detected, will be using plain mutex
 		{
 			ting::Mutex::Guard mutexGuard(this->mutex);
-			ting::s32 ret = this->v;
+			ting::s32 old = this->v;
 			this->v += value;
-			return ret;
+			return old;
 		}
 #endif
 	}
@@ -362,7 +379,13 @@ public:
 		return old;
 		
 #elif M_CPU == M_CPU_ARM
-		//TODO:
+		this->spinLock.Lock();
+		ting::s32 old = this->v;
+		if(old == compareTo){
+			this->v = exchangeBy;
+		}
+		this->spinLock.Unlock();
+		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedCompareExchange(&this->v, exchangeBy, compareTo);
