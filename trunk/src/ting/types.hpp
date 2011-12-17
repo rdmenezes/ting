@@ -32,6 +32,7 @@ THE SOFTWARE. */
 
 #pragma once
 
+#include "config.hpp"
 #include "debug.hpp"
 
 
