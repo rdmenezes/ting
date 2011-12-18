@@ -155,8 +155,8 @@ public:
 		int old;
 		__asm__ __volatile__(
 				"swp %0, %2, [%3]"
-						: "=&r"(old), "=&r"(&this->flag)
-						: "r"(int(value)), "1"(&this->flag)
+						: "=&r"(old), "=&r"(this->flag)
+						: "r"(value), "1"(this->flag)
 						: "memory"
 			);
 		return old;
