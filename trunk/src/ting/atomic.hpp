@@ -91,7 +91,7 @@ public:
 	/**
 	 * @brief Constructor.
 	 * @param initialValue - initial value of the flag.
-     */
+	 */
 	inline Flag(bool initialValue = false){
 #if M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
@@ -156,7 +156,7 @@ public:
 		__asm__ __volatile__(
 				"swp %0, %2, [%3]"
 						: "=&r"(old), "=&r"(&this->flag)
-						: "r"(value), "1"(&this->flag)
+						: "r"(int(value)), "1"(&this->flag)
 						: "memory"
 			);
 		return old;

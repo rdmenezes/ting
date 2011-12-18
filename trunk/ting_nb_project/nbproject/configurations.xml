@@ -6,6 +6,7 @@
         <df name="1">
           <df name="2">
             <df name="ting">
+              <in>File.d</in>
             </df>
           </df>
         </df>
@@ -33,6 +34,7 @@
         <in>WaitSet.hpp</in>
         <in>atomic.hpp</in>
         <in>codegen.h</in>
+        <in>config.hpp</in>
         <in>debug.hpp</in>
         <in>math.hpp</in>
         <in>types.hpp</in>
