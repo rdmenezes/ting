@@ -49,7 +49,7 @@ THE SOFTWARE. */
 	#include <libkern/OSAtomic.h>
 
 #else
-	//no native atomic operations support detected, will be using plain mutex
+	#define M_ATOMIC_USE_MUTEX_FALLBACK
 	#include "Thread.hpp"
 #endif
 
@@ -73,18 +73,20 @@ STATIC_ASSERT(sizeof(int) == 4)
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class Flag{
-#if M_CPU == M_CPU_X86 || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+	ting::Mutex mutex;
+	bool flag;
+#elif M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
+		M_CPU == M_CPU_ARM
 	
 	volatile int flag;
 #elif M_OS == M_OS_WIN32
 	volatile LONG flag;
 #elif M_OS == M_OS_MACOSX
 	volatile int flag;
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
-	ting::Mutex mutex;
-	bool flag;
+#else
+#error "ASSERT(false)"
 #endif
 
 public:
@@ -93,16 +95,17 @@ public:
 	 * @param initialValue - initial value of the flag.
 	 */
 	inline Flag(bool initialValue = false){
-#if M_CPU == M_CPU_X86 || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK) || \
+		M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
+		M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 	
 		this->Set(initialValue);
 #elif M_OS == M_OS_MACOSX
 		this->flag = initialValue;
 #else
-		this->Set(initialValue);
+#error "ASSERT(false)"
 #endif
 	}
 	
@@ -116,7 +119,7 @@ public:
 	 */
 	inline bool Get()const{
 #if M_COMPILER == M_COMPILER_MSVC
-		return this->flag == 0 ? false : true;
+		return this->flag == 0 ? false : true; //this is to avoid compiler warning
 #else
 		return this->flag;
 #endif
@@ -130,7 +133,14 @@ public:
 	 * @return old flag value.
      */
 	inline bool Set(bool value = true){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		{
+			ting::Mutex::Guard mutexGuard(this->mutex);
+			bool old = this->flag;
+			this->flag = value;
+			return old;
+		}
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 		int old;
 	#if M_COMPILER == M_COMPILER_MSVC
 		__asm{
@@ -151,9 +161,10 @@ public:
 		return old;
 	#endif
 
-#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1
+#elif M_CPU == M_CPU_ARM
 		int old;
 	#if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
+//TODO:
 		#if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
 		#error "Not implemented, looks like there is no reliable way to do it"
 		#else //Thumb2 or not thumb mode at all
@@ -188,12 +199,7 @@ public:
 			return OSAtomicCompareAndSwap32(!value, value, &this->flag);
 		}
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-		{
-			ting::Mutex::Guard mutexGuard(this->mutex);
-			bool old = this->flag;
-			this->flag = value;
-			return old;
-		}
+#error "ASSERT(false)"
 #endif
 	}
 	
@@ -205,18 +211,20 @@ public:
 	 * its implementation can be faster.
      */
 	inline void Clear(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		{
+			//still need to lock the mutex to generate the memory barrier.
+			ting::Mutex::Guard mutexGuard(this->mutex);
+			this->flag = false;
+		}
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 		this->Set(false);
 #elif M_OS == M_OS_WIN32
 		InterlockedExchange(&this->flag, 0);
 #elif M_OS == M_OS_MACOSX
 		OSAtomicCompareAndSwap32(true, false, &this->flag);
 #else //unknown cpu architecture, unkown OS, will be using plain mutex
-		{
-			//still need to lock the mutex to generate the memory barrier.
-			ting::Mutex::Guard mutexGuard(this->mutex);
-			this->flag = false;
-		}
+#error "ASSERT(false)"
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
@@ -240,7 +248,9 @@ STATIC_ASSERT(sizeof(int) == 4)
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class SpinLock{
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+	ting::Mutex mutex;
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
 	atomic::Flag flag;
@@ -248,7 +258,7 @@ class SpinLock{
 #elif M_OS == M_OS_MACOSX
 	volatile OSSpinLock sl;
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-	ting::Mutex mutex;
+#error "ASSERT(false)"
 #endif
 
 
@@ -258,14 +268,17 @@ public:
 	 * Creates an initially unlocked spinlock.
      */
 	inline SpinLock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		//no need to initialize mutex, it is unlocked initially itself.
+		
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
 		//initially unlocked.
 #elif M_OS == M_OS_MACOSX
 		this->sl = 0; // 0 means unlocked state
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-		//no need to initialize mutex, it is unlocked initially itself.
+#error "ASSERT(false)"
 #endif
 	}
 	
@@ -275,7 +288,9 @@ public:
 	 * @brief Lock the spinlock.
      */
 	inline void Lock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		this->mutex.Lock();
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
 		while(this->flag.Set(true)){
@@ -283,8 +298,8 @@ public:
 		}
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
-		this->mutex.Lock();
+#else
+#error "ASSERT(false)"
 #endif
 	}
 	
@@ -294,14 +309,16 @@ public:
 	 * @brief Unlock the spinlock.
      */
 	inline void Unlock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		this->mutex.Unlock();
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
 		this->flag.Clear();
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockUnlock(&this->sl);
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
-		this->mutex.Unlock();
+#else
+#error "ASSERT(false)"
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
