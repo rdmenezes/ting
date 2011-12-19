@@ -40,7 +40,7 @@ THE SOFTWARE. */
 
 #if M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM
+		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
 
 #elif M_OS == M_OS_WIN32
 	#include <windows.h>
@@ -163,41 +163,42 @@ public:
 
 #elif M_CPU == M_CPU_ARM
 		int old;
-	#if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
-//TODO:
-		#if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
-		#error "Not implemented, looks like there is no reliable way to do it"
-		#else //Thumb2 or not thumb mode at all
-		
-		int dummy;
-		__asm__ __volatile__(
-				"try:" //label
-				"ldrex %0, [%2]"     "\n"
-				"strex %3, %1, [%2]" "\n"
-				"cmpeq %3, #0"       "\n"  //check if strex succeeded
-				"bne try"                  //retry if not succeeded
-						: "=&r"(old)
-						: "r"(value), "r"(this->flag), "r"(dummy)
-						: "cc", "memory"
-			);
-		#endif
-	#else
+ #if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
+  #if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
+   #error "Not implemented"
+  #else //Thumb2 or not thumb mode at all
+		for(int res;; ){
+			__asm__ __volatile__(
+					"ldrex %0, [%3]"     "\n"
+					"strex %1, %2, [%3]" "\n"
+							: "=r"(old), "=&r"(res) //dummy is not used and because of that GCC tends to assign the same register to it as for the the next argument, adding this & early clobber prevents this.
+							: "r"(value), "r"(this->flag)
+							: "cc", "memory"
+				);
+			if(res == 0){
+				break;
+			}
+		}
+  #endif
+ #else // ARM older than v6
 		__asm__ __volatile__(
 				"swp %0, %2, [%3]"
-						: "=&r"(old), "=&r"(this->flag)
+						: "=r"(old), "=r"(this->flag)
 						: "r"(value), "1"(this->flag)
 						: "memory"
 			);
-	#endif
+ #endif
 		return old;
 #elif M_OS == M_OS_WIN32
 		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
+		
 #elif M_OS == M_OS_MACOSX
 		if(value){
 			return !OSAtomicCompareAndSwap32(!value, value, &this->flag);
 		}else{
 			return OSAtomicCompareAndSwap32(!value, value, &this->flag);
 		}
+		
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
 #error "ASSERT(false)"
 #endif
