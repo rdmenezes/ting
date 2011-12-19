@@ -167,18 +167,18 @@ public:
   #if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
    #error "Not implemented"
   #else //Thumb2 or not thumb mode at all
-		for(int res;; ){
-			__asm__ __volatile__(
-					"ldrex %0, [%3]"     "\n"
-					"strex %1, %2, [%3]" "\n"
-							: "=r"(old), "=&r"(res) //dummy is not used and because of that GCC tends to assign the same register to it as for the the next argument, adding this & early clobber prevents this.
-							: "r"(value), "r"(this->flag)
-							: "cc", "memory"
-				);
-			if(res == 0){
-				break;
-			}
-		}
+		int res;
+		__asm__ __volatile__(
+				"1:"                       "\n"
+				"	ldrex    %0, [%3]"     "\n"
+				"	strex    %1, %2, [%3]" "\n"
+				"	teq      %1, #0"       "\n"
+				"	bne      1b"           "\n"
+						: "=r"(old), "=&r"(res) //res is not used and because of that GCC tends to assign the same register to it as for the the next argument, adding this & early clobber prevents this.
+						: "r"(value), "r"(this->flag)
+						: "cc", "memory" // "cc" stands for "condition codes"
+			);
+
   #endif
  #else // ARM older than v6
 		__asm__ __volatile__(
@@ -388,6 +388,22 @@ public:
 			return old;
 		}
 		
+#elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
+		ting::s32 old;
+		int res, tmp;
+		__asm__ __volatile__(
+				"1:"                         "\n"
+				"	ldrex   %0, [%4]"        "\n" // load old value
+				"	add     %3, %0, %2"      "\n" // %3 = %0 + %2 NOTE: in case of storing failure need to do the addition again, since the old value has probably changed
+				"	strex   %1, %3, [%4]"    "\n" // store new value
+				"	teq     %1, #0"          "\n" // check if storing the value has succeeded (compare %1 with 0)
+				"	bne     1b"              "\n" // jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
+						: "=r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
+						: "r"(value), "r"(tmp), "r"(this->v)
+						: "cc", "memory" //"cc" = "condition codes"
+			);
+		return old;
+		
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&this->v), LONG(value));
@@ -430,11 +446,27 @@ public:
 	#else
 		__asm__ __volatile__(
 				"lock; cmpxchgl %3, %2"
-						: "=m"(this->v), "=a"(old)
+						: "=m"(this->v), "=a"(old) // 'a' is 'eax' or 'ax' or 'al' or 'ah'
 						: "m"(this->v), "r"(exchangeBy), "a"(compareTo)
 						: "memory"
 			);
 	#endif
+		return old;
+		
+#elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
+		ting::s32 old;
+		int res;
+		__asm__ __volatile__(
+				"1:"                         "\n"
+				"	ldrex   %0, [%4]"        "\n" //load old value
+				"	teq     %2, %0"          "\n" //test for equality (xor operation)
+				"	strexeq %1, %3, [%4]"    "\n" //if equal, then store exchangeBy value
+				"	teq     %1, #0"          "\n" //check if storing the value has succeeded (compare %1 with 0)
+				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
+						: "=r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
+						: "r"(compareTo), "r"(exchangeBy), "r"(this->v)
+						: "cc", "memory" // "cc" = "condition codes"
+			);
 		return old;
 		
 #elif M_OS == M_OS_WIN32
