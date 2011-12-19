@@ -75,7 +75,7 @@ M_DECLARE_ALIGNED_MSVC(4)
 class Flag{
 #if M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM
+		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
 	
 	volatile int flag;
 #elif M_OS == M_OS_WIN32
@@ -95,7 +95,7 @@ public:
 	inline Flag(bool initialValue = false){
 #if M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM || \
+		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
 		M_OS == M_OS_WIN32
 	
 		this->Set(initialValue);
@@ -151,14 +151,33 @@ public:
 		return old;
 	#endif
 
-#elif M_CPU == M_CPU_ARM
+#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1
 		int old;
+	#if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
+		#if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
+		#error "Not implemented, looks like there is no reliable way to do it"
+		#else //Thumb2 or not thumb mode at all
+		
+		int dummy;
+		__asm__ __volatile__(
+				"try:" //label
+				"ldrex %0, [%2]"     "\n"
+				"strex %3, %1, [%2]" "\n"
+				"cmpeq %3, #0"       "\n"  //check if strex succeeded
+				"bne try"                  //retry if not succeeded
+						: "=&r"(old)
+						: "r"(value), "r"(this->flag), "r"(dummy)
+						: "cc", "memory"
+			);
+		#endif
+	#else
 		__asm__ __volatile__(
 				"swp %0, %2, [%3]"
 						: "=&r"(old), "=&r"(this->flag)
 						: "r"(value), "1"(this->flag)
 						: "memory"
 			);
+	#endif
 		return old;
 #elif M_OS == M_OS_WIN32
 		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
@@ -186,7 +205,7 @@ public:
 	 * its implementation can be faster.
      */
 	inline void Clear(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
 		this->Set(false);
 #elif M_OS == M_OS_WIN32
 		InterlockedExchange(&this->flag, 0);
@@ -221,7 +240,7 @@ STATIC_ASSERT(sizeof(int) == 4)
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class SpinLock{
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
 		M_OS == M_OS_WIN32
 		
 	atomic::Flag flag;
@@ -239,7 +258,7 @@ public:
 	 * Creates an initially unlocked spinlock.
      */
 	inline SpinLock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
 		M_OS == M_OS_WIN32
 		
 		//initially unlocked.
@@ -256,7 +275,7 @@ public:
 	 * @brief Lock the spinlock.
      */
 	inline void Lock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
 		M_OS == M_OS_WIN32
 		
 		while(this->flag.Set(true)){
@@ -275,7 +294,7 @@ public:
 	 * @brief Unlock the spinlock.
      */
 	inline void Unlock(){
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || (M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1) || \
 		M_OS == M_OS_WIN32
 		
 		this->flag.Clear();
@@ -306,11 +325,8 @@ class S32{
 		M_OS == M_OS_WIN32 || M_OS == M_OS_MACOSX
 		
 	//no additional variables required
-#elif M_CPU == M_CPU_ARM
+#else
 	atomic::SpinLock spinLock;
-#else //unknown cpu architecture, will be using plain mutex
-	//no native atomic operations support detected, will be using plain mutex
-	ting::Mutex mutex;
 #endif
 	
 	volatile ting::s32 v;
@@ -354,12 +370,6 @@ public:
 			return old;
 		}
 		
-#elif M_CPU == M_CPU_ARM
-		this->spinLock.Lock();
-		ting::s32 old = this->v;
-		this->v += value;
-		this->spinLock.Unlock();
-		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&this->v), LONG(value));
@@ -368,13 +378,11 @@ public:
 		return (OSAtomicAdd32(value, &this->v) - value);
 		
 #else
-		//no native atomic operations support detected, will be using plain mutex
-		{
-			ting::Mutex::Guard mutexGuard(this->mutex);
-			ting::s32 old = this->v;
-			this->v += value;
-			return old;
-		}
+		this->spinLock.Lock();
+		ting::s32 old = this->v;
+		this->v += value;
+		this->spinLock.Unlock();
+		return old;
 #endif
 	}
 	
@@ -411,14 +419,6 @@ public:
 	#endif
 		return old;
 		
-#elif M_CPU == M_CPU_ARM
-		this->spinLock.Lock();
-		ting::s32 old = this->v;
-		if(old == compareTo){
-			this->v = exchangeBy;
-		}
-		this->spinLock.Unlock();
-		return old;
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(&this->v), exchangeBy, compareTo);
@@ -447,16 +447,13 @@ public:
 		}
 		
 #else
-		//no native atomic operations support detected, will be using plain mutex
-		{
-			ting::Mutex::Guard mutexGuard(this->mutex);
-			if(this->v == compareTo){
-				this->v = exchangeBy;
-				return compareTo;
-			}else{
-				return this->v;
-			}
+		this->spinLock.Lock();
+		ting::s32 old = this->v;
+		if(old == compareTo){
+			this->v = exchangeBy;
 		}
+		this->spinLock.Unlock();
+		return old;
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
