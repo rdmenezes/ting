@@ -9,4 +9,4 @@ APP_CPPFLAGS += -frtti
 #we want to use stl
 APP_STL := gnustl_shared
 
-#APP_ABI := armeabi-v7a
+APP_ABI := armeabi-v7a
