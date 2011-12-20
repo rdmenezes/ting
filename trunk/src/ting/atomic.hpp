@@ -66,13 +66,17 @@ namespace atomic{
  * which goes after the barrier will not be executed before it.
  * Because of possible unordered execution on some fancy CPUs it is necessary to
  * use memory barriers.
+ * Note, that this barrier function should only be used right before or right after
+ * one of the atomic operations provided by the 'atomic' namespace.
+ * If used in other places, it is not guaranteed that the barrier will be actually set
+ * and the behavior will be CPU-architecture dependent.
  */
 inline void AcquireMemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 	
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
-	//TODO:
+	//do nothing, because locked operations on x86 make memory barrier
 	
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 7 && M_CPU_ARM_THUMB != 1 //DMB instruction is available only on ARMv7
 	__asm__ __volatile__(
@@ -84,11 +88,13 @@ inline void AcquireMemoryBarrier(){
 			"mcr p15, 0, %0, c7, c10, 5" : :"r"(1) :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
 		);
 	
-#elif M_CPU == M_CPU_ARM
-	//TODO:
+#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB == 1
+	//do nothing, should be mutex implementation
 	
 #elif M_OS == M_OS_WIN32
+	//do nothing, Interlocked* functions provide full memory barrier
 #elif M_OS == M_OS_MACOSX
+	//TODO:
 #else
 #error "ASSERT(false)"
 #endif
@@ -102,19 +108,25 @@ inline void AcquireMemoryBarrier(){
  * which goes before the barrier will not be executed after it.
  * Because of possible unordered execution on some fancy CPUs it is necessary to
  * use memory barriers.
+ * Note, that this barrier function should only be used right before or right after
+ * one of the atomic operations provided by the 'atomic' namespace.
+ * If used in other places, it is not guaranteed that the barrier will be actually set
+ * and the behavior will be CPU-architecture dependent.
  */
 inline void ReleaseMemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 	
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
-	//TODO:
+	//do nothing, because locked operations on x86 make memory barrier
 	
 #elif M_CPU == M_CPU_ARM
-	AcquireMemoryBarrier();
+	AcquireMemoryBarrier(); //on ARM there is only full memory barrier
 	
 #elif M_OS == M_OS_WIN32
+	//do nothing, Interlocked* functions provide full memory barrier
 #elif M_OS == M_OS_MACOSX
+	//TODO:
 #else
 #error "ASSERT(false)"
 #endif
