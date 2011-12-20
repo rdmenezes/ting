@@ -61,17 +61,17 @@ namespace atomic{
 
 
 /**
- * @brief Set acquire memory barrier.
- * Acquire memory barrier means that all load/store memory access
- * which goes after the barrier will not be executed before it.
+ * @brief Set full memory barrier.
+ * Full memory barrier means that all load/store memory access
+ * which goes before the barrier will be executed before all load/store access which goes after the barrier.
  * Because of possible unordered execution on some fancy CPUs it is necessary to
  * use memory barriers.
  * Note, that this barrier function should only be used right before or right after
  * one of the atomic operations provided by the 'atomic' namespace.
- * If used in other places, it is not guaranteed that the barrier will be actually set
+ * If used in other places, it is not guaranteed that the barrier will actually be set
  * and the behavior will be CPU-architecture dependent.
  */
-inline void AcquireMemoryBarrier(){
+inline void FullMemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 	
@@ -103,6 +103,37 @@ inline void AcquireMemoryBarrier(){
 
 
 /**
+ * @brief Set acquire memory barrier.
+ * Acquire memory barrier means that all load/store memory access
+ * which goes after the barrier will not be executed before it.
+ * Because of possible unordered execution on some fancy CPUs it is necessary to
+ * use memory barriers.
+ * Note, that this barrier function should only be used right before or right after
+ * one of the atomic operations provided by the 'atomic' namespace.
+ * If used in other places, it is not guaranteed that the barrier will actually be set
+ * and the behavior will be CPU-architecture dependent.
+ */
+inline void AcquireMemoryBarrier(){
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+	//do nothing
+	
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
+		M_CPU == M_CPU_ARM
+	
+	atomic::FullMemoryBarrier(); //there is only full memory barrier on these CPU's
+	
+#elif M_OS == M_OS_WIN32
+	//do nothing, Interlocked* functions provide full memory barrier
+#elif M_OS == M_OS_MACOSX
+	//TODO:
+#else
+#error "ASSERT(false)"
+#endif
+}
+
+
+
+/**
  * @brief Set release memory barrier.
  * Release memory barrier means that all load/store memory access
  * which goes before the barrier will not be executed after it.
@@ -117,11 +148,10 @@ inline void ReleaseMemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 	
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
-	//do nothing, because locked operations on x86 make memory barrier
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
+		M_CPU == M_CPU_ARM
 	
-#elif M_CPU == M_CPU_ARM
-	AcquireMemoryBarrier(); //on ARM there is only full memory barrier
+	atomic::FullMemoryBarrier(); //there is only full memory barrier on these CPU's
 	
 #elif M_OS == M_OS_WIN32
 	//do nothing, Interlocked* functions provide full memory barrier
