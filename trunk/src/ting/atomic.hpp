@@ -71,7 +71,7 @@ namespace atomic{
  * If used in other places, it is not guaranteed that the barrier will actually be set
  * and the behavior will be CPU-architecture dependent.
  */
-inline void FullMemoryBarrier(){
+inline void MemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 	
@@ -90,68 +90,6 @@ inline void FullMemoryBarrier(){
 	
 #elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB == 1
 	//do nothing, should be mutex implementation
-	
-#elif M_OS == M_OS_WIN32
-	//do nothing, Interlocked* functions provide full memory barrier
-#elif M_OS == M_OS_MACOSX
-	//TODO:
-#else
-#error "ASSERT(false)"
-#endif
-}
-
-
-
-/**
- * @brief Set acquire memory barrier.
- * Acquire memory barrier means that all load/store memory access
- * which goes after the barrier will not be executed before it.
- * Because of possible unordered execution on some fancy CPUs it is necessary to
- * use memory barriers.
- * Note, that this barrier function should only be used right before or right after
- * one of the atomic operations provided by the 'atomic' namespace.
- * If used in other places, it is not guaranteed that the barrier will actually be set
- * and the behavior will be CPU-architecture dependent.
- */
-inline void AcquireMemoryBarrier(){
-#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
-	//do nothing
-	
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM
-	
-	atomic::FullMemoryBarrier(); //there is only full memory barrier on these CPU's
-	
-#elif M_OS == M_OS_WIN32
-	//do nothing, Interlocked* functions provide full memory barrier
-#elif M_OS == M_OS_MACOSX
-	//TODO:
-#else
-#error "ASSERT(false)"
-#endif
-}
-
-
-
-/**
- * @brief Set release memory barrier.
- * Release memory barrier means that all load/store memory access
- * which goes before the barrier will not be executed after it.
- * Because of possible unordered execution on some fancy CPUs it is necessary to
- * use memory barriers.
- * Note, that this barrier function should only be used right before or right after
- * one of the atomic operations provided by the 'atomic' namespace.
- * If used in other places, it is not guaranteed that the barrier will be actually set
- * and the behavior will be CPU-architecture dependent.
- */
-inline void ReleaseMemoryBarrier(){
-#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
-	//do nothing
-	
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM
-	
-	atomic::FullMemoryBarrier(); //there is only full memory barrier on these CPU's
 	
 #elif M_OS == M_OS_WIN32
 	//do nothing, Interlocked* functions provide full memory barrier
@@ -415,7 +353,7 @@ public:
 		while(this->flag.Set(true)){
 			while(this->flag.Get()){}
 		}
-		atomic::AcquireMemoryBarrier();
+		atomic::MemoryBarrier();
 		
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
@@ -436,7 +374,7 @@ public:
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
-		atomic::ReleaseMemoryBarrier();
+		atomic::MemoryBarrier();
 		this->flag.Clear();
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockUnlock(&this->sl);
