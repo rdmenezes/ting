@@ -227,7 +227,7 @@ public:
 				"mov    %2, %3"      "\n"
 				"msr    PRIMASK, %0" "\n" //restore interrupts mask
 						: "=r"(tmp), "=r"(old)
-						: "r"(value), "r"(this->flag)
+						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
   #else //Thumb2 or not thumb mode at all
@@ -238,17 +238,17 @@ public:
 				"	strex    %1, %2, [%3]" "\n"
 				"	teq      %1, #0"       "\n"
 				"	bne      1b"           "\n"
-						: "=r"(old), "=&r"(res) //res is not used and because of that GCC tends to assign the same register to it as for the the next argument, adding this & early clobber prevents this.
-						: "r"(value), "r"(this->flag)
+						: "=&r"(old), "=&r"(res) //res is not used and because of that GCC tends to assign the same register to it as for the the next argument, adding this & early clobber prevents this.
+						: "r"(value), "r"(&this->flag)
 						: "cc", "memory" // "cc" stands for "condition codes"
 			);
 
   #endif
  #else // ARM older than v6
 		__asm__ __volatile__(
-				"swp %0, %2, [%3]"
-						: "=r"(old), "=r"(this->flag)
-						: "r"(value), "1"(this->flag)
+				"swp %0, %1, [%2]"
+						: "=&r"(old)
+						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
  #endif
@@ -469,8 +469,8 @@ public:
 				"	strex   %1, %3, [%4]"    "\n" // store new value
 				"	teq     %1, #0"          "\n" // check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" // jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
-						: "=r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
-						: "r"(value), "r"(tmp), "r"(this->v)
+						: "=&r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
+						: "r"(value), "r"(tmp), "r"(&this->v)
 						: "cc", "memory" //"cc" = "condition codes"
 			);
 		return old;
@@ -531,12 +531,12 @@ public:
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
-				"	teq     %2, %0"          "\n" //test for equality (xor operation)
+				"	teq     %0, %2"          "\n" //test for equality (xor operation)
 				"	strexeq %1, %3, [%4]"    "\n" //if equal, then store exchangeBy value
 				"	teq     %1, #0"          "\n" //check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
-						: "=r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
-						: "r"(compareTo), "r"(exchangeBy), "r"(this->v)
+						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
+						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
 		return old;
