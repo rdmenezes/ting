@@ -61,6 +61,58 @@ namespace atomic{
 
 
 /**
+ * @brief Set acquire memory barrier.
+ * Acquire memory barrier means that all load/store memory access
+ * which goes after the barrier will not be executed before it.
+ * Because of possible unordered execution on some fancy CPUs it is necessary to
+ * use memory barriers.
+ */
+inline void AcquireMemoryBarrier(){
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+	//do nothing
+	
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
+	//TODO:
+	
+#elif M_CPU == M_CPU_ARM
+	//TODO:
+	
+#elif M_OS == M_OS_WIN32
+#elif M_OS == M_OS_MACOSX
+#else
+#error "ASSERT(false)"
+#endif
+}
+
+
+
+/**
+ * @brief Set release memory barrier.
+ * Release memory barrier means that all load/store memory access
+ * which goes before the barrier will not be executed after it.
+ * Because of possible unordered execution on some fancy CPUs it is necessary to
+ * use memory barriers.
+ */
+inline void ReleaseMemoryBarrier(){
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+	//do nothing
+	
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
+	//TODO:
+	
+#elif M_CPU == M_CPU_ARM
+	//TODO:
+	
+#elif M_OS == M_OS_WIN32
+#elif M_OS == M_OS_MACOSX
+#else
+#error "ASSERT(false)"
+#endif
+}
+
+
+
+/**
  * @brief Atomic flag.
  * Atomic flag is a bool-like value whose set and clear operations are atomic.
  */
@@ -129,6 +181,7 @@ public:
 	/**
 	 * @brief Set the flag value.
 	 * Sets the flag to the new value and returns its previous value as atomic operation.
+	 * It does not set any memory barrier.
 	 * @param value - the flag value to set.
 	 * @return old flag value.
      */
@@ -210,6 +263,7 @@ public:
 	 * @brief Clear flag.
 	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
 	 * its implementation can be faster.
+	 * It does not set any memory barrier.
      */
 	inline void Clear(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
@@ -287,6 +341,7 @@ public:
 	
 	/**
 	 * @brief Lock the spinlock.
+	 * Acquire memory barrier is set.
      */
 	inline void Lock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
@@ -297,6 +352,8 @@ public:
 		while(this->flag.Set(true)){
 			while(this->flag.Get()){}
 		}
+		atomic::AcquireMemoryBarrier();
+		
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
 #else
@@ -308,6 +365,7 @@ public:
 	
 	/**
 	 * @brief Unlock the spinlock.
+	 * Release memory barrier is set.
      */
 	inline void Unlock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
@@ -315,6 +373,7 @@ public:
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
 		
+		atomic::ReleaseMemoryBarrier();
 		this->flag.Clear();
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockUnlock(&this->sl);
@@ -362,6 +421,7 @@ public:
 	
 	/**
 	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It does not set any memory barrier.
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
@@ -426,6 +486,7 @@ public:
 	 * @brief Atomic compare and exchange operation
 	 * Compares the current value to the 'compareTo' value and if they are equal
 	 * it will store the 'exchangeBy' value to the current value.
+	 * It does not set any memory barrier.
      * @param compareTo - the value to compare the current value to.
      * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
 	 *                     Otherwise, the current value will remain untouched.
