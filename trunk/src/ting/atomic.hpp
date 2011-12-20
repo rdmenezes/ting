@@ -342,7 +342,7 @@ public:
 	
 	/**
 	 * @brief Lock the spinlock.
-	 * Acquire memory barrier is set.
+	 * Right after acquiring the lock the memory barrier is set.
      */
 	inline void Lock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
@@ -366,7 +366,7 @@ public:
 	
 	/**
 	 * @brief Unlock the spinlock.
-	 * Release memory barrier is set.
+	 * Right before releasing the lock the memory barrier is set.
      */
 	inline void Unlock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
