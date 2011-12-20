@@ -79,6 +79,11 @@ inline void AcquireMemoryBarrier(){
 			"dmb" : : :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
 		);
 
+#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1 //for older ARMs use CP15 data memory barrier operation
+	__asm__ __volatile__(
+			"mcr p15, 0, %0, c7, c10, 5" : :"r"(1) :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
+		);
+	
 #elif M_CPU == M_CPU_ARM
 	//TODO:
 	
@@ -105,13 +110,8 @@ inline void ReleaseMemoryBarrier(){
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 	//TODO:
 	
-#elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 7 && M_CPU_ARM_THUMB != 1 //DMB instruction is available only on ARMv7
-	__asm__ __volatile__(
-			"dmb" : : :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
-		);
-
 #elif M_CPU == M_CPU_ARM
-	//TODO:
+	AcquireMemoryBarrier();
 	
 #elif M_OS == M_OS_WIN32
 #elif M_OS == M_OS_MACOSX
