@@ -219,6 +219,17 @@ public:
  #if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
   #if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
    #error "Not implemented"
+		ting::u32 tmp;
+		__asm__ __volatile__(
+				"mrs    %0, PRIMASK" "\n" //save interrupts mask
+				"cpsid  i"           "\n" //disable pioratizable interrupts
+				"mov    %3, %1"      "\n"
+				"mov    %2, %3"      "\n"
+				"msr    PRIMASK, %0" "\n" //restore interrupts mask
+						: "=r"(tmp), "=r"(old)
+						: "r"(value), "r"(this->flag)
+						: "memory"
+			);
   #else //Thumb2 or not thumb mode at all
 		int res;
 		__asm__ __volatile__(
