@@ -181,9 +181,14 @@ protected:
 		//Remove reference to Counter object held by this RefCounted
 		ASSERT(this->counter)
 
+#ifdef DEBUG
 		//since RefCounted is being destroyed, that means that there are no strong ref's left
 		ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
-		ASSERT(this->counter->numWeakRefs.FetchAndAdd(0) >= 1)
+{
+		ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(0);
+		ASSERT_INFO(res >= 1, "res = " << res)
+}
+#endif
 
 		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//there was only 1 weak ref
 			delete this->counter;
@@ -699,7 +704,7 @@ template <class T> class WeakRef{
 		//increment number of weak references
 		{
 			ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(1);
-			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
+			ASSERT_INFO(res >= 1, "res = " << res)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
 
