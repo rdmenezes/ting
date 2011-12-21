@@ -525,17 +525,16 @@ public:
 				"	teq     %0, %2"          "\n" //test for equality (xor operation)
 				"	ite     eq"              "\n" //if equal
 				"	strexeq %1, %3, [%4]"    "\n" //if equal, then store exchangeBy value
-		        "   bne     2f"              "\n" //otherwise, jump to exit with clearing exclusive access, NOTE: Branching must be last instruction in IT block!
+		        "	bne     2f"              "\n" //otherwise, jump to exit with clearing exclusive access, NOTE: Branching must be last instruction in IT block!
 				"	teq     %1, #0"          "\n" //check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
-				"   b       3f"              "\n" //jump to label 3 forward (exit) if succeeded
+				"	b       3f"              "\n" //jump to label 3 forward (exit) if succeeded
 				"2:"                         "\n"
   #if M_CPU_VERSION >= 7                          // CLREX instruction for Thumb-2 is only supported in ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
   #else
-				"	strexeq %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
+				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
   #endif
-		
 				"3:"                         "\n"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
@@ -546,9 +545,18 @@ public:
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
 				"	teq     %0, %2"          "\n" //test for equality (xor operation)
+				"   bne     2f"              "\n" //jump to exit with clearing exclusive access
 				"	strexeq %1, %3, [%4]"    "\n" //if equal, then store exchangeBy value
 				"	teq     %1, #0"          "\n" //check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
+				"	b       3f"              "\n" //jump to exit if succeeded
+				"2:"                         "\n"
+  #if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher
+				"	clrex"                   "\n" //was not equal, clear exclusive access
+  #else
+				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
+  #endif
+				"3:"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
