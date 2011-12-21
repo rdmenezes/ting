@@ -541,6 +541,9 @@ public:
 						: "cc", "memory" // "cc" = "condition codes"
 			);
  #else //non-Thumb 2 mode
+  #if M_CPU_ARM_THUMB != 0
+    #error "ASSERT(false)"
+  #endif
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
