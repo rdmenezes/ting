@@ -450,17 +450,17 @@ public:
 		}
 		
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
-		ting::s32 old;
-		int res, tmp;
+		ting::s32 old, sum;
+		int res;
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" // load old value
-				"	add     %3, %0, %2"      "\n" // %3 = %0 + %2 NOTE: in case of storing failure need to do the addition again, since the old value has probably changed
-				"	strex   %1, %3, [%4]"    "\n" // store new value
+				"	add     %2, %0, %3"      "\n" // %3 = %0 + %2 NOTE: in case of storing failure need to do the addition again, since the old value has probably changed
+				"	strex   %1, %2, [%4]"    "\n" // store new value
 				"	teq     %1, #0"          "\n" // check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" // jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
-						: "=&r"(old), "=&r"(res)   //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
-						: "r"(value), "r"(tmp), "r"(&this->v)
+						: "=&r"(old), "=&r"(res), "=&r"(sum)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
+						: "r"(value), "r"(&this->v)
 						: "cc", "memory" //"cc" = "condition codes"
 			);
 		return old;
