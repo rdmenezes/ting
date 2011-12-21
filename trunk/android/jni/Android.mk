@@ -16,6 +16,8 @@ LOCAL_SRC_FILES += ting/FSFile.cpp
 LOCAL_SRC_FILES += ting/Socket.cpp
 LOCAL_SRC_FILES += ting/Timer.cpp
 
+LOCAL_CFLAGS := -DDEBUG
+
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 

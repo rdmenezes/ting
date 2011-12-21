@@ -3,12 +3,6 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df name="src" root="../src">
       <df name="obj">
-        <df name="1">
-          <df name="2">
-            <df name="ting">
-            </df>
-          </df>
-        </df>
       </df>
       <df name="ting">
         <in>Array.hpp</in>
@@ -113,6 +107,7 @@
   <sourceRootList>
     <Elem>../src</Elem>
     <Elem>../tests</Elem>
+    <Elem>../android/jni</Elem>
   </sourceRootList>
   <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
   <confs>
