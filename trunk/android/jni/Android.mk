@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 
 #TARGET_BUILD_TYPE := debug
 
-LOCAL_ARM_MODE   := arm
+LOCAL_ARM_MODE   := arm #arm or thumb
 
 LOCAL_MODULE    := ting_test
 
