@@ -551,7 +551,7 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to exit if succeeded
 				"2:"                         "\n"
-  #if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher
+#if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat as it is available from ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
   #else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
