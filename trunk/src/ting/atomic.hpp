@@ -541,7 +541,7 @@ public:
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
-#else //non-Thumb 2 mode
+ #else //non-Thumb 2 mode
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
