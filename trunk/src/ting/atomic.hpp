@@ -74,10 +74,10 @@ namespace atomic{
 inline void MemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
-	
+
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 	//do nothing, because locked operations on x86 make memory barrier
-	
+
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 7 && M_CPU_ARM_THUMB != 1 //DMB instruction is available only on ARMv7
 	__asm__ __volatile__(
 			"dmb" : : :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
@@ -87,10 +87,10 @@ inline void MemoryBarrier(){
 	__asm__ __volatile__(
 			"mcr p15, 0, %0, c7, c10, 5" : :"r"(1) :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
 		);
-	
+
 #elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB == 1
 	//do nothing, should be mutex implementation
-	
+
 #elif M_OS == M_OS_WIN32
 	//do nothing, Interlocked* functions provide full memory barrier
 #elif M_OS == M_OS_MACOSX
@@ -121,7 +121,7 @@ class Flag{
 #elif M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
 		M_CPU == M_CPU_ARM
-	
+
 	volatile int flag;
 #elif M_OS == M_OS_WIN32
 	volatile LONG flag;
@@ -142,7 +142,7 @@ public:
 		M_CPU == M_CPU_X86_64 || \
 		M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
-	
+
 		this->Set(initialValue);
 #elif M_OS == M_OS_MACOSX
 		this->flag = initialValue;
@@ -150,9 +150,9 @@ public:
 #error "ASSERT(false)"
 #endif
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Gets the current flag value.
 	 * Note, that the returned value may be not actual, since the flag value can
@@ -166,15 +166,15 @@ public:
 		return this->flag;
 #endif
 	}
-	
-	
+
+
 	/**
 	 * @brief Set the flag value.
 	 * Sets the flag to the new value and returns its previous value as atomic operation.
 	 * It does not set any memory barrier.
 	 * @param value - the flag value to set.
 	 * @return old flag value.
-     */
+	 */
 	inline bool Set(bool value = true){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
@@ -245,27 +245,27 @@ public:
 		return old;
 #elif M_OS == M_OS_WIN32
 		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
-		
+
 #elif M_OS == M_OS_MACOSX
 		if(value){
 			return !OSAtomicCompareAndSwap32(!value, value, &this->flag);
 		}else{
 			return OSAtomicCompareAndSwap32(!value, value, &this->flag);
 		}
-		
+
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
 #error "ASSERT(false)"
 #endif
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Clear flag.
 	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
 	 * its implementation can be faster.
 	 * It does not set any memory barrier.
-     */
+	 */
 	inline void Clear(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
@@ -308,9 +308,9 @@ class SpinLock{
 	ting::Mutex mutex;
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
-		
+
 	atomic::Flag flag;
-	
+
 #elif M_OS == M_OS_MACOSX
 	volatile OSSpinLock sl;
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
@@ -322,14 +322,14 @@ public:
 	/**
 	 * @brief Constructor.
 	 * Creates an initially unlocked spinlock.
-     */
+	 */
 	inline SpinLock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		//no need to initialize mutex, it is unlocked initially itself.
-		
+
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
-		
+
 		//initially unlocked.
 #elif M_OS == M_OS_MACOSX
 		this->sl = 0; // 0 means unlocked state
@@ -337,43 +337,43 @@ public:
 #error "ASSERT(false)"
 #endif
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Lock the spinlock.
 	 * Right after acquiring the lock the memory barrier is set.
-     */
+	 */
 	inline void Lock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Lock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
-		
+
 		while(this->flag.Set(true)){
 			while(this->flag.Get()){}
 		}
 		atomic::MemoryBarrier();
-		
+
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
 #else
 #error "ASSERT(false)"
 #endif
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Unlock the spinlock.
 	 * Right before releasing the lock the memory barrier is set.
-     */
+	 */
 	inline void Unlock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Unlock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
 		M_OS == M_OS_WIN32
-		
+
 		atomic::MemoryBarrier();
 		this->flag.Clear();
 #elif M_OS == M_OS_MACOSX
@@ -401,25 +401,25 @@ class S32{
 
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
 		M_OS == M_OS_WIN32 || M_OS == M_OS_MACOSX
-		
+
 	//no additional variables required
 #else
 	atomic::SpinLock spinLock;
 #endif
-	
+
 	volatile ting::s32 v;
-	
+
 public:
 	/**
 	 * @brief Constructor.
-     * @param initialValue - initial value to assign to this atomic variable.
-     */
+	 * @param initialValue - initial value to assign to this atomic variable.
+	 */
 	inline S32(ting::s32 initialValue = 0) :
 			v(initialValue)
 	{}
 
-	
-	
+
+
 	/**
 	 * @brief Adds the value to this atomic variable and returns its initial value.
 	 * It does not set any memory barrier.
@@ -428,7 +428,7 @@ public:
 	 */
 	inline ting::s32 FetchAndAdd(ting::s32 value){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
-		
+
 		{
 			ting::s32 old;
 	#if M_COMPILER == M_COMPILER_MSVC
@@ -448,7 +448,7 @@ public:
 	#endif
 			return old;
 		}
-		
+
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
 		ting::s32 old, sum;
 		int res;
@@ -464,14 +464,14 @@ public:
 						: "cc", "memory" //"cc" = "condition codes"
 			);
 		return old;
-		
+
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&this->v), LONG(value));
 
 #elif M_OS == M_OS_MACOSX
 		return (OSAtomicAdd32(value, &this->v) - value);
-		
+
 #else
 		this->spinLock.Lock();
 		ting::s32 old = this->v;
@@ -480,22 +480,22 @@ public:
 		return old;
 #endif
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Atomic compare and exchange operation
 	 * Compares the current value to the 'compareTo' value and if they are equal
 	 * it will store the 'exchangeBy' value to the current value.
 	 * It does not set any memory barrier.
-     * @param compareTo - the value to compare the current value to.
-     * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
 	 *                     Otherwise, the current value will remain untouched.
-     * @return old current value.
-     */
+	 * @return old current value.
+	 */
 	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
-		
+
 		ting::s32 old;
 	#if M_COMPILER == M_COMPILER_MSVC
 		__asm{
@@ -514,7 +514,7 @@ public:
 			);
 	#endif
 		return old;
-		
+
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
 		ting::s32 old;
 		int res;
@@ -525,7 +525,7 @@ public:
 				"	teq     %0, %2"          "\n" //test for equality (xor operation)
 				"	ite     eq"              "\n" //if equal
 				"	strexeq %1, %3, [%4]"    "\n" //if equal, then store exchangeBy value
-		        "	bne     2f"              "\n" //otherwise, jump to exit with clearing exclusive access, NOTE: Branching must be last instruction in IT block!
+				"	bne     2f"              "\n" //otherwise, jump to exit with clearing exclusive access, NOTE: Branching must be last instruction in IT block!
 				"	teq     %1, #0"          "\n" //check if storing the value has succeeded (compare %1 with 0)
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to label 3 forward (exit) if succeeded
@@ -542,7 +542,7 @@ public:
 			);
  #else //non-Thumb 2 mode
   #if M_CPU_ARM_THUMB != 0
-    #error "ASSERT(false)"
+   #error "ASSERT(false)"
   #endif
 		__asm__ __volatile__(
 				"1:"                         "\n"
@@ -554,7 +554,7 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to exit if succeeded
 				"2:"                         "\n"
-#if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat as it is available from ARMv7
+  #if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat it as it is available from ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
   #else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
@@ -566,7 +566,7 @@ public:
 			);
  #endif
 		return old;
-		
+
 #elif M_OS == M_OS_WIN32
 		ASSERT(sizeof(LONG) == sizeof(this->v))
 		return InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(&this->v), exchangeBy, compareTo);
@@ -593,7 +593,7 @@ public:
 				return old;
 			}
 		}
-		
+
 #else
 		this->spinLock.Lock();
 		ting::s32 old = this->v;
