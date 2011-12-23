@@ -37,16 +37,16 @@ THE SOFTWARE. */
 #include <vector>
 #include <cstdlib>
 
-#include "AndroidAssetFile.hpp"
+#include "AssetFile.hpp"
 
 
 
-using namespace android_asset_file;
+using namespace ting_android;
 
 
 
 //override
-void AndroidAssetFile::Open(EMode mode){
+void AssetFile::Open(EMode mode){
 	if(this->IsOpened())
 		throw File::Exc("file already opened");
 
@@ -78,7 +78,7 @@ void AndroidAssetFile::Open(EMode mode){
 
 
 //override
-void AndroidAssetFile::Close(){
+void AssetFile::Close(){
 	if(!this->IsOpened())
 		return;
 
@@ -93,7 +93,7 @@ void AndroidAssetFile::Close(){
 
 
 //override
-size_t AndroidAssetFile::ReadInternal(ting::Buffer<ting::u8>& buf){
+size_t AssetFile::ReadInternal(ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
 	int numBytesRead = AAsset_read(this->handle, buf.Begin(), buf.Size());
 	if(numBytesRead < 0){//something happened
@@ -106,7 +106,7 @@ size_t AndroidAssetFile::ReadInternal(ting::Buffer<ting::u8>& buf){
 
 
 //override
-size_t AndroidAssetFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
+size_t AssetFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
 	throw File::Exc("Write() is not supported by Android assets");
 	return 0;
@@ -114,7 +114,7 @@ size_t AndroidAssetFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 
 
 
-void AndroidAssetFile::Seek(size_t numBytesToSeek, bool seekForward){
+void AssetFile::Seek(size_t numBytesToSeek, bool seekForward){
 		if(!this->IsOpened()){
 		throw File::Exc("file is not opened, cannot seek");
 	}
@@ -156,21 +156,21 @@ void AndroidAssetFile::Seek(size_t numBytesToSeek, bool seekForward){
 
 
 //override
-void AndroidAssetFile::SeekForward(size_t numBytesToSeek){
+void AssetFile::SeekForward(size_t numBytesToSeek){
 	this->Seek(numBytesToSeek, true);
 }
 
 
 
 //override
-void AndroidAssetFile::SeekBackward(size_t numBytesToSeek){
+void AssetFile::SeekBackward(size_t numBytesToSeek){
 	this->Seek(numBytesToSeek, false);
 }
 
 
 
 //override
-void AndroidAssetFile::Rewind(){
+void AssetFile::Rewind(){
 	if(!this->IsOpened()){
 		throw File::Exc("file is not opened, cannot rewind");
 	}
@@ -184,7 +184,7 @@ void AndroidAssetFile::Rewind(){
 
 
 //override
-bool AndroidAssetFile::Exists()const{
+bool AssetFile::Exists()const{
 	if(this->IsOpened()) //file is opened => it exists
 		return true;
 	
@@ -203,7 +203,7 @@ bool AndroidAssetFile::Exists()const{
 
 
 //override
-ting::Array<std::string> AndroidAssetFile::ListDirContents(size_t maxEntries){
+ting::Array<std::string> AssetFile::ListDirContents(size_t maxEntries){
 	if(!this->IsDir())
 		throw File::Exc("AndroidAssetFile::ListDirContents(): this is not a directory");
 

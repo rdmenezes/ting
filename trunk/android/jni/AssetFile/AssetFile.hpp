@@ -29,7 +29,6 @@ THE SOFTWARE. */
 
 #pragma once
 
-//TODO: uncomment this
 //#ifndef __ANDROID__
 //#error "Compiling in non-Android environment"
 //#endif
@@ -41,7 +40,7 @@ THE SOFTWARE. */
 
 
 
-namespace android_asset_file{
+namespace ting_android{
 
 
 
@@ -49,7 +48,7 @@ namespace android_asset_file{
  * @brief Android assets implementation of File interface.
  * Implementation of a ting::File interface for Android assets file system.
  */
-class AndroidAssetFile : public ting::File{
+class AssetFile : public ting::File{
 	AAssetManager* manager;
 	
 	ting::Inited<AAsset*, 0> handle;
@@ -59,7 +58,7 @@ public:
 	 * @brief Constructor.
      * @param pathName - initial path to set passed to File constructor.
      */
-	AndroidAssetFile(AAssetManager* manager, const std::string& pathName = std::string()) :
+	AssetFile(AAssetManager* manager, const std::string& pathName = std::string()) :
 			manager(manager),
 			File(pathName)
 	{
@@ -70,7 +69,7 @@ public:
 	 * @brief Destructor.
 	 * This destructor calls the Close() method.
 	 */
-	~AndroidAssetFile(){
+	~AssetFile(){
 		this->Close();
 	}
 
