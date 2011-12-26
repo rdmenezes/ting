@@ -1,8 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="79">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df name="src" root="../src">
+    <df name="jni" root="/home/ivan/prj/ting/android/jni">
+      <df name="AssetFile">
+        <in>AssetFile.cpp</in>
+        <in>AssetFile.hpp</in>
+      </df>
+      <df name="ting">
+        <in>Array.hpp</in>
+        <in>Buffer.hpp</in>
+        <in>Exc.hpp</in>
+        <in>FSFile.cpp</in>
+        <in>FSFile.hpp</in>
+        <in>File.cpp</in>
+        <in>File.hpp</in>
+        <in>PoolStored.hpp</in>
+        <in>Ptr.hpp</in>
+        <in>Ref.hpp</in>
+        <in>Signal.hpp</in>
+        <in>Singleton.hpp</in>
+        <in>Socket.cpp</in>
+        <in>Socket.hpp</in>
+        <in>Thread.cpp</in>
+        <in>Thread.hpp</in>
+        <in>Timer.cpp</in>
+        <in>Timer.hpp</in>
+        <in>WaitSet.cpp</in>
+        <in>WaitSet.hpp</in>
+        <in>atomic.hpp</in>
+        <in>codegen.h</in>
+        <in>config.hpp</in>
+        <in>debug.hpp</in>
+        <in>math.hpp</in>
+        <in>types.hpp</in>
+        <in>utils.hpp</in>
+      </df>
+      <in>main.cpp</in>
+    </df>
+    <df name="src" root="/home/ivan/prj/ting/src">
       <df name="obj">
+        <df name="1">
+          <df name="2">
+            <df name="ting">
+            </df>
+          </df>
+        </df>
       </df>
       <df name="ting">
         <in>Array.hpp</in>
@@ -34,7 +76,7 @@
         <in>utils.hpp</in>
       </df>
     </df>
-    <df name="tests" root="../tests">
+    <df name="tests" root="/home/ivan/prj/ting/tests">
       <df name="Array">
         <in>Array_test.cpp</in>
       </df>
@@ -105,9 +147,9 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
-    <Elem>../src</Elem>
-    <Elem>../tests</Elem>
-    <Elem>../android/jni</Elem>
+    <Elem>/home/ivan/prj/ting/src</Elem>
+    <Elem>/home/ivan/prj/ting/tests</Elem>
+    <Elem>/home/ivan/prj/ting/android/jni</Elem>
   </sourceRootList>
   <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
   <confs>
@@ -130,90 +172,144 @@
           </ccTool>
         </makeTool>
       </makefileType>
-      <item path="../src/ting/PoolStored.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/Ptr.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/Ref.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/Signal.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/Timer.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/codegen.h" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/math.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../src/ting/utils.hpp" ex="true" tool="3" flavor="0">
-      </item>
-      <item path="../tests/Array/Array_test.cpp" ex="true" tool="1" flavor="0">
-      </item>
-      <item path="../tests/PoolStored/PoolStored_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="../tests/Ptr/Ptr_test.cpp" ex="true" tool="1" flavor="0">
-      </item>
-      <item path="../tests/Ref/Ref_test.cpp" ex="true" tool="1" flavor="0">
-      </item>
-      <item path="../tests/RefOverSharedLibrary/Ref_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="../tests/RefOverSharedLibrary/TestClass.hpp"
+      <item path="/home/ivan/prj/ting/src/ting/PoolStored.hpp"
             ex="true"
             tool="3"
             flavor="0">
       </item>
-      <item path="../tests/RefOverSharedLibrary/testso.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
+      <item path="/home/ivan/prj/ting/src/ting/Ptr.hpp" ex="true" tool="3" flavor="0">
       </item>
-      <item path="../tests/RefOverSharedLibrary/testso.hpp"
-            ex="true"
-            tool="3"
-            flavor="0">
+      <item path="/home/ivan/prj/ting/src/ting/Ref.hpp" ex="true" tool="3" flavor="0">
       </item>
-      <item path="../tests/Signal/Signal_test.cpp" ex="true" tool="1" flavor="0">
-      </item>
-      <item path="../tests/SingletonOverSharedLibrary/Singleton_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="../tests/SingletonOverSharedLibrary/TestSingleton.hpp"
+      <item path="/home/ivan/prj/ting/src/ting/Signal.hpp"
             ex="true"
             tool="3"
             flavor="0">
       </item>
-      <item path="../tests/SingletonOverSharedLibrary/testso.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="../tests/SingletonOverSharedLibrary/testso.hpp"
+      <item path="/home/ivan/prj/ting/src/ting/Timer.hpp"
             ex="true"
             tool="3"
             flavor="0">
       </item>
-      <item path="../tests/Socket/Socket_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/src/ting/codegen.h"
+            ex="true"
+            tool="3"
+            flavor="0">
       </item>
-      <item path="../tests/Thread/Thread_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/src/ting/math.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
       </item>
-      <item path="../tests/Timer/Timer_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/src/ting/utils.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
       </item>
-      <item path="../tests/WaitSet/WaitSet_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/tests/Array/Array_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
       </item>
-      <item path="../tests/debug/debug_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/tests/PoolStored/PoolStored_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
       </item>
-      <item path="../tests/math/math_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/tests/Ptr/Ptr_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
       </item>
-      <item path="../tests/types/types_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/tests/Ref/Ref_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
       </item>
-      <item path="../tests/utils/utils_test.cpp" ex="true" tool="1" flavor="0">
+      <item path="/home/ivan/prj/ting/tests/RefOverSharedLibrary/Ref_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/RefOverSharedLibrary/TestClass.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/RefOverSharedLibrary/testso.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/RefOverSharedLibrary/testso.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/Signal/Signal_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/Singleton_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/TestSingleton.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/testso.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/testso.hpp"
+            ex="true"
+            tool="3"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/Socket/Socket_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/Thread/Thread_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/Timer/Timer_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/WaitSet/WaitSet_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/debug/debug_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/math/math_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/types/types_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
+      </item>
+      <item path="/home/ivan/prj/ting/tests/utils/utils_test.cpp"
+            ex="true"
+            tool="1"
+            flavor="0">
       </item>
     </conf>
   </confs>

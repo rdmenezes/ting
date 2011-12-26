@@ -148,10 +148,10 @@ inline void Serialize32(u32 value, u8* out_buf){
 
 
 /**
- * @brief deserialize 16 bit value.
- * Deserialize 16 bit value from the sequence of bytes. Assume that less significant
+ * @brief de-serialize 16 bit value.
+ * De-serialize 16 bit value from the sequence of bytes. Assume that less significant
  * byte goes first in the input byte sequence.
- * @param buf - pointer to buffer containig 2 bytes to convert from network format.
+ * @param buf - pointer to buffer containing 2 bytes to convert from network format.
  * @return 16 bit unsigned integer converted from network byte order to native byte order.
  */
 inline u16 Deserialize16(const u8* buf){
@@ -173,10 +173,10 @@ inline u16 Deserialize16(const u8* buf){
 
 
 /**
- * @brief deserialize 32 bit value.
- * Deserialize 32 bit value from the sequence of bytes. Assume that less significant
+ * @brief de-serialize 32 bit value.
+ * De-serialize 32 bit value from the sequence of bytes. Assume that less significant
  * byte goes first in the input byte sequence.
- * @param buf - pointer to buffer containig 4 bytes to convert from network format.
+ * @param buf - pointer to buffer containing 4 bytes to convert from network format.
  * @return 32 bit unsigned integer converted from network byte order to native byte order.
  */
 inline u32 Deserialize32(const u8* buf){
