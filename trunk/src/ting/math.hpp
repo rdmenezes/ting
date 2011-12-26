@@ -34,15 +34,11 @@ THE SOFTWARE. */
 #pragma once
 
 #include <cmath>
-#include <limits> //this is for std::numeric_limits<float>::quiet_NaN(); etc.
 
 
 
 namespace ting{
-
-//======================
-//Utility math functions
-//======================
+namespace math{
 
 /**
  * @brief Get sign of a number.
@@ -58,7 +54,7 @@ namespace ting{
  * @return 1 if the number is positive.
  */
 template <typename T> inline T Sign(T n){
-	return n < 0 ? (-1) : (1);
+	return n < 0 ? T(-1) : T(1);
 }
 
 
@@ -110,26 +106,6 @@ template <typename T> inline T DLnOf2(){
 
 
 
-/**
- * @brief Get Not-A-Number.
- * @return Not-A-Number value.
- */
-template <typename T> inline T DNaN(){
-	return std::numeric_limits<T>::quiet_NaN();
-}
-
-
-
-/**
- * @brief Get infinity value.
- * @return infinity value.
- */
-template <typename T> inline T DInf(){
-	return std::numeric_limits<T>::infinity();
-}
-
-
-
 //Power functions
 
 /**
@@ -159,7 +135,14 @@ template <typename T> inline T Pow4(T x){
  * @brief Calculate x^5.
  */
 template <typename T> inline T Pow5(T x){
-	return Pow2(x) * Pow3(x);
+	return Pow4(x) * x;
+}
+
+/**
+ * @brief Calculate x^6.
+ */
+template <typename T> inline T Pow6(T x){
+	return Pow2(Pow3(x));
 }
 
 
@@ -443,12 +426,12 @@ template <> inline long double Ln<long double>(long double x){
  */
 template <typename T> inline T CubicRoot(T x){
 	if(x > 0)
-		return ting::Exp<T>(ting::Ln<T>(x) / 3);
+		return Exp<T>(Ln<T>(x) / 3);
 	
 	if(x == 0)
 		return 0;
 	
-	return -ting::Exp<T>(ting::Ln<T>(-x) / 3);
+	return -Exp<T>(Ln<T>(-x) / 3);
 }
 
 
@@ -470,9 +453,9 @@ template <typename T> inline T Arg(T x, T y){
 	if(x == 0){
 		a = DPi<T>() / 2;
 	}else if(x > 0){
-		a = T(ting::Atan(Abs(y / x)));
+		a = T(Atan(Abs(y / x)));
 	}else{
-		a = DPi<T>() - T(ting::Atan(Abs(y / x)));
+		a = DPi<T>() - T(Atan(Abs(y / x)));
 	}
 
 	if(y >= 0){
@@ -483,5 +466,5 @@ template <typename T> inline T Arg(T x, T y){
 }
 
 
-
+}//~namespace math
 }//~namespace ting

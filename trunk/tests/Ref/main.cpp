@@ -529,6 +529,48 @@ void Run1(){
 
 
 
+namespace TestOverloadedOperatorDelete{
+
+bool DeleteCalled(bool called){
+	static bool deleteCalled = false;
+	
+	bool ret = deleteCalled;
+	
+	deleteCalled = called;
+	
+	return ret;
+}
+
+class TestClass : public ting::RefCounted{
+	int a;
+public:
+	
+	static inline ting::Ref<TestClass> New(){
+		return ting::Ref<TestClass>(new TestClass());
+	}
+	
+	static void operator delete(void* p){
+		bool res = DeleteCalled(true);
+		ASSERT_ALWAYS(!res);
+		::operator delete(p);
+	}
+};
+
+void Run(){
+	{
+		ASSERT_ALWAYS(!DeleteCalled(false))
+		ting::Ref<ting::RefCounted> a = TestClass::New();
+
+		ASSERT_ALWAYS(!DeleteCalled(false))
+	}
+	
+	ASSERT_ALWAYS(DeleteCalled(false))
+	ASSERT_ALWAYS(!DeleteCalled(false))
+}
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 //	TRACE(<< "Ref test" << std::endl)
 
@@ -553,6 +595,8 @@ int main(int argc, char *argv[]){
 	TestVirtualInheritedRefCounted::Run3();
 
 	TestConstantReferences::Run1();
+	
+	TestOverloadedOperatorDelete::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Ref test" << std::endl)
 

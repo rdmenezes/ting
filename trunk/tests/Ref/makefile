@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := Ref_test
+binary_name := tests
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -43,7 +43,7 @@ else
 endif
 
 
-$(binary_name): Ref_test.cpp
+$(binary_name): main.cpp
 	@echo Building $@...
 	@g++ -o $@ $(cf) $< $(libs)
 
