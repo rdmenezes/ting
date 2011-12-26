@@ -40,7 +40,6 @@ THE SOFTWARE. */
 
 #include "debug.hpp" //debugging facilities
 #include "types.hpp"
-#include "Thread.hpp"
 
 //define macro used to align structures in memory
 #ifdef _MSC_VER //If Microsoft C++ compiler
