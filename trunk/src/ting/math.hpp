@@ -162,6 +162,8 @@ template <typename T> inline T Pow5(T x){
 	return Pow2(x) * Pow3(x);
 }
 
+
+
 /**
  * @brief Calculates x^p.
  * @param x - value
@@ -169,8 +171,26 @@ template <typename T> inline T Pow5(T x){
  * @return x^p
  */
 template <typename T> inline T Pow(T x, T p){
+	return x.Pow(p);
+}
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Pow<float>(float x, float p){
 	return ::pow(x, p);
 }
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Pow<double>(double x, double p){
+	return ::pow(x, p);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Pow<long double>(long double x, long double p){
+	return ::pow(x, p);
+}
+#endif
 
 
 
@@ -181,23 +201,17 @@ template <typename T> inline T Sin(T x){
 	return x.Sin();
 }
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Sin<float>(float x){
 	return ::sin(x);
 }
 #endif
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Sin<double>(double x){
 	return ::sin(x);
 }
 #endif
-
-
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Sin<long double>(long double x){
@@ -214,23 +228,17 @@ template <typename T> inline T Cos(T x){
 	return x.Cos();
 }
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Cos<float>(float x){
 	return ::cos(x);
 }
 #endif
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Cos<double>(double x){
 	return ::cos(x);
 }
 #endif
-
-
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Cos<long double>(long double x){
@@ -241,11 +249,83 @@ template <> inline long double Cos<long double>(long double x){
 
 
 /**
+ * @brief Calculate tangent of a number.
+ */
+template <typename T> inline T Tan(T x){
+	return x.Tan();
+}
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Tan<float>(float x){
+	return ::tan(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Tan<double>(double x){
+	return ::tan(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Tan<long double>(long double x){
+	return ::tan(x);
+}
+#endif
+
+
+
+/**
+ * @brief Calculate arcsine of a number.
+ */
+template <typename T> inline T Asin(T x){
+	return x.Asin();
+}
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Asin<float>(float x){
+	return ::asin(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Asin<double>(double x){
+	return ::asin(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Asin<long double>(long double x){
+	return ::asin(x);
+}
+#endif
+
+
+
+/**
  * @brief Calculate arccosine of a number.
  */
 template <typename T> inline T Acos(T x){
-	return T(::acos(x));
+	return x.Acos();
 }
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Acos<float>(float x){
+	return ::acos(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Acos<double>(double x){
+	return ::acos(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Acos<long double>(long double x){
+	return ::acos(x);
+}
+#endif
 
 
 
@@ -253,8 +333,26 @@ template <typename T> inline T Acos(T x){
  * @brief Calculate arctangent of a number.
  */
 template <typename T> inline T Atan(T x){
-	return T(::atan(x));
+	return x.Atan();
 }
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Atan<float>(float x){
+	return ::atan(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Atan<double>(double x){
+	return ::atan(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Atan<long double>(long double x){
+	return ::atan(x);
+}
+#endif
 
 
 
@@ -262,8 +360,26 @@ template <typename T> inline T Atan(T x){
  * @brief Calculate square root of a number.
  */
 template <typename T> inline T Sqrt(T x){
-	return T(::sqrt(x));
+	return x.Sqrt();
 }
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline float Sqrt<float>(float x){
+	return ::sqrt(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline double Sqrt<double>(double x){
+	return ::sqrt(x);
+}
+#endif
+
+#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
+template <> inline long double Sqrt<long double>(long double x){
+	return ::sqrt(x);
+}
+#endif
 
 
 
@@ -274,23 +390,17 @@ template <typename T> inline T Exp(T x){
 	return x.Exp();
 }
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Exp<float>(float x){
 	return ::exp(x);
 }
 #endif
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Exp<double>(double x){
 	return ::exp(x);
 }
 #endif
-
-
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Exp<long double>(long double x){
@@ -308,23 +418,17 @@ template <typename T> inline T Ln(T x){
 	return x.Ln();
 }
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline float Ln<float>(float x){
 	return ::log(x);
 }
 #endif
 
-
-
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline double Ln<double>(double x){
 	return ::log(x);
 }
 #endif
-
-
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 template <> inline long double Ln<long double>(long double x){
