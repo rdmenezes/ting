@@ -170,7 +170,7 @@ void Run(){
 		ASSERT_ALWAYS(v == false)
 	}
 	
-	//operator->()
+	//operator->()const
 	{
 		const ting::Inited<TestClass*, 0> p;
 		
@@ -183,7 +183,7 @@ void Run(){
 		delete p;
 	}
 	
-	//operator->()const
+	//operator->()
 	{
 		ting::Inited<const TestClass*, 0> p;
 		
@@ -275,7 +275,24 @@ void Run(){
 		ASSERT_ALWAYS(a1 == 22)
 	}
 	
-}	
+	//operator&
+	{
+		ting::Inited<int, 10> a;
+		
+		int* ap = &a;
+		
+		ASSERT_ALWAYS(*ap == 10)
+	}
+	
+	//operator&()const
+	{
+		const ting::Inited<int, 10> a;
+		
+		int* ap = &a;
+		
+		ASSERT_ALWAYS(*ap == 10)
+	}
+}
 }//~namespace
 
 
