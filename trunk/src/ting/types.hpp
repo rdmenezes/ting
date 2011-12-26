@@ -187,12 +187,8 @@ public:
 	inline operator T&()const{
 		return const_cast<T&>(this->value);
 	}
-
-	inline T operator->(){
-		return this->value;
-	}
 	
-	inline const T operator->()const{
+	inline T operator->()const{
 		return this->value;
 	}
 
