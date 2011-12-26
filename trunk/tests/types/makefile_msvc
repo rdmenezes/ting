@@ -3,7 +3,7 @@ rtlib :=
 
 remove = del
 
-binary_name := types_test.exe
+binary_name := tests.exe
 
 
 #compiler flags
@@ -16,7 +16,7 @@ default: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): types_test.cpp
+$(binary_name): main.cpp
 	@echo Building $@...
 	@cl $(cf) $(threadlib) $(rtlib) $<
 

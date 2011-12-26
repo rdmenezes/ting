@@ -2,8 +2,113 @@
 
 
 
+namespace TestReferenceToInited{
+
+int Func(int& a){
+	int v = 126;
+	a = v;
+	return v;
+}
+
+int FuncConst(const int& a){
+	int v = 126;
+	return v + a;
+}
+
+void Run(){
+	{
+		ting::Inited<int, 10> a;
+
+		{
+			const int& b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			int& b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			const int b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			int b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		
+		int res = Func(a);
+
+		ASSERT_ALWAYS(a == res)
+	}
+	
+	{
+		ting::Inited<const int, 10> a;
+
+		{
+			const int& b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			int b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		
+		int res = FuncConst(a);
+
+		ASSERT_ALWAYS(a + 126 == res)
+	}
+	
+	{
+		const ting::Inited<int, 10> a;
+
+		{
+			const int& b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			int b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		
+		int res = FuncConst(a);
+
+		ASSERT_ALWAYS(a + 126 == res)
+	}
+	
+	{
+		const ting::Inited<const int, 10> a;
+
+		{
+			const int& b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		{
+			int b = a;
+			ASSERT_ALWAYS(b == a) //conversion to type
+			ASSERT_ALWAYS(a == b) //operator==()
+		}
+		
+		int res = FuncConst(a);
+
+		ASSERT_ALWAYS(a + 126 == res)
+	}
+}
+}//~namespace
+
+
 int main(int argc, char *argv[]){
 
+	TestReferenceToInited::Run();
+	
 	{
 		ting::Inited<int, -10> a;
 		ASSERT_ALWAYS(a == -10)
@@ -56,7 +161,7 @@ int main(int argc, char *argv[]){
 		ASSERT_ALWAYS(a == b)
 	}
 
-	//test operator=(const Inited&)
+	//test operator=
 	{
 		ting::Inited<int, 10> a;
 		ASSERT_ALWAYS(a == 10)

@@ -182,11 +182,15 @@ public:
 		this->value = val;
 		return *this;
 	}
-
-	inline operator T()const{
+	
+	inline operator const T&()const{
 		return this->value;
 	}
 
+	inline operator T&(){
+		return this->value;
+	}
+	
 	inline T operator->(){
 		return this->value;
 	}
