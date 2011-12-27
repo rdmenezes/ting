@@ -7,6 +7,7 @@ public class SharedLibLoaderNativeActivity extends NativeActivity {
 static {
 
 System.loadLibrary("gnustl_shared");
+System.loadLibrary("ting");
 System.loadLibrary("ting_test");
 }
 
