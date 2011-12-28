@@ -85,8 +85,8 @@ template <class T> class PoolStored{
 			{}
 		}
 		//Align by sizeof(int) boundary, just to be more safe.
-		//I once had a problem with pthread mutex when it was not aligned by 4 byte bounday,
-		//so I resolved this by declaring PoolElem struct as aligned by sizeof(int).
+		//I once had a problem with pthread mutex when it was not aligned by 4 byte boundary,
+		//so I resolved this by declaring PoolElem structure as aligned by sizeof(int).
 		M_DECLARE_ALIGNED(sizeof(int));
 
 
