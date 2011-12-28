@@ -63,7 +63,7 @@ STATIC_ASSERT(sizeof(int) == 4)
  * operators for that class so that the objects would be stored in the
  * memory pool instead of using standard memory manager to allocate memory.
  * Storing objects in memory pool allows to avoid memory fragmentation.
- * PoolStored is only useful for systems with large ammount of small and
+ * PoolStored is only useful for systems with large amount of small and
  * simple objects which have to be allocated dynamically (i.e. using new/delete
  * operators).
  * For example, PoolStored is used in ting::Ref (reference counted objects)
