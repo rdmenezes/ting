@@ -35,9 +35,11 @@ THE SOFTWARE. */
 #include <e32std.h>
 
 #elif defined(__ANDROID__)
-#include <sstream>
-#include <cassert>
-#include <android/log.h>
+	#undef NDEBUG // we want assertions to work, if we don't undef NDEBUG the assertions will be translated to nothing
+	#include <cassert>
+
+	#include <sstream>
+	#include <android/log.h>
 
 #else //assume more or less standard system
 #include <sstream>
