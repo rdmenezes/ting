@@ -108,6 +108,6 @@ public:
 	}
 };
 
-template <class T> typename Singleton<T>::T_Instance Singleton<T>::instance;
+template <class T> typename ting::Singleton<T>::T_Instance ting::Singleton<T>::instance;
 
 }//~namespace ting
