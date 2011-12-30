@@ -6,42 +6,48 @@
         <in>AssetFile.cpp</in>
         <in>AssetFile.hpp</in>
       </df>
-      <df name="ting">
-        <in>Array.hpp</in>
-        <in>Buffer.hpp</in>
-        <in>Exc.hpp</in>
-        <in>FSFile.cpp</in>
-        <in>FSFile.hpp</in>
-        <in>File.cpp</in>
-        <in>File.hpp</in>
-        <in>PoolStored.hpp</in>
-        <in>Ptr.hpp</in>
-        <in>Ref.hpp</in>
-        <in>Signal.hpp</in>
-        <in>Singleton.hpp</in>
-        <in>Socket.cpp</in>
-        <in>Socket.hpp</in>
-        <in>Thread.cpp</in>
-        <in>Thread.hpp</in>
-        <in>Timer.cpp</in>
-        <in>Timer.hpp</in>
-        <in>WaitSet.cpp</in>
-        <in>WaitSet.hpp</in>
-        <in>atomic.hpp</in>
-        <in>codegen.h</in>
-        <in>config.hpp</in>
-        <in>debug.hpp</in>
-        <in>math.hpp</in>
-        <in>types.hpp</in>
-        <in>utils.hpp</in>
+      <df name="test">
+        <in>main.cpp</in>
       </df>
-      <in>main.cpp</in>
+      <df name="ting">
+        <df name="ting">
+          <in>Array.hpp</in>
+          <in>Buffer.hpp</in>
+          <in>Exc.hpp</in>
+          <in>FSFile.cpp</in>
+          <in>FSFile.hpp</in>
+          <in>File.cpp</in>
+          <in>File.hpp</in>
+          <in>PoolStored.hpp</in>
+          <in>Ptr.hpp</in>
+          <in>Ref.hpp</in>
+          <in>Signal.hpp</in>
+          <in>Singleton.hpp</in>
+          <in>Socket.cpp</in>
+          <in>Socket.hpp</in>
+          <in>Thread.cpp</in>
+          <in>Thread.hpp</in>
+          <in>Timer.cpp</in>
+          <in>Timer.hpp</in>
+          <in>WaitSet.cpp</in>
+          <in>WaitSet.hpp</in>
+          <in>atomic.hpp</in>
+          <in>codegen.h</in>
+          <in>config.hpp</in>
+          <in>debug.hpp</in>
+          <in>math.hpp</in>
+          <in>types.hpp</in>
+          <in>utils.hpp</in>
+        </df>
+      </df>
     </df>
     <df name="src" root="/home/ivan/prj/ting/src">
       <df name="obj">
         <df name="1">
           <df name="2">
             <df name="ting">
+              <in>FSFile.d</in>
+              <in>File.d</in>
             </df>
           </df>
         </df>
@@ -102,7 +108,7 @@
         <in>Ptr_test.cpp</in>
       </df>
       <df name="Ref">
-        <in>Ref_test.cpp</in>
+        <in>main.cpp</in>
       </df>
       <df name="RefOverSharedLibrary">
         <in>Ref_test.cpp</in>
@@ -129,7 +135,7 @@
         <in>Timer_test.cpp</in>
       </df>
       <df name="types">
-        <in>types_test.cpp</in>
+        <in>main.cpp</in>
       </df>
       <df name="utils">
         <in>utils_test.cpp</in>
@@ -221,11 +227,6 @@
             tool="1"
             flavor="0">
       </item>
-      <item path="/home/ivan/prj/ting/tests/Ref/Ref_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
       <item path="/home/ivan/prj/ting/tests/RefOverSharedLibrary/Ref_test.cpp"
             ex="true"
             tool="1"
@@ -297,11 +298,6 @@
             flavor="0">
       </item>
       <item path="/home/ivan/prj/ting/tests/math/math_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="/home/ivan/prj/ting/tests/types/types_test.cpp"
             ex="true"
             tool="1"
             flavor="0">

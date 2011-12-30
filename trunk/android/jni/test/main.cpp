@@ -911,7 +911,7 @@ void android_main(struct android_app* state) {
 	
 	
 	
-	
+	ASSERT_ALWAYS(false)
 	
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
 

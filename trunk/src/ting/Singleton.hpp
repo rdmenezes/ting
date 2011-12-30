@@ -34,6 +34,9 @@ THE SOFTWARE. */
 
 #include "Exc.hpp"
 #include "debug.hpp"
+#include "types.hpp"
+
+
 
 namespace ting{
 
@@ -57,19 +60,14 @@ namespace ting{
  * @endcode
  */
 template <class T> class Singleton{
-	
-	inline static T*& StaticMemoryBlock(){
-		static T* instance = 0;
-		return instance;
-	}
 
 protected://use only as a base class
 	Singleton(){
-		if(Singleton::StaticMemoryBlock() != 0){
+		if(Singleton::instance != 0){
 			throw ting::Exc("Singleton::Singleton(): instance is already created");
 		}
 
-		Singleton::StaticMemoryBlock() = static_cast<T*>(this);
+		Singleton::instance = static_cast<T*>(this);
 	}
 
 private:
@@ -78,7 +76,13 @@ private:
 	Singleton(const Singleton&);
 	Singleton& operator=(const Singleton&);
 
+private:
+	typedef ting::Inited<T*, 0> T_Instance;
+	
+	static T_Instance instance;
+	
 public:
+	
 	/**
 	 * @brief tells if singleton object is created or not.
 	 * Note, this function is not thread safe.
@@ -86,7 +90,7 @@ public:
 	 * @return false otherwise.
 	 */
 	inline static bool IsCreated(){
-		return Singleton::StaticMemoryBlock() != 0;
+		return Singleton::instance != 0;
 	}
 
 	/**
@@ -95,13 +99,15 @@ public:
 	 */
 	inline static T& Inst(){
 		ASSERT_INFO(Singleton::IsCreated(), "Singleton::Inst(): Singleton object is not created")
-		return *(Singleton::StaticMemoryBlock());
+		return *Singleton::instance;
 	}
 
 	~Singleton(){
-		ASSERT(Singleton::StaticMemoryBlock() == static_cast<T*>(this))
-		Singleton::StaticMemoryBlock() = 0;
+		ASSERT(Singleton::instance == static_cast<T*>(this))
+		Singleton::instance = 0;
 	}
 };
+
+template <class T> typename Singleton<T>::T_Instance Singleton<T>::instance;
 
 }//~namespace ting
