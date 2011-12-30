@@ -917,6 +917,8 @@ void android_main(struct android_app* state) {
 
 	ting::TimerLib timerLib;
 	
+	ASSERT_ALWAYS(ting::TimerLib::IsCreated())
+	
 	ting::Mutex testMutex;
 
 	ting::WaitSet testWaitset(3);

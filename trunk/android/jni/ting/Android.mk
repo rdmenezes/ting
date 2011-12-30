@@ -20,4 +20,4 @@ LOCAL_SRC_FILES += ting/Timer.cpp
 
 LOCAL_LDLIBS    := -llog
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
