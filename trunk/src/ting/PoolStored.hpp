@@ -179,13 +179,17 @@ public:
 		}
 		ASSERT(false)
 	}
-
-	static MemoryPool instance;
 };//~template class MemoryPool
 
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> typename ting::MemoryPool<ElemSize, NumElemsInChunk> ting::MemoryPool<ElemSize, NumElemsInChunk>::instance;
+template <size_t ElemSize, size_t NumElemsInChunk> class StaticMemoryPool : public MemoryPool<ElemSize, NumElemsInChunk>{
+public:
+	static StaticMemoryPool instance;
+};
+
+
+template <size_t ElemSize, size_t NumElemsInChunk> typename ting::StaticMemoryPool<ElemSize, NumElemsInChunk> ting::StaticMemoryPool<ElemSize, NumElemsInChunk>::instance;
 
 
 
@@ -217,11 +221,11 @@ public:
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
 		}
 
-		return MemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Alloc();
+		return StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Alloc();
 	}
 
 	inline static void operator delete(void *p){
-		MemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Free(p);
+		StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Free(p);
 	}
 
 private:
