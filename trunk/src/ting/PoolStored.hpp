@@ -103,7 +103,7 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 		typedef std::list<Chunk> T_List;
 		typedef typename T_List::iterator T_Iter;
 		T_List chunks;
-		ting::Mutex mutex;
+		ting::Mutex mutex; //TODO: consider using spinlock after rewriting for faster allocation/deallocation
 
 		~ChunksList(){
 //				TRACE(<< "PoolStored::ChunksList::~ChunksList(): invoked" << std::endl)
@@ -183,13 +183,22 @@ public:
 
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> class StaticMemoryPool : public MemoryPool<ElemSize, NumElemsInChunk>{
+template <size_t ElemSize, size_t NumElemsInChunk> class StaticMemoryPool{
+	static MemoryPool<ElemSize, NumElemsInChunk> instance;
 public:
-	static StaticMemoryPool instance;
+	
+	static inline void* Alloc(){
+		return instance.Alloc();
+	}
+	
+	static inline void Free(void* p){
+		instance.Free(p);
+	}
 };
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> typename ting::StaticMemoryPool<ElemSize, NumElemsInChunk> ting::StaticMemoryPool<ElemSize, NumElemsInChunk>::instance;
+
+template <size_t ElemSize, size_t NumElemsInChunk> typename ting::MemoryPool<ElemSize, NumElemsInChunk> ting::StaticMemoryPool<ElemSize, NumElemsInChunk>::instance;
 
 
 
@@ -221,11 +230,11 @@ public:
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
 		}
 
-		return StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Alloc();
+		return StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::Alloc();
 	}
 
 	inline static void operator delete(void *p){
-		StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::instance.Free(p);
+		StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::Free(p);
 	}
 
 private:
