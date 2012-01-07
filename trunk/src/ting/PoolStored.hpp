@@ -79,9 +79,9 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 		
 		ting::Inited<size_t, 0> numAllocated;
 		
-		ting::Inited<size_t, 0> freeIndex;
+		ting::Inited<size_t, 0> freeIndex;//Used for first pass of elements allocation.
 		
-		ting::Inited<PoolElem*, 0> firstFree;
+		ting::Inited<PoolElem*, 0> firstFree;//After element is freed it is placed into the single-linked list of free elements.
 		
 		inline Chunk(){
 			//there is no reason in memory pool with only 1 element per chunk.
@@ -124,14 +124,13 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 		Chunk& operator=(const Chunk&);//assignment is not allowed (no operator=() implementation provided)
 	};
 
-	ting::Inited<unsigned, 0> numChunks; //this is only to make sure that there are no chunks upon memory pool destruction
-	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list
+	ting::Inited<unsigned, 0> numChunks; //this is only used for making sure that there are no chunks upon memory pool destruction
+	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list (looped list)
 	ting::Mutex mutex; //TODO: consider using spinlock
 	
 public:
 	~MemoryPool(){
 		ASSERT_INFO(this->numChunks == 0, "MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
-		
 	}
 
 public:
