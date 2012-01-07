@@ -98,7 +98,7 @@ class RefCounted{
 
 private:
 
-	struct Counter : public PoolStored<Counter>{
+	struct Counter : public PoolStored<Counter, 512>{
 		ting::atomic::S32 numStrongRefs;
 
 		//WeakRef's are the references which control the life time of the Counter object.

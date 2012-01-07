@@ -6,7 +6,7 @@
 
 
 
-class TestClass : public ting::PoolStored<TestClass>{
+class TestClass : public ting::PoolStored<TestClass, 13>{
 public:
 	int a;
 	int b;

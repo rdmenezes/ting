@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -74,42 +74,39 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 	//so I resolved this by declaring PoolElem structure as aligned by sizeof(int).
 	M_DECLARE_ALIGNED(sizeof(int));
 
-
-	struct Chunk : public ting::Array<PoolElem>{ //consider using static buffer and self made linked list of Chunks
+	struct Chunk : public ting::StaticBuffer<PoolElem, NumElemsInChunk>{
+		Chunk *next, *prev; //for linked list
+		
 		ting::Inited<size_t, 0> numAllocated;
 		
 		ting::Inited<size_t, 0> freeIndex;
 		
 		ting::Inited<PoolElem*, 0> firstFree;
 		
-		Chunk() :
-				ting::Array<PoolElem>(NumElemsInChunk)
-		{}
-
-		Chunk(const Chunk& c) :
-				ting::Array<PoolElem>(c),
-				numAllocated(c.numAllocated),
-				freeIndex(c.freeIndex),
-				firstFree(c.firstFree)
-		{
-			const_cast<Chunk&>(c).numAllocated = 0;//to prevent assert in destructor
-			M_POOL_TRACE(<< "Chunk::Chunk(copy): invoked" << std::endl)
+		inline Chunk(){
+			//there is no reason in memory pool with only 1 element per chunk.
+			//This assumption will also help later to  determine if chunk was
+			//not full before it become empty, so it should reside in the free
+			//chunks list upon turning empty.
+			ASSERT(this->Size() > 1)
 		}
 
-		~Chunk(){
-			ASSERT_INFO(this->numAllocated == 0, "this->numAllocated = " << this->numAllocated << " should be 0")
-		}
-		
 		inline bool IsFull()const{
-			return this->numAllocated == this->Suze();
+			return this->numAllocated == this->Size();
 		}
 		
-		inline void* Alloc(){
-			if(this->numAllocated < this->Size()){
-				PoolElem* ret = &this->operator[this->numAllocated];
+		inline bool IsEmpty()const{
+			return this->numAllocated == 0;
+		}
+		
+		inline PoolElem* Alloc(){
+			if(this->freeIndex != this->Size()){
+				ASSERT(this->freeIndex < this->Size())
+				PoolElem* ret = &this->operator[](this->freeIndex);
 				++this->numAllocated;
+				++this->freeIndex;
 				ret->parent = this;
-				return static_cast<BufHolder*>(ret);
+				return ret;
 			}
 			
 			ASSERT(this->firstFree)
@@ -118,37 +115,51 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 			ASSERT(ret->parent == this)
 			this->firstFree = ret->next;
 			++this->numAllocated;
-			return static_cast<BufHolder*>(ret);
+			ASSERT(this->numAllocated <= this->Size())
+			return ret;
 		}
 
 	private:
+		Chunk(const Chunk&);
 		Chunk& operator=(const Chunk&);//assignment is not allowed (no operator=() implementation provided)
 	};
 
-
-	typedef std::list<Chunk> T_ChunksList;
-	typedef typename T_List::iterator T_ChunksIter;
-	T_ChunksList chunks;
+	ting::Inited<unsigned, 0> numChunks;
+	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list
 	ting::Mutex mutex; //TODO: consider using spinlock
 	
 public:
 	~MemoryPool(){
-		ASSERT_INFO(this->chunks.size() == 0, "MemoryPool: cannot destroy chunk list because it is not empty (" << this->chunks.size() << "). Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
+		ASSERT_INFO(this->numChunks == 0, "MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
+		
 	}
 
 public:
 	void* Alloc_ts(){
 		ting::Mutex::Guard mutexGuard(this->mutex);
 		
-		if(this->chunks.size() == 0 || this->chunks.front().IsFull()){
-			this->chunks.push_front(Chunk());
+		if(this->freeHead == 0){
+			Chunk* c = new Chunk();
+			c->next = c;
+			c->prev = c;
+			this->freeHead = c;
+			++this->numChunks;
 		}
 		
-		void* ret = this->chunks.front().Alloc();
+		ASSERT(this->freeHead)
+		ASSERT(!this->freeHead->IsFull())
 		
-		if(this->chunks.front().IsFull()){
-			this->chunks.push_back(this->chunks.front());
-			this->chunks.pop_front();
+		void* ret = static_cast<BufHolder*>(this->freeHead->Alloc());
+		
+		if(this->freeHead->IsFull()){
+			//remove chunk from free chunks list
+			if(this->freeHead->next == this->freeHead){//if it is the only one chunk in the list
+				this->freeHead = 0;
+			}else{
+				this->freeHead->prev->next = this->freeHead->next;
+				this->freeHead->next->prev = this->freeHead->prev;
+				this->freeHead = this->freeHead->next;
+			}
 		}
 		
 		return ret;
@@ -159,14 +170,48 @@ public:
 		
 		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
 		
-		ASSERT(e->parent->numAllocated > 0)
-		e->next = e->parent->firstFree;
-		e->parent->firstFree = e;
-		--e->parent->numAllocated;
+		Chunk *c = e->parent;
 		
-		if(!e->parent->IsFull()){
-			
+		ASSERT(c->numAllocated > 0)
+		e->next = c->firstFree;
+		c->firstFree = e;
+		
+		if(c->numAllocated == 1){//freed last element in the chunk
+			ASSERT(c->Size() >= 2)
+			//remove chunk, it should be in free chunks list
+			if(this->freeHead->next == this->freeHead){//if it is the only one chunk in the list
+				ASSERT(this->freeHead->prev == this->freeHead)
+				ASSERT(this->freeHead == c)
+				this->freeHead = 0;
+			}else{
+				ASSERT(this->freeHead->prev != this->freeHead)
+				this->freeHead->prev->next = this->freeHead->next;
+				this->freeHead->next->prev = this->freeHead->prev;
+				if(this->freeHead == c){
+					this->freeHead = this->freeHead->next;
+				}
+			}
+			delete c;
+			--this->numChunks;
+			return;
 		}
+		
+		if(c->IsFull()){//is full before freeing the element, need to add to the list of free chunks
+			//move chunk to the beginning of the list
+			ASSERT(c != this->freeHead)
+			if(this->freeHead == 0){
+				c->next = c;
+				c->prev = c;
+				this->freeHead = c;
+			}else{
+				c->prev = this->freeHead;
+				c->next = this->freeHead->next;
+				c->prev->next = c;
+				c->next->prev = c;
+			}
+		}
+		
+		--c->numAllocated;
 	}
 };//~template class MemoryPool
 
@@ -205,7 +250,7 @@ template <size_t ElemSize, size_t NumElemsInChunk> typename ting::MemoryPool<Ele
  * pointer to reference counted object.
  * NOTE: class derived from PoolStored SHALL NOT be used as a base class further.
  */
-template <class T> class PoolStored{
+template <class T, unsigned num_elements_in_chunk> class PoolStored{
 
 protected:
 	//this should only be used as a base class
@@ -219,11 +264,11 @@ public:
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
 		}
 
-		return StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::Alloc_ts();
+		return StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Alloc_ts();
 	}
 
 	inline static void operator delete(void *p){
-		StaticMemoryPool<sizeof(T), ((8192 / sizeof(T)) < 32) ? 32 : (8192 / sizeof(T))>::Free_ts(p);
+		StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Free_ts(p);
 	}
 
 private:
