@@ -28,6 +28,7 @@ cf := $(ecf)
 cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
+cf += -g
 
 default: $(binary_name)
 
