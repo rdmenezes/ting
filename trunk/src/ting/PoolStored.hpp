@@ -58,9 +58,9 @@ STATIC_ASSERT(sizeof(int) == 4)
 
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{		
+template <size_t element_size, size_t num_elements_in_chunk> class MemoryPool{		
 	struct BufHolder{
-		u8 buf[ElemSize];
+		u8 buf[element_size];
 	};
 	
 	struct Chunk;
@@ -74,7 +74,7 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 	//so I resolved this by declaring PoolElem structure as aligned by sizeof(int).
 	M_DECLARE_ALIGNED(sizeof(int));
 
-	struct Chunk : public ting::StaticBuffer<PoolElem, NumElemsInChunk>{
+	struct Chunk : public ting::StaticBuffer<PoolElem, num_elements_in_chunk>{
 		Chunk *next, *prev; //for linked list
 		
 		ting::Inited<size_t, 0> numAllocated;
@@ -172,10 +172,8 @@ public:
 		Chunk *c = e->parent;
 		
 		ASSERT(c->numAllocated > 0)
-		e->next = c->firstFree;
-		c->firstFree = e;
 		
-		if(c->numAllocated == 1){//freed last element in the chunk
+		if(c->numAllocated == 1){//freeing last element in the chunk
 			ASSERT(c->Size() >= 2)
 			//remove chunk, it should be in free chunks list
 			if(this->freeHead->next == this->freeHead){//if it is the only one chunk in the list
@@ -195,7 +193,7 @@ public:
 			return;
 		}
 		
-		if(c->IsFull()){//is full before freeing the element, need to add to the list of free chunks
+		if(c->IsFull()){//if chunk is full before freeing the element, need to add to the list of free chunks
 			//move chunk to the beginning of the list
 			ASSERT(c != this->freeHead)
 			if(this->freeHead == 0){
@@ -210,14 +208,16 @@ public:
 			}
 		}
 		
+		e->next = c->firstFree;
+		c->firstFree = e;
 		--c->numAllocated;
 	}
 };//~template class MemoryPool
 
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> class StaticMemoryPool{
-	static MemoryPool<ElemSize, NumElemsInChunk> instance;
+template <size_t element_size, size_t num_elements_in_chunk> class StaticMemoryPool{
+	static MemoryPool<element_size, num_elements_in_chunk> instance;
 public:
 	
 	static inline void* Alloc_ts(){
@@ -231,7 +231,7 @@ public:
 
 
 
-template <size_t ElemSize, size_t NumElemsInChunk> typename ting::MemoryPool<ElemSize, NumElemsInChunk> ting::StaticMemoryPool<ElemSize, NumElemsInChunk>::instance;
+template <size_t element_size, size_t num_elements_in_chunk> typename ting::MemoryPool<element_size, num_elements_in_chunk> ting::StaticMemoryPool<element_size, num_elements_in_chunk>::instance;
 
 
 
