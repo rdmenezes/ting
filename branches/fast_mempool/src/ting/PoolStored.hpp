@@ -124,7 +124,7 @@ template <size_t ElemSize, size_t NumElemsInChunk> class MemoryPool{
 		Chunk& operator=(const Chunk&);//assignment is not allowed (no operator=() implementation provided)
 	};
 
-	ting::Inited<unsigned, 0> numChunks;
+	ting::Inited<unsigned, 0> numChunks; //this is only to make sure that there are no chunks upon memory pool destruction
 	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list
 	ting::Mutex mutex; //TODO: consider using spinlock
 	
