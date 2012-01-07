@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -98,7 +98,7 @@ class RefCounted{
 
 private:
 
-	struct Counter : public PoolStored<Counter, 512>{
+	struct Counter{
 		ting::atomic::S32 numStrongRefs;
 
 		//WeakRef's are the references which control the life time of the Counter object.
@@ -116,9 +116,21 @@ private:
 		inline ~Counter(){
 			M_REF_PRINT(<< "Counter::~Counter(): counter object destroyed" << std::endl)
 		}
+		
+		inline static void* operator new(size_t size){
+			ASSERT(size == sizeof(Counter))
+
+			return RefCounted::memoryPool.Alloc_ts();
+		}
+
+		inline static void operator delete(void *p){
+			RefCounted::memoryPool.Free_ts(p);
+		}
 	};
 
-
+	
+	//Memory pool for Counter objects
+	static ting::MemoryPool<sizeof(Counter), 512> memoryPool;
 
 	Counter *counter;
 

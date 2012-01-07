@@ -39,6 +39,7 @@ endif
 srcs :=
 srcs += ting/File.cpp
 srcs += ting/FSFile.cpp
+srcs += ting/Ref.cpp
 srcs += ting/Socket.cpp
 srcs += ting/Thread.cpp
 srcs += ting/Timer.cpp
