@@ -42,6 +42,33 @@ namespace ting{
 
 
 
+/**
+ * @brief Intrusive singleton base class.
+ * This is a basic intrusive singleton template.
+ * Template params: T - your singletone class type, T_InstanceOwner - class which owns the static 'instance' variable.
+ * In most cases T_InstanceOwner is the same as T.
+ * Usage as follows:
+ * @code
+ *	class MySingleton : public ting::IntrusiveSingleton<MySingleton, MySingleton>{
+ *		friend class ting::IntrusiveSingleton<MySingleton, MySingleton>;
+ *		static ting::IntrusiveSingleton<MySingleton, MySingleton>::T_Instance instance;
+ * 
+ *	public:
+ *		void DoSomething(){
+ *			//...
+ *		}
+ *  };
+ * 
+ *	//define the static variable somewhere in .cpp file.
+ *  ting::IntrusiveSingleton<MySingleton, MySingleton>::T_Instance MySingleton::instance;
+ *
+ *	int main(int, char**){
+ *		MySingleton mySingleton;
+ *
+ *		MySingleton::Inst().DoSomething();
+ *	}
+ * @endcode
+ */
 template <class T, class T_InstanceOwner = T> class IntrusiveSingleton{
 
 protected://use only as a base class
@@ -91,8 +118,10 @@ public:
 
 
 /**
- * @brief singleton base class.
- * This is a basic singleton template.
+ * @brief Singleton base class.
+ * This is a basic non-intrusive singleton template.
+ * Note, that Singleton inherits the IntrusiveSingleton class, so it inherits all
+ * its static methods, the most important one is Inst().
  * Usage as follows:
  * @code
  *	class MySingleton : public ting::Singleton<MySingleton>{
