@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,56 @@ THE SOFTWARE. */
 
 namespace ting{
 
+
+
+template <class T, class T_InstanceOwner = T> class IntrusiveSingleton{
+
+protected://use only as a base class
+	IntrusiveSingleton(){
+		if(T_InstanceOwner::instance != 0){
+			throw ting::Exc("Singleton::Singleton(): instance is already created");
+		}
+
+		T_InstanceOwner::instance = static_cast<T*>(this);
+	}
+
+	typedef ting::Inited<T*, 0> T_Instance;
+	
+private:
+
+	//copying is not allowed
+	IntrusiveSingleton(const IntrusiveSingleton&);
+	IntrusiveSingleton& operator=(const IntrusiveSingleton&);
+	
+public:
+	
+	/**
+	 * @brief tells if singleton object is created or not.
+	 * Note, this function is not thread safe.
+	 * @return true if object is created.
+	 * @return false otherwise.
+	 */
+	inline static bool IsCreated(){
+		return T_InstanceOwner::instance != 0;
+	}
+
+	/**
+	 * @brief get singleton instance.
+	 * @return reference to singleton object instance.
+	 */
+	inline static T& Inst(){
+		ASSERT_INFO(IsCreated(), "IntrusiveSingleton::Inst(): Singleton object is not created")
+		return *T_InstanceOwner::instance;
+	}
+
+	~IntrusiveSingleton(){
+		ASSERT(T_InstanceOwner::instance == static_cast<T*>(this))
+		T_InstanceOwner::instance = 0;
+	}
+};
+
+
+
 /**
  * @brief singleton base class.
  * This is a basic singleton template.
@@ -59,17 +109,11 @@ namespace ting{
  *	}
  * @endcode
  */
-template <class T> class Singleton{
-
-protected://use only as a base class
-	Singleton(){
-		if(Singleton::instance != 0){
-			throw ting::Exc("Singleton::Singleton(): instance is already created");
-		}
-
-		Singleton::instance = static_cast<T*>(this);
-	}
-
+template <class T> class Singleton : public IntrusiveSingleton<T, Singleton<T> >{
+	friend class IntrusiveSingleton<T, Singleton<T> >;
+public:
+	inline Singleton(){}
+	
 private:
 
 	//copying is not allowed
@@ -77,37 +121,10 @@ private:
 	Singleton& operator=(const Singleton&);
 
 private:
-	typedef ting::Inited<T*, 0> T_Instance;
 	
-	static T_Instance instance;
-	
-public:
-	
-	/**
-	 * @brief tells if singleton object is created or not.
-	 * Note, this function is not thread safe.
-	 * @return true if object is created.
-	 * @return false otherwise.
-	 */
-	inline static bool IsCreated(){
-		return Singleton::instance != 0;
-	}
-
-	/**
-	 * @brief get singleton instance.
-	 * @return reference to singleton object instance.
-	 */
-	inline static T& Inst(){
-		ASSERT_INFO(Singleton::IsCreated(), "Singleton::Inst(): Singleton object is not created")
-		return *Singleton::instance;
-	}
-
-	~Singleton(){
-		ASSERT(Singleton::instance == static_cast<T*>(this))
-		Singleton::instance = 0;
-	}
+	static typename IntrusiveSingleton<T, Singleton<T> >::T_Instance instance;
 };
 
-template <class T> typename ting::Singleton<T>::T_Instance ting::Singleton<T>::instance;
+template <class T> typename ting::IntrusiveSingleton<T, Singleton<T> >::T_Instance ting::Singleton<T>::instance;
 
 }//~namespace ting
