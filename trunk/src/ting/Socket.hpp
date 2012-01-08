@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -323,7 +323,10 @@ private:
  * destructor will be called and the library will be deinitialized automatically.
  * This is what C++ RAII is all about ;-).
  */
-class SocketLib : public Singleton<SocketLib>{
+class SocketLib : public IntrusiveSingleton<SocketLib>{
+	friend class IntrusiveSingleton<SocketLib>;
+	static IntrusiveSingleton<SocketLib>::T_Instance instance;
+	
 public:
 	SocketLib();
 

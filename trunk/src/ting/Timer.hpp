@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -208,7 +208,10 @@ public:
  * the timer library, this is done just by creating the singleton object of
  * the timer library class.
  */
-class TimerLib : public Singleton<TimerLib>{
+class TimerLib : public IntrusiveSingleton<TimerLib>{
+	friend class IntrusiveSingleton<TimerLib>;
+	static IntrusiveSingleton<TimerLib>::T_Instance instance;
+	
 	friend class ting::Timer;
 
 	class TimerThread : public ting::Thread{
@@ -225,10 +228,11 @@ class TimerLib : public Singleton<TimerLib>{
 
 
 		ting::Inited<ting::u64, 0> ticks;
-		ting::Inited<bool, false> incTicks;//flag indicates that high dword of ticks needs increment
+		ting::Inited<bool, false> incTicks;//flag indicates that high word of ticks needs increment
 
-		//This function should be called at least once in 16 days (half of ting::u32(-1) milliseconds).
-		//This should be achieved by having a repeating timer set to 16 days, which will do nothing but
+		//This function should be called at least once in 16 days (half of ting::u32(-1) milliseconds)
+		//in order to function properly.
+		//This is achieved by having a repeating timer set to 16 days, which will do nothing but
 		//calling this function.
 		inline ting::u64 GetTicks();
 
