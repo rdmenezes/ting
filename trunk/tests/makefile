@@ -8,6 +8,7 @@ subdirs += math
 subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
+subdirs += RefOverSharedLibrary
 subdirs += Signal
 subdirs += Socket
 subdirs += Thread
@@ -24,7 +25,6 @@ ifeq ($(platform),win32)
 else
 
 subdirs += SingletonOverSharedLibrary
-subdirs += RefOverSharedLibrary
 
 endif
 

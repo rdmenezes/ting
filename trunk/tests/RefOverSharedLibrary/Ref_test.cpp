@@ -5,7 +5,7 @@
 
 
 int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<< "Started" << std::endl)
+	TRACE_ALWAYS(<< "Started" << std::endl)
 
 	bool destroyed = false;
 

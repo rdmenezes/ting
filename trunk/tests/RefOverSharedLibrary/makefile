@@ -16,7 +16,7 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := -mwindows
+    libs := ../../src/libting.dll -mwindows
     remove := del /Q /F
 else
     libs := ../../src/libting.so
@@ -38,7 +38,8 @@ default: $(binary_name)
 test: $(binary_name)
 	@echo running $^...
 ifeq ($(platform),win32)
-	@./$^
+	@copy /Y ..\..\src\libting.dll .
+	@$^
 else
 	@LD_LIBRARY_PATH=../../src:. ./$^
 endif
@@ -47,8 +48,12 @@ endif
 
 
 lib$(lib_name).$(lib_ext): testso.cpp
+ifeq ($(platform),win32)
+	@g++ $< -shared -o lib$(lib_name).$(lib_ext) $(cf)
+else
 #use -fPIC (position-independent code) for shared libraries.
 	@g++ $< -shared -fPIC -o lib$(lib_name).$(lib_ext) $(cf)
+endif
 
 
 
