@@ -40,7 +40,11 @@ THE SOFTWARE. */
 
 #if M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
+		M_CPU == M_CPU_ARM
+
+	#if M_CPU_ARM_THUMB == 1
+		#error "ARM Thumb-1 does not support atomic operations, switch to ARM mode or Thumb-2 mode"
+	#endif
 
 #elif M_OS == M_OS_WIN32
 	#include <windows.h>
