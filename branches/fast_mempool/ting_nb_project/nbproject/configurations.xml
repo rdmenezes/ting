@@ -20,6 +20,7 @@
           <in>File.hpp</in>
           <in>PoolStored.hpp</in>
           <in>Ptr.hpp</in>
+          <in>Ref.cpp</in>
           <in>Ref.hpp</in>
           <in>Signal.hpp</in>
           <in>Singleton.hpp</in>
@@ -46,6 +47,7 @@
         <df name="1">
           <df name="2">
             <df name="ting">
+              <in>File.d</in>
             </df>
           </df>
         </df>
