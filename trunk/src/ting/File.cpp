@@ -24,6 +24,8 @@ THE SOFTWARE. */
 
 
 
+#include <list>
+
 #include "File.hpp"
 #include "utils.hpp"
 
@@ -113,49 +115,80 @@ void File::MakeDir(){
 
 
 namespace{
-size_t DReadBlockSize = 4096;
+const size_t DReadBlockSize = 4 * 1024;
 }
 
 
 
-ting::Array<ting::u8> File::LoadWholeFileIntoMemory(){
-	if(this->IsOpened())
+ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
+	if(this->IsOpened()){
 		throw File::Exc("file should not be opened");
+	}
 
 	File::Guard fileGuard(*this, File::READ);//make sure we close the file upon exit from the function
 
-	//two arrays
-	ting::Array<ting::u8> a(DReadBlockSize); //start with 4kb
-	ting::Array<ting::u8> b;
-
-	//two pointers
-	ting::Array<ting::u8> *currArr = &a;
-	ting::Array<ting::u8> *freeArr = &b;
-
-	size_t numBytesRead = 0;
-	size_t numBytesReadLastOp = 0;
+	//Define a class derived from StaticBuffer. This is just to define custom
+	//copy constructor which will do nothing to avoid unnecessary buffer copying when
+	//inserting new element to the list of chunks.
+	struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
+		inline Chunk(){}
+		inline Chunk(const chunk&){}
+	};
+	
+	std::list<Chunk> chunks;
+	
+	size_t res;
+	size_t bytesRead = 0;
+	
 	for(;;){
-		if( currArr->Size() < (numBytesRead + DReadBlockSize) ){
-			freeArr->Init( currArr->Size() + DReadBlockSize );
-			ASSERT(freeArr->Size() > numBytesRead);
-			memcpy(freeArr->Begin(), currArr->Begin(), numBytesRead);
-			currArr->Reset();//free memory
-			std::swap(currArr, freeArr);
-		}
-
-		numBytesReadLastOp = this->Read(*currArr, DReadBlockSize, numBytesRead);
-
-		numBytesRead += numBytesReadLastOp;//update number of bytes read
-
-		if(numBytesReadLastOp != DReadBlockSize)
+		if(bytesRead == maxBytesToLoad){
 			break;
-	}//~for
-	freeArr->Init(numBytesRead);
-	memcpy(freeArr->Begin(), currArr->Begin(), numBytesRead);
+		}
+		
+		chunks.push_back(Chunk());
+		
+		ASSERT(maxBytesToLoad > bytesRead)
+		
+		size_t numBytesToRead = maxBytesToLoad - bytesRead;
+		ting::ClampTop(numBytesToRead, chunks.back().Size());
+		
+		res = this->Read(chunks.back(), numBytesToRead);
 
-//	TRACE(<< "File loaded" <<std::endl)
-
-	return *freeArr;
+		bytesRead += res;
+		
+		if(res != numBytesToRead){
+			ASSERT(res < chunks.back().Size())
+			ASSERT(res < numBytesToRead)
+			if(res == 0){
+				chunks.pop_back();//pop empty chunk
+			}
+			break;
+		}
+	}
+	
+	ASSERT(maxBytesToLoad >= bytesRead)
+	
+	if(chunks.size() == 0){
+		return ting::Array<ting::u8>();
+	}
+	
+	ASSERT(chunks.size() >= 1)
+	
+	ting::Array<ting::u8> ret((chunks.size() - 1) * chunks.front().Size() + res);
+	
+	ting::u8* p;
+	for(p = ret.Begin(); chunks.size() > 1; p += chunks.front().Size()){
+		ASSERT(p < ret.End())
+		memcpy(p, chunks.front().Begin(), chunks.front().Size());
+		chunks.pop_front();
+	}
+	
+	ASSERT(chunks.size() == 1)
+	ASSERT(res < chunks.front())
+	memcpy(p, chunks.front().Begin(), res);
+	ASSERT(p + res == ret.End())
+	
+	return ret;
 }
 
 

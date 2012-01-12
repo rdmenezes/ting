@@ -332,10 +332,11 @@ public:
 public:
 	/**
 	 * @brief Load the entire file into the RAM.
+	 * @param maxBytesToLoad - maximum bytes to load. 0 means no limit.
 	 * @return Array containing loaded file data.
 	 */
 	//TODO: add optional limit of maximum bytes to load as a function argument with default value of 0 meaning no limit.
-	ting::Array<ting::u8> LoadWholeFileIntoMemory();
+	ting::Array<ting::u8> LoadWholeFileIntoMemory(size_t maxBytesToLoad = 0);
 
 	/**
 	 * @brief Check for file/directory existence.
