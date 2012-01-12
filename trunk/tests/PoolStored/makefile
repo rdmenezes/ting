@@ -16,7 +16,7 @@ ifeq ($(platform),darwin)
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := ../../src/libting.so
+    libs := ../../src/libting.so -lpthread
     remove := rm -rf
 endif
 

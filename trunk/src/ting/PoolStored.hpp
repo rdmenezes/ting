@@ -43,6 +43,8 @@ THE SOFTWARE. */
 #include "Thread.hpp"
 #include "Exc.hpp"
 #include "Array.hpp"
+#include "atomic.hpp"
+
 
 //#define M_ENABLE_POOL_TRACE
 #ifdef M_ENABLE_POOL_TRACE
@@ -126,16 +128,40 @@ template <size_t element_size, size_t num_elements_in_chunk> class MemoryPool{
 
 	ting::Inited<unsigned, 0> numChunks; //this is only used for making sure that there are no chunks upon memory pool destruction
 	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list (looped list)
-	ting::Mutex mutex; //TODO: consider using spinlock
+	
+	ting::atomic::Flag lockFlag;
+	
+	//lock
+	class Lock{
+		ting::atomic::Flag& flag;
+	public:
+		Lock(ting::atomic::Flag& flag) :
+				flag(flag)
+		{
+			while(this->flag.Set(true)){
+				ting::Thread::Sleep(0);
+			}
+			atomic::MemoryBarrier();
+		}
+		
+		~Lock(){
+			atomic::MemoryBarrier();
+			this->flag.Clear();
+		}
+	};
 	
 public:
 	~MemoryPool(){
 		ASSERT_INFO(this->numChunks == 0, "MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
 	}
 
+private:
+	
+	
+	
 public:
 	void* Alloc_ts(){
-		ting::Mutex::Guard mutexGuard(this->mutex);
+		Lock guard(this->lockFlag);
 		
 		if(this->freeHead == 0){
 			Chunk* c = new Chunk();
@@ -165,7 +191,7 @@ public:
 	}
 
 	void Free_ts(void* p){
-		ting::Mutex::Guard mutexGuard(this->mutex);
+		Lock guard(this->lockFlag);
 		
 		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
 		

@@ -447,7 +447,6 @@ template <typename T> inline T CubicRoot(T x){
  * @param y - imaginary part of a complex number.
  * @return argument of a complex number.
  */
-//TODO: overloaded function which would accept class Complex or something like that
 template <typename T> inline T Arg(T x, T y){
 	T a;
 	if(x == 0){
