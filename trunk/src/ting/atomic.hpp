@@ -94,7 +94,7 @@ inline void MemoryBarrier(){
 #elif M_OS == M_OS_WIN32
 	//do nothing, Interlocked* functions provide full memory barrier
 #elif M_OS == M_OS_MACOSX
-	//TODO:
+	//do nothing, hope that Mac OS atomic functions provide memory barriers.
 #else
 #error "ASSERT(false)"
 #endif
