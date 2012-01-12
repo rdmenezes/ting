@@ -116,6 +116,14 @@ void File::MakeDir(){
 
 namespace{
 const size_t DReadBlockSize = 4 * 1024;
+
+//Define a class derived from StaticBuffer. This is just to define custom
+//copy constructor which will do nothing to avoid unnecessary buffer copying when
+//inserting new element to the list of chunks.
+struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
+	inline Chunk(){}
+	inline Chunk(const Chunk&){}
+};
 }
 
 
@@ -126,14 +134,6 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	}
 
 	File::Guard fileGuard(*this, File::READ);//make sure we close the file upon exit from the function
-
-	//Define a class derived from StaticBuffer. This is just to define custom
-	//copy constructor which will do nothing to avoid unnecessary buffer copying when
-	//inserting new element to the list of chunks.
-	struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
-		inline Chunk(){}
-		inline Chunk(const chunk&){}
-	};
 	
 	std::list<Chunk> chunks;
 	

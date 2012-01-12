@@ -95,11 +95,47 @@ void Run(){
 
 
 
+namespace TestLoadWholeFileToMemory{
+void Run(){
+	ting::FSFile f("test.file.txt");
+	ASSERT_ALWAYS(!f.IsDir())
+	ASSERT_ALWAYS(!f.IsOpened())
+	
+	{
+		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory();
+		ASSERT_ALWAYS(r.Size() == 66874)
+	}
+	
+	{
+		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(66874);
+		ASSERT_ALWAYS(r.Size() == 66874)
+	}
+	
+	{
+		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(4096);
+		ASSERT_ALWAYS(r.Size() == 4096)
+	}
+	
+	{
+		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(35);
+		ASSERT_ALWAYS(r.Size() == 35)
+	}
+	
+	{
+		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(1000000);
+		ASSERT_ALWAYS(r.Size() == 66874)
+	}
+}
+}//~namespace
+
+
+
 int main(int argc, char *argv[]){
 
 	TestSeekForward::Run();
 	TestListDirContents::Run();
 	TestHomeDir::Run();
+	TestLoadWholeFileToMemory::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]" << std::endl)
 
