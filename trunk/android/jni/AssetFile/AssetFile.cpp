@@ -191,10 +191,16 @@ bool AssetFile::Exists()const{
 	if(this->Path().size() == 0)
 		return false;
 
-	//if it is a directory, check directory existence
-	if(this->Path()[this->Path().size() - 1] == '/'){
-		//TODO: support
-		throw File::Exc("Checking for directory existence is not supported");
+	if(this->IsDir()){
+		//try opening the directory to check its existence
+		AAssetDir* pdir = AAssetManager_openDir(this->manager, this->Path().c_str());
+
+		if(!pdir){
+			return false;
+		}else{
+			AAssetDir_close(pdir);
+			return true;
+		}
 	}else{
 		return this->File::Exists();
 	}
@@ -234,12 +240,7 @@ ting::Array<std::string> AssetFile::ListDirContents(size_t maxEntries){
 			if(s == "." || s == "..")
 				continue;//do not add ./ and ../ directories, we are not interested in them
 
-			//try to open as directory to check if it is a directory or file
-			//TODO: check if android returns dir names with trailing '/' already appended
-			if(AAssetDir* directory = AAssetManager_openDir(this->manager, s.c_str())){
-				s += "/";
-				AAssetDir_close(directory);
-			}
+			//NOTE: looks like android does not report directories contained in the inspected directory.
 
 			files.push_back(s);
 			
