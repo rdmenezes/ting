@@ -310,6 +310,7 @@ public:
 	
 private:
 	//parse IP address from string
+	//TODO: need to support port also
 	static u32 ParseString(const char* ip);
 };//~class IPAddress
 
@@ -340,8 +341,80 @@ public:
 	 * @param port - IP port number which will be placed in the resulting IPAddress structure.
 	 * @return filled IPAddress structure.
 	 */
+	//TODO: remove this method
 	IPAddress GetHostByName(const char *hostName, u16 port);
 };//~class SocketLib
+
+
+
+/**
+ * @brief Class for resolving IP-address of the host by its domain name.
+ * This class allows asynchronous DNS lookup.
+ * One has to derive his/her own class from this class to override the
+ * OnCompleted_ts() method which will be called upon the DNS lookup operation has finished.
+ */
+class HostNameResolver{
+	ting::Inited<volatile bool, false> inProgress;
+	
+	//no copying
+	HostNameResolver(const HostNameResolver&);
+	HostNameResolver& operator=(const HostNameResolver&);
+	
+public:
+	~HostNameResolver(){
+		ASSERT(!this->inProgress)
+	}
+	
+	/**
+	 * @brief Start asynchronous IP-address resolving.
+	 * The method is thread-safe.
+     * @param hostName - host name to resolve IP-address for.
+     * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
+	 * @param numTrials - number of trials of requests to DNS server.
+	 * @throw //TODO: too much requests in progress
+	 * @throw //TODO: already in progress
+     */
+	void Resolve_ts(const std::string& hostName, unsigned timeoutMillis = 5000, unsigned numTrials = 6);
+	
+	/**
+	 * @brief Cancel current DNS lookup operation.
+	 * The method is thread-safe.
+     */
+	void Cancel_ts();
+	
+	/**
+	 * @brief Enumeration of the DNS lookup operation result.
+	 */
+	enum E_Result{
+		/**
+		 * @brief DNS lookup operation completed successfully.
+		 */
+		OK,
+		
+		/**
+		 * @brief Timeout hit while waiting for the response from DNS server.
+		 */
+		TIMEOUT,
+		
+		/**
+		 * @brief DNS server reported that there is not such host.
+		 */
+		NO_SUCH_HOST,
+		
+		/**
+		 * @brief Error occurred while DNS lookup operation.
+		 */
+		ERROR
+	};
+	
+	/**
+	 * @brief callback method called upon DNS lookup operation has finished.
+     * @param result - the result of DNS lookup operation.
+	 * @param ip - resolved IP-address. This value can later be used to create the
+	 *             ting::IPAddress object.
+     */
+	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) = 0;
+};
 
 
 
