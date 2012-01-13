@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2010 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -207,27 +207,45 @@ public:
 		ASSERT(!this->isAdded)
 	}
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Check if "Can read" flag is set.
+	 * @return true if Waitable is ready for reading.
+	 */
 	inline bool CanRead()const{
 		return (this->readinessFlags & READ) != 0;
 	}
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Check if "Can write" flag is set.
+	 * @return true if Waitable is ready for writing.
+	 */
 	inline bool CanWrite()const{
 		return (this->readinessFlags & WRITE) != 0;
 	}
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Check if "error" flag is set.
+	 * @return true if Waitable is in error state.
+	 */
 	inline bool ErrorCondition()const{
 		return (this->readinessFlags & ERROR_CONDITION) != 0;
 	}
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Get user data associated with this Waitable.
+	 * Returns the pointer to the user data which was previously set by SetUserData() method.
+	 * @return pointer to the user data.
+	 * @return zero pointer if the user data was not set.
+	 */
 	inline void* GetUserData(){
 		return this->userData;
 	}
 
-	//TODO: write doxygen docs
+	/**
+	 * @brief Set user data.
+	 * See description of GetUserData() for more details.
+	 * @param data - pointer to the user data to associate with this Waitable.
+	 */
 	inline void SetUserData(void* data){
 		this->userData = data;
 	}

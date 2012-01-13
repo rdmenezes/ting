@@ -36,6 +36,7 @@ THE SOFTWARE. */
 
 #include <vector>
 #include <cstdlib>
+#include <sstream>
 
 #include "FSFile.hpp"
 
@@ -348,8 +349,9 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 		DIR *pdir = opendir(this->TruePath().c_str());
 
 		if(!pdir){
-			//TODO: check errno for failure reason
-			throw File::Exc("FSFile::ListDirContents(): opendir() failure");
+			std::stringstream ss;
+			ss << "FSFile::ListDirContents(): opendir() failure, error code = " << strerror(errno);
+			throw File::Exc(ss.str());
 		}
 
 		//create DirentCloser to automatically call closedir on exit from the function in case of exceptions etc...
@@ -378,8 +380,9 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 			struct stat fileStats;
 			//TRACE(<< s << std::endl)
 			if(stat((this->TruePath() + s).c_str(), &fileStats) < 0){
-				//TODO: check errno for failure reason
-				throw File::Exc("FSFile::ListDirContents(): stat() failure");
+				std::stringstream ss;
+				ss << "FSFile::ListDirContents(): stat() failure, error code = " << strerror(errno);
+				throw File::Exc(ss.str());
 			}
 
 			if(fileStats.st_mode & S_IFDIR)//if this entry is a directory append '/' symbol to its end
@@ -394,8 +397,9 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 
 		//check if we exited the while() loop because of readdir() failed
 		if(errno != 0){
-			//TODO: check errno for failure reason
-			throw File::Exc("FSFile::ListDirContents(): readdir() failure");
+			std::stringstream ss;
+			ss << "FSFile::ListDirContents(): readdir() failure, error code = " << strerror(errno);
+			throw File::Exc(ss.str());
 		}
 	}
 #elif defined(__APPLE__)
