@@ -14,14 +14,14 @@ public:
 	//override
 	void Run(){
 		try{
-			ting::TCPServerSocket listenSock;
+			ting::net::TCPServerSocket listenSock;
 
 			listenSock.Open(13666);//start listening
 
 			ASSERT_ALWAYS(listenSock.GetLocalPort() == 13666)
 
 			//Accept some connection
-			ting::TCPSocket sock;
+			ting::net::TCPSocket sock;
 			while(!sock.IsValid() && !this->quitFlag){
 				sock = listenSock.Accept();
 				ting::Thread::Sleep(100);
@@ -41,7 +41,7 @@ public:
 			data[2] = '2';
 			data[3] = '4';
 			sock.SendAll(data);
-		}catch(ting::Socket::Exc &e){
+		}catch(ting::net::Exc &e){
 			ASSERT_INFO_ALWAYS(false, "Network error: " << e.What())
 		}
 	}
@@ -57,9 +57,9 @@ void Run(){
 	ting::Thread::Sleep(1000);
 	
 	try{
-		ting::IPAddress ip("127.0.0.1", 13666);
+		ting::net::IPAddress ip("127.0.0.1", 13666);
 
-		ting::TCPSocket sock;
+		ting::net::TCPSocket sock;
 
 		sock.Open(ip);
 
@@ -85,7 +85,7 @@ void Run(){
 		ASSERT_ALWAYS(data[1] == '1')
 		ASSERT_ALWAYS(data[2] == '2')
 		ASSERT_ALWAYS(data[3] == '4')
-	}catch(ting::Socket::Exc &e){
+	}catch(ting::net::Exc &e){
 		ASSERT_INFO_ALWAYS(false, "Network error: " << e.What())
 	}
 	
@@ -99,20 +99,20 @@ void Run(){
 namespace SendDataContinuouslyWithWaitSet{
 
 void Run(){
-	ting::TCPServerSocket serverSock;
+	ting::net::TCPServerSocket serverSock;
 
 	serverSock.Open(13666);
 
 
-	ting::TCPSocket sockS;
+	ting::net::TCPSocket sockS;
 	{
-		ting::IPAddress ip("127.0.0.1", 13666);
+		ting::net::IPAddress ip("127.0.0.1", 13666);
 		sockS.Open(ip);
 	}
 
 	//Accept connection
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
-	ting::TCPSocket sockR;
+	ting::net::TCPSocket sockR;
 	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
 		ting::Thread::Sleep(100);
 		sockR = serverSock.Accept();
@@ -124,8 +124,8 @@ void Run(){
 	//Here we have 2 sockets sockS and sockR
 
 	{
-		ting::IPAddress addrS = sockS.GetRemoteAddress();
-		ting::IPAddress addrR = sockR.GetRemoteAddress();
+		ting::net::IPAddress addrS = sockS.GetRemoteAddress();
+		ting::net::IPAddress addrR = sockR.GetRemoteAddress();
 //		TRACE(<< "SendDataContinuously::Run(): addrS = " << std::hex << addrS.host << ":" << addrS.port << std::dec << std::endl)
 //		TRACE(<< "SendDataContinuously::Run(): addrR = " << std::hex << addrR.host << ":" << addrR.port << std::dec << std::endl)
 		ASSERT_ALWAYS(addrS.host == 0x7f000001) //check that IP is 127.0.0.1
@@ -212,7 +212,7 @@ void Run(){
 //						TRACE(<< "SendDataContinuously::Run(): " << res << " bytes sent" << std::endl)
 					}
 					ASSERT_ALWAYS(!sockS.CanWrite())
-				}catch(ting::Socket::Exc& e){
+				}catch(ting::net::Exc& e){
 					ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
 				}
 				ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
@@ -229,7 +229,7 @@ void Run(){
 					unsigned numBytesReceived;
 					try{
 						numBytesReceived = sockR.Recv(buf);
-					}catch(ting::Socket::Exc& e){
+					}catch(ting::net::Exc& e){
 						ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
 					}
 					ASSERT_ALWAYS(numBytesReceived <= buf.Size())
@@ -280,20 +280,20 @@ void Run(){
 namespace SendDataContinuously{
 
 void Run(){
-	ting::TCPServerSocket serverSock;
+	ting::net::TCPServerSocket serverSock;
 
 	serverSock.Open(13666);
 
 
-	ting::TCPSocket sockS;
+	ting::net::TCPSocket sockS;
 	{
-		ting::IPAddress ip("127.0.0.1", 13666);
+		ting::net::IPAddress ip("127.0.0.1", 13666);
 		sockS.Open(ip);
 	}
 
 	//Accept connection
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
-	ting::TCPSocket sockR;
+	ting::net::TCPSocket sockR;
 	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
 		ting::Thread::Sleep(100);
 		sockR = serverSock.Accept();
@@ -324,7 +324,7 @@ void Run(){
 			}else{
 				ASSERT_ALWAYS(false)
 			}
-		}catch(ting::Socket::Exc& e){
+		}catch(ting::net::Exc& e){
 			ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
 		}
 
@@ -336,7 +336,7 @@ void Run(){
 			unsigned numBytesReceived;
 			try{
 				numBytesReceived = sockR.Recv(buf);
-			}catch(ting::Socket::Exc& e){
+			}catch(ting::net::Exc& e){
 				ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
 			}
 			ASSERT_ALWAYS(numBytesReceived <= buf.Size())
@@ -365,7 +365,7 @@ namespace BasicIPAddressTest{
 void Run(){
 	{
 		try{
-			ting::IPAddress a("123.124.125.126", 5);
+			ting::net::IPAddress a("123.124.125.126", 5);
 			ASSERT_ALWAYS(a.host == (123 << 24) + (124 << 16) + (125 << 8) + 126)
 			ASSERT_ALWAYS(a.port == 5)
 		}catch(std::exception& e){
@@ -374,22 +374,22 @@ void Run(){
 	}
 
 	{
-		ting::IPAddress a(123, 124, 125, 126, 5);
+		ting::net::IPAddress a(123, 124, 125, 126, 5);
 		ASSERT_ALWAYS(a.host == (123 << 24) + (124 << 16) + (125 << 8) + 126)
 		ASSERT_ALWAYS(a.port == 5)
 	}
 
 	//test copy constructor and operator=()
 	{
-		ting::IPAddress a(123, 124, 125, 126, 5);
+		ting::net::IPAddress a(123, 124, 125, 126, 5);
 		ASSERT_ALWAYS(a.host == (123 << 24) + (124 << 16) + (125 << 8) + 126)
 		ASSERT_ALWAYS(a.port == 5)
 
-		ting::IPAddress a1(a);
+		ting::net::IPAddress a1(a);
 		ASSERT_ALWAYS(a1.host == (123 << 24) + (124 << 16) + (125 << 8) + 126)
 		ASSERT_ALWAYS(a1.port == 5)
 
-		ting::IPAddress a2;
+		ting::net::IPAddress a2;
 		a2 = a1;
 		ASSERT_ALWAYS(a2.host == (123 << 24) + (124 << 16) + (125 << 8) + 126)
 		ASSERT_ALWAYS(a2.port == 5)
@@ -407,17 +407,17 @@ namespace BasicUDPSocketsTest{
 
 void Run(){
 
-	ting::UDPSocket recvSock;
+	ting::net::UDPSocket recvSock;
 
 	try{
 		recvSock.Open(13666);
-	}catch(ting::Socket::Exc &e){
+	}catch(ting::net::Exc &e){
 		ASSERT_INFO_ALWAYS(false, e.What())
 	}
 
 	ASSERT_ALWAYS(recvSock.GetLocalPort() == 13666)
 
-	ting::UDPSocket sendSock;
+	ting::net::UDPSocket sendSock;
 
 	try{
 		sendSock.Open();
@@ -429,7 +429,7 @@ void Run(){
 		data[3] = '4';
 		unsigned bytesSent = 0;
 
-		ting::IPAddress addr("127.0.0.1", 13666);
+		ting::net::IPAddress addr("127.0.0.1", 13666);
 		ASSERT_ALWAYS(addr.host == 0x7f000001)
 
 		for(unsigned i = 0; i < 10; ++i){
@@ -441,7 +441,7 @@ void Run(){
 			ting::Thread::Sleep(100);
 		}
 		ASSERT_ALWAYS(bytesSent == 4)
-	}catch(ting::Socket::Exc &e){
+	}catch(ting::net::Exc &e){
 		ASSERT_INFO_ALWAYS(false, e.What())
 	}
 
@@ -450,7 +450,7 @@ void Run(){
 		
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 10; ++i){
-			ting::IPAddress ip;
+			ting::net::IPAddress ip;
 			bytesReceived = recvSock.Recv(buf, ip);
 			ASSERT_ALWAYS(bytesReceived == 0 || bytesReceived == 4)//all or nothing
 			if(bytesReceived == 4){
@@ -465,7 +465,7 @@ void Run(){
 		ASSERT_ALWAYS(buf[1] == '1')
 		ASSERT_ALWAYS(buf[2] == '2')
 		ASSERT_ALWAYS(buf[3] == '4')
-	}catch(ting::Socket::Exc& e){
+	}catch(ting::net::Exc& e){
 		ASSERT_INFO_ALWAYS(false, e.What())
 	}
 }
@@ -477,7 +477,7 @@ void Run(){
 int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<<"Socket test "<<std::endl)
 
-	ting::SocketLib socketsLib;
+	ting::net::Lib netLib;
 
 	BasicIPAddressTest::Run();
 	BasicClientServerTest::Run();

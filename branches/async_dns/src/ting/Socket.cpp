@@ -32,11 +32,11 @@ using namespace ting::net;
 
 
 
-ting::IntrusiveSingleton<SocketLib>::T_Instance SocketLib::instance;
+ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 
 
-SocketLib::SocketLib(){
+Lib::Lib(){
 #ifdef WIN32
 	WORD versionWanted = MAKEWORD(2,2);
 	WSADATA wsaData;
@@ -55,7 +55,7 @@ SocketLib::SocketLib(){
 
 
 
-SocketLib::~SocketLib(){
+Lib::~Lib(){
 #ifdef WIN32
 	// Clean up windows networking
 	if(WSACleanup() == SOCKET_ERROR)

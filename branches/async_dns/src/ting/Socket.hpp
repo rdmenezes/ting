@@ -325,18 +325,18 @@ private:
  * destructor will be called and the library will be de-initialized automatically.
  * This is what C++ RAII is all about.
  */
-class SocketLib : public IntrusiveSingleton<SocketLib>{
-	friend class IntrusiveSingleton<SocketLib>;
-	static IntrusiveSingleton<SocketLib>::T_Instance instance;
+class Lib : public IntrusiveSingleton<Lib>{
+	friend class IntrusiveSingleton<Lib>;
+	static IntrusiveSingleton<Lib>::T_Instance instance;
 	
 	
 	
 public:
-	SocketLib();
+	Lib();
 
-	~SocketLib();
+	~Lib();
 
-};//~class SocketLib
+};
 
 
 
