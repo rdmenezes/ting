@@ -33,6 +33,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include <string.h>
+#include <string>
 #include <exception>
 #include <new>                    //for std::nothrow
 
@@ -55,24 +56,18 @@ public:
 	 *                  Constructor will copy the string into objects internal memory buffer.
 	 *                  It is legal to supply 0.
 	 */
-	Exc(const char* message = 0){
-		if(!message)
-			message = "no exception info";
-
-		size_t len = strlen(message);
-
-	#ifdef __SYMBIAN32__
-		//if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
-		this->msg = new char[len+1];
-	#else
-		//we do not want another exception, use std::nothrow
-		this->msg = new(std::nothrow) char[len+1];
-	#endif
-		if(!this->msg)
-			return;
-
-		memcpy(this->msg, message, len);
-		this->msg[len] = 0;//null-terminate
+	inline Exc(const char* message = 0){
+		this->Construct(message);
+	}
+	
+	
+	
+	/**
+	 * @brief Constructor.
+     * @param message - human friendly error description.
+     */
+	inline Exc(const std::string& message){
+		this->Construct(message.c_str());
 	}
 
 
@@ -97,6 +92,26 @@ public:
 
 
 private:
+	void Construct(const char* message){
+		if(!message)
+			message = "no exception info";
+
+		size_t len = strlen(message);
+
+	#ifdef __SYMBIAN32__
+		//if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
+		this->msg = new char[len+1];
+	#else
+		//we do not want another exception, use std::nothrow
+		this->msg = new(std::nothrow) char[len+1];
+	#endif
+		if(!this->msg)
+			return;
+
+		memcpy(this->msg, message, len);
+		this->msg[len] = 0;//null-terminate
+	}
+	
 	//override from std::exception
 	const char *what()const throw(){//use throw() because base class (std::exception) uses it.
 		return this->msg;//this->msg is never 0 (see Exc constructor for more info).

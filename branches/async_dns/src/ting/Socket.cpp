@@ -28,11 +28,11 @@ THE SOFTWARE. */
 
 
 
-using namespace ting;
+using namespace ting::net;
 
 
 
-IntrusiveSingleton<SocketLib>::T_Instance SocketLib::instance;
+ting::IntrusiveSingleton<SocketLib>::T_Instance SocketLib::instance;
 
 
 
@@ -41,7 +41,7 @@ SocketLib::SocketLib(){
 	WORD versionWanted = MAKEWORD(2,2);
 	WSADATA wsaData;
 	if(WSAStartup(versionWanted, &wsaData) != 0 ){
-		throw Socket::Exc("SocketLib::SocketLib(): Winsock 2.2 initialization failed");
+		throw net::Exc("SocketLib::SocketLib(): Winsock 2.2 initialization failed");
 	}
 #else //assume linux/unix
 	// SIGPIPE is generated when a remote socket is closed
@@ -71,27 +71,6 @@ SocketLib::~SocketLib(){
 		signal(SIGPIPE, handler);
 	}
 #endif
-}
-
-
-
-IPAddress SocketLib::GetHostByName(const char *hostName, u16 port){
-	if(!hostName)
-		throw Socket::Exc("SocketLib::GetHostByName(): pointer passed as argument is 0");
-
-	IPAddress addr;
-	addr.host = inet_addr(hostName);
-	if(addr.host == INADDR_NONE){
-		struct hostent *hp;
-		hp = gethostbyname(hostName);
-		if(hp){
-			memcpy(&(addr.host), hp->h_addr, sizeof(addr.host)/* hp->h_length */);
-		}else{
-			throw Socket::Exc("SocketLib::GetHostByName(): gethostbyname() failed");
-		}
-	}
-	addr.port = port;
-	return addr;
 }
 
 
@@ -165,7 +144,7 @@ Socket& Socket::operator=(const Socket& s){
 
 void Socket::DisableNaggle(){
 	if(!this->IsValid())
-		throw Socket::Exc("Socket::DisableNaggle(): socket is not valid");
+		throw net::Exc("Socket::DisableNaggle(): socket is not valid");
 
 #if defined(__linux__) || defined(__APPLE__) || defined(WIN32)
 	{
@@ -180,24 +159,25 @@ void Socket::DisableNaggle(){
 
 
 void Socket::SetNonBlockingMode(){
-	if(!this->IsValid())
-		throw Socket::Exc("Socket::SetNonBlockingMode(): socket is not valid");
+	if(!this->IsValid()){
+		throw net::Exc("Socket::SetNonBlockingMode(): socket is not valid");
+	}
 
 #if defined(__linux__) || defined(__APPLE__)
 	{
 		int flags = fcntl(this->socket, F_GETFL, 0);
 		if(flags == -1){
-			throw Socket::Exc("Socket::SetNonBlockingMode(): fcntl(F_GETFL) failed");
+			throw net::Exc("Socket::SetNonBlockingMode(): fcntl(F_GETFL) failed");
 		}
 		if(fcntl(this->socket, F_SETFL, flags | O_NONBLOCK) != 0){
-			throw Socket::Exc("Socket::SetNonBlockingMode(): fcntl(F_SETFL) failed");
+			throw net::Exc("Socket::SetNonBlockingMode(): fcntl(F_SETFL) failed");
 		}
 	}
 #elif defined(WIN32)
 	{
 		u_long mode = 1;
 		if(ioctlsocket(this->socket, FIONBIO, &mode) != 0){
-			throw Socket::Exc("Socket::SetNonBlockingMode(): ioctlsocket(FIONBIO) failed");
+			throw net::Exc("Socket::SetNonBlockingMode(): ioctlsocket(FIONBIO) failed");
 		}
 	}
 #else
@@ -207,9 +187,10 @@ void Socket::SetNonBlockingMode(){
 
 
 
-u16 Socket::GetLocalPort(){
-	if(!this->IsValid())
-		throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
+ting::u16 Socket::GetLocalPort(){
+	if(!this->IsValid()){
+		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
+	}
 
 	sockaddr_in addr;
 
@@ -225,10 +206,10 @@ u16 Socket::GetLocalPort(){
 			&len
 		) < 0)
 	{
-		throw Socket::Exc("Socket::GetLocalPort(): getsockname() failed");
+		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
 	}
 
-	return u16(ntohs(addr.sin_port));
+	return ting::u16(ntohs(addr.sin_port));
 }
 
 
@@ -249,7 +230,7 @@ bool Socket::CheckSignalled(){
 	memset(&events, 0, sizeof(events));
 	ASSERT(this->IsValid())
 	if(WSAEnumNetworkEvents(this->socket, this->eventForWaitable, &events) != 0){
-		throw Socket::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
+		throw net::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
 	}
 
 	//NOTE: sometimes no events are reported, don't know why.
@@ -303,7 +284,7 @@ void Socket::CreateEventForWaitable(){
 	ASSERT(this->eventForWaitable == WSA_INVALID_EVENT)
 	this->eventForWaitable = WSACreateEvent();
 	if(this->eventForWaitable == WSA_INVALID_EVENT){
-		throw Socket::Exc("Socket::CreateEventForWaitable(): could not create event (Win32) for implementing Waitable");
+		throw net::Exc("Socket::CreateEventForWaitable(): could not create event (Win32) for implementing Waitable");
 	}
 }
 
@@ -326,7 +307,7 @@ void Socket::SetWaitingEventsForWindows(long flags){
 			flags
 		) != 0)
 	{
-		throw Socket::Exc("Socket::SetWaitingEventsForWindows(): could not associate event (Win32) with socket");
+		throw net::Exc("Socket::SetWaitingEventsForWindows(): could not associate event (Win32) with socket");
 	}
 }
 
@@ -351,11 +332,11 @@ int Socket::GetHandle(){
 ting::u32 IPAddress::ParseString(const char* ip){
 	//TODO: there already is an IP parsing function in BSD sockets, consider using it here
 	if(!ip)
-		throw Socket::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
+		throw net::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
 
 	struct lf{ //local functions
 		inline static void ThrowInvalidIP(){
-			throw Socket::Exc("IPAddress::ParseString(): string is not a valid IP address");
+			throw net::Exc("IPAddress::ParseString(): string is not a valid IP address");
 		}
 	};
 	
@@ -402,8 +383,9 @@ ting::u32 IPAddress::ParseString(const char* ip){
 
 
 void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
-	if(this->IsValid())
-		throw Socket::Exc("TCPSocket::Open(): socket already opened");
+	if(this->IsValid()){
+		throw net::Exc("TCPSocket::Open(): socket already opened");
+	}
 
 	//create event for implementing Waitable
 #ifdef WIN32
@@ -415,12 +397,13 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 #ifdef WIN32
 		this->CloseEventForWaitable();
 #endif
-		throw Socket::Exc("TCPSocket::Open(): Couldn't create socket");
+		throw net::Exc("TCPSocket::Open(): Couldn't create socket");
 	}
 
 	//Disable Naggle algorithm if required
-	if(disableNaggle)
+	if(disableNaggle){
 		this->DisableNaggle();
+	}
 
 	this->SetNonBlockingMode();
 
@@ -464,7 +447,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 			ss << strerror(errorCode);
 #endif
 			this->Close();
-			throw Socket::Exc(ss.str());
+			throw net::Exc(ss.str());
 		}
 	}
 }
@@ -473,7 +456,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
 	if(!this->IsValid()){
-		throw Socket::Exc("TCPSocket::Send(): socket is not opened");
+		throw net::Exc("TCPSocket::Send(): socket is not opened");
 	}
 
 	this->ClearCanWriteFlag();
@@ -521,7 +504,7 @@ size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
 #else
 				ss << strerror(errorCode);
 #endif
-				throw Socket::Exc(ss.str());
+				throw net::Exc(ss.str());
 			}
 		}
 		break;
@@ -534,8 +517,9 @@ size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
 
 
 void TCPSocket::SendAll(const ting::Buffer<u8>& buf){
-	if(!this->IsValid())
-		throw Socket::Exc("TCPSocket::Send(): socket is not opened");
+	if(!this->IsValid()){
+		throw net::Exc("TCPSocket::Send(): socket is not opened");
+	}
 
 	DEBUG_CODE(int left = int(buf.Size());)
 	ASSERT(left >= 0)
@@ -565,8 +549,9 @@ size_t TCPSocket::Recv(ting::Buffer<u8>& buf, size_t offset){
 	//So, do it at the beginning of the function.
 	this->ClearCanReadFlag();
 
-	if(!this->IsValid())
-		throw Socket::Exc("TCPSocket::Send(): socket is not opened");
+	if(!this->IsValid()){
+		throw net::Exc("TCPSocket::Send(): socket is not opened");
+	}
 
 	ASSERT_INFO(
 			((buf.Begin() + offset) <= (buf.End() - 1)) ||
@@ -611,7 +596,7 @@ size_t TCPSocket::Recv(ting::Buffer<u8>& buf, size_t offset){
 #else
 				ss << strerror(errorCode);
 #endif
-				throw Socket::Exc(ss.str());
+				throw net::Exc(ss.str());
 			}
 		}
 		break;
@@ -624,8 +609,9 @@ size_t TCPSocket::Recv(ting::Buffer<u8>& buf, size_t offset){
 
 
 IPAddress TCPSocket::GetLocalAddress(){
-	if(!this->IsValid())
-		throw Socket::Exc("Socket::GetLocalPort(): socket is not valid");
+	if(!this->IsValid()){
+		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
+	}
 
 	sockaddr_in addr;
 
@@ -641,7 +627,7 @@ IPAddress TCPSocket::GetLocalAddress(){
 			&len
 		) < 0)
 	{
-		throw Socket::Exc("Socket::GetLocalPort(): getsockname() failed");
+		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
 	}
 
 	return IPAddress(
@@ -653,8 +639,9 @@ IPAddress TCPSocket::GetLocalAddress(){
 
 
 IPAddress TCPSocket::GetRemoteAddress(){
-	if(!this->IsValid())
-		throw Socket::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
+	if(!this->IsValid()){
+		throw net::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
+	}
 
 	sockaddr_in addr;
 
@@ -670,7 +657,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 			&len
 		) < 0)
 	{
-		throw Socket::Exc("TCPSocket::GetRemoteAddress(): getpeername() failed");
+		throw net::Exc("TCPSocket::GetRemoteAddress(): getpeername() failed");
 	}
 
 	return IPAddress(
@@ -699,8 +686,9 @@ void TCPSocket::SetWaitingEvents(u32 flagsToWaitFor){
 
 
 void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
-	if(this->IsValid())
-		throw Socket::Exc("TCPServerSocket::Open(): socket already opened");
+	if(this->IsValid()){
+		throw net::Exc("TCPServerSocket::Open(): socket already opened");
+	}
 
 	this->disableNaggle = disableNaggle;
 
@@ -713,7 +701,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 #ifdef WIN32
 		this->CloseEventForWaitable();
 #endif
-		throw Socket::Exc("TCPServerSocket::Open(): Couldn't create socket");
+		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
 	}
 
 	sockaddr_in sockAddr;
@@ -736,12 +724,12 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 		) == DSocketError())
 	{
 		this->Close();
-		throw Socket::Exc("TCPServerSocket::Open(): Couldn't bind to local port");
+		throw net::Exc("TCPServerSocket::Open(): Couldn't bind to local port");
 	}
 
 	if(listen(this->socket, int(queueLength)) == DSocketError()){
 		this->Close();
-		throw Socket::Exc("TCPServerSocket::Open(): Couldn't listen to local port");
+		throw net::Exc("TCPServerSocket::Open(): Couldn't listen to local port");
 	}
 
 	this->SetNonBlockingMode();
@@ -750,8 +738,9 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 
 
 TCPSocket TCPServerSocket::Accept(){
-	if(!this->IsValid())
-		throw Socket::Exc("TCPServerSocket::Accept(): the socket is not opened");
+	if(!this->IsValid()){
+		throw net::Exc("TCPServerSocket::Accept(): the socket is not opened");
+	}
 
 	this->ClearCanReadFlag();
 
@@ -775,8 +764,9 @@ TCPSocket TCPServerSocket::Accept(){
 #endif
 		);
 
-	if(sock.socket == DInvalidSocket())
+	if(sock.socket == DInvalidSocket()){
 		return sock;//no connections to be accepted, return invalid socket
+	}
 
 #ifdef WIN32
 	sock.CreateEventForWaitable();
@@ -788,8 +778,9 @@ TCPSocket TCPServerSocket::Accept(){
 
 	sock.SetNonBlockingMode();
 
-	if(this->disableNaggle)
+	if(this->disableNaggle){
 		sock.DisableNaggle();
+	}
 
 	return sock;//return a newly created socket
 }
@@ -814,8 +805,9 @@ void TCPServerSocket::SetWaitingEvents(u32 flagsToWaitFor){
 
 
 void UDPSocket::Open(u16 port){
-	if(this->IsValid())
-		throw Socket::Exc("UDPSocket::Open(): the socket is already opened");
+	if(this->IsValid()){
+		throw net::Exc("UDPSocket::Open(): the socket is already opened");
+	}
 
 #ifdef WIN32
 	this->CreateEventForWaitable();
@@ -826,7 +818,7 @@ void UDPSocket::Open(u16 port){
 #ifdef WIN32
 		this->CloseEventForWaitable();
 #endif
-		throw Socket::Exc("UDPSocket::Open(): ::socket() failed");
+		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
 	//Bind locally, if appropriate
@@ -845,7 +837,7 @@ void UDPSocket::Open(u16 port){
 			) == DSocketError())
 		{
 			this->Close();
-			throw Socket::Exc("UDPSocket::Open(): could not bind to local port");
+			throw net::Exc("UDPSocket::Open(): could not bind to local port");
 		}
 	}
 
@@ -864,7 +856,7 @@ void UDPSocket::Open(u16 port){
 			) == DSocketError())
 		{
 			this->Close();
-			throw Socket::Exc("UDPSocket::Open(): failed setting broadcast option");
+			throw net::Exc("UDPSocket::Open(): failed setting broadcast option");
 		}
 	}
 #else
@@ -877,8 +869,9 @@ void UDPSocket::Open(u16 port){
 
 
 size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
-	if(!this->IsValid())
-		throw Socket::Exc("UDPSocket::Send(): socket is not opened");
+	if(!this->IsValid()){
+		throw net::Exc("UDPSocket::Send(): socket is not opened");
+	}
 
 	this->ClearCanWriteFlag();
 
@@ -927,7 +920,7 @@ size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destination
 #else
 				ss << strerror(errorCode);
 #endif
-				throw Socket::Exc(ss.str());
+				throw net::Exc(ss.str());
 			}
 		}
 		break;
@@ -944,8 +937,9 @@ size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destination
 
 
 size_t UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
-	if(!this->IsValid())
-		throw Socket::Exc("UDPSocket::Recv(): socket is not opened");
+	if(!this->IsValid()){
+		throw net::Exc("UDPSocket::Recv(): socket is not opened");
+	}
 
 	//The 'can read' flag shall be cleared even if this function fails.
 	//This is to avoid subsequent calls to Recv() because of it indicating
@@ -1000,7 +994,7 @@ size_t UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 #else
 				ss << strerror(errorCode);
 #endif
-				throw Socket::Exc(ss.str());
+				throw net::Exc(ss.str());
 			}
 		}
 		break;

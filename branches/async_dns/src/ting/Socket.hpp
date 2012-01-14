@@ -76,6 +76,24 @@ THE SOFTWARE. */
  * All the declarations of ting library are made inside this namespace.
  */
 namespace ting{
+namespace net{
+
+
+
+/**
+ * @brief Basic exception class.
+ * This is a basic exception class for network related errors.
+ */
+class Exc : public ting::Exc{
+public:
+	/**
+	 * @brief Exception constructor.
+	 * @param message - human friendly error description.
+	 */
+	inline Exc(const std::string& message) :
+			ting::Exc(message)
+	{}
+};
 
 
 
@@ -164,23 +182,6 @@ protected:
 
 
 public:
-	/**
-	 * @brief Basic exception class.
-	 * This is a basic exception class of the library. All other exception classes are derived from it.
-	 */
-	class Exc : public ting::Exc{
-	public:
-		/**
-		 * @brief Exception constructor.
-		 * @param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
-		 */
-		Exc(const std::string& message = std::string()) :
-				ting::Exc((std::string("[Socket::Exc] ") + message).c_str())
-		{}
-	};
-
-	
-
 	Socket(const Socket& s);
 
 	
@@ -317,32 +318,24 @@ private:
 
 
 /**
- * @brief Socket library singletone class.
- * This is a Socket library singletone class. Creating an object of this class initializes the library
- * while destroying this object deinitializes it. So, the convenient way of initializing the library
+ * @brief Socket library singleton class.
+ * This is a Socket library singleton class. Creating an object of this class initializes the library
+ * while destroying this object de-initializes it. So, the convenient way of initializing the library
  * is to create an object of this class on the stack. Thus, when the object goes out of scope its
- * destructor will be called and the library will be deinitialized automatically.
- * This is what C++ RAII is all about ;-).
+ * destructor will be called and the library will be de-initialized automatically.
+ * This is what C++ RAII is all about.
  */
 class SocketLib : public IntrusiveSingleton<SocketLib>{
 	friend class IntrusiveSingleton<SocketLib>;
 	static IntrusiveSingleton<SocketLib>::T_Instance instance;
+	
+	
 	
 public:
 	SocketLib();
 
 	~SocketLib();
 
-
-	/**
-	 * @brief Resolve host IP by its name.
-	 * This function resolves host IP address by its name. If it fails resolving the IP address it will throw Socket::Exc.
-	 * @param hostName - null-terminated string representing host name. Example: "www.somedomain.com".
-	 * @param port - IP port number which will be placed in the resulting IPAddress structure.
-	 * @return filled IPAddress structure.
-	 */
-	//TODO: remove this method
-	IPAddress GetHostByName(const char *hostName, u16 port);
 };//~class SocketLib
 
 
@@ -361,9 +354,34 @@ class HostNameResolver{
 	HostNameResolver& operator=(const HostNameResolver&);
 	
 public:
-	~HostNameResolver(){
+	virtual ~HostNameResolver(){
 		ASSERT(!this->inProgress)
 	}
+	
+	/**
+	 * @brief Basic DNS lookup exception.
+     * @param message - human friendly error description.
+     */
+	class Exc : public net::Exc{
+	public:
+		inline Exc(const std::string& message) :
+				ting::net::Exc(message)
+		{}
+	};
+	
+	class TooMuchRequestsExc : public Exc{
+	public:
+		TooMuchRequestsExc() :
+				Exc("Too much active DNS lookup requests in progress")
+		{}
+	};
+	
+	class AlreadyInProgress : public Exc{
+	public:
+		AlreadyInProgress() :
+				Exc("DNS lookup operation is already in progress")
+		{}
+	};
 	
 	/**
 	 * @brief Start asynchronous IP-address resolving.
@@ -371,16 +389,20 @@ public:
      * @param hostName - host name to resolve IP-address for.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
 	 * @param numTrials - number of trials of requests to DNS server.
-	 * @throw //TODO: too much requests in progress
-	 * @throw //TODO: already in progress
+	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
+	 * @throw AlreadyInProgress when DNS lookup operation served by this resolver object is already in progress.
      */
 	void Resolve_ts(const std::string& hostName, unsigned timeoutMillis = 5000, unsigned numTrials = 6);
 	
 	/**
 	 * @brief Cancel current DNS lookup operation.
 	 * The method is thread-safe.
+	 * @return true - if the ongoing DNS lookup operation was canceled.
+	 * @return false - if there was no ongoing DNS lookup operation to cancel.
+	 *                 This means that the DNS lookup operation was not started
+	 *                 or has finished before the Cancel_ts() method was called.
      */
-	void Cancel_ts();
+	bool Cancel_ts();
 	
 	/**
 	 * @brief Enumeration of the DNS lookup operation result.
@@ -626,7 +648,7 @@ public:
 	 * After the socket is opened it becomes a valid socket and Socket::IsValid() will return true for such socket.
 	 * After the socket is closed it becomes invalid.
 	 * In other words, a valid socket is an opened socket.
-	 * In case of errors this method throws Socket::Exc.
+	 * In case of errors this method throws net::Exc.
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
 	 *				 If 0 is passed then system will assign some free port if any. If there
 	 *               are no free ports, then it is an error and an exception will be thrown.
@@ -684,7 +706,7 @@ private:
 };//~class UDPSocket
 
 
-
+}//~namespace
 }//~namespace
 
 
