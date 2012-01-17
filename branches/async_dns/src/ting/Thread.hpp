@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -635,7 +635,7 @@ public:
 
 
 	/**
-	 * @brief This should be overriden, this is what to be run in new thread.
+	 * @brief This should be overridden, this is what to be run in new thread.
 	 * Pure virtual method, it is called in new thread when thread runs.
 	 */
 	virtual void Run() = 0;
@@ -656,7 +656,7 @@ public:
 
 	/**
 	 * @brief Wait for thread to finish its execution.
-	 * This functon waits for the thread finishes its execution,
+	 * This function waits for the thread finishes its execution,
 	 * i.e. until the thread returns from its Thread::Run() method.
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
@@ -674,7 +674,7 @@ public:
 	 */
 	static void Sleep(unsigned msec = 0){
 #ifdef WIN32
-		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
+		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif defined(__SYMBIAN32__)
 		User::After(msec * 1000);
 #elif defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__linux__)
@@ -770,7 +770,7 @@ public:
 
 
 	/**
-	 * @brief Send 'no operation' message to thread's queue.
+	 * @brief Send "no operation" message to thread's queue.
 	 */
 	inline void PushNopMessage();//see implementation below
 
