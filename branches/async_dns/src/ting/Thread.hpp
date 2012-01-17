@@ -647,9 +647,9 @@ public:
 	 * Starts execution of the thread. Thread's Thread::Run() method will
 	 * be run as separate thread of execution.
 	 * @param stackSize - size of the stack in bytes which should be allocated for this thread.
-	 *                    If stackSize is 0 then system default stack size is used.
+	 *                    If stackSize is 0 then system default stack size is used
+	 *                    (stack size depends on underlying OS).
 	 */
-	//0 stacksize stands for default stack size (platform dependent)
 	void Start(size_t stackSize = 0);
 
 
