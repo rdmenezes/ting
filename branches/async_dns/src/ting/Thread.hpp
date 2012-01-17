@@ -114,7 +114,7 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_MUTEX_TRACE
 #ifdef M_ENABLE_MUTEX_TRACE
-#define M_MUTEX_TRACE(x) TRACE(<<"[MUTEX] ") TRACE(x)
+#define M_MUTEX_TRACE(x) TRACE(<< "[MUTEX] ") TRACE(x)
 #else
 #define M_MUTEX_TRACE(x)
 #endif
@@ -122,7 +122,7 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_QUEUE_TRACE
 #ifdef M_ENABLE_QUEUE_TRACE
-#define M_QUEUE_TRACE(x) TRACE(<<"[QUEUE] ") TRACE(x)
+#define M_QUEUE_TRACE(x) TRACE(<< "[QUEUE] ") TRACE(x)
 #else
 #define M_QUEUE_TRACE(x)
 #endif
@@ -215,19 +215,19 @@ public:
 	 * then the mutex be automaticlly unlocked in such case.
 	 */
 	class Guard{
-		Mutex *mut;
+		Mutex &mutex;
 
 		//forbid copying
 		Guard(const Guard& );
 		Guard& operator=(const Guard& );
 	public:
 		Guard(Mutex &m):
-				mut(&m)
+				mutex(m)
 		{
-			this->mut->Lock();
+			this->mutex.Lock();
 		}
 		~Guard(){
-			this->mut->Unlock();
+			this->mutex.Unlock();
 		}
 	};//~class Guard
 };//~class Mutex
