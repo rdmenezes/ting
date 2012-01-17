@@ -46,7 +46,7 @@ ting::Mutex dnsMutex;
 class DNSLookupThread : public ting::MsgThread{
 	
 	ting::net::UDPSocket socket;
-	ting::Inited<ting::WaitSet, 2> waitSet;//WaitSet for 2 Waitables
+	ting::WaitSet waitSet;
 	
 	void AddResolver(HostNameResolver* resover){
 		//TODO:
@@ -57,7 +57,9 @@ class DNSLookupThread : public ting::MsgThread{
 	}
 	
 public:
-	DNSLookupThread(){
+	DNSLookupThread() :
+			waitSet(2)
+	{
 		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
 		
 		//Open socket in constructor instead of Run() to catch any possible error
@@ -69,7 +71,13 @@ public:
 	ting::Inited<unsigned, 0> numRequests;
 	
 	void Run(){
+		this->waitSet.Add(&this->queue, ting::Waitable::READ);
+		this->waitSet.Add(&this->socket, ting::Waitable::READ);
+		
 		//TODO:
+		
+		this->waitSet.Remove(&this->socket);
+		this->waitSet.Remove(&this->queue);
 	}
 	
 	class AddResolverMessage : public ting::Message{
