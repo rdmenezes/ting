@@ -648,12 +648,14 @@ void Thread::Start(size_t stackSize){
 	//by concurrent threads simultaneously and to protect call to Join() before Start()
 	//has returned.
 	ting::Mutex::Guard mutexGuard1(this->mutex1);
+	
 	//Protect by mutex to avoid incorrect state changing in case when thread
-	//exits before the Start() method retruned.
+	//exits before the Start() method returned.
 	ting::Mutex::Guard mutexGuard2(Thread::Mutex2());
 
-	if(this->state != NEW)
+	if(this->state != NEW){
 		throw ting::Exc("Thread::Start(): Thread is already running or stopped");
+	}
 
 #ifdef WIN32
 	this->th = reinterpret_cast<HANDLE>(
