@@ -24,6 +24,8 @@ THE SOFTWARE. */
 
 
 
+#include <map>
+
 #include "Socket.hpp"
 
 
@@ -48,11 +50,13 @@ class DNSLookupThread : public ting::MsgThread{
 	ting::net::UDPSocket socket;
 	ting::WaitSet waitSet;
 	
-	void AddResolver(HostNameResolver* resover){
-		//TODO:
-	}
+	typedef std::multimap<ting::u64, HostNameResolver*> T_ResolversTimeMap;
+	typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
+	T_ResolversTimeMap resolversByTime;
 	
-	void RemoveResolver(HostNameResolver* resolver){
+	std::map<HostNameResolver*, T_ResolversTimeIter> resolversMap;
+	
+	void AddResolver(HostNameResolver* resolver){
 		//TODO:
 	}
 	
@@ -71,6 +75,7 @@ public:
 	ting::Inited<unsigned, 0> numRequests;
 	
 	void Run(){
+		TRACE(<< "DNS lookup thread started" << std::endl)
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
 		
@@ -78,6 +83,7 @@ public:
 		
 		this->waitSet.Remove(&this->socket);
 		this->waitSet.Remove(&this->queue);
+		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	
 	class AddResolverMessage : public ting::Message{
@@ -94,21 +100,6 @@ public:
 			this->thr->AddResolver(resolver);
 		}
 	};
-	
-	class RemoveResolverMessage : public ting::Message{
-		DNSLookupThread* thr;
-		HostNameResolver* resolver;
-	public:
-		RemoveResolverMessage(DNSLookupThread* thr, HostNameResolver* resolver) :
-				thr(ASS(thr)),
-				resolver(ASS(resolver))
-		{}
-		
-		//override
-		void Handle(){
-			this->thr->RemoveResolver(resolver);
-		}
-	};
 };
 
 //accessing this variable must be protected by dnsMutex
@@ -120,7 +111,11 @@ ting::Ptr<DNSLookupThread> dnsThread;
 
 
 
-void HostNameResolver::Resolve_ts(const std::string& hostName, unsigned timeoutMillis, unsigned numTrials){
+void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis, unsigned numTrials){
+	if(hostName.size() > 253){
+		throw DomainNameTooLongExc();
+	}
+	
 	//TODO:
 }
 

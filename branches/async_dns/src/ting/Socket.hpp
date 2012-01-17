@@ -367,6 +367,13 @@ public:
 		{}
 	};
 	
+	class DomainNameTooLongExc : public Exc{
+	public:
+		DomainNameTooLongExc() :
+				Exc("Too long domain name, should not exceed 253 characters according to RFC 2181")
+		{}
+	};
+	
 	class TooMuchRequestsExc : public Exc{
 	public:
 		TooMuchRequestsExc() :
@@ -392,7 +399,7 @@ public:
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
 	 * @throw AlreadyInProgress when DNS lookup operation served by this resolver object is already in progress.
      */
-	void Resolve_ts(const std::string& hostName, unsigned timeoutMillis = 5000, unsigned numTrials = 6);
+	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 5000, unsigned numTrials = 6);
 	
 	/**
 	 * @brief Cancel current DNS lookup operation.
