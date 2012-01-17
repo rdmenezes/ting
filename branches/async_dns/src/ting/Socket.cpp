@@ -121,8 +121,9 @@ void Socket::Close(){
 //same as std::auto_ptr
 Socket& Socket::operator=(const Socket& s){
 //	TRACE(<< "Socket::operator=(): invoked " << this << std::endl)
-	if(this == &s)//detect self-assignment
+	if(this == &s){//detect self-assignment
 		return *this;
+	}
 
 	//first, assign as Waitable, it may throw an exception
 	//if the waitable is added to some waitset
@@ -143,8 +144,9 @@ Socket& Socket::operator=(const Socket& s){
 
 
 void Socket::DisableNaggle(){
-	if(!this->IsValid())
+	if(!this->IsValid()){
 		throw net::Exc("Socket::DisableNaggle(): socket is not valid");
+	}
 
 #if defined(__linux__) || defined(__APPLE__) || defined(WIN32)
 	{
@@ -269,7 +271,7 @@ bool Socket::CheckSignalled(){
 	}
 
 #ifdef DEBUG
-	//if some event occured then some of readiness flags should be set
+	//if some event occurred then some of readiness flags should be set
 	if(events.lNetworkEvents != 0){
 		ASSERT_ALWAYS(this->readinessFlags != 0)
 	}
@@ -331,8 +333,9 @@ int Socket::GetHandle(){
 //static
 ting::u32 IPAddress::ParseString(const char* ip){
 	//TODO: there already is an IP parsing function in BSD sockets, consider using it here
-	if(!ip)
+	if(!ip){
 		throw net::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
+	}
 
 	struct lf{ //local functions
 		inline static void ThrowInvalidIP(){
@@ -941,7 +944,7 @@ size_t UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
 		throw net::Exc("UDPSocket::Recv(): socket is not opened");
 	}
 
-	//The 'can read' flag shall be cleared even if this function fails.
+	//The "can read" flag shall be cleared even if this function fails.
 	//This is to avoid subsequent calls to Recv() because of it indicating
 	//that there's an activity.
 	//So, do it at the beginning of the function.
