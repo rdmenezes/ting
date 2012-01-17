@@ -36,6 +36,95 @@ ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 
 
+namespace{
+
+
+//this mutex is used when adding and removing a request to/from the thread.
+ting::Mutex dnsMutex;
+
+
+class DNSLookupThread : public ting::MsgThread{
+	
+	ting::net::UDPSocket socket;
+	ting::Inited<ting::WaitSet, 2> waitSet;//WaitSet for 2 Waitables
+	
+	void AddResolver(HostNameResolver* resover){
+		//TODO:
+	}
+	
+	void RemoveResolver(HostNameResolver* resolver){
+		//TODO:
+	}
+	
+public:
+	DNSLookupThread(){
+		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
+		
+		//Open socket in constructor instead of Run() to catch any possible error
+		//with opening the socket before starting the thread.
+		this->socket.Open();
+	}
+	
+	//accessing this variable must be protected by dnsMutex
+	ting::Inited<unsigned, 0> numRequests;
+	
+	void Run(){
+		//TODO:
+	}
+	
+	class AddResolverMessage : public ting::Message{
+		DNSLookupThread* thr;
+		HostNameResolver* resolver;
+	public:
+		AddResolverMessage(DNSLookupThread* thr, HostNameResolver* resolver) :
+				thr(ASS(thr)),
+				resolver(ASS(resolver))
+		{}
+		
+		//override
+		void Handle(){
+			this->thr->AddResolver(resolver);
+		}
+	};
+	
+	class RemoveResolverMessage : public ting::Message{
+		DNSLookupThread* thr;
+		HostNameResolver* resolver;
+	public:
+		RemoveResolverMessage(DNSLookupThread* thr, HostNameResolver* resolver) :
+				thr(ASS(thr)),
+				resolver(ASS(resolver))
+		{}
+		
+		//override
+		void Handle(){
+			this->thr->RemoveResolver(resolver);
+		}
+	};
+};
+
+//accessing this variable must be protected by dnsMutex
+ting::Ptr<DNSLookupThread> dnsThread;
+
+
+
+}//~namespace
+
+
+
+void HostNameResolver::Resolve_ts(const std::string& hostName, unsigned timeoutMillis, unsigned numTrials){
+	//TODO:
+}
+
+
+
+bool HostNameResolver::Cancel_ts(){
+	//TODO:
+	return true;
+}
+
+
+
 Lib::Lib(){
 #ifdef WIN32
 	WORD versionWanted = MAKEWORD(2,2);
@@ -56,6 +145,20 @@ Lib::Lib(){
 
 
 Lib::~Lib(){
+	//check that there are no active dns lookups and finish the DNS request thread
+	{
+		ting::Mutex::Guard mutexGuard(dnsMutex);
+		
+		if(dnsThread){
+			dnsThread->PushQuitMessage();
+			dnsThread->Join();
+			
+			ASSERT_INFO(dnsThread->numRequests == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
+			
+			dnsThread.Reset();
+		}
+	}
+	
 #ifdef WIN32
 	// Clean up windows networking
 	if(WSACleanup() == SOCKET_ERROR)

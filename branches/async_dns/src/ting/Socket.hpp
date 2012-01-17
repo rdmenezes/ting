@@ -330,13 +330,10 @@ class Lib : public IntrusiveSingleton<Lib>{
 	friend class IntrusiveSingleton<Lib>;
 	static IntrusiveSingleton<Lib>::T_Instance instance;
 	
-	
-	
 public:
 	Lib();
 
 	~Lib();
-
 };
 
 
@@ -386,7 +383,9 @@ public:
 	
 	/**
 	 * @brief Start asynchronous IP-address resolving.
-	 * The method is thread-safe.
+	 * The method is thread-safe. DNS resolution requests to DNS server are done
+	 * via UDP protocol which is unreliable, so there is a possibility to have
+	 * several request sending trials, see numTrials argument.
      * @param hostName - host name to resolve IP-address for.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
 	 * @param numTrials - number of trials of requests to DNS server.
@@ -432,6 +431,7 @@ public:
 	
 	/**
 	 * @brief callback method called upon DNS lookup operation has finished.
+	 * Note, that the method has to be thread-safe.
      * @param result - the result of DNS lookup operation.
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::IPAddress object.
@@ -447,6 +447,7 @@ public:
 class TCPSocket : public Socket{
 	friend class TCPServerSocket;
 public:
+	
 	/**
 	 * @brief Constructs an invalid TCP socket object.
 	 */
@@ -454,6 +455,8 @@ public:
 //		TRACE(<< "TCPSocket::TCPSocket(): invoked " << this << std::endl)
 	}
 
+	
+	
 	/**
 	 * @brief A copy constructor.
 	 * Copy constructor creates a new socket object which refers to the same socket as s.
@@ -468,6 +471,8 @@ public:
 //		TRACE(<< "TCPSocket::TCPSocket(copy): invoked " << this << std::endl)
 	}
 
+	
+	
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
 	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
@@ -479,6 +484,8 @@ public:
 		return *this;
 	}
 
+	
+	
 	/**
 	 * @brief Connects the socket.
 	 * This method connects the socket to remote TCP server socket.
@@ -523,11 +530,15 @@ public:
 	 */
 	size_t Recv(ting::Buffer<u8>& buf, size_t offset = 0);
 
+	
+	
 	/**
 	 * @brief Get local IP address and port.
 	 * @return IP address and port of the local socket.
 	 */
 	IPAddress GetLocalAddress();
+	
+	
 	
 	/**
 	 * @brief Get remote IP address and port.
@@ -560,6 +571,8 @@ public:
 	 */
 	TCPServerSocket(){}
 
+	
+	
 	/**
 	 * @brief A copy constructor.
 	 * Copy constructor creates a new socket object which refers to the same socket as s.
@@ -573,6 +586,8 @@ public:
 			disableNaggle(s.disableNaggle)
 	{}
 
+	
+	
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
 	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
@@ -585,6 +600,8 @@ public:
 		return *this;
 	}
 
+	
+	
 	/**
 	 * @brief Connects the socket or starts listening on it.
 	 * This method starts listening on the socket for incoming connections.
@@ -593,6 +610,8 @@ public:
 	 * @param queueLength - the maximum length of the queue of pending connections.
 	 */
 	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50);
+	
+	
 	
 	/**
 	 * @brief Accepts one of the pending connections, non-blocking.
