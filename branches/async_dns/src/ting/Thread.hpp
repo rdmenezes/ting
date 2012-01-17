@@ -528,7 +528,7 @@ public:
 	 * This method gets a message from message queue. If there are no messages on the queue
 	 * it will return invalid auto pointer.
 	 * @return auto-pointer to Message instance.
-	 * @return invalid auto-pointer if there are no messares in the queue.
+	 * @return invalid auto-pointer if there are no messages in the queue.
 	 */
 	Ptr<Message> PeekMsg();
 
@@ -811,8 +811,8 @@ class QuitMessage : public Message{
 
 
 /**
- * @brief do nothing message.
- * The handler of this message dos nothing when the message is handled. This message
+ * @brief No operation message.
+ * The handler of this message does nothing when the message is handled. This message
  * can be used to unblock thread which is waiting infinitely on its message queue.
  */
 class NopMessage : public Message{
@@ -821,13 +821,14 @@ class NopMessage : public Message{
 
 	//override
 	void Handle(){
-		//Do nothing, nop
+		//Do nothing
 	}
 };
 
 
 
 inline void MsgThread::PushNopMessage(){
+	//TODO: push preallocated message
 	this->PushMessage(Ptr<Message>(new NopMessage()));
 }
 
