@@ -274,7 +274,7 @@ public:
 
 	/**
 	 * @brief Create IP address specifying exact ip address as 4 bytes and port number.
-	 * The ip adress can be specified as 4 separate byte values, for example:
+	 * The ip address can be specified as 4 separate byte values, for example:
 	 * @code
 	 * ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
 	 * @endcode
@@ -311,7 +311,8 @@ public:
 	
 private:
 	//parse IP address from string
-	//TODO: need to support port also
+	//TODO: need to support port parsing also
+	//TODO: move this function completely to cpp
 	static u32 ParseString(const char* ip);
 };//~class IPAddress
 
@@ -469,7 +470,7 @@ public:
 
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -574,7 +575,7 @@ public:
 
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -631,7 +632,7 @@ public:
 
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred before, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -690,7 +691,7 @@ public:
 	 *              should be large enough to store the whole datagram. If datagram
 	 *              does not fit the passed buffer, then the datagram tail will be truncated
 	 *              and this tail data will be lost.
-     * @param out_SenderIP - reference to the ip address structure where the IP address
+     * @param out_SenderIP - reference to the IP-address structure where the IP-address
 	 *                       of the sender will be stored.
      * @return number of bytes stored in the output buffer.
      */
@@ -714,10 +715,10 @@ private:
  * @mainpage ting::Socket library
  *
  * @section sec_about About
- * <b>tin::Socket</b> is a simple cross platfrom C++ wrapper above sockets networking API designed for games.
+ * <b>tin::Socket</b> is a simple cross platform C++ wrapper above sockets networking API designed for games.
  *
  * @section sec_getting_started Getting started
- * @ref page_usage_tutorial "library usage tutorial" - quickstart tutorial
+ * @ref page_usage_tutorial "library usage tutorial" - quick start tutorial
  */
 
 /*
