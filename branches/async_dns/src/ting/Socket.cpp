@@ -137,14 +137,76 @@ private:
 		this->socket.Open();
 	}
 public:
+	~LookupThread(){
+		ASSERT(this->sendList.size() == 0)
+		ASSERT(this->resolversMap.size() == 0)
+		ASSERT(this->resolversByTime1.size() == 0)
+		ASSERT(this->resolversByTime2.size() == 0)
+		ASSERT(this->idMap.size() == 0)		
+	}
 	
+	//returns Ptr owning the removed resolver, returns invalid Ptr if there was
+	//no such resolver object found.
+	//NOTE: call to this function should be protected by mutex.
+	ting::Ptr<dns::Resolver*> RemoveResolver(HostNameResolver* resolver){
+		ting::Ptr<dns::Resolver*> r;
+		{
+			dns::T_ResolversIter i = this->resolversMap.find(resolver);
+			if(i == this->resolversMap.end()){
+				return r;
+			}
+			r = i->second;
+			this->resolversMap.erase(i);
+		}
+
+		//the request is active, remove it from all the maps
+
+		//if the request was not sent yet
+		if(r->sendIter != this->sendList.end()){
+			this->sendList.erase(r->sendIter);
+		}
+
+		r->timeMap->erase(r->timeMapIter);
+
+		this->idMap.erase(r->idIter);
+		
+		return r;
+	}
 	
 	void Run(){
 		TRACE(<< "DNS lookup thread started" << std::endl)
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
 		
-		//TODO:
+		while(!this->quitFlag){
+			ting::u32 timeout;
+			{
+				ting::Mutex::Guard mutexGuard(dns::mutex);
+				
+				ting::u32 curTime = ting::GetTicks();
+				
+				//TODO:
+				
+				while(this->timeMap1.begin()->first <= curTime){
+					//timeout
+					ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+					ASSERT(r)
+					
+					dns::mutex.Unlock();
+					//Notify about timeout.
+					r->hnr->OnCompleted_ts(HostNameResolver::TIMEOUT, 0);
+					dns::mutex.Lock();
+				}
+				if(this->resolversMap.size() == 0){
+					break;//exit thread
+				}
+				
+				timeout = 
+			}
+			
+			this->waitSet.WaitWithTimeout();
+			//TODO:
+		}
 		
 		this->waitSet.Remove(&this->socket);
 		this->waitSet.Remove(&this->queue);
@@ -184,7 +246,7 @@ HostNameResolver::~HostNameResolver(){
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsValid()){
-		
+		//TODO:
 	}
 }
 
@@ -200,13 +262,16 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	//check if thread is created
 	if(dns::thread.IsNotValid()){
 		dns::thread = dns::LookupThread::New();
-		dns::thread->Start();
 	}else{
+		//Thread is created, check if it is running.
+		//If there are active requests then the thread must be running.
 		if(dns::thread->resolversMap.size() == 0){
-			//thread is stopped, make sure the old one has exited and create a new one
+			//thread is stopped, make sure the old one has exited and create a new one by calling Join() method.
+			//NOTE, if the thread was not started due to some error during adding
+			//previous DNS lookup request it is OK to call Join() on such not
+			//started thread.
 			dns::thread->Join();
 			dns::thread = dns::LookupThread::New();
-			dns::thread->Start();
 		}
 	}
 	
@@ -248,14 +313,20 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	//insert the resolver to main resolvers map
 	dns::thread->resolversMap[this] = r;
 	
-	//If there was no requests in the list, send the message to the thread to switch
+	//If there was no send requests in the list, send the message to the thread to switch
 	//socket to wait for sending mode.
-	if(dns::thread->resolversMap.size() == 1){
+	if(dns::thread->sendList.size() == 1){
 		dns::thread->PushMessage(
 				ting::Ptr<dns::LookupThread::StartSendingMessage>(
 						new dns::LookupThread::StartSendingMessage(dns::thread.operator->())
 					)
 			);
+	}
+	
+	//Start the thread if there was no active requests, which means that the thread
+	//was newly created and needs to be started.
+	if(dns::thread->resolversMap.size() == 1){
+		dns::thread->Start();
 	}
 }
 
@@ -268,29 +339,13 @@ bool HostNameResolver::Cancel_ts(){
 		return false;
 	}
 	
-	dns::Resolver* r;
-	{
-		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
-		if(i == dns::thread->resolversMap.end()){
-			return false;
-		}
-		r = i->second.operator->();
+	bool ret = dns::thread->RemoveResolver(this).IsValid();
+	
+	if(dns::thread->resolversMap.size() == 0 && ret){
+		dns::thread->PushQuitMessage();
 	}
 	
-	//the request is active, remove it from all the maps
-	
-	//if the request was not sent yet
-	if(r->sendIter != dns::thread->sendList.end()){
-		dns::thread->sendList.erase(r->sendIter);
-	}
-	
-	r->timeMap->erase(r->timeMapIter);
-	
-	dns::thread->idMap.erase(r->idIter);
-	
-	dns::thread->resolversMap.erase(this);
-	
-	return true;
+	return ret;
 }
 
 

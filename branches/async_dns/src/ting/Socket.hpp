@@ -437,7 +437,7 @@ public:
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::IPAddress object.
      */
-	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) = 0;
+	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) throw() = 0;
 };
 
 
