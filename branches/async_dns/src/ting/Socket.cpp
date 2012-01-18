@@ -71,7 +71,10 @@ typedef T_ResolversMap::iterator T_ResolversIter;
 
 struct Resolver : public ting::PoolStored<Resolver, 10>{
 	HostNameResolver* hnr;
+	
 	std::string hostName; //host name to resolve
+	
+	ting::u32 timeStamp; //ticks when the request was posted
 	
 	T_ResolversTimeMap* timeMap;
 	T_ResolversTimeIter timeMapIter;
@@ -185,9 +188,12 @@ public:
 				
 				ting::u32 curTime = ting::GetTicks();
 				
-				//TODO:
-				
-				while(this->timeMap1.begin()->first <= curTime){
+				while(this->resolversMap.size() != 0){
+					//TODO:
+					if(this->timeMap1.begin()->first > curTime){
+						
+					}
+					
 					//timeout
 					ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
 					ASSERT(r)
@@ -304,6 +310,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 			r->timeMap = &dns::thread->timeMap1;
 		}
 		r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
+		r->timeStamp = curTime;
 	}
 	
 	//add resolver to send queue
