@@ -345,22 +345,12 @@ public:
  * OnCompleted_ts() method which will be called upon the DNS lookup operation has finished.
  */
 class HostNameResolver{
-	enum E_State{
-		IDLE,
-		SENDING_REQUEST,
-		WAITING_RESPONSE
-	};
-	
-	ting::Inited<volatile E_State, IDLE> state;
-	
 	//no copying
 	HostNameResolver(const HostNameResolver&);
 	HostNameResolver& operator=(const HostNameResolver&);
 	
 public:
-	virtual ~HostNameResolver(){
-		ASSERT(this->state == IDLE)
-	}
+	virtual ~HostNameResolver();
 	
 	/**
 	 * @brief Basic DNS lookup exception.
@@ -387,7 +377,7 @@ public:
 		{}
 	};
 	
-	class AlreadyInProgress : public Exc{
+	class AlreadyInProgressExc : public Exc{
 	public:
 		AlreadyInProgress() :
 				Exc("DNS lookup operation is already in progress")
@@ -396,17 +386,14 @@ public:
 	
 	/**
 	 * @brief Start asynchronous IP-address resolving.
-	 * The method is thread-safe. DNS resolution requests to DNS server are done
-	 * via UDP protocol which is unreliable, so there is a possibility to have
-	 * several request sending trials, see numTrials argument.
+	 * The method is thread-safe.
      * @param hostName - host name to resolve IP-address for.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
-	 * @param numTrials - number of trials of requests to DNS server.
 	 * @throw DomainNameTooLongExc when supplied for resolution domain name is too long.
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
-	 * @throw AlreadyInProgress when DNS lookup operation served by this resolver object is already in progress.
+	 * @throw AlreadyInProgressExc when DNS lookup operation served by this resolver object is already in progress.
      */
-	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 5000, unsigned numTrials = 6);
+	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 20000);
 	
 	/**
 	 * @brief Cancel current DNS lookup operation.

@@ -45,18 +45,24 @@ namespace{
 ting::Mutex dnsMutex;
 
 
+struct DNSResolver : public ting::PoolStored<DNSResolver, 10>{
+	HostNameResolver* hnr;
+	std::string hostName; //host name to resolve
+};
+
+
 class DNSLookupThread : public ting::MsgThread{
 	
 	ting::net::UDPSocket socket;
 	ting::WaitSet waitSet;
 	
-	typedef std::multimap<ting::u64, HostNameResolver*> T_ResolversTimeMap;
+	typedef std::multimap<ting::u64, DNSResolver*> T_ResolversTimeMap;
 	typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
 	T_ResolversTimeMap resolversByTime;
 	
-	std::map<HostNameResolver*, T_ResolversTimeIter> resolversMap;
+	std::map<HostNameResolver*, DNSResolver*> resolversMap;
 	
-	void AddResolver(HostNameResolver* resolver){
+	void AddResolver(DNSResolver* resolver){
 		//TODO:
 	}
 	
@@ -88,9 +94,9 @@ public:
 	
 	class AddResolverMessage : public ting::Message{
 		DNSLookupThread* thr;
-		HostNameResolver* resolver;
+		DNSResolver* resolver;
 	public:
-		AddResolverMessage(DNSLookupThread* thr, HostNameResolver* resolver) :
+		AddResolverMessage(DNSLookupThread* thr, DNSResolver* resolver) :
 				thr(ASS(thr)),
 				resolver(ASS(resolver))
 		{}
@@ -111,10 +117,19 @@ ting::Ptr<DNSLookupThread> dnsThread;
 
 
 
-void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis, unsigned numTrials){
+HostNameResolver::~HostNameResolver(){
+	//TODO: check that there is no ongoing DNS lookup operation.
+}
+
+
+void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
 	if(hostName.size() > 253){
 		throw DomainNameTooLongExc();
 	}
+	
+	ting::Mutex::Guard mutexGuard(dnsMutex);
+	
+	//TODO: check if already in progress
 	
 	//TODO:
 }
@@ -122,6 +137,12 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 
 
 bool HostNameResolver::Cancel_ts(){
+	ting::Mutex::Guard mutexGuard(dnsMutex);
+	
+	if(this->state == IDLE){
+		return false;
+	}
+	
 	//TODO:
 	return true;
 }
