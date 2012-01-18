@@ -387,7 +387,7 @@ public:
 	/**
 	 * @brief Start asynchronous IP-address resolving.
 	 * The method is thread-safe.
-     * @param hostName - host name to resolve IP-address for.
+     * @param hostName - host name to resolve IP-address for. The host name string is case sensitive.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
 	 * @throw DomainNameTooLongExc when supplied for resolution domain name is too long.
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
