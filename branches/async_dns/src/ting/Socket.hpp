@@ -345,7 +345,13 @@ public:
  * OnCompleted_ts() method which will be called upon the DNS lookup operation has finished.
  */
 class HostNameResolver{
-	ting::Inited<volatile bool, false> inProgress;
+	enum E_State{
+		IDLE,
+		SENDING_REQUEST,
+		WAITING_RESPONSE
+	};
+	
+	ting::Inited<volatile E_State, IDLE> state;
 	
 	//no copying
 	HostNameResolver(const HostNameResolver&);
@@ -353,7 +359,7 @@ class HostNameResolver{
 	
 public:
 	virtual ~HostNameResolver(){
-		ASSERT(!this->inProgress)
+		ASSERT(this->state == IDLE)
 	}
 	
 	/**
@@ -370,7 +376,7 @@ public:
 	class DomainNameTooLongExc : public Exc{
 	public:
 		DomainNameTooLongExc() :
-				Exc("Too long domain name, should not exceed 253 characters according to RFC 2181")
+				Exc("Too long domain name, it should not exceed 253 characters according to RFC 2181")
 		{}
 	};
 	
@@ -396,6 +402,7 @@ public:
      * @param hostName - host name to resolve IP-address for.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
 	 * @param numTrials - number of trials of requests to DNS server.
+	 * @throw DomainNameTooLongExc when supplied for resolution domain name is too long.
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
 	 * @throw AlreadyInProgress when DNS lookup operation served by this resolver object is already in progress.
      */
