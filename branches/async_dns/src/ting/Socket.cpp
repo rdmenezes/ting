@@ -25,6 +25,10 @@ THE SOFTWARE. */
 
 
 #include <map>
+#include <list>
+
+#include "PoolStored.hpp"
+#include "Timer.hpp"
 
 #include "Socket.hpp"
 
@@ -39,36 +43,92 @@ ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 
 namespace{
+namespace dns{
+
+
+struct Resolver;
+
 
 
 //this mutex is used when adding and removing a request to/from the thread.
-ting::Mutex dnsMutex;
+ting::Mutex mutex;
 
 
-struct DNSResolver : public ting::PoolStored<DNSResolver, 10>{
+
+typedef std::multimap<ting::u32, Resolver*> T_ResolversTimeMap;
+typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
+
+typedef std::map<ting::u16, Resolver*> T_IdMap;
+typedef T_IdMap::iterator T_IdIter;
+
+typedef std::list<Resolver*> T_RequestsToSendList;
+typedef T_RequestsToSendList::iterator T_RequestsToSendIter;
+
+typedef std::map<HostNameResolver*, ting::Ptr<Resolver> > T_ResolversMap;
+typedef T_ResolversMap::iterator T_ResolversIter;
+
+
+
+struct Resolver : public ting::PoolStored<Resolver, 10>{
 	HostNameResolver* hnr;
 	std::string hostName; //host name to resolve
+	
+	T_ResolversTimeMap* timeMap;
+	T_ResolversTimeIter timeMapIter;
+	
+	T_IdIter idIter;
+	
+	T_RequestsToSendIter sendIter;
 };
 
 
-class DNSLookupThread : public ting::MsgThread{
-	
+
+class LookupThread : public ting::MsgThread{
 	ting::net::UDPSocket socket;
 	ting::WaitSet waitSet;
 	
-	typedef std::multimap<ting::u64, DNSResolver*> T_ResolversTimeMap;
-	typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
-	T_ResolversTimeMap resolversByTime;
-	
-	std::map<HostNameResolver*, DNSResolver*> resolversMap;
-	
-	void AddResolver(DNSResolver* resolver){
-		//TODO:
-	}
+	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
-	DNSLookupThread() :
-			waitSet(2)
+	T_ResolversTimeMap& timeMap1;
+	T_ResolversTimeMap& timeMap2;
+	
+	T_RequestsToSendList sendList;
+	
+	T_ResolversMap resolversMap;
+	T_IdMap idMap;
+	
+	//NOTE: call to this function should be protected by mutex.
+	//throws HostNameResolver::TooMuchRequestsExc if all IDs are occupied.
+	ting::u16 FindFreeId(){
+		if(this->idMap.size() == 0){
+			return 0;
+		}
+		
+		if(this->idMap.begin()->first != 0){
+			return this->idMap.begin()->first - 1;
+		}
+		
+		if((--(this->idMap.end()))->first != ting::u16(-1)){
+			return (--(this->idMap.end()))->first + 1;
+		}
+		
+		T_IdIter i1 = this->idMap.begin();
+		T_IdIter i2 = ++this->idMap.begin();
+		for(; i2 != this->idMap.end(); ++i1, ++i2){
+			if(i2->first - i1->first > 1){
+				return i1->first + 1;
+			}
+		}
+		
+		throw HostNameResolver::TooMuchRequestsExc();
+	}
+	
+private:	
+	LookupThread() :
+			waitSet(2),
+			timeMap1(resolversByTime1),
+			timeMap2(resolversByTime2)
 	{
 		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
 		
@@ -76,9 +136,8 @@ public:
 		//with opening the socket before starting the thread.
 		this->socket.Open();
 	}
+public:
 	
-	//accessing this variable must be protected by dnsMutex
-	ting::Inited<unsigned, 0> numRequests;
 	
 	void Run(){
 		TRACE(<< "DNS lookup thread started" << std::endl)
@@ -92,34 +151,43 @@ public:
 		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	
-	class AddResolverMessage : public ting::Message{
-		DNSLookupThread* thr;
-		DNSResolver* resolver;
+	class StartSendingMessage : public ting::Message{
+		LookupThread* thr;
 	public:
-		AddResolverMessage(DNSLookupThread* thr, DNSResolver* resolver) :
-				thr(ASS(thr)),
-				resolver(ASS(resolver))
+		StartSendingMessage(LookupThread* thr) :
+				thr(ASS(thr))
 		{}
 		
 		//override
 		void Handle(){
-			this->thr->AddResolver(resolver);
+			this->thr->waitSet.Change(&this->thr->socket, ting::Waitable::READ_AND_WRITE);
 		}
 	};
+	
+	static inline ting::Ptr<LookupThread> New(){
+		return ting::Ptr<LookupThread>(new LookupThread());
+	}
 };
 
 //accessing this variable must be protected by dnsMutex
-ting::Ptr<DNSLookupThread> dnsThread;
+ting::Ptr<LookupThread> thread;
 
 
 
+}//~namespace
 }//~namespace
 
 
 
 HostNameResolver::~HostNameResolver(){
-	//TODO: check that there is no ongoing DNS lookup operation.
+	//check that there is no ongoing DNS lookup operation.
+	ting::Mutex::Guard mutexGuard(dns::mutex);
+	
+	if(dns::thread.IsValid()){
+		
+	}
 }
+
 
 
 void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
@@ -127,23 +195,101 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 		throw DomainNameTooLongExc();
 	}
 	
-	ting::Mutex::Guard mutexGuard(dnsMutex);
+	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
-	//TODO: check if already in progress
+	//check if thread is created
+	if(dns::thread.IsNotValid()){
+		dns::thread = dns::LookupThread::New();
+		dns::thread->Start();
+	}else{
+		if(dns::thread->resolversMap.size() == 0){
+			//thread is stopped, make sure the old one has exited and create a new one
+			dns::thread->Join();
+			dns::thread = dns::LookupThread::New();
+			dns::thread->Start();
+		}
+	}
 	
-	//TODO:
+	ASSERT(dns::thread.IsValid())
+	
+	//check if already in progress
+	if(dns::thread->resolversMap.find(this) != dns::thread->resolversMap.end()){
+		throw AlreadyInProgressExc();
+	}
+	
+	ting::Ptr<dns::Resolver> r(new dns::Resolver());
+	r->hnr = this;
+	r->hostName = hostName;
+	{
+		//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
+		ting::u8 id = dns::thread->FindFreeId();
+		std::pair<dns::T_IdIter, bool> res =
+				dns::thread->idMap.insert(std::pair<ting::u16, dns::Resolver*>(id, r.operator->()));
+		ASSERT(res.second)
+		r->idIter = res.first;
+	}
+	
+	//calculate time
+	{
+		ting::u32 curTime = ting::GetTicks();
+		ting::u32 endTime = curTime + timeoutMillis;
+		if(endTime < curTime){//if warped around
+			r->timeMap = &dns::thread->timeMap2;
+		}else{
+			r->timeMap = &dns::thread->timeMap1;
+		}
+		r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
+	}
+	
+	//add resolver to send queue
+	dns::thread->sendList.push_back(r.operator->());
+	r->sendIter = --dns::thread->sendList.end();
+	
+	//insert the resolver to main resolvers map
+	dns::thread->resolversMap[this] = r;
+	
+	//If there was no requests in the list, send the message to the thread to switch
+	//socket to wait for sending mode.
+	if(dns::thread->resolversMap.size() == 1){
+		dns::thread->PushMessage(
+				ting::Ptr<dns::LookupThread::StartSendingMessage>(
+						new dns::LookupThread::StartSendingMessage(dns::thread.operator->())
+					)
+			);
+	}
 }
 
 
 
 bool HostNameResolver::Cancel_ts(){
-	ting::Mutex::Guard mutexGuard(dnsMutex);
+	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
-	if(this->state == IDLE){
+	if(dns::thread.IsNotValid()){
 		return false;
 	}
 	
-	//TODO:
+	dns::Resolver* r;
+	{
+		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
+		if(i == dns::thread->resolversMap.end()){
+			return false;
+		}
+		r = i->second.operator->();
+	}
+	
+	//the request is active, remove it from all the maps
+	
+	//if the request was not sent yet
+	if(r->sendIter != dns::thread->sendList.end()){
+		dns::thread->sendList.erase(r->sendIter);
+	}
+	
+	r->timeMap->erase(r->timeMapIter);
+	
+	dns::thread->idMap.erase(r->idIter);
+	
+	dns::thread->resolversMap.erase(this);
+	
 	return true;
 }
 
@@ -171,15 +317,15 @@ Lib::Lib(){
 Lib::~Lib(){
 	//check that there are no active dns lookups and finish the DNS request thread
 	{
-		ting::Mutex::Guard mutexGuard(dnsMutex);
+		ting::Mutex::Guard mutexGuard(dns::mutex);
 		
-		if(dnsThread){
-			dnsThread->PushQuitMessage();
-			dnsThread->Join();
+		if(dns::thread.IsValid()){
+			dns::thread->PushQuitMessage();
+			dns::thread->Join();
 			
-			ASSERT_INFO(dnsThread->numRequests == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
+			ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
 			
-			dnsThread.Reset();
+			dns::thread.Reset();
 		}
 	}
 	

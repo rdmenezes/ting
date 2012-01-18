@@ -379,7 +379,7 @@ public:
 	
 	class AlreadyInProgressExc : public Exc{
 	public:
-		AlreadyInProgress() :
+		AlreadyInProgressExc() :
 				Exc("DNS lookup operation is already in progress")
 		{}
 	};
