@@ -209,14 +209,24 @@ private:
 				}
 
 				if(this->socket.CanRead()){
-					//TODO:
+					try{
+						//TODO: read packet
+					}catch(ting::net::Exc& e){
+						this->RemoveAllResolvers();
+						break;//exit thread
+					}
 				}
 
 				if(this->socket.CanWrite()){
 					//send request
 					ASSERT(this->sendList.size() > 0)
 					
-					//TODO: send request
+					try{
+						//TODO: send request
+					}catch(ting::net::Exc& e){
+						this->RemoveAllResolvers();
+						break;//exit thread
+					}
 					
 					if(this->sendList.size() == 0){
 						//move socket to waiting for READ condition only
