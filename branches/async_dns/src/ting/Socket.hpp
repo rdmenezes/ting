@@ -426,7 +426,13 @@ public:
 		
 		/**
 		 * @brief Error occurred while DNS lookup operation.
+		 * Error reported by DNS server.
 		 */
+		DNS_ERROR,
+		
+		/**
+		 * @brief Local error occurred.
+         */
 		ERROR
 	};
 	

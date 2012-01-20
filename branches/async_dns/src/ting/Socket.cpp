@@ -74,8 +74,6 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	
 	std::string hostName; //host name to resolve
 	
-	ting::u32 timeStamp; //ticks when the request was posted
-	
 	T_ResolversTimeMap* timeMap;
 	T_ResolversTimeIter timeMapIter;
 	
@@ -93,6 +91,11 @@ class LookupThread : public ting::MsgThread{
 	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
+	//This variable is for detecting system clock ticks warp around.
+	//True if last call to ting::GetTicks() returned value in first half.
+	//False otherwise.
+	bool lastTicksInFirstHalf;
+	
 	T_ResolversTimeMap& timeMap1;
 	T_ResolversTimeMap& timeMap2;
 	
@@ -176,6 +179,20 @@ public:
 		return r;
 	}
 	
+private:
+	//NOTE: call to this function should be protected by dns::mutex
+	void RemoveAllResolvers(){
+		while(this->resolversMap.size() != 0){
+			ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->resolversMap.begin()->first);
+			ASSERT(r)
+
+			dns::mutex.Unlock();
+			//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
+			r->hnr->OnCompleted_ts(HostNameResolver::ERROR, 0);
+			dns::mutex.Lock();
+		}
+	}
+	
 	void Run(){
 		TRACE(<< "DNS lookup thread started" << std::endl)
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
@@ -186,12 +203,52 @@ public:
 			{
 				ting::Mutex::Guard mutexGuard(dns::mutex);
 				
-				ting::u32 curTime = ting::GetTicks();
-				
-				while(this->resolversMap.size() != 0){
+				if(this->socket.ErrorCondition()){
+					this->RemoveAllResolvers();
+					break;//exit thread
+				}
+
+				if(this->socket.CanRead()){
 					//TODO:
-					if(this->timeMap1.begin()->first > curTime){
+				}
+
+				if(this->socket.CanWrite()){
+					//send request
+					ASSERT(this->sendList.size() > 0)
+					
+					//TODO: send request
+					
+					if(this->sendList.size() == 0){
+						//move socket to waiting for READ condition only
+						this->waitSet.Change(&this->socket, ting::Waitable::READ);
+					}
+				}
+				
+				ting::u32 curTime = ting::GetTicks();
+				{//check if time has warped around and it is necessary to swap time maps
+					bool isFirstHalf = curTime < (ting::u32(-1) / 2);
+					if(isFirstHalf && !this->lastTicksInFirstHalf){
+						//Time warped.
+						//Timeout all requests from first time map
+						while(this->timeMap1.size() != 0){
+							ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+							ASSERT(r)
+
+							dns::mutex.Unlock();
+							//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
+							r->hnr->OnCompleted_ts(HostNameResolver::TIMEOUT, 0);
+							dns::mutex.Lock();
+						}
 						
+						ASSERT(this->timeMap1.size() == 0)
+						std::swap(this->timeMap1, this->timeMap2);
+					}
+					this->lastTicksInFirstHalf = isFirstHalf;
+				}
+				
+				while(this->timeMap1.size() != 0){
+					if(this->timeMap1.begin()->first > curTime){
+						break;
 					}
 					
 					//timeout
@@ -199,19 +256,34 @@ public:
 					ASSERT(r)
 					
 					dns::mutex.Unlock();
-					//Notify about timeout.
+					//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
 					r->hnr->OnCompleted_ts(HostNameResolver::TIMEOUT, 0);
 					dns::mutex.Lock();
 				}
+				
 				if(this->resolversMap.size() == 0){
 					break;//exit thread
 				}
 				
-				timeout = 
+				ASSERT(this->timeMap1.size() > 0)
+				ASSERT(this->timeMap1.begin()->first > curTime)
+				
+				timeout = curTime - this->timeMap1.begin()->first;
 			}
 			
-			this->waitSet.WaitWithTimeout();
-			//TODO:
+			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
+			ting::ClampTop(timeout, ting::u32(-1) / 4);
+			
+			if(this->waitSet.WaitWithTimeout(timeout) == 0){
+				//no Waitables triggered
+				continue;
+			}
+			
+			if(this->queue.CanRead()){
+				while(ting::Ptr<ting::Message> m = this->queue.PeekMsg()){
+					m->Handle();
+				}
+			}			
 		}
 		
 		this->waitSet.Remove(&this->socket);
@@ -219,6 +291,7 @@ public:
 		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	
+public:
 	class StartSendingMessage : public ting::Message{
 		LookupThread* thr;
 	public:
@@ -301,8 +374,8 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	}
 	
 	//calculate time
+	ting::u32 curTime = ting::GetTicks();
 	{
-		ting::u32 curTime = ting::GetTicks();
 		ting::u32 endTime = curTime + timeoutMillis;
 		if(endTime < curTime){//if warped around
 			r->timeMap = &dns::thread->timeMap2;
@@ -310,7 +383,6 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 			r->timeMap = &dns::thread->timeMap1;
 		}
 		r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
-		r->timeStamp = curTime;
 	}
 	
 	//add resolver to send queue
@@ -333,6 +405,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	//Start the thread if there was no active requests, which means that the thread
 	//was newly created and needs to be started.
 	if(dns::thread->resolversMap.size() == 1){
+		dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
 		dns::thread->Start();
 	}
 }
