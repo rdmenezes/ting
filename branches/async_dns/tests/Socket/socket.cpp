@@ -5,6 +5,8 @@
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/Array.hpp"
 
+#include "socket.hpp"
+
 
 
 namespace BasicClientServerTest{
@@ -471,21 +473,3 @@ void Run(){
 }
 
 }//~namespace
-
-
-
-int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<<"Socket test "<<std::endl)
-
-	ting::net::Lib netLib;
-
-	BasicIPAddressTest::Run();
-	BasicClientServerTest::Run();
-	BasicUDPSocketsTest::Run();
-	SendDataContinuouslyWithWaitSet::Run();
-	SendDataContinuously::Run();
-
-	TRACE_ALWAYS(<<"[PASSED]: Socket test"<<std::endl)
-
-	return 0;
-}
