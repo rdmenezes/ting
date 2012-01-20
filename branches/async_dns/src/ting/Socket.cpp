@@ -154,8 +154,8 @@ public:
 	//returns Ptr owning the removed resolver, returns invalid Ptr if there was
 	//no such resolver object found.
 	//NOTE: call to this function should be protected by mutex.
-	ting::Ptr<dns::Resolver*> RemoveResolver(HostNameResolver* resolver){
-		ting::Ptr<dns::Resolver*> r;
+	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver){
+		ting::Ptr<dns::Resolver> r;
 		{
 			dns::T_ResolversIter i = this->resolversMap.find(resolver);
 			if(i == this->resolversMap.end()){
@@ -183,7 +183,7 @@ private:
 	//NOTE: call to this function should be protected by dns::mutex
 	void RemoveAllResolvers(){
 		while(this->resolversMap.size() != 0){
-			ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->resolversMap.begin()->first);
+			ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
 			ASSERT(r)
 
 			dns::mutex.Unlock();
@@ -241,7 +241,7 @@ private:
 						//Time warped.
 						//Timeout all requests from first time map
 						while(this->timeMap1.size() != 0){
-							ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+							ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
 							ASSERT(r)
 
 							dns::mutex.Unlock();
@@ -262,7 +262,7 @@ private:
 					}
 					
 					//timeout
-					ting::Ptr<dns::Resolver*> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+					ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
 					ASSERT(r)
 					
 					dns::mutex.Unlock();
