@@ -77,9 +77,97 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	T_ResolversTimeMap* timeMap;
 	T_ResolversTimeIter timeMapIter;
 	
+	ting::u16 id;
 	T_IdIter idIter;
 	
 	T_RequestsToSendIter sendIter;
+	
+	void SendRequestToDNS(ting::net::UDPSocket& socket){
+		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
+		
+		size_t packetSize =
+				2 + //ID
+				2 + //flags
+				2 + //Number of questions
+				2 + //Number of answers
+				2 + //Number of authority records
+				2 + //Number of other records
+				this->hostName.size() + 2 + //domain name
+				2 + //Question type
+				2   //Question class
+			;
+		
+		ASSERT(packetSize <= buf.Size())
+		
+		ting::u8* p = buf.Begin();
+		
+		//ID
+		ting::Serialize16(this->id, p);
+		p += 2;
+		
+		//flags
+		ting::Serialize16(0x100, p);
+		p += 2;
+		
+		//Number of questions
+		ting::Serialize16(1, p);
+		p += 2;
+		
+		//Number of answers
+		ting::Serialize16(0, p);
+		p += 2;
+		
+		//Number of authority records
+		ting::Serialize16(0, p);
+		p += 2;
+		
+		//Number of other records
+		ting::Serialize16(0, p);
+		p += 2;
+		
+		//domain name
+		for(size_t dotPos = 0; dotPos < this->hostName.size();){
+			size_t oldDotPos = dotPos;
+			dotPos = this->hostName.find('.', dotPos);
+			if(dotPos == std::string::npos){
+				dotPos = this->hostName.size();
+			}
+			
+			ASSERT(dotPos <= 0xff)
+			size_t labelLength = dotPos - oldDotPos;
+			ASSERT(labelLength <= 0xff)
+			
+			*p = ting::u8(labelLength);//save label length
+			++p;
+			//copy the label bytes
+			memcpy(p, this->hostName.c_str() + oldDotPos, labelLength);
+			p += labelLength;
+			
+			++dotPos;
+			
+			ASSERT(p <= buf.End());
+		}
+		
+		*p = 0; //terminate labels sequence
+		++p;
+		
+		//Question type (1 means A query)
+		ting::Serialize16(1, p);
+		p += 2;
+		
+		//Question class (1 means inet)
+		ting::Serialize16(1, p);
+		p += 2;
+		
+		ASSERT(p <= buf.End());
+		ASSERT(p - buf.Begin() == packetSize);
+		
+		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
+	}
+	
+	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
+		//TODO:
+	}
 };
 
 
@@ -374,11 +462,12 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	ting::Ptr<dns::Resolver> r(new dns::Resolver());
 	r->hnr = this;
 	r->hostName = hostName;
+	
+	//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
 	{
-		//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
-		ting::u8 id = dns::thread->FindFreeId();
+		r->id = dns::thread->FindFreeId();
 		std::pair<dns::T_IdIter, bool> res =
-				dns::thread->idMap.insert(std::pair<ting::u16, dns::Resolver*>(id, r.operator->()));
+				dns::thread->idMap.insert(std::pair<ting::u16, dns::Resolver*>(r->id, r.operator->()));
 		ASSERT(res.second)
 		r->idIter = res.first;
 	}
