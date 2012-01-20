@@ -82,6 +82,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	
 	T_RequestsToSendIter sendIter;
 	
+	//NOTE: call to this function should be protected by dns::mutex, to make sure the request is not canceled while sending.
 	void SendRequestToDNS(ting::net::UDPSocket& socket){
 		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
 		
@@ -310,7 +311,8 @@ private:
 					ASSERT(this->sendList.size() > 0)
 					
 					try{
-						//TODO: send request
+						this->sendList.front()->SendRequestToDNS(this->socket);
+						this->sendList.pop_front();
 					}catch(ting::net::Exc& e){
 						this->RemoveAllResolvers();
 						break;//exit thread
