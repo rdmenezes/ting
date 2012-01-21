@@ -163,7 +163,8 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ASSERT(p <= buf.End());
 		ASSERT(p - buf.Begin() == packetSize);
 		
-		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
+		size_t ret = socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
+		ASSERT(ret == packetSize)
 	}
 	
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
