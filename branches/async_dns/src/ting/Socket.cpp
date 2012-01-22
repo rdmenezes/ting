@@ -171,9 +171,194 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
+	inline void ReportError(ting::net::HostNameResolver::E_Result error){
+		dns::mutex.Unlock();
+		this->hnr->OnCompleted_ts(error, 0);
+		dns::mutex.Lock();
+	}
+	
+	//NOTE: call to this function should be protected by dns::mutex
 	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
-		//TODO:
+		if(buf.Size() <
+				2 + //ID
+				2 + //flags
+				2 + //Number of questions
+				2 + //Number of answers
+				2 + //Number of authority records
+				2   //Number of other records
+			)
+		{
+			this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+			return;
+		}
+		
+		const ting::u8* p = buf.Begin();
+		p += 2;//skip ID
+		
+		{
+			ting::u16 flags = ting::Deserialize16(p);
+			p += 2;
+			
+			if((flags & 1) != 1){//we expect it to be a response, not query.
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+				return;
+			}
+			
+			//Check response code
+			if((flags << 12) != 0){//0 means no error condition
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+				return;
+			}
+		}
+		
+		{//check number of questions
+			ting::u16 numQuestions = ting::Deserialize16(p);
+			p += 2;
+			
+			if(numQuestions != 1){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+				return;
+			}
+		}
+		
+		ting::u16 numAnswers = ting::Deserialize16(p);
+		p += 2;
+		ASSERT(buf.Begin() <= p)
+		ASSERT(p <= (buf.End() - 1) || p == buf.End())
+		
+		if(numAnswers == 0){
+			this->ReportError(ting::net::HostNameResolver::NO_SUCH_HOST);
+			return;
+		}
+		
+		//restore host name
+		{
+			std::string host;
+			
+			for(;;){
+				if(p == buf.End()){
+					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				ASSERT(buf.Overlaps(p))
+				
+				ting::u8 len = *p;
+				++p;
+				
+				if(len == 0){
+					break;
+				}
+				
+				if(host.size() != 0){//if not first label
+					host += '.';
+				}
+				
+				if(buf.End() - p < len){
+					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				
+				host += std::string(reinterpret_cast<const char*>(p), size_t(len));
+				p += len;
+				ASSERT(buf.Overlaps(p) || p == buf.End())
+			}
+			
+			if(this->hostName != host){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
+				return;
+			}
+		}
+		
+		//check query type, we sent question type 1 (A query).
+		{
+			ting::u16 type = ting::Deserialize16(p);
+			p += 2;
+			
+			if(type != 1){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong question type
+				return;
+			}
+		}
+		
+		//check query class, we sent question class 1 (inet).
+		{
+			ting::u16 cls = ting::Deserialize16(p);
+			p += 2;
+			
+			if(cls != 1){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong question class
+				return;
+			}
+		}
+		
+		ASSERT(buf.Begin() <= p)
+		ASSERT(p <= (buf.End() - 1) || p == buf.End)
+		
+		//loop through the answers
+		for(ting::u16 n = 0; n != numAnswers; ++n){
+			if(p == buf.End()){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			
+			//skip possible domain name
+			for(; p != buf.End() && *p != 0; ++p){}
+			
+			if(p == buf.End()){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			++p;
+			
+			if(buf.End() - p < 2){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			ting::u16 type = ting::Deserialize16(p);
+			p += 2;
+			
+			if(buf.End() - p < 2){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+//			ting::u16 cls = ting::Deserialize16(p);
+			p += 2;
+			
+			if(buf.End() - p < 4){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+//			ting::u32 ttl = ting::Deserialize32(p);//time till the returned value can be cached.
+			p += 4;
+			
+			if(buf.End() - p < 2){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			ting::u16 dataLen = ting::Deserialize16(p);
+			p += 2;
+			
+			if(buf.End() - p < dataLen){
+				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			if(type == 1){//'A' type answer
+				if(dataLen < 4){
+					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				
+				ting::u32 address = ting::Deserialize32(p);
+				dns::mutex.Unlock();
+				this->hnr->OnCompleted_ts(ting::net::HostNameResolver::OK, address);
+				dns::mutex.Lock();
+				return;
+			}
+			p += dataLen;
+		}
+		
+		this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//no answer found
 	}
 };
 
@@ -309,12 +494,14 @@ private:
 						ting::net::IPAddress address;
 						size_t ret = this->socket.Recv(buf, address);//TODO: check returned address?
 						ASSERT(ret != 0)
+						ASSERT(ret <= buf.Size())
 						if(ret >= 2){//at least there should be ID, otherwise ignore received UDP packet
 							ting::u16 id = ting::Deserialize16(buf.Begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
-								i->second->ParseReplyFromDNS(buf);//this function will call the callback
+								i->second->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
+								ASSERT(id == i->second->id)
 								this->RemoveResolver(i->second->hnr);
 							}
 						}

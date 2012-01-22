@@ -187,6 +187,17 @@ public:
 		return this->buf + this->size;
 	}
 
+	
+	
+	/**
+	 * @brief Checks if pointer points somewhere within the buffer.
+     * @param p - pointer to check.
+     * @return true - if pointer passed as argument points somewhere within the buffer.
+	 * @return false otherwise.
+     */
+	inline bool Overlaps(const T* p)const{
+		return this->Begin() <= p && p <= (this->End() - 1);
+	}
 
 
 #ifdef DEBUG
