@@ -517,7 +517,7 @@ private:
 					
 					try{
 						this->sendList.front()->SendRequestToDNS(this->socket);
-						this->sendList.front()->sendIter = this->sendList.end();
+						this->sendList.front()->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
 						this->sendList.pop_front();
 					}catch(ting::net::Exc& e){
 						this->RemoveAllResolvers();
