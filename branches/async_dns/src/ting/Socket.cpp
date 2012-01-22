@@ -163,10 +163,15 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ASSERT(p <= buf.End());
 		ASSERT(p - buf.Begin() == packetSize);
 		
-		size_t ret = socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
+#ifdef DEBUG
+		size_t ret =
+#endif
+		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
 		ASSERT(ret == packetSize)
 	}
 	
+	//NOTE: call to this function should be protected by dns::mutex
+	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
 		//TODO:
 	}
@@ -300,7 +305,19 @@ private:
 
 				if(this->socket.CanRead()){
 					try{
-						//TODO: read packet
+						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes.
+						ting::net::IPAddress address;
+						size_t ret = this->socket.Recv(buf, address);//TODO: check returned address?
+						ASSERT(ret != 0)
+						if(ret >= 2){//at least there should be ID, otherwise ignore received UDP packet
+							ting::u16 id = ting::Deserialize16(buf.Begin());
+							
+							T_IdIter i = this->idMap.find(id);
+							if(i != this->idMap.end()){
+								i->second->ParseReplyFromDNS(buf);//this function will call the callback
+								this->RemoveResolver(i->second->hnr);
+							}
+						}
 					}catch(ting::net::Exc& e){
 						this->RemoveAllResolvers();
 						break;//exit thread
@@ -313,6 +330,7 @@ private:
 					
 					try{
 						this->sendList.front()->SendRequestToDNS(this->socket);
+						this->sendList.front()->sendIter = this->sendList.end();
 						this->sendList.pop_front();
 					}catch(ting::net::Exc& e){
 						this->RemoveAllResolvers();
