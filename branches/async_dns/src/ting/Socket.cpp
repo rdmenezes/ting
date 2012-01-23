@@ -187,6 +187,13 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	//NOTE: call to this function should be protected by dns::mutex
 	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
+		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
+#ifdef DEBUG
+		for(unsigned i = 0; i < buf.Size(); ++i){
+			TRACE(<< int(buf[i]) << std::endl)
+		}
+#endif
+		
 		if(buf.Size() <
 				2 + //ID
 				2 + //flags
@@ -207,13 +214,14 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			ting::u16 flags = ting::Deserialize16BE(p);
 			p += 2;
 			
-			if((flags & 1) != 1){//we expect it to be a response, not query.
+			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
+				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): flags = " << flags << std::endl)
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
 			
 			//Check response code
-			if((flags << 12) != 0){//0 means no error condition
+			if((flags & 0xf) != 0){//0 means no error condition
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
@@ -239,7 +247,17 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			return;
 		}
 		
-		//restore host name
+		{
+//			ting::u16 nscount = ting::Deserialize16BE(p);
+			p += 2;
+		}
+		
+		{
+//			ting::u16 arcount = ting::Deserialize16BE(p);
+			p += 2;
+		}
+		
+		//restore host name (it can be absent)
 		{
 			std::string host;
 			
@@ -270,8 +288,10 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				p += len;
 				ASSERT(buf.Overlaps(p) || p == buf.End())
 			}
+			TRACE(<< "host = " << host << std::endl)
 			
 			if(this->hostName != host){
+				TRACE(<< "this->hostName = " << this->hostName << std::endl)
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
 				return;
 			}
@@ -308,16 +328,23 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				return;
 			}
 			
-			//skip possible domain name
-			for(; p != buf.End() && *p != 0; ++p){
-				ASSERT(buf.Overlaps(p))
+			//check if there is a domain name or a reference to the domain name
+			if(((*p) >> 6) == 0){ //check if two high bits are set
+				//skip possible domain name
+				for(; p != buf.End() && *p != 0; ++p){
+					ASSERT(buf.Overlaps(p))
+				}
+				if(p == buf.End()){
+					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				++p;
+			}else{
+				//it is a reference to the domain name.
+				//skip it
+				p += 2;
+				//TODO: do not skip ?
 			}
-			
-			if(p == buf.End()){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-			++p;
 			
 			if(buf.End() - p < 2){
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet

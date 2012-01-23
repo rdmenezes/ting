@@ -18,6 +18,7 @@ public:
 	
 	//override
 	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+//		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
 		this->result = result;
 		
 		this->ip = ip;
