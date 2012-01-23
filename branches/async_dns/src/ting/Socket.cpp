@@ -169,12 +169,12 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress("8.8.8.8", 53));//TODO: dns address
 		ASSERT(ret == packetSize)
 		
-		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
-#ifdef DEBUG
-		for(unsigned i = 0; i < packetSize; ++i){
-			TRACE(<< int(buf[i]) << std::endl)
-		}
-#endif
+//		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
+//#ifdef DEBUG
+//		for(unsigned i = 0; i < packetSize; ++i){
+//			TRACE(<< int(buf[i]) << std::endl)
+//		}
+//#endif
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -187,12 +187,12 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	//NOTE: call to this function should be protected by dns::mutex
 	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
-		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
-#ifdef DEBUG
-		for(unsigned i = 0; i < buf.Size(); ++i){
-			TRACE(<< int(buf[i]) << std::endl)
-		}
-#endif
+//		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
+//#ifdef DEBUG
+//		for(unsigned i = 0; i < buf.Size(); ++i){
+//			TRACE(<< int(buf[i]) << std::endl)
+//		}
+//#endif
 		
 		if(buf.Size() <
 				2 + //ID
@@ -215,7 +215,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
-				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): flags = " << flags << std::endl)
+//				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): flags = " << flags << std::endl)
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
@@ -288,10 +288,10 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				p += len;
 				ASSERT(buf.Overlaps(p) || p == buf.End())
 			}
-			TRACE(<< "host = " << host << std::endl)
+//			TRACE(<< "host = " << host << std::endl)
 			
 			if(this->hostName != host){
-				TRACE(<< "this->hostName = " << this->hostName << std::endl)
+//				TRACE(<< "this->hostName = " << this->hostName << std::endl)
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
 				return;
 			}
@@ -524,7 +524,7 @@ private:
 				}
 
 				if(this->socket.CanRead()){
-					TRACE(<< "can read" << std::endl)
+//					TRACE(<< "can read" << std::endl)
 					try{
 						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes.
 						ting::net::IPAddress address;
@@ -548,7 +548,7 @@ private:
 				}
 
 				if(this->socket.CanWrite()){
-					TRACE(<< "can write" << std::endl)
+//					TRACE(<< "can write" << std::endl)
 					//send request
 					ASSERT(this->sendList.size() > 0)
 					
@@ -564,7 +564,7 @@ private:
 					if(this->sendList.size() == 0){
 						//move socket to waiting for READ condition only
 						this->waitSet.Change(&this->socket, ting::Waitable::READ);
-						TRACE(<< "socket wait mode changed to read only" << std::endl)
+//						TRACE(<< "socket wait mode changed to read only" << std::endl)
 					}
 				}
 				
@@ -621,10 +621,10 @@ private:
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
 			ting::ClampTop(timeout, ting::u32(-1) / 4);
 			
-			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
+//			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
 			if(this->waitSet.WaitWithTimeout(timeout) == 0){
 				//no Waitables triggered
-				TRACE(<< "timeout hit" << std::endl)
+//				TRACE(<< "timeout hit" << std::endl)
 				continue;
 			}
 			
@@ -637,7 +637,7 @@ private:
 		
 		this->waitSet.Remove(&this->socket);
 		this->waitSet.Remove(&this->queue);
-		TRACE(<< "DNS lookup thread stopped" << std::endl)
+//		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	
 public:
@@ -651,7 +651,7 @@ public:
 		//override
 		void Handle(){
 			this->thr->waitSet.Change(&this->thr->socket, ting::Waitable::READ_AND_WRITE);
-			TRACE(<< "socket wait mode changed to read and write" << std::endl)
+//			TRACE(<< "socket wait mode changed to read and write" << std::endl)
 		}
 	};
 	
@@ -682,7 +682,7 @@ HostNameResolver::~HostNameResolver(){
 
 
 void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
-	TRACE(<< "HostNameResolver::Resolve_ts(): enter" << std::endl)
+//	TRACE(<< "HostNameResolver::Resolve_ts(): enter" << std::endl)
 	
 	ASSERT(ting::net::Lib::IsCreated())
 	
@@ -764,7 +764,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	if(dns::thread->resolversMap.size() == 1){
 		dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
 		dns::thread->Start();
-		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
+//		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
 	}
 }
 

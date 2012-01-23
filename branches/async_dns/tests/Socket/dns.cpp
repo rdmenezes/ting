@@ -42,9 +42,9 @@ void Run(){
 	
 	ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
 	
-	ting::net::IPAddress ip(r.ip, 0);
+	ASSERT_INFO_ALWAYS(r.ip == 0x4D581503, "r.ip = " << r.ip)
 	
-	TRACE(<< "ip = " << ip.host << std::endl)
+//	TRACE(<< "ip = " << ip.host << std::endl)
 	
 	//TODO:
 }
