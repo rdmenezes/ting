@@ -373,7 +373,7 @@ public:
 	class TooMuchRequestsExc : public Exc{
 	public:
 		TooMuchRequestsExc() :
-				Exc("Too much active DNS lookup requests in progress")
+				Exc("Too much active DNS lookup requests in progress, only 65536 simultaneous active requests are allowed")
 		{}
 	};
 	

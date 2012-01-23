@@ -3,3 +3,7 @@
 #include "dns.hpp"
 
 
+
+void TestSimpleDNSLookup::Run(){
+	//TODO:
+}

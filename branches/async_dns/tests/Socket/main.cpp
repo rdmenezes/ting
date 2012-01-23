@@ -10,6 +10,8 @@ int main(int argc, char *argv[]){
 
 	ting::net::Lib netLib;
 
+	TestSimpleDNSLookup::Run();
+	
 	BasicIPAddressTest::Run();
 	BasicClientServerTest::Run();
 	BasicUDPSocketsTest::Run();

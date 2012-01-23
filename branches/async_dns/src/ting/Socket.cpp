@@ -292,8 +292,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			}
 		}
 		
-		ASSERT(buf.Begin() <= p)
-		ASSERT(p <= (buf.End() - 1) || p == buf.End)
+		ASSERT(buf.Overlaps(p) || p == buf.End)
 		
 		//loop through the answers
 		for(ting::u16 n = 0; n != numAnswers; ++n){
@@ -303,7 +302,9 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			}
 			
 			//skip possible domain name
-			for(; p != buf.End() && *p != 0; ++p){}
+			for(; p != buf.End() && *p != 0; ++p){
+				ASSERT(buf.Overlaps(p))
+			}
 			
 			if(p == buf.End()){
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
@@ -631,13 +632,15 @@ HostNameResolver::~HostNameResolver(){
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsValid()){
-		//TODO:
+		dns::thread->RemoveResolver(this);
 	}
 }
 
 
 
 void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
+	ASSERT(ting::net::Lib::IsCreated())
+	
 	if(hostName.size() > 253){
 		throw DomainNameTooLongExc();
 	}
