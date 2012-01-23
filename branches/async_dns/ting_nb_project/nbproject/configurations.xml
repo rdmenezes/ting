@@ -126,7 +126,11 @@
         <in>testso.hpp</in>
       </df>
       <df name="Socket">
-        <in>Socket_test.cpp</in>
+        <in>dns.cpp</in>
+        <in>dns.hpp</in>
+        <in>main.cpp</in>
+        <in>socket.cpp</in>
+        <in>socket.hpp</in>
       </df>
       <df name="Thread">
         <in>Thread_test.cpp</in>
@@ -270,11 +274,6 @@
       <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/testso.hpp"
             ex="true"
             tool="3"
-            flavor="0">
-      </item>
-      <item path="/home/ivan/prj/ting/tests/Socket/Socket_test.cpp"
-            ex="true"
-            tool="1"
             flavor="0">
       </item>
       <item path="/home/ivan/prj/ting/tests/Thread/Thread_test.cpp"

@@ -671,12 +671,17 @@ ting::Ptr<LookupThread> thread;
 
 
 HostNameResolver::~HostNameResolver(){
+#ifdef DEBUG
 	//check that there is no ongoing DNS lookup operation.
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsValid()){
-		dns::thread->RemoveResolver(this);
+		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
+		if(i != dns::thread->resolversMap.end()){
+			ASSERT_INFO_ALWAYS(false, "trying to destroy the HostNameResolver object while DNS lookup request is in progress, call HostNameResolver::Cancel_ts() first.")
+		}
 	}
+#endif
 }
 
 
