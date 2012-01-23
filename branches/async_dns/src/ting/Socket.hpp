@@ -350,6 +350,8 @@ class HostNameResolver{
 	HostNameResolver& operator=(const HostNameResolver&);
 	
 public:
+	inline HostNameResolver(){}
+	
 	virtual ~HostNameResolver();
 	
 	/**

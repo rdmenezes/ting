@@ -184,7 +184,7 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	}
 	
 	ASSERT(chunks.size() == 1)
-	ASSERT(res < chunks.front())
+	ASSERT(res < chunks.front().Size())
 	memcpy(p, chunks.front().Begin(), res);
 	ASSERT(p + res == ret.End())
 	

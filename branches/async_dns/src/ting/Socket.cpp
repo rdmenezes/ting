@@ -160,14 +160,16 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ting::Serialize16(1, p);
 		p += 2;
 		
-		ASSERT(p <= buf.End());
-		ASSERT(p - buf.Begin() == packetSize);
+		ASSERT(buf.Begin() <= p && p <= buf.End());
+		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
 #ifdef DEBUG
 		size_t ret =
 #endif
-		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress(8,8,8,8, 53));//TODO: dns address
+		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress("8.8.8.8", 53));//TODO: dns address
 		ASSERT(ret == packetSize)
+		
+		TRACE(<< "DNS request sent, packetSize = " << packetSize << ": " << ting::Buffer<ting::u8>(buf.Begin(), packetSize) << std::endl)
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -292,7 +294,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			}
 		}
 		
-		ASSERT(buf.Overlaps(p) || p == buf.End)
+		ASSERT(buf.Overlaps(p) || p == buf.End())
 		
 		//loop through the answers
 		for(ting::u16 n = 0; n != numAnswers; ++n){
@@ -490,6 +492,7 @@ private:
 				}
 
 				if(this->socket.CanRead()){
+					TRACE(<< "can read" << std::endl)
 					try{
 						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes.
 						ting::net::IPAddress address;
@@ -513,6 +516,7 @@ private:
 				}
 
 				if(this->socket.CanWrite()){
+					TRACE(<< "can write" << std::endl)
 					//send request
 					ASSERT(this->sendList.size() > 0)
 					
@@ -528,6 +532,7 @@ private:
 					if(this->sendList.size() == 0){
 						//move socket to waiting for READ condition only
 						this->waitSet.Change(&this->socket, ting::Waitable::READ);
+						TRACE(<< "socket wait mode changed to read only" << std::endl)
 					}
 				}
 				
@@ -575,14 +580,19 @@ private:
 				ASSERT(this->timeMap1.size() > 0)
 				ASSERT(this->timeMap1.begin()->first > curTime)
 				
-				timeout = curTime - this->timeMap1.begin()->first;
+//				TRACE(<< "DNS thread: curTime = " << curTime << std::endl)
+//				TRACE(<< "DNS thread: this->timeMap1.begin()->first = " << (this->timeMap1.begin()->first) << std::endl)
+				
+				timeout = this->timeMap1.begin()->first - curTime;
 			}
 			
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
 			ting::ClampTop(timeout, ting::u32(-1) / 4);
 			
+			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
 			if(this->waitSet.WaitWithTimeout(timeout) == 0){
 				//no Waitables triggered
+				TRACE(<< "timeout hit" << std::endl)
 				continue;
 			}
 			
@@ -609,6 +619,7 @@ public:
 		//override
 		void Handle(){
 			this->thr->waitSet.Change(&this->thr->socket, ting::Waitable::READ_AND_WRITE);
+			TRACE(<< "socket wait mode changed to read and write" << std::endl)
 		}
 	};
 	
@@ -639,6 +650,8 @@ HostNameResolver::~HostNameResolver(){
 
 
 void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
+	TRACE(<< "HostNameResolver::Resolve_ts(): enter" << std::endl)
+	
 	ASSERT(ting::net::Lib::IsCreated())
 	
 	if(hostName.size() > 253){
@@ -687,6 +700,8 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	ting::u32 curTime = ting::GetTicks();
 	{
 		ting::u32 endTime = curTime + timeoutMillis;
+//		TRACE(<< "HostNameResolver::Resolve_ts(): curTime = " << curTime << std::endl)
+//		TRACE(<< "HostNameResolver::Resolve_ts(): endTime = " << endTime << std::endl)
 		if(endTime < curTime){//if warped around
 			r->timeMap = &dns::thread->timeMap2;
 		}else{
@@ -717,6 +732,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	if(dns::thread->resolversMap.size() == 1){
 		dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
 		dns::thread->Start();
+		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
 	}
 }
 
