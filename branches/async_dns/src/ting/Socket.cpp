@@ -637,7 +637,7 @@ private:
 		
 		this->waitSet.Remove(&this->socket);
 		this->waitSet.Remove(&this->queue);
-//		TRACE(<< "DNS lookup thread stopped" << std::endl)
+		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	
 public:
