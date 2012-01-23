@@ -257,7 +257,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 		}
 		
-		//restore host name (it can be absent)
+		//parse host name
 		{
 			std::string host;
 			
