@@ -536,9 +536,9 @@ private:
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
-								i->second->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
 								ASSERT(id == i->second->id)
-								this->RemoveResolver(i->second->hnr);
+								ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
+								r->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
 							}
 						}
 					}catch(ting::net::Exc& e){
