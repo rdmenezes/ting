@@ -197,7 +197,7 @@ void Run(){
 					ting::u8* p = sendBuffer.Begin();
 					for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
 						ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
-						ting::Serialize32(scnt, p);
+						ting::Serialize32LE(scnt, p);
 						++scnt;
 					}
 					ASSERT_ALWAYS(p == sendBuffer.End())
@@ -250,7 +250,7 @@ void Run(){
 
 						if(recvBufBytes == recvBuffer.Size()){
 							recvBufBytes = 0;
-							ting::u32 num = ting::Deserialize32(recvBuffer.Begin());
+							ting::u32 num = ting::Deserialize32LE(recvBuffer.Begin());
 							ASSERT_INFO_ALWAYS(
 									rcnt == num,
 									"num = " << num << " rcnt = " << rcnt
