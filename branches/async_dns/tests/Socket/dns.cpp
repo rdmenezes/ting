@@ -14,9 +14,11 @@ public:
 	
 	ting::Semaphore* sema;
 	
+	E_Result result;
+	
 	//override
 	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
-		ASSERT_ALWAYS(result == ting::net::HostNameResolver::OK)
+		this->result = result;
 		
 		this->ip = ip;
 		
@@ -36,6 +38,8 @@ void Run(){
 	if(!sema.Wait(11000)){
 		ASSERT_ALWAYS(false)
 	}
+	
+	ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
 	
 	ting::net::IPAddress ip(r.ip, 0);
 	

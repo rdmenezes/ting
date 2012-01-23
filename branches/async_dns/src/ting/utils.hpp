@@ -106,30 +106,25 @@ template <class T> inline void ClampBottom(T& v, const T bottom){
 
 
 /**
- * @brief serialize 16 bit value.
+ * @brief serialize 16 bit value, little-endian.
  * Serialize 16 bit value, less significant byte first.
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16(u16 value, u8* out_buf){
+inline void Serialize16LE(u16 value, u8* out_buf){
 	out_buf[0] = value & 0xff;
 	out_buf[1] = value >> 8;
-
-	//NOTE: the following method of serializing is incorrect because,
-	//	    according to C++ standard, it is undefined behavior.
-	//      On most compilers it will work, but, to be on a safe side, we do not use it.
-	//*reinterpret_cast<u16*>(out_buf) = value;//assume little-endian
 }
 
 
 
 /**
- * @brief serialize 32 bit value.
+ * @brief serialize 32 bit value, little-endian.
  * Serialize 32 bit value, less significant byte first.
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32(u32 value, u8* out_buf){
+inline void Serialize32LE(u32 value, u8* out_buf){
 	*out_buf = u8(value & 0xff);
 	++out_buf;
 	*out_buf = u8((value >> 8) & 0xff);
@@ -137,23 +132,18 @@ inline void Serialize32(u32 value, u8* out_buf){
 	*out_buf = u8((value >> 16) & 0xff);
 	++out_buf;
 	*out_buf = u8((value >> 24) & 0xff);
-
-	//NOTE: the following method of serializing is incorrect because,
-	//	    according to C++ standard, it is undefined behavior.
-	//      On most compilers it will work, but, to be on a safe side, we do not use it.
-	//*reinterpret_cast<u32*>(out_buf) = value;//assume little-endian
 }
 
 
 
 /**
- * @brief de-serialize 16 bit value.
+ * @brief de-serialize 16 bit value, little-endian.
  * De-serialize 16 bit value from the sequence of bytes. Assume that less significant
  * byte goes first in the input byte sequence.
- * @param buf - pointer to buffer containing 2 bytes to convert from network format.
- * @return 16 bit unsigned integer converted from network byte order to native byte order.
+ * @param buf - pointer to buffer containing 2 bytes to convert from little-endian format.
+ * @return 16 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u16 Deserialize16(const u8* buf){
+inline u16 Deserialize16LE(const u8* buf){
 	u16 ret;
 
 	//assume little-endian
@@ -162,23 +152,18 @@ inline u16 Deserialize16(const u8* buf){
 	ret |= ((u16(*buf)) << 8);
 
 	return ret;
-
-	//NOTE: the following method of serializing is incorrect because,
-	//	    according to C++ standard, it is undefined behavior.
-	//      On most compilers it will work, but, to be on a safe side, we do not use it.
-	//return *reinterpret_cast<const u16*>(buf);//assume little-endian
 }
 
 
 
 /**
- * @brief de-serialize 32 bit value.
+ * @brief de-serialize 32 bit value, little-endian.
  * De-serialize 32 bit value from the sequence of bytes. Assume that less significant
  * byte goes first in the input byte sequence.
- * @param buf - pointer to buffer containing 4 bytes to convert from network format.
- * @return 32 bit unsigned integer converted from network byte order to native byte order.
+ * @param buf - pointer to buffer containing 4 bytes to convert from little-endian format.
+ * @return 32 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u32 Deserialize32(const u8* buf){
+inline u32 Deserialize32LE(const u8* buf){
 	u32 ret;
 
 	//assume little-endian
@@ -191,11 +176,81 @@ inline u32 Deserialize32(const u8* buf){
 	ret |= ((u32(*buf)) << 24);
 
 	return ret;
+}
 
-	//NOTE: the following method of serializing is incorrect because,
-	//	    according to C++ standard, it is undefined behavior.
-	//      On most compilers it will work, but, to be on a safe side, we do not use it.
-	//return *reinterpret_cast<const u32*>(buf);//assume little-endian
+
+
+/**
+ * @brief serialize 16 bit value, big-endian.
+ * Serialize 16 bit value, most significant byte first.
+ * @param value - the value.
+ * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
+ */
+inline void Serialize16BE(u16 value, u8* out_buf){
+	out_buf[0] = value >> 8;
+	out_buf[1] = value & 0xff;
+}
+
+
+
+/**
+ * @brief serialize 32 bit value, big-endian.
+ * Serialize 32 bit value, most significant byte first.
+ * @param value - the value.
+ * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
+ */
+inline void Serialize32BE(u32 value, u8* out_buf){
+	*out_buf = u8((value >> 24) & 0xff);
+	++out_buf;
+	*out_buf = u8((value >> 16) & 0xff);
+	++out_buf;
+	*out_buf = u8((value >> 8) & 0xff);
+	++out_buf;
+	*out_buf = u8(value & 0xff);
+}
+
+
+
+/**
+ * @brief de-serialize 16 bit value, big-endian.
+ * De-serialize 16 bit value from the sequence of bytes. Assume that most significant
+ * byte goes first in the input byte sequence.
+ * @param buf - pointer to buffer containing 2 bytes to convert from big-endian format.
+ * @return 16 bit unsigned integer converted from big-endian byte order to native byte order.
+ */
+inline u16 Deserialize16BE(const u8* buf){
+	u16 ret;
+
+	//assume big-endian
+	ret = ((u16(*buf)) << 8);
+	++buf;
+	ret |= u16(*buf);
+
+	return ret;
+}
+
+
+
+/**
+ * @brief de-serialize 32 bit value, big-endian.
+ * De-serialize 32 bit value from the sequence of bytes. Assume that most significant
+ * byte goes first in the input byte sequence.
+ * @param buf - pointer to buffer containing 4 bytes to convert from big-endian format.
+ * @return 32 bit unsigned integer converted from big-endian byte order to native byte order.
+ */
+inline u32 Deserialize32BE(const u8* buf){
+	u32 ret;
+
+	//assume big-endian
+	ret = ((u32(*buf)) << 24);
+	++buf;
+	ret |= ((u32(*buf)) << 16);
+	++buf;
+	ret |= ((u32(*buf)) << 8);
+	++buf;
+	ret |= u32(*buf);
+
+	return ret;
 }
 
 

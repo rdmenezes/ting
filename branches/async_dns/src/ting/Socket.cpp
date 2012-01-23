@@ -103,27 +103,27 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ting::u8* p = buf.Begin();
 		
 		//ID
-		ting::Serialize16(this->id, p);
+		ting::Serialize16BE(this->id, p);
 		p += 2;
 		
 		//flags
-		ting::Serialize16(0x100, p);
+		ting::Serialize16BE(0x100, p);
 		p += 2;
 		
 		//Number of questions
-		ting::Serialize16(1, p);
+		ting::Serialize16BE(1, p);
 		p += 2;
 		
 		//Number of answers
-		ting::Serialize16(0, p);
+		ting::Serialize16BE(0, p);
 		p += 2;
 		
 		//Number of authority records
-		ting::Serialize16(0, p);
+		ting::Serialize16BE(0, p);
 		p += 2;
 		
 		//Number of other records
-		ting::Serialize16(0, p);
+		ting::Serialize16BE(0, p);
 		p += 2;
 		
 		//domain name
@@ -153,11 +153,11 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		++p;
 		
 		//Question type (1 means A query)
-		ting::Serialize16(1, p);
+		ting::Serialize16BE(1, p);
 		p += 2;
 		
 		//Question class (1 means inet)
-		ting::Serialize16(1, p);
+		ting::Serialize16BE(1, p);
 		p += 2;
 		
 		ASSERT(buf.Begin() <= p && p <= buf.End());
@@ -169,7 +169,12 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress("8.8.8.8", 53));//TODO: dns address
 		ASSERT(ret == packetSize)
 		
-		TRACE(<< "DNS request sent, packetSize = " << packetSize << ": " << ting::Buffer<ting::u8>(buf.Begin(), packetSize) << std::endl)
+		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
+#ifdef DEBUG
+		for(unsigned i = 0; i < packetSize; ++i){
+			TRACE(<< int(buf[i]) << std::endl)
+		}
+#endif
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -199,7 +204,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		p += 2;//skip ID
 		
 		{
-			ting::u16 flags = ting::Deserialize16(p);
+			ting::u16 flags = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if((flags & 1) != 1){//we expect it to be a response, not query.
@@ -215,7 +220,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		}
 		
 		{//check number of questions
-			ting::u16 numQuestions = ting::Deserialize16(p);
+			ting::u16 numQuestions = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(numQuestions != 1){
@@ -224,7 +229,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			}
 		}
 		
-		ting::u16 numAnswers = ting::Deserialize16(p);
+		ting::u16 numAnswers = ting::Deserialize16BE(p);
 		p += 2;
 		ASSERT(buf.Begin() <= p)
 		ASSERT(p <= (buf.End() - 1) || p == buf.End())
@@ -274,7 +279,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		
 		//check query type, we sent question type 1 (A query).
 		{
-			ting::u16 type = ting::Deserialize16(p);
+			ting::u16 type = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(type != 1){
@@ -285,7 +290,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		
 		//check query class, we sent question class 1 (inet).
 		{
-			ting::u16 cls = ting::Deserialize16(p);
+			ting::u16 cls = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(cls != 1){
@@ -318,7 +323,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-			ting::u16 type = ting::Deserialize16(p);
+			ting::u16 type = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < 2){
@@ -339,7 +344,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-			ting::u16 dataLen = ting::Deserialize16(p);
+			ting::u16 dataLen = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < dataLen){
@@ -352,7 +357,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 					return;
 				}
 				
-				ting::u32 address = ting::Deserialize32(p);
+				ting::u32 address = ting::Deserialize32BE(p);
 				dns::mutex.Unlock();
 				this->hnr->OnCompleted_ts(ting::net::HostNameResolver::OK, address);
 				dns::mutex.Lock();
@@ -500,7 +505,7 @@ private:
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.Size())
 						if(ret >= 2){//at least there should be ID, otherwise ignore received UDP packet
-							ting::u16 id = ting::Deserialize16(buf.Begin());
+							ting::u16 id = ting::Deserialize16BE(buf.Begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
