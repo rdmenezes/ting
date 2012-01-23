@@ -53,7 +53,7 @@ struct Resolver;
 //this mutex is used when adding and removing a request to/from the thread.
 ting::Mutex mutex;
 
-
+ting::Inited<HostNameResolver*, 0> callbackBeingCalled;
 
 typedef std::multimap<ting::u32, Resolver*> T_ResolversTimeMap;
 typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
@@ -178,10 +178,18 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
-	inline void ReportError(ting::net::HostNameResolver::E_Result error){
+	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip){
+		ASSERT(!dns::callbackBeingCalled)
+		dns::callbackBeingCalled = this->hnr;
 		dns::mutex.Unlock();
-		this->hnr->OnCompleted_ts(error, 0);
+		this->hnr->OnCompleted_ts(result, ip);
 		dns::mutex.Lock();
+		dns::callbackBeingCalled = 0;
+	}
+	
+	//NOTE: call to this function should be protected by dns::mutex
+	inline void ReportError(ting::net::HostNameResolver::E_Result error){
+		this->CallCallback(error, 0);
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -385,9 +393,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				}
 				
 				ting::u32 address = ting::Deserialize32BE(p);
-				dns::mutex.Unlock();
-				this->hnr->OnCompleted_ts(ting::net::HostNameResolver::OK, address);
-				dns::mutex.Lock();
+				this->CallCallback(ting::net::HostNameResolver::OK, address);
 				return;
 			}
 			p += dataLen;
@@ -501,10 +507,8 @@ private:
 			ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
 			ASSERT(r)
 
-			dns::mutex.Unlock();
 			//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-			r->hnr->OnCompleted_ts(HostNameResolver::ERROR, 0);
-			dns::mutex.Lock();
+			r->CallCallback(HostNameResolver::ERROR, 0);
 		}
 	}
 	
@@ -578,10 +582,8 @@ private:
 							ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
 							ASSERT(r)
 
-							dns::mutex.Unlock();
 							//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-							r->hnr->OnCompleted_ts(HostNameResolver::TIMEOUT, 0);
-							dns::mutex.Lock();
+							r->CallCallback(HostNameResolver::TIMEOUT, 0);
 						}
 						
 						ASSERT(this->timeMap1.size() == 0)
@@ -599,10 +601,8 @@ private:
 					ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
 					ASSERT(r)
 					
-					dns::mutex.Unlock();
 					//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-					r->hnr->OnCompleted_ts(HostNameResolver::TIMEOUT, 0);
-					dns::mutex.Lock();
+					r->CallCallback(HostNameResolver::TIMEOUT, 0);
 				}
 				
 				if(this->resolversMap.size() == 0){
@@ -674,6 +674,8 @@ HostNameResolver::~HostNameResolver(){
 #ifdef DEBUG
 	//check that there is no ongoing DNS lookup operation.
 	ting::Mutex::Guard mutexGuard(dns::mutex);
+	
+	ASSERT_INFO_ALWAYS(!dns::callbackBeingCalled, "There is a DNS request in process of calling the callback method")
 	
 	if(dns::thread.IsValid()){
 		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);

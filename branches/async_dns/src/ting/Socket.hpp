@@ -404,6 +404,9 @@ public:
 	 * @return false - if there was no ongoing DNS lookup operation to cancel.
 	 *                 This means that the DNS lookup operation was not started
 	 *                 or has finished before the Cancel_ts() method was called.
+	 *                 In the latter case if destroying the object one must make
+	 *                 sure that the OnCompleted_ts() callback function has been called before
+	 *                 destroying the HostNameResolver object.
      */
 	bool Cancel_ts();
 	
