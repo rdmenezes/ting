@@ -737,9 +737,11 @@ void Thread::Join(){
 	User::WaitForRequest(reqStat);
 	this->th.Close();
 #elif defined(__linux__) || defined(__APPLE__)
-	if(int res = pthread_join(this->th, 0)){
-		ASSERT_INFO(false, "res = " << strerror(res))
-	}
+#ifdef DEBUG
+	int res =
+#endif
+			pthread_join(this->th, 0);
+	ASSERT_INFO(res == 0, "res = " << strerror(res))
 #else
 #error "Unsupported OS"
 #endif

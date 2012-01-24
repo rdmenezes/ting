@@ -806,6 +806,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	//		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
 		}
 	}catch(...){
+		dns::thread->resolversMap.erase(this);
 		dns::thread->sendList.pop_back();
 		r->timeMap->erase(r->timeMapIter);
 		dns::thread->idMap.erase(r->idIter);
