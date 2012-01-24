@@ -609,7 +609,7 @@ class Thread{
 		JOINED
 	};
 	
-	ting::Inited<E_State, NEW> state;
+	ting::Inited<volatile E_State, NEW> state;
 
 	//system dependent handle
 #if defined(WIN32)

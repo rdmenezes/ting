@@ -53,8 +53,6 @@ struct Resolver;
 //this mutex is used when adding and removing a request to/from the thread.
 ting::Mutex mutex;
 
-ting::Inited<HostNameResolver*, 0> callbackBeingCalled;
-
 typedef std::multimap<ting::u32, Resolver*> T_ResolversTimeMap;
 typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
 
@@ -179,12 +177,9 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	
 	//NOTE: call to this function should be protected by dns::mutex
 	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip){
-		ASSERT(!dns::callbackBeingCalled)
-		dns::callbackBeingCalled = this->hnr;
 		dns::mutex.Unlock();
 		this->hnr->OnCompleted_ts(result, ip);
 		dns::mutex.Lock();
-		dns::callbackBeingCalled = 0;
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -223,15 +218,21 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
-//				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): flags = " << flags << std::endl)
+				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0x8000) = " << (flags & 0x8000) << std::endl)
 				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
 			
 			//Check response code
 			if((flags & 0xf) != 0){//0 means no error condition
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
-				return;
+				if((flags & 0xf) == 3){//name does not exist
+					this->ReportError(ting::net::HostNameResolver::NO_SUCH_HOST);
+					return;
+				}else{
+					TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0xf) = " << (flags & 0xf) << std::endl)
+					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+					return;
+				}
 			}
 		}
 		
@@ -621,7 +622,7 @@ private:
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
 			ting::ClampTop(timeout, ting::u32(-1) / 4);
 			
-//			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
+			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
 			if(this->waitSet.WaitWithTimeout(timeout) == 0){
 				//no Waitables triggered
 //				TRACE(<< "timeout hit" << std::endl)
@@ -674,8 +675,6 @@ HostNameResolver::~HostNameResolver(){
 #ifdef DEBUG
 	//check that there is no ongoing DNS lookup operation.
 	ting::Mutex::Guard mutexGuard(dns::mutex);
-	
-	ASSERT_INFO_ALWAYS(!dns::callbackBeingCalled, "There is a DNS request in process of calling the callback method")
 	
 	if(dns::thread.IsValid()){
 		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);

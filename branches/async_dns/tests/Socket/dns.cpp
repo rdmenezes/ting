@@ -86,3 +86,61 @@ void Run(){
 }
 
 }
+
+
+
+namespace TestRequestFromCallback{
+
+class Resolver : public ting::net::HostNameResolver{
+	
+public:
+	
+	Resolver(ting::Semaphore& sema) :
+			sema(sema)
+	{}
+	
+	std::string host;
+	
+	ting::u32 ip;
+	
+	ting::Semaphore& sema;
+	
+	E_Result result;
+	
+	//override
+	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+//		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
+		
+		if(this->host.size() == 0){
+			ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::NO_SUCH_HOST, "result = " << result)
+			ASSERT_ALWAYS(ip == 0)
+			
+			this->host = "ya.ru";
+			this->Resolve_ts(this->host, 5000);
+		}else{
+			ASSERT_ALWAYS(this->host == "ya.ru")
+			this->result = result;
+			this->ip = ip;
+			this->sema.Signal();
+		}
+	}
+};
+
+void Run(){
+	
+	ting::Semaphore sema;
+	
+	Resolver r(sema);
+	
+	r.Resolve_ts("rfesfdf.ru", 3000);
+	
+	if(!sema.Wait(8000)){
+		ASSERT_ALWAYS(false)
+	}
+	
+	ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
+
+//	ASSERT_INFO_ALWAYS(r.ip == 0x4D581503 || r.ip == 0x57FAFB03, "r.ip = " << r.ip)
+	ASSERT_ALWAYS(r.ip != 0)
+}
+}

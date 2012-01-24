@@ -592,7 +592,7 @@ void* Thread::RunThread(void *data)
 
 	{
 		//protect by mutex to avoid changing the
-		//this->state variable before Join() or Start() has finished.
+		//this->state variable before Start() has finished.
 		ting::Mutex::Guard mutexGuard(Thread::Mutex2());
 
 		thr->state = STOPPED;
@@ -710,7 +710,8 @@ void Thread::Start(size_t stackSize){
 void Thread::Join(){
 //	TRACE(<< "Thread::Join(): enter" << std::endl)
 
-	//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously
+	//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously.
+	//NOTE: excerpt from pthread docs: "If multiple threads simultaneously try to join with the same thread, the results are undefined."
 	ting::Mutex::Guard mutexGuard(this->mutex1);
 
 	if(this->state == NEW){
@@ -723,6 +724,8 @@ void Thread::Join(){
 	}
 
 	ASSERT(this->state == RUNNING || this->state == STOPPED)
+	
+	ASSERT_INFO(T_ThreadID(this->th) != ting::Thread::GetCurrentThreadID(), "tried to call Join() on the current thread")
 
 #ifdef WIN32
 	WaitForSingleObject(this->th, INFINITE);
@@ -734,14 +737,16 @@ void Thread::Join(){
 	User::WaitForRequest(reqStat);
 	this->th.Close();
 #elif defined(__linux__) || defined(__APPLE__)
-	pthread_join(this->th, 0);
+	if(int res = pthread_join(this->th, 0)){
+		ASSERT_INFO(false, "res = " << strerror(res))
+	}
 #else
 #error "Unsupported OS"
 #endif
 
 	//NOTE: at this point the thread's Run() method should already exit and state
 	//should be set to STOPPED
-	ASSERT(this->state == STOPPED)
+	ASSERT_INFO(this->state == STOPPED, "this->state = " << this->state)
 
 	this->state = JOINED;
 
