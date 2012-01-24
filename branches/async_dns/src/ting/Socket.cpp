@@ -29,6 +29,7 @@ THE SOFTWARE. */
 
 #include "PoolStored.hpp"
 #include "Timer.hpp"
+#include "FSFile.hpp"
 
 #include "Socket.hpp"
 
@@ -550,19 +551,42 @@ private:
 				RegCloseKey(hKey);
 			}
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-			FILE	*fp;
-			char	line[512];
-			int	a, b, c, d;
-
-			if((fp = fopen("/etc/resolv.conf", "r")) != NULL){
-				//Try to figure out what DNS server to use
-				for(; fgets(line, sizeof(line), fp) != NULL; ){
-					if(sscanf(line, "nameserver %d.%d.%d.%d", &a, &b, &c, &d) == 4){
-						this->dns = ting::net::IPAddress(a, b, c, d, 53);
-						break;
-					}
+			ting::FSFile f("/etc/resolv.conf");
+			
+			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
+			
+			for(ting::u8* p = buf.Begin(); p != buf.End(); ++p){
+				ting::u8* start = p;
+				
+				while(p != buf.End() && *p != '\n'){
+					++p;
 				}
-				fclose(fp);
+				
+				ASSERT(p >= start)
+				std::string line(reinterpret_cast<const char*>(start), size_t(p - start));
+				if(p == buf.End()){
+					--p;
+				}
+				
+				const std::string ns("nameserver ");
+				
+				size_t nsStart = line.find(ns);
+				if(nsStart != 0){
+					continue;
+				}
+				
+				size_t ipStart = nsStart + ns.size();
+				
+				size_t ipEnd = line.find_first_not_of(".0123456789", ipStart);
+				
+				std::string ipstr = line.substr(ipStart, ipEnd - ipStart);
+				
+				TRACE(<< "dns ipstr = " << ipstr << std::endl)
+				
+				try{
+					this->dns = ting::net::IPAddress(ipstr.c_str(), 53);
+					break;
+				}catch(...){}
 			}
 #else
 			TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
@@ -570,6 +594,7 @@ private:
 		}catch(...){
 			this->dns = ting::net::IPAddress();
 		}
+		TRACE(<< "this->dns.host = " << this->dns.host << std::endl)
 	}
 	
 	

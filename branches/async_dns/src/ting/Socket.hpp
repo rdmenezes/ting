@@ -291,8 +291,8 @@ public:
 
 	/**
 	 * @brief Create IP address specifying ip address as string and port number.
-	 * @param ip - IP address null-terminated string. Example: "127.0.0.1".
-	 * @param p - IP port number.
+	 * @param ip - IP-address null-terminated string. Example: "127.0.0.1".
+	 * @param p - IP-port number.
 	 */
 	inline IPAddress(const char* ip, u16 p) :
 			host(IPAddress::ParseString(ip)),
