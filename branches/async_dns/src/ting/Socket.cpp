@@ -413,6 +413,13 @@ class LookupThread : public ting::MsgThread{
 	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
+	//this variable is for joining and destroying previous thread object if there was any.
+	ting::Ptr<ting::MsgThread> prevThread;
+	
+	//this is to indicate that the thread is exiting and new DNS lookup requests should be queued to
+	//a new thread.
+	ting::Inited<volatile bool, false> isExiting;
+	
 	//This variable is for detecting system clock ticks warp around.
 	//True if last call to ting::GetTicks() returned value in first half.
 	//False otherwise.
@@ -514,6 +521,15 @@ private:
 	}
 	
 	void Run(){
+		//destroy previous thread if necessary
+		if(this->prevThread){
+			//NOTE, if the thread was not started due to some error during adding its
+			//first DNS lookup request it is OK to call Join() on such not
+			//started thread.
+			this->prevThread->Join();
+			this->prevThread.Reset();
+		}
+		
 		TRACE(<< "DNS lookup thread started" << std::endl)
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
@@ -524,6 +540,7 @@ private:
 				ting::Mutex::Guard mutexGuard(dns::mutex);
 				
 				if(this->socket.ErrorCondition()){
+					this->isExiting = true;
 					this->RemoveAllResolvers();
 					break;//exit thread
 				}
@@ -547,6 +564,7 @@ private:
 							}
 						}
 					}catch(ting::net::Exc& e){
+						this->isExiting = true;
 						this->RemoveAllResolvers();
 						break;//exit thread
 					}
@@ -562,6 +580,7 @@ private:
 						this->sendList.front()->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
 						this->sendList.pop_front();
 					}catch(ting::net::Exc& e){
+						this->isExiting = true;
 						this->RemoveAllResolvers();
 						break;//exit thread
 					}
@@ -607,6 +626,7 @@ private:
 				}
 				
 				if(this->resolversMap.size() == 0){
+					this->isExiting = true;
 					break;//exit thread
 				}
 				
@@ -698,28 +718,29 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
+	bool needStartTheThread = false;
+	
 	//check if thread is created
 	if(dns::thread.IsNotValid()){
 		dns::thread = dns::LookupThread::New();
+		needStartTheThread = true;
 	}else{
+		//check if already in progress
+		if(dns::thread->resolversMap.find(this) != dns::thread->resolversMap.end()){
+			throw AlreadyInProgressExc();
+		}
+
 		//Thread is created, check if it is running.
 		//If there are active requests then the thread must be running.
-		if(dns::thread->resolversMap.size() == 0){
-			//thread is stopped, make sure the old one has exited and create a new one by calling Join() method.
-			//NOTE, if the thread was not started due to some error during adding
-			//previous DNS lookup request it is OK to call Join() on such not
-			//started thread.
-			dns::thread->Join();
-			dns::thread = dns::LookupThread::New();
+		if(dns::thread->isExiting == true){
+			ting::Ptr<dns::LookupThread> t = dns::LookupThread::New();
+			t->prevThread = dns::thread;
+			dns::thread = t;
+			needStartTheThread = true;
 		}
 	}
 	
 	ASSERT(dns::thread.IsValid())
-	
-	//check if already in progress
-	if(dns::thread->resolversMap.find(this) != dns::thread->resolversMap.end()){
-		throw AlreadyInProgressExc();
-	}
 	
 	ting::Ptr<dns::Resolver> r(new dns::Resolver());
 	r->hnr = this;
@@ -765,9 +786,8 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 			);
 	}
 	
-	//Start the thread if there was no active requests, which means that the thread
-	//was newly created and needs to be started.
-	if(dns::thread->resolversMap.size() == 1){
+	//Start the thread if we created the new one.
+	if(needStartTheThread){
 		dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
 		dns::thread->Start();
 //		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
