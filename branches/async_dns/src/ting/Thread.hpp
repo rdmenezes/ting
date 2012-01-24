@@ -627,6 +627,9 @@ class Thread{
 	Thread& operator=(const Thread& );
 
 public:
+	
+	//TODO: Create a set of exceptions and document all functions about what they throw
+	
 	Thread();
 	
 	

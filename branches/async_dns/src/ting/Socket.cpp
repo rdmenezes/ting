@@ -418,7 +418,7 @@ public:
 	
 	//this is to indicate that the thread is exiting and new DNS lookup requests should be queued to
 	//a new thread.
-	ting::Inited<volatile bool, false> isExiting;
+	ting::Inited<volatile bool, true> isExiting;//initially the thread is not running, so set to true
 	
 	//This variable is for detecting system clock ticks warp around.
 	//True if last call to ting::GetTicks() returned value in first half.
@@ -766,31 +766,50 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 		}else{
 			r->timeMap = &dns::thread->timeMap1;
 		}
-		r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
+		try{
+			r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
+		}catch(...){
+			dns::thread->idMap.erase(r->idIter);
+			throw;
+		}
 	}
 	
 	//add resolver to send queue
-	dns::thread->sendList.push_back(r.operator->());
+	try{
+		dns::thread->sendList.push_back(r.operator->());
+	}catch(...){
+		r->timeMap->erase(r->timeMapIter);
+		dns::thread->idMap.erase(r->idIter);
+		throw;
+	}
 	r->sendIter = --dns::thread->sendList.end();
 	
 	//insert the resolver to main resolvers map
-	dns::thread->resolversMap[this] = r;
+	try{
+		dns::thread->resolversMap[this] = r;
 	
-	//If there was no send requests in the list, send the message to the thread to switch
-	//socket to wait for sending mode.
-	if(dns::thread->sendList.size() == 1){
-		dns::thread->PushMessage(
-				ting::Ptr<dns::LookupThread::StartSendingMessage>(
-						new dns::LookupThread::StartSendingMessage(dns::thread.operator->())
-					)
-			);
-	}
-	
-	//Start the thread if we created the new one.
-	if(needStartTheThread){
-		dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
-		dns::thread->Start();
-//		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
+		//If there was no send requests in the list, send the message to the thread to switch
+		//socket to wait for sending mode.
+		if(dns::thread->sendList.size() == 1){
+			dns::thread->PushMessage(
+					ting::Ptr<dns::LookupThread::StartSendingMessage>(
+							new dns::LookupThread::StartSendingMessage(dns::thread.operator->())
+						)
+				);
+		}
+
+		//Start the thread if we created the new one.
+		if(needStartTheThread){
+			dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
+			dns::thread->Start();
+			dns::thread->isExiting = false;
+	//		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
+		}
+	}catch(...){
+		dns::thread->sendList.pop_back();
+		r->timeMap->erase(r->timeMapIter);
+		dns::thread->idMap.erase(r->idIter);
+		throw;
 	}
 }
 
