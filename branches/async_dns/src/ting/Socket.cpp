@@ -537,7 +537,7 @@ private:
 							HKEY_LOCAL_MACHINE,
 							"SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces",
 							&this->key
-						)) != ERROR_SUCCESS)
+						) != ERROR_SUCCESS)
 					{
 						throw ting::Exc("InitDNS(): RegOpenKey() failed");
 					}
@@ -556,21 +556,45 @@ private:
 					continue;
 				}
 				
-				ting::StaticBuffer<char, 32> value;
+				ting::StaticBuffer<BYTE, 512> value;
 				
-				DWORD type, len = value.Size();
+				DWORD len = value.Size();
 				
-				if(RegQueryValueEx(hSub, "NameServer", 0, &type, value.Begin(), &len) != ERROR_SUCCESS){
-					if(RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value.Begin(), &len) != ERROR_SUCCESS)){
+				if(RegQueryValueEx(hSub, "NameServer", 0, NULL, value.Begin(), &len) != ERROR_SUCCESS){
+					TRACE(<< "NameServer reading failed " << std::endl)
+				}else{
+					try{
+						std::string str(reinterpret_cast<char*>(value.Begin()));
+						size_t spaceIndex = str.find(' ');
+
+						std::string ip = str.substr(0, spaceIndex);
+						TRACE(<< "NameServer ip = " << ip << std::endl)
+				
+						this->dns = ting::net::IPAddress(ip.c_str(), 53);
 						RegCloseKey(hSub);
-						continue;
-					}
+						return;
+					}catch(...){}
 				}
+
+				len = value.Size();
+				if(RegQueryValueEx(hSub, "DhcpNameServer", 0, NULL, value.Begin(), &len) != ERROR_SUCCESS){
+					TRACE(<< "DhcpNameServer reading failed " << std::endl)
+					RegCloseKey(hSub);
+					continue;
+				}
+
+				try{
+					std::string str(reinterpret_cast<char*>(value.Begin()));
+					size_t spaceIndex = str.find(' ');
+
+					std::string ip = str.substr(0, spaceIndex);
+					TRACE(<< "DhcpNameServer ip = " << ip << std::endl)
 				
-				this->dns = ting::net::IPAddress(value.Begin(), 53);
+					this->dns = ting::net::IPAddress(ip.c_str(), 53);
+					RegCloseKey(hSub);
+					return;
+				}catch(...){}
 				RegCloseKey(hSub);
-				TRACE(<< "this->dns = " << this->dns << std::endl)
-				return;
 			}
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
@@ -635,6 +659,8 @@ private:
 		
 		this->InitDNS();
 		
+		TRACE(<< "this->dns.host = " << this->dns.host << std::endl)
+
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
 		

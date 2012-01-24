@@ -437,19 +437,22 @@ public:
 		 */
 		DNS_ERROR,
 		
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#undef ERROR
+#endif
 		/**
 		 * @brief Local error occurred.
-         */
+		 */
 		ERROR
 	};
 	
 	/**
 	 * @brief callback method called upon DNS lookup operation has finished.
 	 * Note, that the method has to be thread-safe.
-     * @param result - the result of DNS lookup operation.
+	 * @param result - the result of DNS lookup operation.
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::IPAddress object.
-     */
+	 */
 	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) throw() = 0;
 };
 
