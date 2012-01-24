@@ -526,46 +526,50 @@ private:
 	
 	
 	void InitDNS(){
+		try{
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-		int	i;
-		LONG	err;
-		HKEY	hKey, hSub;
-		char	subkey[512], dhcpns[512], ns[512], value[128];
-		char* key = "SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces";
+			int	i;
+			LONG	err;
+			HKEY	hKey, hSub;
+			char	subkey[512], dhcpns[512], ns[512], value[128];
+			char* key = "SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces";
 
-		if((err = RegOpenKey(HKEY_LOCAL_MACHINE, key, &hKey)) == ERROR_SUCCESS){
-			for(i = 0; RegEnumKey(hKey, i, subkey, sizeof(subkey)) == ERROR_SUCCESS; ++i){
-				DWORD type, len = sizeof(value);
-				if(RegOpenKey(hKey, subkey, &hSub) == ERROR_SUCCESS &&
-						(RegQueryValueEx(hSub, "NameServer", 0,	&type, value, &len) == ERROR_SUCCESS ||
-						RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value, &len) == ERROR_SUCCESS)
-					)
-				{
-					this->dns = ting::net::IPAddress(value, 53);
-					RegCloseKey(hSub);
-					break;
+			if((err = RegOpenKey(HKEY_LOCAL_MACHINE, key, &hKey)) == ERROR_SUCCESS){
+				for(i = 0; RegEnumKey(hKey, i, subkey, sizeof(subkey)) == ERROR_SUCCESS; ++i){
+					DWORD type, len = sizeof(value);
+					if(RegOpenKey(hKey, subkey, &hSub) == ERROR_SUCCESS &&
+							(RegQueryValueEx(hSub, "NameServer", 0,	&type, value, &len) == ERROR_SUCCESS ||
+							RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value, &len) == ERROR_SUCCESS)
+						)
+					{
+						this->dns = ting::net::IPAddress(value, 53);
+						RegCloseKey(hSub);
+						break;
+					}
 				}
+				RegCloseKey(hKey);
 			}
-			RegCloseKey(hKey);
-		}
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-		FILE	*fp;
-		char	line[512];
-		int	a, b, c, d;
+			FILE	*fp;
+			char	line[512];
+			int	a, b, c, d;
 
-		if((fp = fopen("/etc/resolv.conf", "r")) != NULL){
-			//Try to figure out what DNS server to use
-			for(; fgets(line, sizeof(line), fp) != NULL; ){
-				if(sscanf(line, "nameserver %d.%d.%d.%d", &a, &b, &c, &d) == 4){
-					this->dns = ting::net::IPAddress(a, b, c, d, 53);
-					break;
+			if((fp = fopen("/etc/resolv.conf", "r")) != NULL){
+				//Try to figure out what DNS server to use
+				for(; fgets(line, sizeof(line), fp) != NULL; ){
+					if(sscanf(line, "nameserver %d.%d.%d.%d", &a, &b, &c, &d) == 4){
+						this->dns = ting::net::IPAddress(a, b, c, d, 53);
+						break;
+					}
 				}
+				fclose(fp);
 			}
-			fclose(fp);
-		}
 #else
-		TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
+			TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
 #endif
+		}catch(...){
+			this->dns = ting::net::IPAddress();
+		}
 	}
 	
 	
