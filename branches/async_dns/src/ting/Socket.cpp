@@ -529,27 +529,50 @@ private:
 	void InitDNS(){
 		try{
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-			int	i;
-			LONG	err;
-			HKEY	hKey, hSub;
-			char	subkey[512], dhcpns[512], ns[512], value[128];
-			char* key = "SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces";
-
-			if((err = RegOpenKey(HKEY_LOCAL_MACHINE, key, &hKey)) == ERROR_SUCCESS){
-				for(i = 0; RegEnumKey(hKey, i, subkey, sizeof(subkey)) == ERROR_SUCCESS; ++i){
-					DWORD type, len = sizeof(value);
-					if(RegOpenKey(hKey, subkey, &hSub) == ERROR_SUCCESS &&
-							(RegQueryValueEx(hSub, "NameServer", 0,	&type, value, &len) == ERROR_SUCCESS ||
-							RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value, &len) == ERROR_SUCCESS)
-						)
+			struct WinRegKey{
+				HKEY	key;
+			
+				WinRegKey(){
+					if(RegOpenKey(
+							HKEY_LOCAL_MACHINE,
+							"SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces",
+							&this->key
+						)) != ERROR_SUCCESS)
 					{
-						this->dns = ting::net::IPAddress(value, 53);
-						RegCloseKey(hSub);
-						break;
+						throw ting::Exc("InitDNS(): RegOpenKey() failed");
 					}
 				}
-				RegCloseKey(hKey);
+				
+				~WinRegKey(){
+					RegCloseKey(this->key);
+				}
+			} key;
+			
+			ting::StaticBuffer<char, 256> subkey;//according to MSDN docs maximum key name length is 255 chars.
+			
+			for(unsigned i = 0; RegEnumKey(key.key, i, subkey.Begin(), subkey.Size()) == ERROR_SUCCESS; ++i){
+				HKEY hSub;
+				if(RegOpenKey(key.key, subkey.Begin(), &hSub) != ERROR_SUCCESS){
+					continue;
+				}
+				
+				ting::StaticBuffer<char, 32> value;
+				
+				DWORD type, len = value.Size();
+				
+				if(RegQueryValueEx(hSub, "NameServer", 0, &type, value.Begin(), &len) != ERROR_SUCCESS){
+					if(RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value.Begin(), &len) != ERROR_SUCCESS)){
+						RegCloseKey(hSub);
+						continue;
+					}
+				}
+				
+				this->dns = ting::net::IPAddress(value.Begin(), 53);
+				RegCloseKey(hSub);
+				TRACE(<< "this->dns = " << this->dns << std::endl)
+				return;
 			}
+
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 			ting::FSFile f("/etc/resolv.conf");
 			
@@ -585,16 +608,15 @@ private:
 				
 				try{
 					this->dns = ting::net::IPAddress(ipstr.c_str(), 53);
-					break;
+					return;
 				}catch(...){}
 			}
 #else
 			TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
 #endif
 		}catch(...){
-			this->dns = ting::net::IPAddress();
 		}
-		TRACE(<< "this->dns.host = " << this->dns.host << std::endl)
+		this->dns = ting::net::IPAddress();
 	}
 	
 	
