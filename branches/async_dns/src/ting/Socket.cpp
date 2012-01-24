@@ -687,10 +687,18 @@ private:
 						if(r->dns.host == 0){
 							r->dns = this->dns;
 						}
-						//TODO: check if DNS ip is 0
-						r->SendRequestToDNS(this->socket);
-						r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
-						this->sendList.pop_front();
+						
+						if(r->dns.host != 0){
+							r->SendRequestToDNS(this->socket);
+							r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
+							this->sendList.pop_front();
+						}else{
+							ting::Ptr<dns::Resolver> r = this->RemoveResolver(r->hnr);
+							ASSERT(r)
+
+							//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
+							r->CallCallback(HostNameResolver::ERROR, 0);
+						}
 					}catch(ting::net::Exc& e){
 						this->isExiting = true;
 						this->RemoveAllResolvers();
