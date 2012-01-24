@@ -12,3 +12,4 @@ namespace TestRequestFromCallback{
 void Run();	
 }
 
+//TODO: test explicit dns server IP

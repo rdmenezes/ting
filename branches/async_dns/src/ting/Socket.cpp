@@ -80,6 +80,8 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	
 	T_RequestsToSendIter sendIter;
 	
+	ting::net::IPAddress dns;
+	
 	//NOTE: call to this function should be protected by dns::mutex, to make sure the request is not canceled while sending.
 	void SendRequestToDNS(ting::net::UDPSocket& socket){
 		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
@@ -164,7 +166,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 #ifdef DEBUG
 		size_t ret =
 #endif
-		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), ting::net::IPAddress("8.8.8.8", 53));//TODO: dns address
+		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), this->dns);
 		ASSERT(ret == packetSize)
 		
 //		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
@@ -433,6 +435,8 @@ public:
 	T_ResolversMap resolversMap;
 	T_IdMap idMap;
 	
+	ting::net::IPAddress dns;
+	
 	//NOTE: call to this function should be protected by mutex.
 	//throws HostNameResolver::TooMuchRequestsExc if all IDs are occupied.
 	ting::u16 FindFreeId(){
@@ -520,7 +524,54 @@ private:
 		}
 	}
 	
+	
+	void InitDNS(){
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+		int	i;
+		LONG	err;
+		HKEY	hKey, hSub;
+		char	subkey[512], dhcpns[512], ns[512], value[128];
+		char* key = "SYSTEM\\ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces";
+
+		if((err = RegOpenKey(HKEY_LOCAL_MACHINE, key, &hKey)) == ERROR_SUCCESS){
+			for(i = 0; RegEnumKey(hKey, i, subkey, sizeof(subkey)) == ERROR_SUCCESS; ++i){
+				DWORD type, len = sizeof(value);
+				if(RegOpenKey(hKey, subkey, &hSub) == ERROR_SUCCESS &&
+						(RegQueryValueEx(hSub, "NameServer", 0,	&type, value, &len) == ERROR_SUCCESS ||
+						RegQueryValueEx(hSub, "DhcpNameServer", 0, &type, value, &len) == ERROR_SUCCESS)
+					)
+				{
+					this->dns = ting::net::IPAddress(value, 53);
+					RegCloseKey(hSub);
+					break;
+				}
+			}
+			RegCloseKey(hKey);
+		}
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+		FILE	*fp;
+		char	line[512];
+		int	a, b, c, d;
+
+		if((fp = fopen("/etc/resolv.conf", "r")) != NULL){
+			//Try to figure out what DNS server to use
+			for(; fgets(line, sizeof(line), fp) != NULL; ){
+				if(sscanf(line, "nameserver %d.%d.%d.%d", &a, &b, &c, &d) == 4){
+					this->dns = ting::net::IPAddress(a, b, c, d, 53);
+					break;
+				}
+			}
+			fclose(fp);
+		}
+#else
+		TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
+#endif
+	}
+	
+	
 	void Run(){
+		TRACE(<< "DNS lookup thread started" << std::endl)
+		
 		//destroy previous thread if necessary
 		if(this->prevThread){
 			//NOTE, if the thread was not started due to some error during adding its
@@ -528,9 +579,11 @@ private:
 			//started thread.
 			this->prevThread->Join();
 			this->prevThread.Reset();
+			TRACE(<< "Previous thread destroyed" << std::endl)
 		}
 		
-		TRACE(<< "DNS lookup thread started" << std::endl)
+		this->InitDNS();
+		
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
 		
@@ -550,7 +603,8 @@ private:
 					try{
 						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes.
 						ting::net::IPAddress address;
-						size_t ret = this->socket.Recv(buf, address);//TODO: check returned address?
+						size_t ret = this->socket.Recv(buf, address);
+						
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.Size())
 						if(ret >= 2){//at least there should be ID, otherwise ignore received UDP packet
@@ -558,6 +612,8 @@ private:
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
+								//TODO: check by host name also
+								
 								ASSERT(id == i->second->id)
 								ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
 								r->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
@@ -576,8 +632,13 @@ private:
 					ASSERT(this->sendList.size() > 0)
 					
 					try{
-						this->sendList.front()->SendRequestToDNS(this->socket);
-						this->sendList.front()->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
+						dns::Resolver* r = this->sendList.front();
+						if(r->dns.host == 0){
+							r->dns = this->dns;
+						}
+						//TODO: check if DNS ip is 0
+						r->SendRequestToDNS(this->socket);
+						r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
 						this->sendList.pop_front();
 					}catch(ting::net::Exc& e){
 						this->isExiting = true;
@@ -707,7 +768,7 @@ HostNameResolver::~HostNameResolver(){
 
 
 
-void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis){
+void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis, const ting::net::IPAddress& dnsIP){
 //	TRACE(<< "HostNameResolver::Resolve_ts(): enter" << std::endl)
 	
 	ASSERT(ting::net::Lib::IsCreated())
@@ -745,6 +806,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	ting::Ptr<dns::Resolver> r(new dns::Resolver());
 	r->hnr = this;
 	r->hostName = hostName;
+	r->dns = dnsIP;
 	
 	//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
 	{
@@ -1162,31 +1224,36 @@ ting::u32 IPAddress::ParseString(const char* ip){
 		unsigned numDgts;
 		for(numDgts = 0; numDgts < 3; ++numDgts){
 			if( *curp == '.' || *curp == 0 ){
-				if(numDgts==0)
+				if(numDgts==0){
 					lf::ThrowInvalidIP();
+				}
 				break;
 			}else{
-				if(*curp < '0' || *curp > '9')
+				if(*curp < '0' || *curp > '9'){
 					lf::ThrowInvalidIP();
+				}
 				digits[numDgts] = unsigned(*curp) - unsigned('0');
 			}
 			++curp;
 		}
 
-		if(t < 3 && *curp != '.')//unexpected delimiter or unexpected end of string
+		if(t < 3 && *curp != '.'){//unexpected delimiter or unexpected end of string
 			lf::ThrowInvalidIP();
-		else if(t == 3 && *curp != 0)
+		}else if(t == 3 && *curp != 0){
 			lf::ThrowInvalidIP();
+		}
 
 		unsigned xxx = 0;
 		for(unsigned i = 0; i < numDgts; ++i){
 			unsigned ord = 1;
-			for(unsigned j = 1; j < numDgts - i; ++j)
+			for(unsigned j = 1; j < numDgts - i; ++j){
 			   ord *= 10;
+			}
 			xxx += digits[i] * ord;
 		}
-		if(xxx > 255)
+		if(xxx > 255){
 			lf::ThrowInvalidIP();
+		}
 
 		h |= (xxx << (8 * (3 - t)));
 

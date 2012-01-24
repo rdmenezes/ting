@@ -391,11 +391,13 @@ public:
 	 * The method is thread-safe.
      * @param hostName - host name to resolve IP-address for. The host name string is case sensitive.
      * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
+	 * @param dnsIP - IP-address of the DNS to use for host name resolving. The default value is invalid IP-address
+	 *                in which case the DNS IP-address will be retrieved from underlying OS.
 	 * @throw DomainNameTooLongExc when supplied for resolution domain name is too long.
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
 	 * @throw AlreadyInProgressExc when DNS lookup operation served by this resolver object is already in progress.
      */
-	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 20000);
+	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 20000, const ting::net::IPAddress& dnsIP = ting::net::IPAddress());
 	
 	/**
 	 * @brief Cancel current DNS lookup operation.
