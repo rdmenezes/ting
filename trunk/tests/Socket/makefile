@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := Socket_test
+binary_name := tests
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -42,13 +42,18 @@ else
 endif
 
 
-$(binary_name): Socket_test.cpp
-	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+%.o:%.cpp
+	@echo Compiling $<...
+	@g++ -c -o $@ $(cf) $<
+
+$(binary_name): socket.o dns.o main.o
+	@echo Linking $@...
+	@g++ $^ -o $@ $(cf) $(libs)
 
 
 
 clean:
 	@$(remove) $(binary_name)
+	@$(remove) *.o
 
 include ../../targets.mk

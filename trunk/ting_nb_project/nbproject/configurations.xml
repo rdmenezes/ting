@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="79">
+<configurationDescriptor version="80">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df name="jni" root="/home/ivan/prj/ting/android/jni">
       <df name="AssetFile">
@@ -47,7 +47,12 @@
         <df name="1">
           <df name="2">
             <df name="ting">
-              <in>File.d</in>
+            </df>
+          </df>
+        </df>
+        <df name="1">
+          <df name="2">
+            <df name="ting">
             </df>
           </df>
         </df>
@@ -127,7 +132,11 @@
         <in>testso.hpp</in>
       </df>
       <df name="Socket">
-        <in>Socket_test.cpp</in>
+        <in>dns.cpp</in>
+        <in>dns.hpp</in>
+        <in>main.cpp</in>
+        <in>socket.cpp</in>
+        <in>socket.hpp</in>
       </df>
       <df name="Thread">
         <in>Thread_test.cpp</in>
@@ -271,11 +280,6 @@
       <item path="/home/ivan/prj/ting/tests/SingletonOverSharedLibrary/testso.hpp"
             ex="true"
             tool="3"
-            flavor="0">
-      </item>
-      <item path="/home/ivan/prj/ting/tests/Socket/Socket_test.cpp"
-            ex="true"
-            tool="1"
             flavor="0">
       </item>
       <item path="/home/ivan/prj/ting/tests/Thread/Thread_test.cpp"

@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2011 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -114,7 +114,7 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_MUTEX_TRACE
 #ifdef M_ENABLE_MUTEX_TRACE
-#define M_MUTEX_TRACE(x) TRACE(<<"[MUTEX] ") TRACE(x)
+#define M_MUTEX_TRACE(x) TRACE(<< "[MUTEX] ") TRACE(x)
 #else
 #define M_MUTEX_TRACE(x)
 #endif
@@ -122,7 +122,7 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_QUEUE_TRACE
 #ifdef M_ENABLE_QUEUE_TRACE
-#define M_QUEUE_TRACE(x) TRACE(<<"[QUEUE] ") TRACE(x)
+#define M_QUEUE_TRACE(x) TRACE(<< "[QUEUE] ") TRACE(x)
 #else
 #define M_QUEUE_TRACE(x)
 #endif
@@ -215,19 +215,19 @@ public:
 	 * then the mutex be automaticlly unlocked in such case.
 	 */
 	class Guard{
-		Mutex *mut;
+		Mutex &mutex;
 
 		//forbid copying
 		Guard(const Guard& );
 		Guard& operator=(const Guard& );
 	public:
 		Guard(Mutex &m):
-				mut(&m)
+				mutex(m)
 		{
-			this->mut->Lock();
+			this->mutex.Lock();
 		}
 		~Guard(){
-			this->mut->Unlock();
+			this->mutex.Unlock();
 		}
 	};//~class Guard
 };//~class Mutex
@@ -528,7 +528,7 @@ public:
 	 * This method gets a message from message queue. If there are no messages on the queue
 	 * it will return invalid auto pointer.
 	 * @return auto-pointer to Message instance.
-	 * @return invalid auto-pointer if there are no messares in the queue.
+	 * @return invalid auto-pointer if there are no messages in the queue.
 	 */
 	Ptr<Message> PeekMsg();
 
@@ -596,6 +596,7 @@ class Thread{
 
 	ting::Mutex mutex1;
 
+	//TODO: move static mutex to cpp
 	static inline ting::Mutex& Mutex2(){
 		static ting::Mutex m;
 		return m;
@@ -608,7 +609,7 @@ class Thread{
 		JOINED
 	};
 	
-	ting::Inited<E_State, NEW> state;
+	ting::Inited<volatile E_State, NEW> state;
 
 	//system dependent handle
 #if defined(WIN32)
@@ -626,6 +627,9 @@ class Thread{
 	Thread& operator=(const Thread& );
 
 public:
+	
+	//TODO: Create a set of exceptions and document all functions about what they throw
+	
 	Thread();
 	
 	
@@ -634,7 +638,7 @@ public:
 
 
 	/**
-	 * @brief This should be overriden, this is what to be run in new thread.
+	 * @brief This should be overridden, this is what to be run in new thread.
 	 * Pure virtual method, it is called in new thread when thread runs.
 	 */
 	virtual void Run() = 0;
@@ -646,16 +650,16 @@ public:
 	 * Starts execution of the thread. Thread's Thread::Run() method will
 	 * be run as separate thread of execution.
 	 * @param stackSize - size of the stack in bytes which should be allocated for this thread.
-	 *                    If stackSize is 0 then system default stack size is used.
+	 *                    If stackSize is 0 then system default stack size is used
+	 *                    (stack size depends on underlying OS).
 	 */
-	//0 stacksize stands for default stack size (platform dependent)
 	void Start(size_t stackSize = 0);
 
 
 
 	/**
 	 * @brief Wait for thread to finish its execution.
-	 * This functon waits for the thread finishes its execution,
+	 * This function waits for the thread finishes its execution,
 	 * i.e. until the thread returns from its Thread::Run() method.
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
@@ -673,7 +677,7 @@ public:
 	 */
 	static void Sleep(unsigned msec = 0){
 #ifdef WIN32
-		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on mingw (I do not know why), this is why I use SleepEx() here.
+		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif defined(__SYMBIAN32__)
 		User::After(msec * 1000);
 #elif defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__linux__)
@@ -769,7 +773,7 @@ public:
 
 
 	/**
-	 * @brief Send 'no operation' message to thread's queue.
+	 * @brief Send "no operation" message to thread's queue.
 	 */
 	inline void PushNopMessage();//see implementation below
 
@@ -810,8 +814,8 @@ class QuitMessage : public Message{
 
 
 /**
- * @brief do nothing message.
- * The handler of this message dos nothing when the message is handled. This message
+ * @brief No operation message.
+ * The handler of this message does nothing when the message is handled. This message
  * can be used to unblock thread which is waiting infinitely on its message queue.
  */
 class NopMessage : public Message{
@@ -820,13 +824,14 @@ class NopMessage : public Message{
 
 	//override
 	void Handle(){
-		//Do nothing, nop
+		//Do nothing
 	}
 };
 
 
 
 inline void MsgThread::PushNopMessage(){
+	//TODO: push preallocated message
 	this->PushMessage(Ptr<Message>(new NopMessage()));
 }
 

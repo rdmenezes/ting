@@ -76,6 +76,24 @@ THE SOFTWARE. */
  * All the declarations of ting library are made inside this namespace.
  */
 namespace ting{
+namespace net{
+
+
+
+/**
+ * @brief Basic exception class.
+ * This is a basic exception class for network related errors.
+ */
+class Exc : public ting::Exc{
+public:
+	/**
+	 * @brief Exception constructor.
+	 * @param message - human friendly error description.
+	 */
+	inline Exc(const std::string& message) :
+			ting::Exc(message)
+	{}
+};
 
 
 
@@ -164,23 +182,6 @@ protected:
 
 
 public:
-	/**
-	 * @brief Basic exception class.
-	 * This is a basic exception class of the library. All other exception classes are derived from it.
-	 */
-	class Exc : public ting::Exc{
-	public:
-		/**
-		 * @brief Exception constructor.
-		 * @param message Pointer to the exception message null-terminated string. Constructor will copy the string into objects internal memory buffer.
-		 */
-		Exc(const std::string& message = std::string()) :
-				ting::Exc((std::string("[Socket::Exc] ") + message).c_str())
-		{}
-	};
-
-	
-
 	Socket(const Socket& s);
 
 	
@@ -273,7 +274,7 @@ public:
 
 	/**
 	 * @brief Create IP address specifying exact ip address as 4 bytes and port number.
-	 * The ip adress can be specified as 4 separate byte values, for example:
+	 * The ip address can be specified as 4 separate byte values, for example:
 	 * @code
 	 * ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
 	 * @endcode
@@ -290,8 +291,8 @@ public:
 
 	/**
 	 * @brief Create IP address specifying ip address as string and port number.
-	 * @param ip - IP address null-terminated string. Example: "127.0.0.1".
-	 * @param p - IP port number.
+	 * @param ip - IP-address null-terminated string. Example: "127.0.0.1".
+	 * @param p - IP-port number.
 	 */
 	inline IPAddress(const char* ip, u16 p) :
 			host(IPAddress::ParseString(ip)),
@@ -310,38 +311,150 @@ public:
 	
 private:
 	//parse IP address from string
+	//TODO: need to support port parsing also
+	//TODO: move this function completely to cpp
 	static u32 ParseString(const char* ip);
 };//~class IPAddress
 
 
 
 /**
- * @brief Socket library singletone class.
- * This is a Socket library singletone class. Creating an object of this class initializes the library
- * while destroying this object deinitializes it. So, the convenient way of initializing the library
+ * @brief Socket library singleton class.
+ * This is a Socket library singleton class. Creating an object of this class initializes the library
+ * while destroying this object de-initializes it. So, the convenient way of initializing the library
  * is to create an object of this class on the stack. Thus, when the object goes out of scope its
- * destructor will be called and the library will be deinitialized automatically.
- * This is what C++ RAII is all about ;-).
+ * destructor will be called and the library will be de-initialized automatically.
+ * This is what C++ RAII is all about.
  */
-class SocketLib : public IntrusiveSingleton<SocketLib>{
-	friend class IntrusiveSingleton<SocketLib>;
-	static IntrusiveSingleton<SocketLib>::T_Instance instance;
+class Lib : public IntrusiveSingleton<Lib>{
+	friend class IntrusiveSingleton<Lib>;
+	static IntrusiveSingleton<Lib>::T_Instance instance;
 	
 public:
-	SocketLib();
+	Lib();
 
-	~SocketLib();
+	~Lib();
+};
 
 
+
+/**
+ * @brief Class for resolving IP-address of the host by its domain name.
+ * This class allows asynchronous DNS lookup.
+ * One has to derive his/her own class from this class to override the
+ * OnCompleted_ts() method which will be called upon the DNS lookup operation has finished.
+ */
+class HostNameResolver{
+	//no copying
+	HostNameResolver(const HostNameResolver&);
+	HostNameResolver& operator=(const HostNameResolver&);
+	
+public:
+	inline HostNameResolver(){}
+	
+	virtual ~HostNameResolver();
+	
 	/**
-	 * @brief Resolve host IP by its name.
-	 * This function resolves host IP address by its name. If it fails resolving the IP address it will throw Socket::Exc.
-	 * @param hostName - null-terminated string representing host name. Example: "www.somedomain.com".
-	 * @param port - IP port number which will be placed in the resulting IPAddress structure.
-	 * @return filled IPAddress structure.
+	 * @brief Basic DNS lookup exception.
+     * @param message - human friendly error description.
+     */
+	class Exc : public net::Exc{
+	public:
+		inline Exc(const std::string& message) :
+				ting::net::Exc(message)
+		{}
+	};
+	
+	class DomainNameTooLongExc : public Exc{
+	public:
+		DomainNameTooLongExc() :
+				Exc("Too long domain name, it should not exceed 253 characters according to RFC 2181")
+		{}
+	};
+	
+	class TooMuchRequestsExc : public Exc{
+	public:
+		TooMuchRequestsExc() :
+				Exc("Too much active DNS lookup requests in progress, only 65536 simultaneous active requests are allowed")
+		{}
+	};
+	
+	class AlreadyInProgressExc : public Exc{
+	public:
+		AlreadyInProgressExc() :
+				Exc("DNS lookup operation is already in progress")
+		{}
+	};
+	
+	/**
+	 * @brief Start asynchronous IP-address resolving.
+	 * The method is thread-safe.
+     * @param hostName - host name to resolve IP-address for. The host name string is case sensitive.
+     * @param timeoutMillis - timeout for waiting for DNS server response in milliseconds.
+	 * @param dnsIP - IP-address of the DNS to use for host name resolving. The default value is invalid IP-address
+	 *                in which case the DNS IP-address will be retrieved from underlying OS.
+	 * @throw DomainNameTooLongExc when supplied for resolution domain name is too long.
+	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
+	 * @throw AlreadyInProgressExc when DNS lookup operation served by this resolver object is already in progress.
+     */
+	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 20000, const ting::net::IPAddress& dnsIP = ting::net::IPAddress());
+	
+	/**
+	 * @brief Cancel current DNS lookup operation.
+	 * The method is thread-safe.
+	 * @return true - if the ongoing DNS lookup operation was canceled.
+	 * @return false - if there was no ongoing DNS lookup operation to cancel.
+	 *                 This means that the DNS lookup operation was not started
+	 *                 or has finished before the Cancel_ts() method was called.
+	 *                 In the latter case if destroying the object one must make
+	 *                 sure that the OnCompleted_ts() callback function has been called before
+	 *                 destroying the HostNameResolver object.
+     */
+	bool Cancel_ts();
+	
+	/**
+	 * @brief Enumeration of the DNS lookup operation result.
 	 */
-	IPAddress GetHostByName(const char *hostName, u16 port);
-};//~class SocketLib
+	enum E_Result{
+		/**
+		 * @brief DNS lookup operation completed successfully.
+		 */
+		OK,
+		
+		/**
+		 * @brief Timeout hit while waiting for the response from DNS server.
+		 */
+		TIMEOUT,
+		
+		/**
+		 * @brief DNS server reported that there is not such host.
+		 */
+		NO_SUCH_HOST,
+		
+		/**
+		 * @brief Error occurred while DNS lookup operation.
+		 * Error reported by DNS server.
+		 */
+		DNS_ERROR,
+		
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#undef ERROR
+#endif
+		/**
+		 * @brief Local error occurred.
+		 */
+		ERROR
+	};
+	
+	/**
+	 * @brief callback method called upon DNS lookup operation has finished.
+	 * Note, that the method has to be thread-safe.
+	 * @param result - the result of DNS lookup operation.
+	 * @param ip - resolved IP-address. This value can later be used to create the
+	 *             ting::IPAddress object.
+	 */
+	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) throw() = 0;
+};
 
 
 
@@ -351,6 +464,7 @@ public:
 class TCPSocket : public Socket{
 	friend class TCPServerSocket;
 public:
+	
 	/**
 	 * @brief Constructs an invalid TCP socket object.
 	 */
@@ -358,6 +472,8 @@ public:
 //		TRACE(<< "TCPSocket::TCPSocket(): invoked " << this << std::endl)
 	}
 
+	
+	
 	/**
 	 * @brief A copy constructor.
 	 * Copy constructor creates a new socket object which refers to the same socket as s.
@@ -372,9 +488,11 @@ public:
 //		TRACE(<< "TCPSocket::TCPSocket(copy): invoked " << this << std::endl)
 	}
 
+	
+	
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -383,6 +501,8 @@ public:
 		return *this;
 	}
 
+	
+	
 	/**
 	 * @brief Connects the socket.
 	 * This method connects the socket to remote TCP server socket.
@@ -427,11 +547,15 @@ public:
 	 */
 	size_t Recv(ting::Buffer<u8>& buf, size_t offset = 0);
 
+	
+	
 	/**
 	 * @brief Get local IP address and port.
 	 * @return IP address and port of the local socket.
 	 */
 	IPAddress GetLocalAddress();
+	
+	
 	
 	/**
 	 * @brief Get remote IP address and port.
@@ -464,6 +588,8 @@ public:
 	 */
 	TCPServerSocket(){}
 
+	
+	
 	/**
 	 * @brief A copy constructor.
 	 * Copy constructor creates a new socket object which refers to the same socket as s.
@@ -477,9 +603,11 @@ public:
 			disableNaggle(s.disableNaggle)
 	{}
 
+	
+	
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -489,6 +617,8 @@ public:
 		return *this;
 	}
 
+	
+	
 	/**
 	 * @brief Connects the socket or starts listening on it.
 	 * This method starts listening on the socket for incoming connections.
@@ -497,6 +627,8 @@ public:
 	 * @param queueLength - the maximum length of the queue of pending connections.
 	 */
 	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50);
+	
+	
 	
 	/**
 	 * @brief Accepts one of the pending connections, non-blocking.
@@ -536,7 +668,7 @@ public:
 
 	/**
 	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s objejct referred, s become invalid.
+	 * After this assignment operator completes this socket object refers to the socket the s object referred before, s become invalid.
 	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
 	 * @param s - socket to assign from.
 	 */
@@ -553,7 +685,7 @@ public:
 	 * After the socket is opened it becomes a valid socket and Socket::IsValid() will return true for such socket.
 	 * After the socket is closed it becomes invalid.
 	 * In other words, a valid socket is an opened socket.
-	 * In case of errors this method throws Socket::Exc.
+	 * In case of errors this method throws net::Exc.
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
 	 *				 If 0 is passed then system will assign some free port if any. If there
 	 *               are no free ports, then it is an error and an exception will be thrown.
@@ -595,7 +727,7 @@ public:
 	 *              should be large enough to store the whole datagram. If datagram
 	 *              does not fit the passed buffer, then the datagram tail will be truncated
 	 *              and this tail data will be lost.
-     * @param out_SenderIP - reference to the ip address structure where the IP address
+     * @param out_SenderIP - reference to the IP-address structure where the IP-address
 	 *                       of the sender will be stored.
      * @return number of bytes stored in the output buffer.
      */
@@ -611,7 +743,7 @@ private:
 };//~class UDPSocket
 
 
-
+}//~namespace
 }//~namespace
 
 
@@ -619,10 +751,10 @@ private:
  * @mainpage ting::Socket library
  *
  * @section sec_about About
- * <b>tin::Socket</b> is a simple cross platfrom C++ wrapper above sockets networking API designed for games.
+ * <b>tin::Socket</b> is a simple cross platform C++ wrapper above sockets networking API designed for games.
  *
  * @section sec_getting_started Getting started
- * @ref page_usage_tutorial "library usage tutorial" - quickstart tutorial
+ * @ref page_usage_tutorial "library usage tutorial" - quick start tutorial
  */
 
 /*
