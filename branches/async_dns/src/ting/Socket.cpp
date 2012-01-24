@@ -179,17 +179,12 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
-	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip){
+	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0){
 		dns::mutex.Unlock();
 		this->hnr->OnCompleted_ts(result, ip);
 		dns::mutex.Lock();
 	}
-	
-	//NOTE: call to this function should be protected by dns::mutex
-	inline void ReportError(ting::net::HostNameResolver::E_Result error){
-		this->CallCallback(error, 0);
-	}
-	
+
 	//NOTE: call to this function should be protected by dns::mutex
 	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
@@ -209,7 +204,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				2   //Number of other records
 			)
 		{
-			this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+			this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
 			return;
 		}
 		
@@ -222,18 +217,18 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
 				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0x8000) = " << (flags & 0x8000) << std::endl)
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
 			
 			//Check response code
 			if((flags & 0xf) != 0){//0 means no error condition
 				if((flags & 0xf) == 3){//name does not exist
-					this->ReportError(ting::net::HostNameResolver::NO_SUCH_HOST);
+					this->CallCallback(ting::net::HostNameResolver::NO_SUCH_HOST);
 					return;
 				}else{
 					TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0xf) = " << (flags & 0xf) << std::endl)
-					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
 					return;
 				}
 			}
@@ -244,7 +239,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 			
 			if(numQuestions != 1){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
 				return;
 			}
 		}
@@ -255,7 +250,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ASSERT(p <= (buf.End() - 1) || p == buf.End())
 		
 		if(numAnswers == 0){
-			this->ReportError(ting::net::HostNameResolver::NO_SUCH_HOST);
+			this->CallCallback(ting::net::HostNameResolver::NO_SUCH_HOST);
 			return;
 		}
 		
@@ -275,7 +270,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			
 			for(;;){
 				if(p == buf.End()){
-					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 					return;
 				}
 				ASSERT(buf.Overlaps(p))
@@ -292,7 +287,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				}
 				
 				if(buf.End() - p < len){
-					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 					return;
 				}
 				
@@ -304,7 +299,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			
 			if(this->hostName != host){
 //				TRACE(<< "this->hostName = " << this->hostName << std::endl)
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
 				return;
 			}
 		}
@@ -315,7 +310,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 			
 			if(type != 1){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong question type
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong question type
 				return;
 			}
 		}
@@ -326,7 +321,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += 2;
 			
 			if(cls != 1){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//wrong question class
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong question class
 				return;
 			}
 		}
@@ -336,7 +331,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		//loop through the answers
 		for(ting::u16 n = 0; n != numAnswers; ++n){
 			if(p == buf.End()){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 			
@@ -347,7 +342,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 					ASSERT(buf.Overlaps(p))
 				}
 				if(p == buf.End()){
-					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 					return;
 				}
 				++p;
@@ -359,40 +354,40 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			}
 			
 			if(buf.End() - p < 2){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 			ting::u16 type = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < 2){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 //			ting::u16 cls = ting::Deserialize16(p);
 			p += 2;
 			
 			if(buf.End() - p < 4){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 //			ting::u32 ttl = ting::Deserialize32(p);//time till the returned value can be cached.
 			p += 4;
 			
 			if(buf.End() - p < 2){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 			ting::u16 dataLen = ting::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < dataLen){
-				this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
 			if(type == 1){//'A' type answer
 				if(dataLen < 4){
-					this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 					return;
 				}
 				
@@ -403,7 +398,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 			p += dataLen;
 		}
 		
-		this->ReportError(ting::net::HostNameResolver::DNS_ERROR);//no answer found
+		this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//no answer found
 	}
 };
 
@@ -556,7 +551,7 @@ private:
 					continue;
 				}
 				
-				ting::StaticBuffer<BYTE, 512> value;
+				ting::StaticBuffer<BYTE, 1024> value;
 				
 				DWORD len = value.Size();
 				
