@@ -96,12 +96,14 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	{
 		unsigned i;
 		for(i = 0; i < this->numWaitables; ++i){
-			if(this->waitables[i] == w)
+			if(this->waitables[i] == w){
 				break;
+			}
 		}
 		ASSERT(i <= this->numWaitables)
-		if(i == this->numWaitables)
+		if(i == this->numWaitables){
 			throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
+		}
 	}
 
 	//set new wait flags
@@ -217,11 +219,13 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	//we are not expecting abandoned mutexes
 	ASSERT(res < WAIT_ABANDONED_0 || (WAIT_ABANDONED_0 + this->numWaitables) <= res)
 
-	if(res == WAIT_FAILED)
+	if(res == WAIT_FAILED){
 		throw ting::Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");
+	}
 
-	if(res == WAIT_TIMEOUT)
+	if(res == WAIT_TIMEOUT){
 		return 0;
+	}
 
 	ASSERT(WAIT_OBJECT_0 <= res && res < (WAIT_OBJECT_0 + this->numWaitables ))
 
