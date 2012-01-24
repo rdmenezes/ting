@@ -802,7 +802,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 		if(needStartTheThread){
 			dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
 			dns::thread->Start();
-			dns::thread->isExiting = false;
+			dns::thread->isExiting = false;//thread has just started, clear the exiting flag
 	//		TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)
 		}
 	}catch(...){
