@@ -323,6 +323,7 @@ void Queue::PushMessage(Ptr<Message> msg){
 		ASSERT(!this->CanRead())
 		this->SetCanReadFlag();
 
+		//TODO: investigate if it is possible to make this Push message function throw nothing
 #if defined(WIN32)
 		if(SetEvent(this->eventForWaitable) == 0){
 			throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
