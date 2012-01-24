@@ -1734,7 +1734,7 @@ TCPSocket TCPServerSocket::Accept(){
 	sock.CreateEventForWaitable();
 
 	//NOTE: accepted socket is associated with the same event object as the listening socket which accepted it.
-	//Reassociate the socket with its own event object.
+	//Re-associate the socket with its own event object.
 	sock.SetWaitingEvents(0);
 #endif
 
