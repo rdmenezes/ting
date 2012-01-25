@@ -257,8 +257,8 @@ private:
  */
 class IPAddress{
 public:
-	ting::Inited<u32, 0> host;///< IP address
-	ting::Inited<u16, 0> port;///< IP port number
+	u32 host;///< IP address
+	u16 port;///< IP port number
 
 	class BadIPAddressFormatExc : public ting::net::Exc{
 	public:
@@ -271,7 +271,7 @@ public:
 	inline IPAddress(){}
 
 	/**
-	 * @brief Create IP address specifying exact ip address and port number.
+	 * @brief Create IP-address specifying exact IP-address and port number.
 	 * @param h - IP address. For example, 0x7f000001 represents "127.0.0.1" IP address value.
 	 * @param p - IP port number.
 	 */
@@ -281,8 +281,8 @@ public:
 	{}
 
 	/**
-	 * @brief Create IP address specifying exact ip address as 4 bytes and port number.
-	 * The ip address can be specified as 4 separate byte values, for example:
+	 * @brief Create IP-address specifying exact IP-address as 4 bytes and port number.
+	 * The IP-address can be specified as 4 separate byte values, for example:
 	 * @code
 	 * ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
 	 * @endcode
@@ -298,12 +298,26 @@ public:
 	{}
 
 	/**
-	 * @brief Create IP address specifying ip address as string and port number.
+	 * @brief Create IP-address specifying IP-address as string and port number.
+	 * The string passed as argument should contain properly formatted IP address at its beginning.
+	 * It is OK if string contains something else after the IP-address.
+	 * Only IP address is parsed, even if port number is specified after the IP-address it will not be parsed,
+	 * instead the port number will be taken from the corresponding argument of the constructor.
 	 * @param ip - IP-address null-terminated string. Example: "127.0.0.1".
 	 * @param p - IP-port number.
-	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IPAddress.
+	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IP-address.
 	 */
 	IPAddress(const char* ip, u16 p);
+	
+	/**
+	 * @brief Create IP-address specifying IP-address as string and port number.
+	 * The string passed for parsing should contain the IP-address with the port number.
+	 * If there is no port number specified after the IP-address the format of the IP-address
+	 * is regarded as invalid and corresponding exception is thrown.
+     * @param ip - null-terminated string representing IP-address with port number, e.g. "127.0.0.1:80".
+	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IP-address.
+     */
+	IPAddress(const char* ip);
 
 	/**
 	 * @brief compares two IP addresses for equality.
@@ -397,7 +411,11 @@ public:
 	 * @throw TooMuchRequestsExc when there are too much active DNS lookup requests are in progress, no resources for another one.
 	 * @throw AlreadyInProgressExc when DNS lookup operation served by this resolver object is already in progress.
      */
-	void Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis = 20000, const ting::net::IPAddress& dnsIP = ting::net::IPAddress());
+	void Resolve_ts(
+			const std::string& hostName,
+			ting::u32 timeoutMillis = 20000,
+			const ting::net::IPAddress& dnsIP = ting::net::IPAddress(ting::u32(0), 0)
+		);
 	
 	/**
 	 * @brief Cancel current DNS lookup operation.

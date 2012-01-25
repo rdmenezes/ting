@@ -473,3 +473,145 @@ void Run(){
 }
 
 }//~namespace
+
+
+
+namespace TestIPAddress{
+
+void Run(){
+	try{//test IP-address without port string parsing
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1", 80);
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:23ddqwd", 80);
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.2555:23ddqwd", 80);
+			ASSERT_ALWAYS(ip.host == 0x7f0000ff)
+			ASSERT_ALWAYS(ip.port == 80)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.1803:65536");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.270.1:65536");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+	}catch(...){
+		ASSERT_ALWAYS(false)
+	}
+	
+	try{//test IP-address with port string parsing
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:80");
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.0.1803:43");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.0.180p43");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.0.180:123456");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.0.180:72345");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test incorrect string
+			ting::net::IPAddress ip("127.0.0.1803:65536");
+			ASSERT_ALWAYS(false)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			//should get here
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:65535");
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 0xffff)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:0");
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 0)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:6535 ");
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 6535)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+		
+		try{//test correct string
+			ting::net::IPAddress ip("127.0.0.1:6535dwqd 345");
+			ASSERT_ALWAYS(ip.host == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 6535)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}
+	}catch(...){
+		ASSERT_ALWAYS(false)
+	}
+}
+
+}//~namespace

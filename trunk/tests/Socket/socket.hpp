@@ -1,5 +1,9 @@
 #pragma once
 
+namespace TestIPAddress{
+void Run();
+}//~namespace
+
 namespace BasicClientServerTest{
 
 void Run();

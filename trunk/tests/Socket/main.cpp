@@ -9,6 +9,8 @@ int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<< "Socket test " << std::endl)
 
 	ting::net::Lib netLib;
+	
+	TestIPAddress::Run();
 
 	TestSimpleDNSLookup::Run();
 	TestRequestFromCallback::Run();

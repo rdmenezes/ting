@@ -166,6 +166,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ASSERT(buf.Begin() <= p && p <= buf.End());
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
+		TRACE(<< "sending DNS request to " << (this->dns.host) << std::endl)
 		size_t ret = socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), this->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
@@ -636,7 +637,7 @@ private:
 #endif
 		}catch(...){
 		}
-		this->dns = ting::net::IPAddress();
+		this->dns = ting::net::IPAddress(ting::u32(0), 0);
 	}
 	
 	
@@ -699,7 +700,7 @@ private:
 					}
 				}
 
-				TRACE(<< "this->sendList.size() = " << (this->sendList.size()) << std::endl)
+//				TRACE(<< "this->sendList.size() = " << (this->sendList.size()) << std::endl)
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just try to send data to the socket without waiting for WRITE.
@@ -1309,29 +1310,32 @@ int Socket::GetHandle(){
 
 namespace{
 
-//TODO: need to support port parsing also
-ting::u32 ParseIPAddressString(const char* ip){
-	if(!ip){
-		throw ting::net::IPAddress::BadIPAddressFormatExc();
-	}
-	
+//This function modifies the pointer passed as argument (reference to a pointer).
+//After successful completion of the function the pointer passed as argument
+//points to the character which goes right after the IP address.
+ting::u32 ParseIPAddressString(const char*& p){
 	ting::u32 h = 0;//parsed host
-	const char *curp = ip;
-	for(unsigned t = 0; t < 4; ++t, ++curp){
+
+	for(unsigned t = 0; t < 4; ++t){
 		unsigned digits[3];
 		unsigned numDgts;
-		for(numDgts = 0; numDgts < 3; ++numDgts, ++curp){
-			if(*curp < '0' || '9' < *curp){
+		for(numDgts = 0; numDgts < 3; ++numDgts, ++p){
+			if(*p < '0' || '9' < *p){
 				if(numDgts == 0){
 					throw ting::net::IPAddress::BadIPAddressFormatExc();
 				}
 				break;
 			}
-			digits[numDgts] = unsigned(*curp) - unsigned('0');
+			digits[numDgts] = unsigned(*p) - unsigned('0');
 		}
 
-		if(t < 3 && *curp != '.'){//unexpected non-delimiter character
-			throw ting::net::IPAddress::BadIPAddressFormatExc();
+		if(t < 3){
+			if(*p != '.'){//unexpected non-delimiter character
+				throw ting::net::IPAddress::BadIPAddressFormatExc();
+			}
+			++p;
+		}else{
+			ASSERT(t == 3)
 		}
 
 		unsigned xxx = 0;
@@ -1342,13 +1346,12 @@ ting::u32 ParseIPAddressString(const char* ip){
 			}
 			xxx += digits[i] * ord;
 		}
-		if(xxx > 255){
+		if(xxx > 0xff){
 			throw ting::net::IPAddress::BadIPAddressFormatExc();
 		}
 
 		h |= (xxx << (8 * (3 - t)));
 	}
-	
 	
 	return h;
 }
@@ -1361,6 +1364,49 @@ IPAddress::IPAddress(const char* ip, u16 p) :
 		host(ParseIPAddressString(ip)),
 		port(p)
 {}
+
+
+
+IPAddress::IPAddress(const char* ip) :
+		host(ParseIPAddressString(ip))
+{
+	if(*ip != ':'){
+//		TRACE(<< "no colon, *ip = " << (*ip) << std::endl)
+		throw ting::net::IPAddress::BadIPAddressFormatExc();
+	}
+	
+	++ip;
+	
+	//move to the end of port number, maximum 5 digits.
+	for(unsigned i = 0; '0' <= *ip && *ip <= '9' && i < 5; ++i, ++ip){
+	}
+	if('0' <= *ip && *ip <= '9'){//if still have one more digit
+//		TRACE(<< "still have one more digit" << std::endl)
+		throw ting::net::IPAddress::BadIPAddressFormatExc();
+	}
+	
+	--ip;
+	
+	ting::u32 port = 0;
+	
+	for(unsigned i = 0; *ip != ':'; ++i, --ip){
+		ting::u32 pow = 1;
+		for(unsigned j = 0; j < i; ++j){
+			pow *= 10;
+		}
+	
+		ASSERT('0' <= *ip && *ip <= '9')
+		
+		port += (*ip - '0') * pow;
+	}
+	
+	if(port > 0xffff){
+//		TRACE(<< "port number is bigger than 0xffff" << std::endl)
+		throw ting::net::IPAddress::BadIPAddressFormatExc();
+	}
+	
+	this->port = ting::u16(port);
+}
 
 
 
