@@ -84,7 +84,8 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	ting::net::IPAddress dns;
 	
 	//NOTE: call to this function should be protected by dns::mutex, to make sure the request is not canceled while sending.
-	void SendRequestToDNS(ting::net::UDPSocket& socket){
+	//returns true if request is sent, false otherwise.
+	bool SendRequestToDNS(ting::net::UDPSocket& socket){
 		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
 		
 		size_t packetSize =
@@ -164,11 +165,9 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		ASSERT(buf.Begin() <= p && p <= buf.End());
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
-#ifdef DEBUG
-		size_t ret =
-#endif
-		socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), this->dns);
-		ASSERT(ret == packetSize)
+		size_t ret = socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), this->dns);
+		
+		ASSERT(ret == packetSize || ret == 0)
 		
 //		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
 //#ifdef DEBUG
@@ -176,6 +175,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 //			TRACE(<< int(buf[i]) << std::endl)
 //		}
 //#endif
+		return ret == packetSize;
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
@@ -698,28 +698,40 @@ private:
 					}
 				}
 
-				if(this->socket.CanWrite()){
+//Workaround for strange bug on Win32 (reproduced on WinXP at least).
+//For some reason waiting for WRITE on UDP socket does not work. It hangs in the
+//Wait() method until timeout is hit. So, just try to send data to the socket without waiting for WRITE.
+#if M_OS == M_OS_WIN32 && M_OS == M_OS_WIN64
+				if(this->sendList.size() != 0)
+#else
+				if(this->socket.CanWrite())
+#endif
+				{
 					TRACE(<< "can write" << std::endl)
 					//send request
 					ASSERT(this->sendList.size() > 0)
 					
 					try{
-						dns::Resolver* r = this->sendList.front();
-						if(r->dns.host == 0){
-							r->dns = this->dns;
-						}
-						
-						if(r->dns.host != 0){
-							r->SendRequestToDNS(this->socket);
-							TRACE(<< "request sent" << std::endl)
-							r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
-							this->sendList.pop_front();
-						}else{
-							ting::Ptr<dns::Resolver> removedResolver = this->RemoveResolver(r->hnr);
-							ASSERT(removedResolver)
+						while(this->sendList.size() != 0){
+							dns::Resolver* r = this->sendList.front();
+							if(r->dns.host == 0){
+								r->dns = this->dns;
+							}
 
-							//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-							removedResolver->CallCallback(HostNameResolver::ERROR, 0);
+							if(r->dns.host != 0){
+								if(!r->SendRequestToDNS(this->socket)){
+									break;//socket is not ready for sending, go out of requests sending loop.
+								}
+								TRACE(<< "request sent" << std::endl)
+								r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
+								this->sendList.pop_front();
+							}else{
+								ting::Ptr<dns::Resolver> removedResolver = this->RemoveResolver(r->hnr);
+								ASSERT(removedResolver)
+
+								//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
+								removedResolver->CallCallback(HostNameResolver::ERROR, 0);
+							}
 						}
 					}catch(ting::net::Exc& e){
 						this->isExiting = true;
@@ -784,6 +796,15 @@ private:
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
 			ting::ClampTop(timeout, ting::u32(-1) / 4);
 			
+//Workaround for strange bug on Win32 (reproduced on WinXP at least).
+//For some reason waiting for WRITE on UDP socket does not work. It hangs in the
+//Wait() method until timeout is hit. So, just check every 100ms if it is OK to write to UDP socket.
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+			if(this->sendList.size() > 0){
+				ting::ClampTop(timeout, 100);
+			}
+#endif
+			
 			TRACE(<< "DNS thread: waiting with timeout = " << timeout << std::endl)
 			if(this->waitSet.WaitWithTimeout(timeout) == 0){
 				//no Waitables triggered
@@ -796,7 +817,7 @@ private:
 					m->Handle();
 				}
 			}			
-		}
+		}//~while(!this->quitFlag)
 		
 		this->waitSet.Remove(&this->socket);
 		this->waitSet.Remove(&this->queue);
