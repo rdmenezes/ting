@@ -27,6 +27,7 @@ THE SOFTWARE. */
 #include <map>
 #include <list>
 
+#include "config.hpp"
 #include "PoolStored.hpp"
 #include "Timer.hpp"
 #include "FSFile.hpp"
@@ -698,10 +699,11 @@ private:
 					}
 				}
 
+				TRACE(<< "this->sendList.size() = " << (this->sendList.size()) << std::endl)
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just try to send data to the socket without waiting for WRITE.
-#if M_OS == M_OS_WIN32 && M_OS == M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 				if(this->sendList.size() != 0)
 #else
 				if(this->socket.CanWrite())
@@ -720,6 +722,7 @@ private:
 
 							if(r->dns.host != 0){
 								if(!r->SendRequestToDNS(this->socket)){
+									TRACE(<< "request not sent" << std::endl)
 									break;//socket is not ready for sending, go out of requests sending loop.
 								}
 								TRACE(<< "request sent" << std::endl)
@@ -801,7 +804,7 @@ private:
 //Wait() method until timeout is hit. So, just check every 100ms if it is OK to write to UDP socket.
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 			if(this->sendList.size() > 0){
-				ting::ClampTop(timeout, 100);
+				ting::ClampTop(timeout, ting::u32(100));
 			}
 #endif
 			
