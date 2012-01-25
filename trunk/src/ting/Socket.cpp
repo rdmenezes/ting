@@ -1298,51 +1298,37 @@ int Socket::GetHandle(){
 	return this->socket;
 }
 
-
-
 #else
 #error "unsupported OS"
 #endif
 
 
 
-//static
-ting::u32 IPAddress::ParseString(const char* ip){
-	//TODO: there already is an IP parsing function in BSD sockets, consider using it here
-	if(!ip){
-		throw net::Exc("IPAddress::ParseString(): pointer passed as argument is 0");
-	}
+namespace{
 
-	struct lf{ //local functions
-		inline static void ThrowInvalidIP(){
-			throw net::Exc("IPAddress::ParseString(): string is not a valid IP address");
-		}
-	};
+//TODO: need to support port parsing also
+ting::u32 ParseIPAddressString(const char* ip){
+	if(!ip){
+		throw ting::net::IPAddress::BadIPAddressFormatExc();
+	}
 	
-	u32 h = 0;//parsed host
+	ting::u32 h = 0;//parsed host
 	const char *curp = ip;
-	for(unsigned t = 0; t < 4; ++t){
+	for(unsigned t = 0; t < 4; ++t, ++curp){
 		unsigned digits[3];
 		unsigned numDgts;
-		for(numDgts = 0; numDgts < 3; ++numDgts){
-			if( *curp == '.' || *curp == 0 ){
-				if(numDgts==0){
-					lf::ThrowInvalidIP();
+		for(numDgts = 0; numDgts < 3; ++numDgts, ++curp){
+			if(*curp < '0' || '9' < *curp){
+				if(numDgts == 0){
+					throw ting::net::IPAddress::BadIPAddressFormatExc();
 				}
 				break;
-			}else{
-				if(*curp < '0' || *curp > '9'){
-					lf::ThrowInvalidIP();
-				}
-				digits[numDgts] = unsigned(*curp) - unsigned('0');
 			}
-			++curp;
+			digits[numDgts] = unsigned(*curp) - unsigned('0');
 		}
 
-		if(t < 3 && *curp != '.'){//unexpected delimiter or unexpected end of string
-			lf::ThrowInvalidIP();
-		}else if(t == 3 && *curp != 0){
-			lf::ThrowInvalidIP();
+		if(t < 3 && *curp != '.'){//unexpected non-delimiter character
+			throw ting::net::IPAddress::BadIPAddressFormatExc();
 		}
 
 		unsigned xxx = 0;
@@ -1354,15 +1340,24 @@ ting::u32 IPAddress::ParseString(const char* ip){
 			xxx += digits[i] * ord;
 		}
 		if(xxx > 255){
-			lf::ThrowInvalidIP();
+			throw ting::net::IPAddress::BadIPAddressFormatExc();
 		}
 
 		h |= (xxx << (8 * (3 - t)));
-
-		++curp;
 	}
+	
+	
 	return h;
 }
+
+}//~namespace
+
+
+
+IPAddress::IPAddress(const char* ip, u16 p) :
+		host(ParseIPAddressString(ip)),
+		port(p)
+{}
 
 
 

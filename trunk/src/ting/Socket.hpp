@@ -260,6 +260,14 @@ public:
 	ting::Inited<u32, 0> host;///< IP address
 	ting::Inited<u16, 0> port;///< IP port number
 
+	class BadIPAddressFormatExc : public ting::net::Exc{
+	public:
+		BadIPAddressFormatExc() :
+				ting::net::Exc("Failed parsing IP-address from string, bad address format")
+		{}
+	};
+	
+	
 	inline IPAddress(){}
 
 	/**
@@ -293,11 +301,9 @@ public:
 	 * @brief Create IP address specifying ip address as string and port number.
 	 * @param ip - IP-address null-terminated string. Example: "127.0.0.1".
 	 * @param p - IP-port number.
+	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IPAddress.
 	 */
-	inline IPAddress(const char* ip, u16 p) :
-			host(IPAddress::ParseString(ip)),
-			port(p)
-	{}
+	IPAddress(const char* ip, u16 p);
 
 	/**
 	 * @brief compares two IP addresses for equality.
@@ -308,12 +314,6 @@ public:
 	inline bool operator==(const IPAddress& ip){
 		return (this->host == ip.host) && (this->port == ip.port);
 	}
-	
-private:
-	//parse IP address from string
-	//TODO: need to support port parsing also
-	//TODO: move this function completely to cpp
-	static u32 ParseString(const char* ip);
 };//~class IPAddress
 
 
