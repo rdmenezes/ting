@@ -179,7 +179,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	}
 	
 	//NOTE: call to this function should be protected by dns::mutex
-	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0){
+	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0)throw(){
 		dns::mutex.Unlock();
 		this->hnr->OnCompleted_ts(result, ip);
 		dns::mutex.Lock();
@@ -593,7 +593,6 @@ private:
 			}
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-			/*
 			ting::FSFile f("/etc/resolv.conf");
 			
 			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
@@ -631,7 +630,6 @@ private:
 					return;
 				}catch(...){}
 			}
-			*/
 #else
 			TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
 #endif
