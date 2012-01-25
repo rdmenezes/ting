@@ -593,6 +593,7 @@ private:
 			}
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+			/*
 			ting::FSFile f("/etc/resolv.conf");
 			
 			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
@@ -630,6 +631,7 @@ private:
 					return;
 				}catch(...){}
 			}
+			*/
 #else
 			TRACE(<< "InitDNS(): don't know how to get DNS IP on this OS" << std::endl)
 #endif
@@ -715,11 +717,11 @@ private:
 							r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
 							this->sendList.pop_front();
 						}else{
-							ting::Ptr<dns::Resolver> r = this->RemoveResolver(r->hnr);
-							ASSERT(r)
+							ting::Ptr<dns::Resolver> removedResolver = this->RemoveResolver(r->hnr);
+							ASSERT(removedResolver)
 
 							//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-							r->CallCallback(HostNameResolver::ERROR, 0);
+							removedResolver->CallCallback(HostNameResolver::ERROR, 0);
 						}
 					}catch(ting::net::Exc& e){
 						this->isExiting = true;
