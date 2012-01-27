@@ -47,8 +47,44 @@ ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 namespace{
 namespace dns{
 
-
+//forward declaration
 struct Resolver;
+
+
+
+//After the successful completion the 'p' points to the byte right after the host name.
+//In case of unsuccessful completion 'p' is undefined.
+std::string ParseHostNameFromDNSPacket(const ting::u8* & p, const ting::u8* end){
+	std::string host;
+			
+	for(;;){
+		if(p == end){
+			return "";
+		}
+
+		ting::u8 len = *p;
+		++p;
+
+		if(len == 0){
+			break;
+		}
+
+		if(host.size() != 0){//if not first label
+			host += '.';
+		}
+
+		if(end - p < len){
+			return "";
+		}
+
+		host += std::string(reinterpret_cast<const char*>(p), size_t(len));
+		p += len;
+		ASSERT(p <= end - 1 || p == end)
+	}
+//			TRACE(<< "host = " << host << std::endl)
+	
+	return host;
+}
 
 
 
@@ -268,35 +304,7 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 		
 		//parse host name
 		{
-			std::string host;
-			
-			for(;;){
-				if(p == buf.End()){
-					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
-				}
-				ASSERT(buf.Overlaps(p))
-				
-				ting::u8 len = *p;
-				++p;
-				
-				if(len == 0){
-					break;
-				}
-				
-				if(host.size() != 0){//if not first label
-					host += '.';
-				}
-				
-				if(buf.End() - p < len){
-					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
-				}
-				
-				host += std::string(reinterpret_cast<const char*>(p), size_t(len));
-				p += len;
-				ASSERT(buf.Overlaps(p) || p == buf.End())
-			}
+			std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
 //			TRACE(<< "host = " << host << std::endl)
 			
 			if(this->hostName != host){
