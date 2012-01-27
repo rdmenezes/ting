@@ -826,7 +826,6 @@ public:
 
 
 inline void MsgThread::PushNopMessage(){
-	//TODO: push preallocated message
 	this->PushMessage(Ptr<Message>(new NopMessage()));
 }
 
