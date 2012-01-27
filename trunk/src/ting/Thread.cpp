@@ -139,8 +139,6 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			throw ting::Exc("Semaphore::Wait(u32): wait failed");
 			break;
 	}
-#elif defined(__SYMBIAN32__)
-	throw ting::Exc("Semaphore::Wait(): wait with timeout is not implemented on Symbian, TODO: implement");
 #elif defined(__APPLE__)
 	int retVal = 0;
 
@@ -303,7 +301,7 @@ Queue::~Queue(){
 
 
 
-void Queue::PushMessage(Ptr<Message> msg){
+void Queue::PushMessage(Ptr<Message> msg) throw(){
 	ASSERT(msg.IsValid())
 	Mutex::Guard mutexGuard(this->mut);
 	if(this->first){
@@ -315,7 +313,7 @@ void Queue::PushMessage(Ptr<Message> msg){
 		this->last = this->first = msg.Extract();
 
 		//Set CanRead flag.
-		//NOTE: in linux imlementation with epoll(), the CanRead
+		//NOTE: in linux implementation with epoll(), the CanRead
 		//flag will also be set in WaitSet::Wait() method.
 		//NOTE: set CanRead flag before event notification/pipe write, because
 		//if do it after then some other thread which was waiting on the WaitSet
@@ -323,19 +321,20 @@ void Queue::PushMessage(Ptr<Message> msg){
 		ASSERT(!this->CanRead())
 		this->SetCanReadFlag();
 
-		//TODO: investigate if it is possible to make this Push message function throw nothing
 #if defined(WIN32)
 		if(SetEvent(this->eventForWaitable) == 0){
-			throw ting::Exc("Queue::PushMessage(): setting event for Waitable failed");
+			ASSERT(false)
 		}
 #elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 		{
 			u8 oneByteBuf[1];
-			write(this->pipeEnds[1], oneByteBuf, 1);
+			if(write(this->pipeEnds[1], oneByteBuf, 1) != 1){
+				ASSERT(false)
+			}
 		}
 #elif defined(__linux__)
 		if(eventfd_write(this->eventFD, 1) < 0){
-			throw ting::Exc("Queue::PushMessage(): eventfd_write() failed");
+			ASSERT(false)
 		}
 #else
 #error "Unsupported OS"
@@ -343,7 +342,7 @@ void Queue::PushMessage(Ptr<Message> msg){
 	}
 
 	ASSERT(this->CanRead())
-	//NOTE: must do signalling while mutex is locked!!!
+	//NOTE: must do signaling while mutex is locked!!!
 	this->sem.Signal();
 }
 
@@ -371,7 +370,9 @@ Ptr<Message> Queue::PeekMsg(){
 #elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 			{
 				u8 oneByteBuf[1];
-				read(this->pipeEnds[0], oneByteBuf, 1);
+				if(read(this->pipeEnds[0], oneByteBuf, 1) != 1){
+					throw ting::Exc("Queue::Wait(): read() failed");
+				}
 			}
 #elif defined(__linux__)
 			{
