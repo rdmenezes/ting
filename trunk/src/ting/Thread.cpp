@@ -569,6 +569,12 @@ int Queue::GetHandle(){
 
 
 
+namespace{
+ting::Mutex threadMutex2;
+}
+
+
+
 //Tread Run function
 //static
 #ifdef WIN32
@@ -595,7 +601,7 @@ void* Thread::RunThread(void *data)
 	{
 		//protect by mutex to avoid changing the
 		//this->state variable before Start() has finished.
-		ting::Mutex::Guard mutexGuard(Thread::Mutex2());
+		ting::Mutex::Guard mutexGuard(threadMutex2);
 
 		thr->state = STOPPED;
 	}
@@ -653,7 +659,7 @@ void Thread::Start(size_t stackSize){
 	
 	//Protect by mutex to avoid incorrect state changing in case when thread
 	//exits before the Start() method returned.
-	ting::Mutex::Guard mutexGuard2(Thread::Mutex2());
+	ting::Mutex::Guard mutexGuard2(threadMutex2);
 
 	if(this->state != NEW){
 		throw ting::Exc("Thread::Start(): Thread is already running or stopped");

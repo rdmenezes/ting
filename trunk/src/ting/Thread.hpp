@@ -596,11 +596,6 @@ class Thread{
 
 	ting::Mutex mutex1;
 
-	//TODO: move static mutex to cpp
-	static inline ting::Mutex& Mutex2(){
-		static ting::Mutex m;
-		return m;
-	}
 
 	enum E_State{
 		NEW,
