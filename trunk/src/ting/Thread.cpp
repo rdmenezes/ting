@@ -715,7 +715,7 @@ void Thread::Start(size_t stackSize){
 
 
 
-void Thread::Join(){
+void Thread::Join() throw(){
 //	TRACE(<< "Thread::Join(): enter" << std::endl)
 
 	//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously.
@@ -728,7 +728,7 @@ void Thread::Join(){
 	}
 
 	if(this->state == JOINED){
-		throw ting::Exc("Thread::Join(): thread is already joined");
+		return;
 	}
 
 	ASSERT(this->state == RUNNING || this->state == STOPPED)
@@ -762,3 +762,22 @@ void Thread::Join(){
 
 //	TRACE(<< "Thread::Join(): exit" << std::endl)
 }
+
+
+
+namespace{
+ting::Mutex quitMessageMutex;
+}
+
+
+
+void MsgThread::PushPreallocatedQuitMessage_ts() throw(){
+	ting::Mutex::Guard mutexGuard(quitMessageMutex);
+	
+	if(this->quitMessage.IsNotValid()){
+		return;
+	}
+	
+	this->queue.PushMessage(this->quitMessage);
+}
+

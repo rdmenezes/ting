@@ -659,7 +659,7 @@ public:
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
 	 */
-	void Join();
+	void Join() throw();
 
 
 
@@ -756,10 +756,22 @@ protected:
 	ting::Inited<volatile bool, false> quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
 
 	Queue queue;
+	
+	ting::Ptr<ting::QuitMessage> quitMessage;
 
 public:
-	inline MsgThread(){}
+	inline MsgThread();
 
+	
+	
+	/**
+	 * @brief Send preallocated 'Quit' message to thread's queue.
+	 * This function throws no exceptions. It can send the quit message only once.
+	 */
+	void PushPreallocatedQuitMessage_ts() throw();
+	
+	
+	
 	/**
 	 * @brief Send 'Quit' message to thread's queue.
 	 */
@@ -792,12 +804,13 @@ public:
  */
 class QuitMessage : public Message{
 	MsgThread *thr;
-  public:
+public:
 	QuitMessage(MsgThread* thread) :
 			thr(thread)
 	{
-		if(!this->thr)
+		if(!this->thr){
 			throw ting::Exc("QuitMessage::QuitMessage(): thread pointer passed is 0");
+		}
 	}
 
 	//override
@@ -825,15 +838,18 @@ public:
 
 
 
+inline MsgThread::MsgThread() :
+		quitMessage(new ting::QuitMessage(this))
+{}
+
+
 inline void MsgThread::PushNopMessage(){
 	this->PushMessage(Ptr<Message>(new NopMessage()));
 }
 
 
 
-//TODO: need some quit requesting function which throws nothing
 inline void MsgThread::PushQuitMessage(){
-	//TODO: post preallocated quit message?
 	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
 }
 
