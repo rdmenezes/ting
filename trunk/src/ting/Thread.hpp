@@ -814,7 +814,7 @@ class QuitMessage : public Message{
  * can be used to unblock thread which is waiting infinitely on its message queue.
  */
 class NopMessage : public Message{
-  public:
+public:
 	NopMessage(){}
 
 	//override
@@ -832,6 +832,7 @@ inline void MsgThread::PushNopMessage(){
 
 
 
+//TODO: need some quit requesting function which throws nothing
 inline void MsgThread::PushQuitMessage(){
 	//TODO: post preallocated quit message?
 	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
