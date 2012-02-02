@@ -623,7 +623,23 @@ class Thread{
 
 public:
 	
-	//TODO: Create a set of exceptions and document all functions about what they throw
+	/**
+	 * @brief Basic exception type thrown by Thread class.
+	 * @param msg - human friendly exception description.
+	 */
+	class Exc : public ting::Exc{
+	public:
+		Exc(const std::string& msg) :
+				ting::Exc(msg)
+		{}
+	};
+	
+	class HasAlreadyBeenStartedExc : public Exc{
+	public:
+		HasAlreadyBeenStartedExc() :
+				Exc("The thread has already been started.")
+		{}
+	};
 	
 	Thread();
 	
@@ -670,7 +686,7 @@ public:
 	 * AT LEAST 'msec' milliseconds.
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
-	static void Sleep(unsigned msec = 0){
+	static void Sleep(unsigned msec = 0) throw(){
 #ifdef WIN32
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif defined(__SYMBIAN32__)
@@ -768,7 +784,7 @@ public:
 	 * @brief Send preallocated 'Quit' message to thread's queue.
 	 * This function throws no exceptions. It can send the quit message only once.
 	 */
-	void PushPreallocatedQuitMessage_ts() throw();
+	void PushPreallocatedQuitMessage() throw();
 	
 	
 	

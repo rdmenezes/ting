@@ -662,7 +662,7 @@ void Thread::Start(size_t stackSize){
 	ting::Mutex::Guard mutexGuard2(threadMutex2);
 
 	if(this->state != NEW){
-		throw ting::Exc("Thread::Start(): Thread is already running or stopped");
+		throw HasAlreadyBeenStartedExc();
 	}
 
 #ifdef WIN32
@@ -676,15 +676,16 @@ void Thread::Start(size_t stackSize){
 					NULL
 				)
 		);
-	if(this->th == NULL)
-		throw ting::Exc("Thread::Start(): starting thread failed");
+	if(this->th == NULL){
+		throw Exc("Thread::Start(): _beginthreadex failed");
+	}
 #elif defined(__SYMBIAN32__)
 	if(this->th.Create(_L("ting thread"), &RunThread,
 				stackSize == 0 ? KDefaultStackSize : stackSize,
 				NULL, reinterpret_cast<TAny*>(this)) != KErrNone
 			)
 	{
-		throw ting::Exc("Thread::Start(): starting thread failed");
+		throw Exc("Thread::Start(): starting thread failed");
 	}
 	this->th.Resume();//start the thread execution
 #elif defined(__linux__) || defined(__APPLE__)
@@ -703,7 +704,7 @@ void Thread::Start(size_t stackSize){
 			std::stringstream ss;
 			ss << "Thread::Start(): starting thread failed,"
 					<< " error code = " << res << ": " << strerror(res);
-			throw ting::Exc(ss.str().c_str());
+			throw Exc(ss.str());
 		}
 		pthread_attr_destroy(&attr);
 	}
@@ -771,7 +772,7 @@ ting::Mutex quitMessageMutex;
 
 
 
-void MsgThread::PushPreallocatedQuitMessage_ts() throw(){
+void MsgThread::PushPreallocatedQuitMessage() throw(){
 	ting::Mutex::Guard mutexGuard(quitMessageMutex);
 	
 	if(this->quitMessage.IsNotValid()){

@@ -93,8 +93,9 @@ public:
 
 private:
 	void Construct(const char* message){
-		if(!message)
+		if(!message){
 			message = "no exception info";
+		}
 
 		size_t len = strlen(message);
 
@@ -105,8 +106,9 @@ private:
 		//we do not want another exception, use std::nothrow
 		this->msg = new(std::nothrow) char[len+1];
 	#endif
-		if(!this->msg)
+		if(!this->msg){
 			return;
+		}
 
 		memcpy(this->msg, message, len);
 		this->msg[len] = 0;//null-terminate
