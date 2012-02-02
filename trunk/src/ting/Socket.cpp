@@ -360,7 +360,6 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 				//it is a reference to the domain name.
 				//skip it
 				p += 2;
-				//TODO: do not skip ?
 			}
 			
 			if(buf.End() - p < 2){
