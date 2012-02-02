@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-// Homepage: http://ting.googlecode.com
+// Home page: http://ting.googlecode.com
 
 
 
@@ -683,22 +683,27 @@ private:
 				if(this->socket.CanRead()){
 					TRACE(<< "can read" << std::endl)
 					try{
-						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes.
+						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes. So, no need to allocate bigger buffer.
 						ting::net::IPAddress address;
 						size_t ret = this->socket.Recv(buf, address);
 						
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.Size())
-						if(ret >= 2){//at least there should be ID, otherwise ignore received UDP packet
+						if(ret >= 13){//at least there should be standard header and host name, otherwise ignore received UDP packet
 							ting::u16 id = ting::Deserialize16BE(buf.Begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
-								//TODO: check by host name also
-								
 								ASSERT(id == i->second->id)
-								ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
-								r->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
+								
+								//check by host name also
+								const ting::u8* p = buf.Begin() + 12;//start of the host name
+								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
+								
+								if(host == i->second->hostName){
+									ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
+									r->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
+								}
 							}
 						}
 					}catch(ting::net::Exc& e){
