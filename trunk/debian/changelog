@@ -1,7 +1,5 @@
-libting (0.10.0-1) stable; urgency=low
+libting (0.11.0-1) stable; urgency=low
 
-  * ting::File and ting::FSFile
-  * moved implementation to .cpp and libting.so
   * Sockets related stuff moved to ting::net namespace, ting::SocketLib renamed to ting::net::Lib
   * ting::net::HostNameResolver class added for DNS lookups, ting::SocketLib::GetHostByName() removed.
   * ting::atomic namespace added providing some primitives for cross platform atomic operations.
@@ -9,6 +7,13 @@ libting (0.10.0-1) stable; urgency=low
   * some other minor changes
 
  -- Ivan Gagis <igagis@gmail.com>  Fri, 03 Feb 2012 16:28:00 +0200
+
+libting (0.10.0-1) stable; urgency=low
+
+  * ting::File and ting::FSFile
+  * moved implementation to .cpp and libting.so
+
+ -- Ivan Gagis <igagis@gmail.com>  Fri, 07 Oct 2011 16:28:00 +0200
 
 libting (0.9.0-1) stable; urgency=low
 
