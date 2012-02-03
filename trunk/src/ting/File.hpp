@@ -158,7 +158,7 @@ public:
 	 * @brief Open file.
 	 * Opens file for reading/writing or creates the file.
 	 * @param mode - file opening mode (reading/writing/create).
-	 * @throw AlreadyOpenedExc - if file already opened.
+	 * @throw IllegalStateExc - if file already opened.
 	 */
 	virtual void Open(EMode mode) = 0;
 
@@ -206,7 +206,7 @@ public:
 	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually read.
-	 * @throw NotOpenedExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Read(
 			ting::Buffer<ting::u8>& buf,
@@ -256,7 +256,7 @@ public:
 	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually written.
-	 * @throw NotOpenedExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Write(
 			const ting::Buffer<ting::u8>& buf,
@@ -306,7 +306,7 @@ public:
 	 * to skip the specified number of bytes by reading the data and wasting it away.
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
-	 * @throw NotOpenedExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	virtual void SeekForward(size_t numBytesToSeek);
 
@@ -316,14 +316,14 @@ public:
 	 * support seeking backwards.
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
-	 * @throw NotOpenedExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	virtual void SeekBackward(size_t numBytesToSeek);
 
 	/**
 	 * @brief Seek to the beginning of the file.
 	 * Not all file systems support rewinding.
-	 * @throw NotOpenedExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	virtual void Rewind();
 

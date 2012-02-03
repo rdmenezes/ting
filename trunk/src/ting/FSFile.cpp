@@ -125,8 +125,9 @@ size_t FSFile::ReadInternal(ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
 	size_t numBytesRead = fread(buf.Begin(), 1, buf.Size(), this->handle);
 	if(numBytesRead != buf.Size()){//something happened
-		if(!feof(this->handle))
+		if(!feof(this->handle)){
 			throw File::Exc("fread() error");//if it is not an EndOfFile then it is error
+		}
 	}
 	return numBytesRead;
 }
