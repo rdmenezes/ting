@@ -1,0 +1,24 @@
+threadlib := 
+rtlib :=
+
+remove = del
+
+binary_name := utils_test.exe
+
+
+#compiler flags
+cf := /EHsc /W3
+cf += /D"DEBUG"
+cf += /D"WIN32"
+
+
+default: $(binary_name)
+	@echo running $^...
+	@./$^
+
+$(binary_name): utils_test.cpp
+	@echo Building $@...
+	@cl $(cf) $(threadlib) $(rtlib) $<
+
+clean:
+	@$(remove) $(binary_name)
