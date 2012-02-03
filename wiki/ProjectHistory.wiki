@@ -3,8 +3,8 @@
 2012-02-03: libting-0.11.0 released.
   * ting::File and ting::FSFile
   * moved implementation to .cpp and libting.so
-  * Sockets related stuff moved to ting::net namespace, ting::SocketLib renamed to ting::net::Lib
-  * ting::net::HostNameResolver class added for DNS lookups, ting::SocketLib::GetHostByName() removed.
+  * Sockets related stuff moved to ting::net namespace, ting::!SocketLib renamed to ting::net::Lib
+  * ting::net::!HostNameResolver class added for DNS lookups, ting::!SocketLib::!GetHostByName() removed.
   * ting::atomic namespace added providing some primitives for cross platform atomic operations.
   * .pc file added, so ting can now be used with pkg-config
   * some other minor changes
