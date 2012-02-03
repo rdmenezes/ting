@@ -14,13 +14,13 @@ int main(int argc, char *argv[]){
 
 	TestSimpleDNSLookup::Run();
 	TestRequestFromCallback::Run();
-	/*
+	
 	BasicIPAddressTest::Run();
 	BasicClientServerTest::Run();
 	BasicUDPSocketsTest::Run();
 	SendDataContinuouslyWithWaitSet::Run();
 	SendDataContinuously::Run();
-*/
+
 	TRACE_ALWAYS(<< "[PASSED]: Socket test" << std::endl)
 
 	return 0;
