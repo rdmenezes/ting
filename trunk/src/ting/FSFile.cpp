@@ -48,7 +48,7 @@ using namespace ting;
 
 void FSFile::SetRootDir(const std::string &dir){
 	if(this->IsOpened()){
-		throw File::Exc("FSFile::SetRootDir(): can't set root directory when file is opened");
+		throw File::IllegalStateExc("cannot set root directory when file is opened");
 	}
 	
 	if(dir.size() > 0){
@@ -63,11 +63,13 @@ void FSFile::SetRootDir(const std::string &dir){
 
 //override
 void FSFile::Open(EMode mode){
-	if(this->IsOpened())
-		throw File::Exc("file already opened");
+	if(this->IsOpened()){
+		throw File::IllegalStateExc("cannot open, file is already opened.");
+	}
 
-	if(this->IsDir())
+	if(this->IsDir()){
 		throw File::Exc("path refers to a directory, directories can't be opened");
+	}
 	
 	const char* modeStr;
 	switch(mode){
@@ -91,10 +93,11 @@ void FSFile::Open(EMode mode){
 	}
 
 	//set open mode
-	if(mode == CREATE)
+	if(mode == CREATE){
 		this->ioMode = WRITE;
-	else
+	}else{
 		this->ioMode = mode;
+	}
 
 	this->isOpened = true;//set "opened" flag
 }
@@ -103,8 +106,9 @@ void FSFile::Open(EMode mode){
 
 //override
 void FSFile::Close(){
-	if(!this->IsOpened())
+	if(!this->IsOpened()){
 		return;
+	}
 
 	ASSERT(this->handle)
 
@@ -143,8 +147,8 @@ size_t FSFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 
 
 void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
-		if(!this->IsOpened()){
-		throw File::Exc("file is not opened, cannot seek");
+	if(!this->IsOpened()){
+		throw File::IllegalStateExc("cannot seek, file is not opened");
 	}
 
 	ASSERT(this->handle)
@@ -200,7 +204,7 @@ void FSFile::SeekBackward(size_t numBytesToSeek){
 //override
 void FSFile::Rewind(){
 	if(!this->IsOpened()){
-		throw File::Exc("file is not opened, cannot rewind");
+		throw File::IllegalStateExc("cannot rewind, file is not opened");
 	}
 
 	ASSERT(this->handle)
@@ -213,11 +217,13 @@ void FSFile::Rewind(){
 
 //override
 bool FSFile::Exists()const{
-	if(this->IsOpened()) //file is opened => it exists
+	if(this->IsOpened()){ //file is opened => it exists
 		return true;
+	}
 	
-	if(this->Path().size() == 0)
+	if(this->Path().size() == 0){
 		return false;
+	}
 
 	//if it is a directory, check directory existence
 	if(this->Path()[this->Path().size() - 1] == '/'){
@@ -241,17 +247,20 @@ bool FSFile::Exists()const{
 
 //override
 void FSFile::MakeDir(){
-	if(this->IsOpened())
-		throw File::Exc("illegal state");
+	if(this->IsOpened()){
+		throw File::IllegalStateExc("cannot make directory when file is opened");
+	}
 
-	if(this->Path().size() == 0 || this->Path()[this->Path().size() - 1] != '/')
+	if(this->Path().size() == 0 || this->Path()[this->Path().size() - 1] != '/'){
 		throw File::Exc("invalid directory name");
+	}
 
 #if defined(__linux__)
 //	TRACE(<< "creating directory = " << this->Path() << std::endl)
 	umask(0);//clear umask for proper permissions of newly created directory
-	if(mkdir(this->TruePath().c_str(), 0777) != 0)
+	if(mkdir(this->TruePath().c_str(), 0777) != 0){
 		throw File::Exc("mkdir() failed");
+	}
 #else
 	throw File::Exc("creating directory is not supported");
 #endif

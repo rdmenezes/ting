@@ -66,21 +66,20 @@ public:
 	public:
 		/**
 		 * @brief Constructor.
-		 * Creates an exception without and error description.
-		 */
-		Exc() :
-				ting::Exc("[File::Exc]: unknown")
-		{}
-
-		/**
-		 * @brief Constructor.
 		 * @param descr - human readable description of the error.
 		 */
-		Exc(const std::string& descr):
-				ting::Exc((std::string("[File::Exc]: ") + descr).c_str())
+		Exc(const std::string& descr) :
+				ting::Exc(std::string("[File::Exc]: ") + descr)
 		{}
 	};
 
+	class IllegalStateExc : public Exc{
+	public:
+		IllegalStateExc(const std::string& descr = "Illegal opened/closed state") :
+				Exc(descr)
+		{}
+	};
+	
 	/**
 	 * @brief Modes of opening the file.
 	 */
@@ -125,8 +124,9 @@ public:
 	 * @param pathName - the path to a file or directory.
 	 */
 	inline void SetPath(const std::string& pathName){
-		if(this->IsOpened())
-			throw File::Exc("cannot set path while file is opened");
+		if(this->IsOpened()){
+			throw File::IllegalStateExc("Cannot set path when file is opened");
+		}
 
 		this->path = pathName;
 	}
@@ -158,6 +158,7 @@ public:
 	 * @brief Open file.
 	 * Opens file for reading/writing or creates the file.
 	 * @param mode - file opening mode (reading/writing/create).
+	 * @throw AlreadyOpenedExc - if file already opened.
 	 */
 	virtual void Open(EMode mode) = 0;
 
@@ -205,6 +206,7 @@ public:
 	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually read.
+	 * @throw NotOpenedExc - if file is not opened.
 	 */
 	size_t Read(
 			ting::Buffer<ting::u8>& buf,
@@ -213,7 +215,7 @@ public:
 		)
 	{
 		if(!this->IsOpened()){
-			throw File::Exc("file is not opened, cannot read");
+			throw File::IllegalStateExc("Cannot read, file is not opened");
 		}
 
 		size_t actualNumBytesToRead =
@@ -254,6 +256,7 @@ public:
 	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually written.
+	 * @throw NotOpenedExc - if file is not opened.
 	 */
 	size_t Write(
 			const ting::Buffer<ting::u8>& buf,
@@ -262,7 +265,7 @@ public:
 		)
 	{
 		if(!this->IsOpened()){
-			throw File::Exc("file is not opened, cannot write");
+			throw File::IllegalStateExc("Cannot write, file is not opened");
 		}
 
 		if(this->ioMode != WRITE){
@@ -303,6 +306,7 @@ public:
 	 * to skip the specified number of bytes by reading the data and wasting it away.
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
+	 * @throw NotOpenedExc - if file is not opened.
 	 */
 	virtual void SeekForward(size_t numBytesToSeek);
 
@@ -312,12 +316,14 @@ public:
 	 * support seeking backwards.
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
+	 * @throw NotOpenedExc - if file is not opened.
 	 */
 	virtual void SeekBackward(size_t numBytesToSeek);
 
 	/**
 	 * @brief Seek to the beginning of the file.
 	 * Not all file systems support rewinding.
+	 * @throw NotOpenedExc - if file is not opened.
 	 */
 	virtual void Rewind();
 
