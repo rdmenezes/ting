@@ -119,296 +119,6 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	T_RequestsToSendIter sendIter;
 	
 	ting::net::IPAddress dns;
-	
-	//NOTE: call to this function should be protected by dns::mutex, to make sure the request is not canceled while sending.
-	//returns true if request is sent, false otherwise.
-	bool SendRequestToDNS(ting::net::UDPSocket& socket){
-		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
-		
-		size_t packetSize =
-				2 + //ID
-				2 + //flags
-				2 + //Number of questions
-				2 + //Number of answers
-				2 + //Number of authority records
-				2 + //Number of other records
-				this->hostName.size() + 2 + //domain name
-				2 + //Question type
-				2   //Question class
-			;
-		
-		ASSERT(packetSize <= buf.Size())
-		
-		ting::u8* p = buf.Begin();
-		
-		//ID
-		ting::Serialize16BE(this->id, p);
-		p += 2;
-		
-		//flags
-		ting::Serialize16BE(0x100, p);
-		p += 2;
-		
-		//Number of questions
-		ting::Serialize16BE(1, p);
-		p += 2;
-		
-		//Number of answers
-		ting::Serialize16BE(0, p);
-		p += 2;
-		
-		//Number of authority records
-		ting::Serialize16BE(0, p);
-		p += 2;
-		
-		//Number of other records
-		ting::Serialize16BE(0, p);
-		p += 2;
-		
-		//domain name
-		for(size_t dotPos = 0; dotPos < this->hostName.size();){
-			size_t oldDotPos = dotPos;
-			dotPos = this->hostName.find('.', dotPos);
-			if(dotPos == std::string::npos){
-				dotPos = this->hostName.size();
-			}
-			
-			ASSERT(dotPos <= 0xff)
-			size_t labelLength = dotPos - oldDotPos;
-			ASSERT(labelLength <= 0xff)
-			
-			*p = ting::u8(labelLength);//save label length
-			++p;
-			//copy the label bytes
-			memcpy(p, this->hostName.c_str() + oldDotPos, labelLength);
-			p += labelLength;
-			
-			++dotPos;
-			
-			ASSERT(p <= buf.End());
-		}
-		
-		*p = 0; //terminate labels sequence
-		++p;
-		
-		//Question type (1 means A query)
-		ting::Serialize16BE(1, p);
-		p += 2;
-		
-		//Question class (1 means inet)
-		ting::Serialize16BE(1, p);
-		p += 2;
-		
-		ASSERT(buf.Begin() <= p && p <= buf.End());
-		ASSERT(size_t(p - buf.Begin()) == packetSize);
-		
-		TRACE(<< "sending DNS request to " << (this->dns.host) << std::endl)
-		size_t ret = socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), this->dns);
-		
-		ASSERT(ret == packetSize || ret == 0)
-		
-//		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
-//#ifdef DEBUG
-//		for(unsigned i = 0; i < packetSize; ++i){
-//			TRACE(<< int(buf[i]) << std::endl)
-//		}
-//#endif
-		return ret == packetSize;
-	}
-	
-	//NOTE: call to this function should be protected by dns::mutex
-	inline void CallCallback(ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0)throw(){
-		dns::mutex.Unlock();
-		this->hnr->OnCompleted_ts(result, ip);
-		dns::mutex.Lock();
-	}
-
-	//NOTE: call to this function should be protected by dns::mutex
-	//This function will call the Resolver callback.
-	void ParseReplyFromDNS(const ting::Buffer<ting::u8>& buf){
-//		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
-//#ifdef DEBUG
-//		for(unsigned i = 0; i < buf.Size(); ++i){
-//			TRACE(<< int(buf[i]) << std::endl)
-//		}
-//#endif
-		
-		if(buf.Size() <
-				2 + //ID
-				2 + //flags
-				2 + //Number of questions
-				2 + //Number of answers
-				2 + //Number of authority records
-				2   //Number of other records
-			)
-		{
-			this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
-			return;
-		}
-		
-		const ting::u8* p = buf.Begin();
-		p += 2;//skip ID
-		
-		{
-			ting::u16 flags = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
-				TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0x8000) = " << (flags & 0x8000) << std::endl)
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
-				return;
-			}
-			
-			//Check response code
-			if((flags & 0xf) != 0){//0 means no error condition
-				if((flags & 0xf) == 3){//name does not exist
-					this->CallCallback(ting::net::HostNameResolver::NO_SUCH_HOST);
-					return;
-				}else{
-					TRACE(<< "dns::Resolver::ParseReplyFromDNS(): (flags & 0xf) = " << (flags & 0xf) << std::endl)
-					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
-					return;
-				}
-			}
-		}
-		
-		{//check number of questions
-			ting::u16 numQuestions = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if(numQuestions != 1){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);
-				return;
-			}
-		}
-		
-		ting::u16 numAnswers = ting::Deserialize16BE(p);
-		p += 2;
-		ASSERT(buf.Begin() <= p)
-		ASSERT(p <= (buf.End() - 1) || p == buf.End())
-		
-		if(numAnswers == 0){
-			this->CallCallback(ting::net::HostNameResolver::NO_SUCH_HOST);
-			return;
-		}
-		
-		{
-//			ting::u16 nscount = ting::Deserialize16BE(p);
-			p += 2;
-		}
-		
-		{
-//			ting::u16 arcount = ting::Deserialize16BE(p);
-			p += 2;
-		}
-		
-		//parse host name
-		{
-			std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
-//			TRACE(<< "host = " << host << std::endl)
-			
-			if(this->hostName != host){
-//				TRACE(<< "this->hostName = " << this->hostName << std::endl)
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
-				return;
-			}
-		}
-		
-		//check query type, we sent question type 1 (A query).
-		{
-			ting::u16 type = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if(type != 1){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong question type
-				return;
-			}
-		}
-		
-		//check query class, we sent question class 1 (inet).
-		{
-			ting::u16 cls = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if(cls != 1){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//wrong question class
-				return;
-			}
-		}
-		
-		ASSERT(buf.Overlaps(p) || p == buf.End())
-		
-		//loop through the answers
-		for(ting::u16 n = 0; n != numAnswers; ++n){
-			if(p == buf.End()){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-			
-			//check if there is a domain name or a reference to the domain name
-			if(((*p) >> 6) == 0){ //check if two high bits are set
-				//skip possible domain name
-				for(; p != buf.End() && *p != 0; ++p){
-					ASSERT(buf.Overlaps(p))
-				}
-				if(p == buf.End()){
-					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
-				}
-				++p;
-			}else{
-				//it is a reference to the domain name.
-				//skip it
-				p += 2;
-			}
-			
-			if(buf.End() - p < 2){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-			ting::u16 type = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if(buf.End() - p < 2){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-//			ting::u16 cls = ting::Deserialize16(p);
-			p += 2;
-			
-			if(buf.End() - p < 4){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-//			ting::u32 ttl = ting::Deserialize32(p);//time till the returned value can be cached.
-			p += 4;
-			
-			if(buf.End() - p < 2){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-			ting::u16 dataLen = ting::Deserialize16BE(p);
-			p += 2;
-			
-			if(buf.End() - p < dataLen){
-				this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
-			}
-			if(type == 1){//'A' type answer
-				if(dataLen < 4){
-					this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
-				}
-				
-				ting::u32 address = ting::Deserialize32BE(p);
-				this->CallCallback(ting::net::HostNameResolver::OK, address);
-				return;
-			}
-			p += dataLen;
-		}
-		
-		this->CallCallback(ting::net::HostNameResolver::DNS_ERROR);//no answer found
-	}
 };
 
 
@@ -420,6 +130,8 @@ class LookupThread : public ting::MsgThread{
 	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
+	ting::Mutex mutex;
+	
 	//this variable is for joining and destroying previous thread object if there was any.
 	ting::Ptr<ting::MsgThread> prevThread;
 	
@@ -468,7 +180,304 @@ public:
 		throw HostNameResolver::TooMuchRequestsExc();
 	}
 	
-private:	
+	
+	//NOTE: call to this function should be protected by mutex, to make sure the request is not canceled while sending.
+	//returns true if request is sent, false otherwise.
+	bool SendRequestToDNS(const dns::Resolver* r){
+		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
+		
+		size_t packetSize =
+				2 + //ID
+				2 + //flags
+				2 + //Number of questions
+				2 + //Number of answers
+				2 + //Number of authority records
+				2 + //Number of other records
+				r->hostName.size() + 2 + //domain name
+				2 + //Question type
+				2   //Question class
+			;
+		
+		ASSERT(packetSize <= buf.Size())
+		
+		ting::u8* p = buf.Begin();
+		
+		//ID
+		ting::Serialize16BE(r->id, p);
+		p += 2;
+		
+		//flags
+		ting::Serialize16BE(0x100, p);
+		p += 2;
+		
+		//Number of questions
+		ting::Serialize16BE(1, p);
+		p += 2;
+		
+		//Number of answers
+		ting::Serialize16BE(0, p);
+		p += 2;
+		
+		//Number of authority records
+		ting::Serialize16BE(0, p);
+		p += 2;
+		
+		//Number of other records
+		ting::Serialize16BE(0, p);
+		p += 2;
+		
+		//domain name
+		for(size_t dotPos = 0; dotPos < r->hostName.size();){
+			size_t oldDotPos = dotPos;
+			dotPos = r->hostName.find('.', dotPos);
+			if(dotPos == std::string::npos){
+				dotPos = r->hostName.size();
+			}
+			
+			ASSERT(dotPos <= 0xff)
+			size_t labelLength = dotPos - oldDotPos;
+			ASSERT(labelLength <= 0xff)
+			
+			*p = ting::u8(labelLength);//save label length
+			++p;
+			//copy the label bytes
+			memcpy(p, r->hostName.c_str() + oldDotPos, labelLength);
+			p += labelLength;
+			
+			++dotPos;
+			
+			ASSERT(p <= buf.End());
+		}
+		
+		*p = 0; //terminate labels sequence
+		++p;
+		
+		//Question type (1 means A query)
+		ting::Serialize16BE(1, p);
+		p += 2;
+		
+		//Question class (1 means inet)
+		ting::Serialize16BE(1, p);
+		p += 2;
+		
+		ASSERT(buf.Begin() <= p && p <= buf.End());
+		ASSERT(size_t(p - buf.Begin()) == packetSize);
+		
+		TRACE(<< "sending DNS request to " << (r->dns.host) << std::endl)
+		size_t ret = this->socket.Send(ting::Buffer<ting::u8>(buf.Begin(), packetSize), r->dns);
+		
+		ASSERT(ret == packetSize || ret == 0)
+		
+//		TRACE(<< "DNS request sent, packetSize = " << packetSize << std::endl)
+//#ifdef DEBUG
+//		for(unsigned i = 0; i < packetSize; ++i){
+//			TRACE(<< int(buf[i]) << std::endl)
+//		}
+//#endif
+		return ret == packetSize;
+	}
+	
+	
+	
+	//NOTE: call to this function should be protected by mutex
+	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0)throw(){
+		this->mutex.Unlock();
+		r->hnr->OnCompleted_ts(result, ip);
+		this->mutex.Lock();
+	}
+	
+	
+	
+	//NOTE: call to this function should be protected by mutex
+	//This function will call the Resolver callback.
+	void ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<ting::u8>& buf){
+//		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
+//#ifdef DEBUG
+//		for(unsigned i = 0; i < buf.Size(); ++i){
+//			TRACE(<< int(buf[i]) << std::endl)
+//		}
+//#endif
+		
+		if(buf.Size() <
+				2 + //ID
+				2 + //flags
+				2 + //Number of questions
+				2 + //Number of answers
+				2 + //Number of authority records
+				2   //Number of other records
+			)
+		{
+			this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
+			return;
+		}
+		
+		const ting::u8* p = buf.Begin();
+		p += 2;//skip ID
+		
+		{
+			ting::u16 flags = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
+				TRACE(<< "ParseReplyFromDNS(): (flags & 0x8000) = " << (flags & 0x8000) << std::endl)
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
+				return;
+			}
+			
+			//Check response code
+			if((flags & 0xf) != 0){//0 means no error condition
+				if((flags & 0xf) == 3){//name does not exist
+					this->CallCallback(r, ting::net::HostNameResolver::NO_SUCH_HOST);
+					return;
+				}else{
+					TRACE(<< "ParseReplyFromDNS(): (flags & 0xf) = " << (flags & 0xf) << std::endl)
+					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
+					return;
+				}
+			}
+		}
+		
+		{//check number of questions
+			ting::u16 numQuestions = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if(numQuestions != 1){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
+				return;
+			}
+		}
+		
+		ting::u16 numAnswers = ting::Deserialize16BE(p);
+		p += 2;
+		ASSERT(buf.Begin() <= p)
+		ASSERT(p <= (buf.End() - 1) || p == buf.End())
+		
+		if(numAnswers == 0){
+			this->CallCallback(r, ting::net::HostNameResolver::NO_SUCH_HOST);
+			return;
+		}
+		
+		{
+//			ting::u16 nscount = ting::Deserialize16BE(p);
+			p += 2;
+		}
+		
+		{
+//			ting::u16 arcount = ting::Deserialize16BE(p);
+			p += 2;
+		}
+		
+		//parse host name
+		{
+			std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
+//			TRACE(<< "host = " << host << std::endl)
+			
+			if(r->hostName != host){
+//				TRACE(<< "this->hostName = " << this->hostName << std::endl)
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
+				return;
+			}
+		}
+		
+		//check query type, we sent question type 1 (A query).
+		{
+			ting::u16 type = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if(type != 1){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong question type
+				return;
+			}
+		}
+		
+		//check query class, we sent question class 1 (inet).
+		{
+			ting::u16 cls = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if(cls != 1){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong question class
+				return;
+			}
+		}
+		
+		ASSERT(buf.Overlaps(p) || p == buf.End())
+		
+		//loop through the answers
+		for(ting::u16 n = 0; n != numAnswers; ++n){
+			if(p == buf.End()){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			
+			//check if there is a domain name or a reference to the domain name
+			if(((*p) >> 6) == 0){ //check if two high bits are set
+				//skip possible domain name
+				for(; p != buf.End() && *p != 0; ++p){
+					ASSERT(buf.Overlaps(p))
+				}
+				if(p == buf.End()){
+					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				++p;
+			}else{
+				//it is a reference to the domain name.
+				//skip it
+				p += 2;
+			}
+			
+			if(buf.End() - p < 2){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			ting::u16 type = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if(buf.End() - p < 2){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+//			ting::u16 cls = ting::Deserialize16(p);
+			p += 2;
+			
+			if(buf.End() - p < 4){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+//			ting::u32 ttl = ting::Deserialize32(p);//time till the returned value can be cached.
+			p += 4;
+			
+			if(buf.End() - p < 2){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			ting::u16 dataLen = ting::Deserialize16BE(p);
+			p += 2;
+			
+			if(buf.End() - p < dataLen){
+				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+				return;
+			}
+			if(type == 1){//'A' type answer
+				if(dataLen < 4){
+					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+					return;
+				}
+				
+				ting::u32 address = ting::Deserialize32BE(p);
+				this->CallCallback(r, ting::net::HostNameResolver::OK, address);
+				return;
+			}
+			p += dataLen;
+		}
+		
+		this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//no answer found
+	}
+	
+	
+	
+private:
 	LookupThread() :
 			waitSet(2),
 			timeMap1(resolversByTime1),
@@ -525,7 +534,7 @@ private:
 			ASSERT(r)
 
 			//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-			r->CallCallback(HostNameResolver::ERROR, 0);
+			this->CallCallback(r.operator->(), HostNameResolver::ERROR, 0);
 		}
 	}
 	
@@ -671,7 +680,7 @@ private:
 		while(!this->quitFlag){
 			ting::u32 timeout;
 			{
-				ting::Mutex::Guard mutexGuard(dns::mutex);
+				ting::Mutex::Guard mutexGuard(this->mutex);
 				
 				if(this->socket.ErrorCondition()){
 					this->isExiting = true;
@@ -701,7 +710,7 @@ private:
 								
 								if(host == i->second->hostName){
 									ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
-									r->ParseReplyFromDNS(ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
+									this->ParseReplyFromDNS(r.operator->(), ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
 								}
 							}
 						}
@@ -734,7 +743,7 @@ private:
 							}
 
 							if(r->dns.host != 0){
-								if(!r->SendRequestToDNS(this->socket)){
+								if(!this->SendRequestToDNS(r)){
 									TRACE(<< "request not sent" << std::endl)
 									break;//socket is not ready for sending, go out of requests sending loop.
 								}
@@ -746,7 +755,7 @@ private:
 								ASSERT(removedResolver)
 
 								//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-								removedResolver->CallCallback(HostNameResolver::ERROR, 0);
+								this->CallCallback(removedResolver.operator->(), HostNameResolver::ERROR, 0);
 							}
 						}
 					}catch(ting::net::Exc& e){
@@ -773,7 +782,7 @@ private:
 							ASSERT(r)
 
 							//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-							r->CallCallback(HostNameResolver::TIMEOUT, 0);
+							this->CallCallback(r.operator->(), HostNameResolver::TIMEOUT, 0);
 						}
 						
 						ASSERT(this->timeMap1.size() == 0)
@@ -792,7 +801,7 @@ private:
 					ASSERT(r)
 					
 					//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-					r->CallCallback(HostNameResolver::TIMEOUT, 0);
+					this->CallCallback(r.operator->(), HostNameResolver::TIMEOUT, 0);
 				}
 				
 				if(this->resolversMap.size() == 0){
@@ -876,6 +885,8 @@ HostNameResolver::~HostNameResolver(){
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsValid()){
+		ting::Mutex::Guard mutexGuard(dns::thread->mutex);
+		
 		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
 		if(i != dns::thread->resolversMap.end()){
 			ASSERT_INFO_ALWAYS(false, "trying to destroy the HostNameResolver object while DNS lookup request is in progress, call HostNameResolver::Cancel_ts() first.")
@@ -904,6 +915,8 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 		dns::thread = dns::LookupThread::New();
 		needStartTheThread = true;
 	}else{
+		ting::Mutex::Guard mutexGuard(dns::thread->mutex);
+		
 		//check if already in progress
 		if(dns::thread->resolversMap.find(this) != dns::thread->resolversMap.end()){
 			throw AlreadyInProgressExc();
@@ -925,6 +938,8 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	r->hnr = this;
 	r->hostName = hostName;
 	r->dns = dnsIP;
+	
+	ting::Mutex::Guard mutexGuard2(dns::thread->mutex);
 	
 	//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
 	{
@@ -1003,6 +1018,8 @@ bool HostNameResolver::Cancel_ts(){
 		return false;
 	}
 	
+	ting::Mutex::Guard mutexGuard2(dns::thread->mutex);
+	
 	bool ret = dns::thread->RemoveResolver(this).IsValid();
 	
 	if(dns::thread->resolversMap.size() == 0 && ret){
@@ -1039,7 +1056,7 @@ Lib::~Lib(){
 		ting::Mutex::Guard mutexGuard(dns::mutex);
 		
 		if(dns::thread.IsValid()){
-			dns::thread->PushQuitMessage();
+			dns::thread->PushPreallocatedQuitMessage();
 			dns::thread->Join();
 			
 			ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
