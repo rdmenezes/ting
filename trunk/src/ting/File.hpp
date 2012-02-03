@@ -49,7 +49,6 @@ namespace ting{
  * @brief Abstract interface to a file system.
  * This class represents an abstract interface to a file system.
  */
-//TODO: make File a Waitable?
 class File{
 	std::string path;
 
