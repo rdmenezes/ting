@@ -88,7 +88,7 @@ std::string ParseHostNameFromDNSPacket(const ting::u8* & p, const ting::u8* end)
 
 
 
-//this mutex is used when adding and removing a request to/from the thread.
+//this mutex is used to protect the dns::thread access.
 ting::Mutex mutex;
 
 typedef std::multimap<ting::u32, Resolver*> T_ResolversTimeMap;
@@ -130,7 +130,7 @@ class LookupThread : public ting::MsgThread{
 	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
-	ting::Mutex mutex;
+	ting::Mutex mutex;//this mutex is used to protect access to members of the thread object.
 	
 	//this variable is for joining and destroying previous thread object if there was any.
 	ting::Ptr<ting::MsgThread> prevThread;
