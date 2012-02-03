@@ -75,6 +75,65 @@ ting::Array<std::string> File::ListDirContents(size_t maxEntries){
 
 
 
+size_t File::Read(
+			ting::Buffer<ting::u8>& buf,
+			size_t numBytesToRead,
+			size_t offset
+		)
+{
+	if(!this->IsOpened()){
+		throw File::IllegalStateExc("Cannot read, file is not opened");
+	}
+
+	size_t actualNumBytesToRead =
+			numBytesToRead == 0 ? buf.Size() : numBytesToRead;
+
+	if(offset > buf.Size()){
+		throw File::Exc("offset is out of buffer bounds");
+	}
+
+	if(actualNumBytesToRead > buf.Size() - offset){
+		throw File::Exc("attempt to read more bytes than the number of bytes from offset to the buffer end");
+	}
+
+	ASSERT(actualNumBytesToRead + offset <= buf.Size())
+	ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
+	return this->ReadInternal(b);
+}
+
+
+
+size_t File::Write(
+			const ting::Buffer<ting::u8>& buf,
+			size_t numBytesToWrite,
+			size_t offset
+		)
+{
+	if(!this->IsOpened()){
+		throw File::IllegalStateExc("Cannot write, file is not opened");
+	}
+
+	if(this->ioMode != WRITE){
+		throw File::Exc("file is opened, but not in WRITE mode");
+	}
+
+	size_t actualNumBytesToWrite =
+			numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
+
+	if(offset > buf.Size()){
+		throw File::Exc("offset is out of buffer bounds");
+	}
+
+	if(actualNumBytesToWrite > buf.Size() - offset){
+		throw File::Exc("attempt to write more bytes than passed buffer contains");
+	}
+
+	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
+	return this->WriteInternal(ting::Buffer<ting::u8>(const_cast<ting::u8*>(buf.Begin() + offset), actualNumBytesToWrite));
+}
+
+
+
 void File::SeekForward(size_t numBytesToSeek){
 	if(!this->IsOpened())
 		throw File::Exc("SeekForward(): file is not opened");
@@ -130,7 +189,7 @@ struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
 
 ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	if(this->IsOpened()){
-		throw File::Exc("file should not be opened");
+		throw File::IllegalStateExc("file should not be opened");
 	}
 
 	File::Guard fileGuard(*this, File::READ);//make sure we close the file upon exit from the function

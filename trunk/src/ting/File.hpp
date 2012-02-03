@@ -212,27 +212,7 @@ public:
 			ting::Buffer<ting::u8>& buf,
 			size_t numBytesToRead = 0, //0 means the whole buffer size
 			size_t offset = 0
-		)
-	{
-		if(!this->IsOpened()){
-			throw File::IllegalStateExc("Cannot read, file is not opened");
-		}
-
-		size_t actualNumBytesToRead =
-				numBytesToRead == 0 ? buf.Size() : numBytesToRead;
-
-		if(offset > buf.Size()){
-			throw File::Exc("offset is out of buffer bounds");
-		}
-
-		if(actualNumBytesToRead > buf.Size() - offset){
-			throw File::Exc("attempt to read more bytes than the number of bytes from offset to the buffer end");
-		}
-
-		ASSERT(actualNumBytesToRead + offset <= buf.Size())
-		ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
-		return this->ReadInternal(b);
-	}
+		);
 
 protected:
 	/**
@@ -262,30 +242,7 @@ public:
 			const ting::Buffer<ting::u8>& buf,
 			size_t numBytesToWrite = 0, //0 means the whole buffer size
 			size_t offset = 0
-		)
-	{
-		if(!this->IsOpened()){
-			throw File::IllegalStateExc("Cannot write, file is not opened");
-		}
-
-		if(this->ioMode != WRITE){
-			throw File::Exc("file is opened, but not in WRITE mode");
-		}
-
-		size_t actualNumBytesToWrite =
-				numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
-
-		if(offset > buf.Size()){
-			throw File::Exc("offset is out of buffer bounds");
-		}
-
-		if(actualNumBytesToWrite > buf.Size() - offset){
-			throw File::Exc("attempt to write more bytes than passed buffer contains");
-		}
-
-		ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-		return this->WriteInternal(ting::Buffer<ting::u8>(const_cast<ting::u8*>(buf.Begin() + offset), actualNumBytesToWrite));
-	}
+		);
 
 protected:
 	/**
@@ -332,6 +289,7 @@ public:
 	 * If this File instance is a directory then try to create that directory on
 	 * file system. Not all file systems are writable, so not all of them support
 	 * directory creation.
+	 * @throw IllegalStateExc - if file is opened.
 	 */
 	virtual void MakeDir();
 
@@ -340,6 +298,7 @@ public:
 	 * @brief Load the entire file into the RAM.
 	 * @param maxBytesToLoad - maximum bytes to load. Default value is the maximum limit the size_t type can hold.
 	 * @return Array containing loaded file data.
+	 * @throw IllegalStateExc - if file is already opened.
 	 */
 	ting::Array<ting::u8> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
 
