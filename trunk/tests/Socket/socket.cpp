@@ -476,6 +476,38 @@ void Run(){
 
 
 
+namespace TestUDPSocketWaitForWriting{
+
+void Run(){
+
+	ting::net::UDPSocket sendSock;
+
+	try{
+		sendSock.Open();
+
+		ting::WaitSet ws(1);
+		
+		ws.Add(&sendSock, ting::Waitable::READ_AND_WRITE);
+		
+		if(ws.WaitWithTimeout(3000, 0) == 0){
+			//if timeout was hit
+			ASSERT_ALWAYS(false)
+		}else{
+			ASSERT_ALWAYS(sendSock.CanWrite())
+			ASSERT_ALWAYS(!sendSock.CanRead())
+		}
+		
+		ws.Remove(&sendSock);
+	}catch(ting::net::Exc &e){
+		ASSERT_INFO_ALWAYS(false, e.What())
+	}
+
+}
+
+}//~namespace
+
+
+
 namespace TestIPAddress{
 
 void Run(){

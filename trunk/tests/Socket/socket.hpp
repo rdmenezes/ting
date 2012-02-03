@@ -41,3 +41,11 @@ namespace BasicUDPSocketsTest{
 void Run();
 
 }//~namespace
+
+
+
+namespace TestUDPSocketWaitForWriting{
+
+void Run();
+
+}//~namespace

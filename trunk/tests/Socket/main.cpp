@@ -10,14 +10,15 @@ int main(int argc, char *argv[]){
 
 	ting::net::Lib netLib;
 	
+	BasicIPAddressTest::Run();
 	TestIPAddress::Run();
 
 	TestSimpleDNSLookup::Run();
 	TestRequestFromCallback::Run();
-	
-	BasicIPAddressTest::Run();
+		
 	BasicClientServerTest::Run();
 	BasicUDPSocketsTest::Run();
+	TestUDPSocketWaitForWriting::Run();
 	SendDataContinuouslyWithWaitSet::Run();
 	SendDataContinuously::Run();
 
