@@ -60,7 +60,7 @@ STATIC_ASSERT(sizeof(int) == 4)
 
 
 
-template <size_t element_size, size_t num_elements_in_chunk> class MemoryPool{		
+template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPool{		
 	struct BufHolder{
 		u8 buf[element_size];
 	};
