@@ -69,7 +69,9 @@ namespace atomic{
  * Note, that this barrier function should only be used right before or right after
  * one of the atomic operations provided by the 'atomic' namespace.
  * If used in other places, it is not guaranteed that the barrier will actually be set
- * and the behavior will be CPU-architecture dependent.
+ * and the behavior will be CPU-architecture dependent. This is because some CPUs does not
+ * provide explicit operation for setting the memory barrier but, instead, they guarantee
+ * that atomic operations they provide are setting implicit memory barriers.
  */
 inline void MemoryBarrier(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
