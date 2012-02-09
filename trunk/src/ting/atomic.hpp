@@ -98,7 +98,7 @@ inline void MemoryBarrier(){
 #elif M_OS == M_OS_MACOSX
 	//do nothing, hope that Mac OS atomic functions provide memory barriers.
 #else
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 }
 
@@ -130,7 +130,7 @@ class Flag{
 #elif M_OS == M_OS_MACOSX
 	volatile int flag;
 #else
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 
 public:
@@ -149,7 +149,7 @@ public:
 #elif M_OS == M_OS_MACOSX
 		this->flag = initialValue;
 #else
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 
@@ -208,9 +208,9 @@ public:
 
 #elif M_CPU == M_CPU_ARM
 		int old;
- #if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
-  #if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
-   #error "Not implemented"
+	#if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
+		#if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
+			#error "Not implemented"
 		ting::u32 tmp;
 		__asm__ __volatile__(
 				"mrs    %0, PRIMASK" "\n" //save interrupts mask
@@ -222,7 +222,7 @@ public:
 						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
-  #else //Thumb2 or not thumb mode at all
+		#else //Thumb2 or not thumb mode at all
 		int res;
 		__asm__ __volatile__(
 				"1:"                       "\n"
@@ -235,15 +235,15 @@ public:
 						: "cc", "memory" // "cc" stands for "condition codes"
 			);
 
-  #endif
- #else // ARM older than v6
+		#endif
+	#else // ARM older than v6
 		__asm__ __volatile__(
 				"swp %0, %1, [%2]"
 						: "=&r"(old)
 						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
- #endif
+	#endif
 		return old;
 #elif M_OS == M_OS_WIN32
 		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
@@ -256,7 +256,7 @@ public:
 		}
 
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 
@@ -282,7 +282,7 @@ public:
 #elif M_OS == M_OS_MACOSX
 		OSAtomicCompareAndSwap32(true, false, &this->flag);
 #else //unknown cpu architecture, unkown OS, will be using plain mutex
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
@@ -316,7 +316,7 @@ class SpinLock{
 #elif M_OS == M_OS_MACOSX
 	volatile OSSpinLock sl;
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 
 
@@ -336,7 +336,7 @@ public:
 #elif M_OS == M_OS_MACOSX
 		this->sl = 0; // 0 means unlocked state
 #else //unknown cpu architecture, unknown OS, will be using plain mutex
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 
@@ -360,7 +360,7 @@ public:
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockLock(&this->sl);
 #else
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 
@@ -381,7 +381,7 @@ public:
 #elif M_OS == M_OS_MACOSX
 		OSSpinLockUnlock(&this->sl);
 #else
-#error "ASSERT(false)"
+	#error "ASSERT(false)"
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
@@ -520,7 +520,7 @@ public:
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
 		ting::s32 old;
 		int res;
- #if M_CPU_ARM_THUMB == 2
+	#if M_CPU_ARM_THUMB == 2
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
@@ -532,20 +532,20 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to label 3 forward (exit) if succeeded
 				"2:"                         "\n"
-  #if M_CPU_VERSION >= 7                          // CLREX instruction for Thumb-2 is only supported in ARMv7
+		#if M_CPU_VERSION >= 7                          // CLREX instruction for Thumb-2 is only supported in ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
-  #else
+		#else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
-  #endif
+		#endif
 				"3:"                         "\n"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
- #else //non-Thumb 2 mode
-  #if M_CPU_ARM_THUMB != 0
-   #error "ASSERT(false)"
-  #endif
+	#else //non-Thumb 2 mode
+		#if M_CPU_ARM_THUMB != 0
+			#error "ASSERT(false)"
+		#endif
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
@@ -556,17 +556,17 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to exit if succeeded
 				"2:"                         "\n"
-  #if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat it as it is available from ARMv7
+		#if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat it as it is available from ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
-  #else
+		#else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
-  #endif
+		#endif
 				"3:"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
- #endif
+	#endif
 		return old;
 
 #elif M_OS == M_OS_WIN32
