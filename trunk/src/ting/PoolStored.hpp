@@ -191,6 +191,10 @@ public:
 	}
 
 	void Free_ts(void* p){
+		if(p == 0){
+			return;
+		}
+		
 		Lock guard(this->lockFlag);
 		
 		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
