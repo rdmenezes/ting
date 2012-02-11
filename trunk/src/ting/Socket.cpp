@@ -1105,7 +1105,7 @@ Socket::~Socket(){
 
 
 
-void Socket::Close(){
+void Socket::Close() throw(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 	if(this->IsValid()){
 		ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
