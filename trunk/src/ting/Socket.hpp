@@ -672,12 +672,22 @@ private:
 
 
 
+/**
+ * @brief UDP socket class.
+ * Socket for User Datagram Protocol.
+ * NOTE: Win32 specific: when using UDP socket with WaitSet be aware that waiting on UDP socket for writing does not work on Win32 OS.
+ *       On other operating systems it works OK.
+ */
 class UDPSocket : public Socket{
 public:
 	UDPSocket(){}
 
 
-
+	/**
+	 * @brief Copy constructor.
+	 * It works the same way as for copy constructor of TCPSocket.
+	 * @param s - socket to copy from.
+	 */
 	UDPSocket(const UDPSocket& s) :
 			Socket(s)
 	{}
@@ -705,17 +715,11 @@ public:
 	 * In other words, a valid socket is an opened socket.
 	 * In case of errors this method throws net::Exc.
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
-	 *				 If 0 is passed then system will assign some free port if any. If there
+	 *               If 0 is passed then system will assign some free port if any. If there
 	 *               are no free ports, then it is an error and an exception will be thrown.
 	 * This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
 	 */
-	void Open(u16 port);
-
-
-	
-	void Open(){
-		this->Open(0);
-	}
+	void Open(u16 port = 0);
 
 
 
@@ -741,14 +745,14 @@ public:
 	 * Note, that it will always write out the whole datagram at once. I.e. it is either all or nothing.
 	 * Except for the case when the given buffer is not large enough to store the datagram,
 	 * in which case the datagram is truncated to the size of the buffer and the rest of the data is lost.
-     * @param buf - reference to the buffer the received datagram will be stored to. The buffer
+	 * @param buf - reference to the buffer the received datagram will be stored to. The buffer
 	 *              should be large enough to store the whole datagram. If datagram
 	 *              does not fit the passed buffer, then the datagram tail will be truncated
 	 *              and this tail data will be lost.
-     * @param out_SenderIP - reference to the IP-address structure where the IP-address
+	 * @param out_SenderIP - reference to the IP-address structure where the IP-address
 	 *                       of the sender will be stored.
-     * @return number of bytes stored in the output buffer.
-     */
+	 * @return number of bytes stored in the output buffer.
+	 */
 	size_t Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP);
 
 
