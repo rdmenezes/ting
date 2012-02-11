@@ -42,12 +42,6 @@ THE SOFTWARE. */
 		M_CPU == M_CPU_X86_64 || \
 		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
 
-#elif M_OS == M_OS_WIN32
-	#include <windows.h>
-
-#elif M_OS == M_OS_MACOSX
-	#include <libkern/OSAtomic.h>
-
 #else
 	#define M_ATOMIC_USE_MUTEX_FALLBACK
 	#include "Thread.hpp"
@@ -91,12 +85,8 @@ inline void MemoryBarrier(){
 		);
 
 #elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB == 1
-	//do nothing, should be mutex implementation
+	#error "ARM Thumb-1 mode does not support atomic operations"
 
-#elif M_OS == M_OS_WIN32
-	//do nothing, Interlocked* functions provide full memory barrier
-#elif M_OS == M_OS_MACOSX
-	//do nothing, hope that Mac OS atomic functions provide memory barriers.
 #else
 	#error "ASSERT(false)"
 #endif
@@ -125,10 +115,7 @@ class Flag{
 		M_CPU == M_CPU_ARM
 
 	volatile int flag;
-#elif M_OS == M_OS_WIN32
-	volatile LONG flag;
-#elif M_OS == M_OS_MACOSX
-	volatile int flag;
+
 #else
 	#error "ASSERT(false)"
 #endif
@@ -142,12 +129,10 @@ public:
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK) || \
 		M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
-		M_CPU == M_CPU_ARM || \
-		M_OS == M_OS_WIN32
+		M_CPU == M_CPU_ARM
 
 		this->Set(initialValue);
-#elif M_OS == M_OS_MACOSX
-		this->flag = initialValue;
+
 #else
 	#error "ASSERT(false)"
 #endif
@@ -245,17 +230,8 @@ public:
 			);
 	#endif
 		return old;
-#elif M_OS == M_OS_WIN32
-		return InterlockedExchange(&this->flag, value) == 0 ? false : true;
 
-#elif M_OS == M_OS_MACOSX
-		if(value){
-			return !OSAtomicCompareAndSwap32(!value, value, &this->flag);
-		}else{
-			return OSAtomicCompareAndSwap32(!value, value, &this->flag);
-		}
-
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
+#else //unknown cpu architecture, will be using plain mutex
 	#error "ASSERT(false)"
 #endif
 	}
@@ -277,10 +253,7 @@ public:
 		}
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 		this->Set(false);
-#elif M_OS == M_OS_WIN32
-		InterlockedExchange(&this->flag, 0);
-#elif M_OS == M_OS_MACOSX
-		OSAtomicCompareAndSwap32(true, false, &this->flag);
+
 #else //unknown cpu architecture, unkown OS, will be using plain mutex
 	#error "ASSERT(false)"
 #endif
@@ -308,14 +281,11 @@ M_DECLARE_ALIGNED_MSVC(4)
 class SpinLock{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	ting::Mutex mutex;
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
-		M_OS == M_OS_WIN32
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 	atomic::Flag flag;
 
-#elif M_OS == M_OS_MACOSX
-	volatile OSSpinLock sl;
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
+#else //unknown cpu architecture, will be using plain mutex
 	#error "ASSERT(false)"
 #endif
 
@@ -329,13 +299,11 @@ public:
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		//no need to initialize mutex, it is unlocked initially itself.
 
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
-		M_OS == M_OS_WIN32
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 		//initially unlocked.
-#elif M_OS == M_OS_MACOSX
-		this->sl = 0; // 0 means unlocked state
-#else //unknown cpu architecture, unknown OS, will be using plain mutex
+
+#else //unknown cpu architecture, will be using plain mutex
 	#error "ASSERT(false)"
 #endif
 	}
@@ -349,16 +317,13 @@ public:
 	inline void Lock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Lock();
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
-		M_OS == M_OS_WIN32
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 		while(this->flag.Set(true)){
 			while(this->flag.Get()){}
 		}
 		atomic::MemoryBarrier();
 
-#elif M_OS == M_OS_MACOSX
-		OSSpinLockLock(&this->sl);
 #else
 	#error "ASSERT(false)"
 #endif
@@ -373,13 +338,11 @@ public:
 	inline void Unlock(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Unlock();
-#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM || \
-		M_OS == M_OS_WIN32
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 		atomic::MemoryBarrier();
 		this->flag.Clear();
-#elif M_OS == M_OS_MACOSX
-		OSSpinLockUnlock(&this->sl);
+
 #else
 	#error "ASSERT(false)"
 #endif
@@ -401,8 +364,7 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
-		M_OS == M_OS_WIN32 || M_OS == M_OS_MACOSX
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 	//no additional variables required
 #else
@@ -466,13 +428,6 @@ public:
 						: "cc", "memory" //"cc" = "condition codes"
 			);
 		return old;
-
-#elif M_OS == M_OS_WIN32
-		ASSERT(sizeof(LONG) == sizeof(this->v))
-		return InterlockedExchangeAdd(reinterpret_cast<volatile LONG*>(&this->v), LONG(value));
-
-#elif M_OS == M_OS_MACOSX
-		return (OSAtomicAdd32(value, &this->v) - value);
 
 #else
 		this->spinLock.Lock();
@@ -568,33 +523,6 @@ public:
 			);
 	#endif
 		return old;
-
-#elif M_OS == M_OS_WIN32
-		ASSERT(sizeof(LONG) == sizeof(this->v))
-		return InterlockedCompareExchange(reinterpret_cast<volatile LONG*>(&this->v), exchangeBy, compareTo);
-
-#elif M_OS == M_OS_MACOSX
-		for(;;){
-			//No memory barrier is needed, since we don't care when the old
-			//value will be read because we are checking anyway if it is equal
-			//to 'compareTo' before returning.
-			if(OSAtomicCompareAndSwap32(compareTo, exchangeBy, &this->v)){
-				return compareTo; //operation succeeded, return previous value.
-			}else{
-				//The following scenario is still possible:
-				// - The value of this->v was not equal to 'compareTo'. Thus, the atomic
-				//   operation returned false.
-				// - Right after the real value of this->v, in parallel,
-				//   has changed to something which is equal to 'compareTo'.
-				// - Thus, we need to check if we are returning the value which is equal to 'compareTo'
-				//   and prevent it by repeating the procedure again.
-				volatile ting::s32 old = this->v;
-				if(old == compareTo){
-					continue;
-				}
-				return old;
-			}
-		}
 
 #else
 		this->spinLock.Lock();
