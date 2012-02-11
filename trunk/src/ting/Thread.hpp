@@ -468,10 +468,8 @@ public:
  * Message queue is used for communication of separate threads by
  * means of sending messages to each other. Thus, when one thread sends a message to another one,
  * it asks that another thread to execute some code portion - handler code of the message.
- * Each Thread object already contains its own queue object (Thread::queue), but one is free to
- * create his/her own Queue objects when they are needed.
  * NOTE: Queue implements Waitable interface which means that it can be used in conjunction
- * with ting::WaitSet API. But, note, that the implementation of the Waitable is that it
+ * with ting::WaitSet. But, note, that the implementation of the Waitable is that it
  * shall only be used to wait for READ. If you are trying to wait for WRITE the behavior will be
  * undefined.
  */
