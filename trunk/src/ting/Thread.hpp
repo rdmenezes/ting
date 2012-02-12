@@ -338,10 +338,10 @@ public:
 	 * @brief Signal the semaphore.
 	 * Increments the semaphore value.
 	 */
-	inline void Signal(){
+	inline void Signal(){//TODO: make throw()
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #ifdef WIN32
-		if( ReleaseSemaphore(this->s, 1, NULL) == 0 ){
+		if(ReleaseSemaphore(this->s, 1, NULL) == 0){
 			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
 		}
 #elif defined(__SYMBIAN32__)
