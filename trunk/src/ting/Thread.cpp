@@ -409,7 +409,7 @@ Ptr<Message> Queue::GetMsg(){
 			//      The semaphore value actually reflects the number of Messages in
 			//      the queue.
 			this->sem.Wait();
-			Message* ret = this->first;
+			Message* ret = this->first;//TODO: memory leak in case of exception thrown below
 			this->first = this->first->next;
 
 			if(this->first == 0){
@@ -453,7 +453,7 @@ Ptr<Message> Queue::GetMsg(){
 		ASSERT(this->CanRead())
 		ASSERT(this->first)
 		Message* ret = this->first;
-		this->first = this->first->next;
+		this->first = this->first->next;//TODO: memory leak in case of exception thrown below
 
 		if(this->first == 0){
 #if defined(WIN32)
