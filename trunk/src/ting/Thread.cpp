@@ -447,7 +447,7 @@ Ptr<Message> Queue::GetMsg(){
 
 	this->sem.Wait();
 
-	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signalled" << std::endl)
+	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signaled" << std::endl)
 	{
 		Mutex::Guard mutexGuard(this->mut);
 		ASSERT(this->CanRead())
