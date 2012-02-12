@@ -364,7 +364,8 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class S32{
 
-#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
+#if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || \
+	(M_CPU == M_CPU_ARM  && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1)
 
 	//no additional variables required
 #else
