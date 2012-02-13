@@ -79,14 +79,14 @@ try{
 
 = Wait Sets =
 
-note that it is also possible to use wait sets (ting::WaitSet) to check one or more sockets for activity. Using the wait sets is analogous to using the select() function from BSD sockets API.
+note that it is also possible to use wait sets (ting::!WaitSet) to check one or more sockets for activity. Using the wait sets is analogous to using the select() function from BSD sockets API.
 
 First of all, include the wait set header file:
 {{{
 #include <ting/WaitSet.hpp>
 }}}
 
-To use wait set one needs to create the ting::WaitSet object:
+To use wait set one needs to create the ting::!WaitSet object:
 {{{
 //create a wait set for 10 objects at maximum
 ting::WaitSet waitSet(10);
@@ -101,7 +101,7 @@ waitSet.Add(&s2, ting::Waitable::READ);
 waitSet.Add(&s3, ting::Waitable::READ);
 }}}
 
-Now we can check the sockets from socket set for read activity. To do this we use ting::WaitSet::Wait() function. It will return true if there are some sockets with activity or false if there is no any activity on sockets from socket set.
+Now we can check the sockets from socket set for read activity. To do this we use ting::!WaitSet::Wait() function. It will return true if there are some sockets with activity or false if there is no any activity on sockets from socket set.
 {{{
 waitSet.Wait();
 //There are some active sockets.
@@ -111,7 +111,7 @@ waitSet.Wait();
 //... handle socket activity
 }}}
 
-After ting::WaitSet::Wait() returned we can check every socket for activity with ting::net::Socket::CanRead() function:
+After ting::!WaitSet::Wait() returned we can check every socket for activity with ting::net::Socket::!CanRead() function:
 {{{
 if(s1.CanRead()){
     //try to read some data from socket
