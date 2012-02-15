@@ -67,6 +67,8 @@ void Run(){
 
 		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "google.ru")));
 		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "ya.ru")));
+		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "mail.ru")));
+		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "vk.com")));
 		
 //		TRACE(<< "starting resolutions" << std::endl)
 		
