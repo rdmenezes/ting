@@ -337,7 +337,7 @@ void Queue::PushMessage(Ptr<Message> msg) throw(){
 			ASSERT(false)
 		}
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 	}
 
@@ -358,10 +358,9 @@ Ptr<Message> Queue::PeekMsg(){
 		//      The semaphore value actually reflects the number of Messages in
 		//      the queue.
 		this->sem.Wait();
-		Message* ret = this->first;
-		this->first = this->first->next;
 
-		if(this->first == 0){
+		ASSERT(this->first)
+		if(this->first->next == 0){//if we are taking away the last message from the queue
 #if defined(WIN32)
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
@@ -390,6 +389,9 @@ Ptr<Message> Queue::PeekMsg(){
 			ASSERT(this->CanRead())
 		}
 
+		Message* ret = this->first;
+		this->first = this->first->next;
+		
 		return Ptr<Message>(ret);
 	}
 	return Ptr<Message>();
@@ -409,10 +411,10 @@ Ptr<Message> Queue::GetMsg(){
 			//      The semaphore value actually reflects the number of Messages in
 			//      the queue.
 			this->sem.Wait();
-			Message* ret = this->first;//TODO: memory leak in case of exception thrown below
-			this->first = this->first->next;
 
-			if(this->first == 0){
+			ASSERT(this->first)
+			
+			if(this->first->next == 0){//if we are taking away the last message from the queue
 #if defined(WIN32)
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
@@ -438,6 +440,9 @@ Ptr<Message> Queue::GetMsg(){
 			}else{
 				ASSERT(this->CanRead())
 			}
+			
+			Message* ret = this->first;
+			this->first = this->first->next;
 
 			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit without waiting on semaphore" << std::endl)
 			return Ptr<Message>(ret);
@@ -452,10 +457,8 @@ Ptr<Message> Queue::GetMsg(){
 		Mutex::Guard mutexGuard(this->mut);
 		ASSERT(this->CanRead())
 		ASSERT(this->first)
-		Message* ret = this->first;
-		this->first = this->first->next;//TODO: memory leak in case of exception thrown below
 
-		if(this->first == 0){
+		if(this->first->next == 0){//if we are taking away the last message from the queue
 #if defined(WIN32)
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
@@ -481,6 +484,9 @@ Ptr<Message> Queue::GetMsg(){
 		}else{
 			ASSERT(this->CanRead())
 		}
+		
+		Message* ret = this->first;
+		this->first = this->first->next;
 
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit after waiting on semaphore" << std::endl)
 		return Ptr<Message>(ret);
