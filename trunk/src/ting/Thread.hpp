@@ -337,25 +337,32 @@ public:
 	/**
 	 * @brief Signal the semaphore.
 	 * Increments the semaphore value.
+	 * The semaphore value is a 32bit unsigned integer, so it can be a pretty big values.
+	 * But, if the maximum value is reached then subsequent calls to this method
+	 * will not do any incrementing (because the maximum value is reached), i.e. there will
+	 * be no semaphore value warp around to 0 again. Reaching such condition is
+	 * considered as an error condition which, in theory, should never occur in the program.
+	 * Because of that, in the debug mode (DEBUG macro defined) there are assertions to
+	 * detect such a condition.
 	 */
-	inline void Signal(){//TODO: make throw()
+	inline void Signal() throw(){
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #ifdef WIN32
 		if(ReleaseSemaphore(this->s, 1, NULL) == 0){
-			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
+			ASSERT(false)
 		}
 #elif defined(__SYMBIAN32__)
 		this->s.Signal();
 #elif defined(__APPLE__)
 		if(sem_post(this->s) < 0){
-			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
+			ASSERT(false)
 		}
 #elif defined(__linux__)
 		if(sem_post(&this->s) < 0){
-			throw ting::Exc("Semaphore::Post(): releasing semaphore failed");
+			ASSERT(false)
 		}
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 	}
 };//~class Semaphore

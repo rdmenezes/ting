@@ -109,8 +109,9 @@ inline ting::u32 GetTicks(){
 	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
 #elif defined(__linux__)
 	timespec ts;
-	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1)
+	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1){
 		throw ting::Exc("GetTicks(): clock_gettime() returned error");
+	}
 
 	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
 #else
