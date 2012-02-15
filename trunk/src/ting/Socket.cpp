@@ -467,6 +467,7 @@ public:
 				
 				ting::u32 address = ting::Deserialize32BE(p);
 				this->CallCallback(r, ting::net::HostNameResolver::OK, address);
+				TRACE(<< "host resolved: " << r->hostName << " = " << address << std::endl)
 				return;
 			}
 			p += dataLen;

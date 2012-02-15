@@ -10,8 +10,9 @@ class Resolver : public ting::net::HostNameResolver{
 	
 public:
 	
-	Resolver(ting::Semaphore& sema) :
-			sema(sema)
+	Resolver(ting::Semaphore& sema, const std::string& hostName = std::string()) :
+			sema(sema),
+			hostName(hostName)
 	{}
 	
 	ting::u32 ip;
@@ -19,6 +20,12 @@ public:
 	ting::Semaphore& sema;
 	
 	E_Result result;
+	
+	std::string hostName;
+	
+	void Resolve(){
+		this->Resolve_ts(this->hostName, 10000);
+	}
 	
 	//override
 	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
@@ -58,20 +65,17 @@ void Run(){
 		typedef T_ResolverList::iterator T_ResolverIter;
 		T_ResolverList r;
 
-		for(unsigned i = 0; i < 10; ++i){
-			r.push_back(ting::Ptr<Resolver>(
-					new Resolver(sema)
-				));
-		}
+		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "google.ru")));
+		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "ya.ru")));
 		
 //		TRACE(<< "starting resolutions" << std::endl)
 		
 		for(T_ResolverIter i = r.begin(); i != r.end(); ++i){
-			(*i)->Resolve_ts("ya.ru", 5000);
+			(*i)->Resolve();
 		}
 		
 		for(unsigned i = 0; i < r.size(); ++i){
-			if(!sema.Wait(6000)){
+			if(!sema.Wait(11000)){
 				ASSERT_ALWAYS(false)
 			}
 		}
