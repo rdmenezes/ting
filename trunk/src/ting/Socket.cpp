@@ -1108,6 +1108,8 @@ Socket::~Socket(){
 
 void Socket::Close() throw(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
+	ASSERT_INFO(!this->IsAdded(), "Socket::Close(): trying to close socket which is added to the WaitSet. Remove the socket from WaitSet before closing.")
+	
 	if(this->IsValid()){
 		ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
 
