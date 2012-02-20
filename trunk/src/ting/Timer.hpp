@@ -115,7 +115,7 @@ inline ting::u32 GetTicks(){
 
 	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 }
 
@@ -159,11 +159,11 @@ public:
 	 * That means, that one should handle the timer expiration as fast as possible to
 	 * avoid inaccuracy of other timers which have expired at the same time, since
 	 * the longer your expired handler method is executed, the latter expired method of those other timers will be called.
-	 * Do not do any heavy calculations of logics in the expired handler method. Do just
+	 * Do not do any heavy calculations or logics in the expired handler method. Do just
 	 * quick initiation of the action which should be taken on timer expiration,
 	 * for example, post a message to the message queue of another thread to be handled by that another thread.
 	 */
-	virtual void OnExpired() = 0;
+	virtual void OnExpired()throw() = 0;
 
 	/**
 	 * @brief Constructor for new Timer instance.
@@ -173,7 +173,7 @@ public:
 		ASSERT(!this->isRunning)
 	}
 
-	virtual ~Timer();
+	virtual ~Timer()throw();
 
 	/**
 	 * @brief Start timer.
@@ -197,7 +197,7 @@ public:
 	 * @return false if timer was not running already when the Stop() method was called. I.e.
 	 *         the timer has expired already or was not started.
 	 */
-	inline bool Stop();
+	inline bool Stop()throw();
 };
 
 
@@ -250,9 +250,9 @@ class TimerLib : public IntrusiveSingleton<TimerLib>{
 
 		void AddTimer_ts(Timer* timer, u32 timeout);
 
-		bool RemoveTimer_ts(Timer* timer);
+		bool RemoveTimer_ts(Timer* timer)throw();
 
-		inline void SetQuitFlagAndSignalSemaphore(){
+		inline void SetQuitFlagAndSignalSemaphore()throw(){
 			this->quitFlag = true;
 			this->sema.Signal();
 		}
@@ -265,8 +265,12 @@ class TimerLib : public IntrusiveSingleton<TimerLib>{
 	class HalfMaxTicksTimer : public Timer{
 	public:
 		//override
-		void OnExpired(){
-			this->Start(Timer::DMaxTicks() / 2);
+		void OnExpired()throw(){
+			try{
+				this->Start(Timer::DMaxTicks() / 2);
+			}catch(...){
+				ASSERT(false)
+			}
 		}
 	} halfMaxTicksTimer;
 
@@ -283,11 +287,15 @@ public:
 	 * Note, that before destroying the timer library singleton object all the
 	 * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
 	 */
-	~TimerLib(){
+	~TimerLib()throw(){
+		//stop half max ticks timer
+		while(!this->halfMaxTicksTimer.Stop()){
+			ting::Thread::Sleep(10);
+		}
 #ifdef DEBUG
 		{
 			ting::Mutex::Guard mutexGuard(this->thread.mutex);
-			ASSERT(this->thread.timers.size() == 1) // 1 for half max ticks timer
+			ASSERT(this->thread.timers.size() == 0)
 		}
 #endif
 		this->thread.SetQuitFlagAndSignalSemaphore();
@@ -297,11 +305,8 @@ public:
 
 
 
-inline Timer::~Timer(){
-	ASSERT(TimerLib::IsCreated())
-	this->Stop();
-
-	ASSERT(!this->isRunning)
+inline Timer::~Timer()throw(){
+	ASSERT_INFO(!this->isRunning, "trying to destroy running timer. Stop the timer first and make sure its OnExpired() method will not be called, then destroy the timer object.")
 }
 
 
@@ -314,7 +319,7 @@ inline void Timer::Start(ting::u32 millisec){
 
 
 
-inline bool Timer::Stop(){
+inline bool Timer::Stop()throw(){
 	ASSERT(TimerLib::IsCreated())
 	return TimerLib::Inst().thread.RemoveTimer_ts(this);
 }

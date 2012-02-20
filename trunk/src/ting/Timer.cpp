@@ -36,7 +36,7 @@ IntrusiveSingleton<TimerLib>::T_Instance TimerLib::instance;
 
 
 
-bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer){
+bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 

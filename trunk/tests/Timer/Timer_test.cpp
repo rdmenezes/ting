@@ -16,7 +16,7 @@ struct TestTimer1 : public ting::Timer{
 	{}
 
 	//override
-	void OnExpired(){
+	void OnExpired()throw(){
 		TRACE_ALWAYS(<< "\t- timer1 fired!" << std::endl)
 		*this->e = true;
 	}
@@ -28,7 +28,7 @@ struct TestTimer2 : public ting::Timer{
 	TestTimer2(){}
 
 	//override
-	void OnExpired(){
+	void OnExpired()throw(){
 		TRACE_ALWAYS(<< "\t- timer2 fired!" << std::endl)
 
 		this->Start(2500);
@@ -57,6 +57,10 @@ void Run(){
 	}
 
 	ting::Thread::Sleep(50);
+	
+	while(!timer2.Stop()){
+		ting::Thread::Sleep(50);
+	}
 }
 
 }//~namespace
@@ -78,7 +82,7 @@ struct TestTimer : public ting::Timer{
 	}
 
 	//override
-	void OnExpired(){
+	void OnExpired()throw(){
 //		TRACE_ALWAYS(<<"\t- timer fired!"<<std::endl)
 		ting::Mutex::Guard mutexGuard(*this->m);
 		++(*this->e);
@@ -128,7 +132,7 @@ struct TestTimer : public ting::Timer{
 	{}
 
 	//override
-	void OnExpired(){
+	void OnExpired()throw(){
 //		TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
 		*this->e = true;
 	}
