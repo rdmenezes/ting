@@ -87,7 +87,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	inline Buffer(T* bufPtr, size_t bufSize) :
+	inline Buffer(T* bufPtr, size_t bufSize)throw() :
 			buf(bufPtr),
 			size(bufSize)
 	{}
@@ -98,7 +98,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	inline size_t Size()const{
+	inline size_t Size()const throw(){
 		return this->size;
 	}
 
@@ -108,7 +108,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	inline size_t SizeOfElem()const{
+	inline size_t SizeOfElem()const throw(){
 		return sizeof(this->buf[0]);
 	}
 
@@ -118,7 +118,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	inline size_t SizeInBytes()const{
+	inline size_t SizeInBytes()const throw(){
 		return this->Size() * this->SizeOfElem();
 	}
 
@@ -130,7 +130,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline const T& operator[](size_t i)const{
+	inline const T& operator[](size_t i)const throw(){
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -142,7 +142,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline T& operator[](size_t i){
+	inline T& operator[](size_t i)throw(){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -153,7 +153,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	inline T* Begin(){
+	inline T* Begin()throw(){
 		return this->buf;
 	}
 
@@ -163,7 +163,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	inline const T* Begin()const{
+	inline const T* Begin()const throw(){
 		return this->buf;
 	}
 
@@ -173,7 +173,7 @@ public:
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	inline T* End(){
+	inline T* End()throw(){
 		return this->buf + this->size;
 	}
 
@@ -183,7 +183,7 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	inline const T* End()const{
+	inline const T* End()const throw(){
 		return this->buf + this->size;
 	}
 
@@ -195,7 +195,7 @@ public:
      * @return true - if pointer passed as argument points somewhere within the buffer.
 	 * @return false otherwise.
      */
-	inline bool Overlaps(const T* p)const{
+	inline bool Overlaps(const T* p)const throw(){
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 

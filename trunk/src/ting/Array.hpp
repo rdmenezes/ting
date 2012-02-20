@@ -108,13 +108,13 @@ template <class T> class Array : public ting::Buffer<T>{
 		}
 	}
 
-	inline void DestroyObjects(){
+	inline void DestroyObjects()throw(){
 		for(T* p = &this->buf[0]; p != &this->buf[this->size]; ++p){
 			p->~T();
 		}
 	}
 
-	inline void FreeMemory(){
+	inline void FreeMemory()throw(){
 		ting::u8 *buffer = reinterpret_cast<ting::u8*>(this->buf);
 
 		//check for strict aliasing
@@ -125,7 +125,7 @@ template <class T> class Array : public ting::Buffer<T>{
 
 
 
-	inline void Destroy(){
+	inline void Destroy()throw(){
 		this->DestroyObjects();
 		this->FreeMemory();
 	}
@@ -230,7 +230,7 @@ public:
 
 
 
-	~Array(){
+	~Array()throw(){
 		M_ARRAY_PRINT(<< "Array::~Array(): invoked" << std::endl)
 		this->Destroy();
 		M_ARRAY_PRINT(<< "Array::~Array(): exit" << std::endl)
@@ -288,7 +288,7 @@ public:
 	 * @return true - if this Array object holds memory buffer of not zero size.
 	 * @return false - if this Array object does not hold any memory buffer.
 	 */
-	inline bool IsValid()const{
+	inline bool IsValid()const throw(){
 		return this->buf != 0;
 	}
 
@@ -300,7 +300,7 @@ public:
 	 * @return true - if Array is not valid.
 	 * @return false - if Array is valid.
 	 */
-	inline bool IsNotValid()const{
+	inline bool IsNotValid()const throw(){
 		return !this->IsValid();
 	}
 
@@ -314,7 +314,7 @@ public:
 	//Because if using simple "operator bool()" it may result in chained automatic
 	//conversion to undesired types such as int.
 	typedef void (Array::*unspecified_bool_type)();
-	inline operator unspecified_bool_type() const{
+	inline operator unspecified_bool_type()const{
 		return this->IsValid() ? &Array::Reset : 0; //Array::Reset is taken just because it has matching signature
 	}
 
@@ -325,7 +325,7 @@ public:
 	 * Frees memory buffer hold by Array object (if any).
 	 * After that the Array object becomes invalid.
 	 */
-	inline void Reset(){
+	inline void Reset()throw(){
 		this->Destroy();
 		this->buf = 0;
 		this->size = 0;
