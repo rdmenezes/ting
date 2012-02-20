@@ -72,7 +72,7 @@ public:
 
 
 
-	virtual ~Exc()throw(){//use throw() because base class (std::exception) uses it.
+	virtual ~Exc()throw(){
 		delete[] this->msg;
 	}
 
@@ -85,7 +85,7 @@ public:
 	 *         Note, that after the exception object is destroyed
 	 *         the pointer returned by this method become invalid.
 	 */
-	inline const char *What()const{
+	inline const char *What()const throw(){
 		return this->what();
 	}
 
@@ -115,7 +115,7 @@ private:
 	}
 	
 	//override from std::exception
-	const char *what()const throw(){//use throw() because base class (std::exception) uses it.
+	const char *what()const throw(){
 		return this->msg;//this->msg is never 0 (see Exc constructor for more info).
 	}
 };
