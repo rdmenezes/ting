@@ -109,7 +109,7 @@ M_DECLARE_ALIGNED_MSVC(4)
 class Flag{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	ting::Mutex mutex;
-	bool flag;
+	volatile bool flag;
 #elif M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
 		M_CPU == M_CPU_ARM
