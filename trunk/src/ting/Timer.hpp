@@ -74,7 +74,6 @@ THE SOFTWARE. */
 #include "Singleton.hpp"
 #include "Thread.hpp"
 #include "math.hpp"
-#include "Signal.hpp"
 
 
 
