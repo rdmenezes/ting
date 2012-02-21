@@ -691,7 +691,7 @@ public:
 	 * AT LEAST 'msec' milliseconds.
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
-	static void Sleep(unsigned msec = 0) throw(){
+	static void Sleep(unsigned msec = 0)throw(){
 #ifdef WIN32
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif defined(__SYMBIAN32__)

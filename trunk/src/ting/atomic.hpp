@@ -67,7 +67,7 @@ namespace atomic{
  * provide explicit operation for setting the memory barrier but, instead, they guarantee
  * that atomic operations they provide are setting implicit memory barriers.
  */
-inline void MemoryBarrier(){
+inline void MemoryBarrier()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 
@@ -125,7 +125,7 @@ public:
 	 * @brief Constructor.
 	 * @param initialValue - initial value of the flag.
 	 */
-	inline Flag(bool initialValue = false){
+	inline Flag(bool initialValue = false)throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK) || \
 		M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
@@ -146,7 +146,7 @@ public:
 	 * be changed in parallel. It does not set any memory barrier.
 	 * @return current flag value.
 	 */
-	inline bool Get()const{
+	inline bool Get()const throw(){
 #if M_COMPILER == M_COMPILER_MSVC
 		return this->flag == 0 ? false : true; //this is to avoid compiler warning
 #else
@@ -154,6 +154,7 @@ public:
 #endif
 	}
 
+	
 
 	/**
 	 * @brief Set the flag value.
@@ -162,7 +163,7 @@ public:
 	 * @param value - the flag value to set.
 	 * @return old flag value.
 	 */
-	inline bool Set(bool value = true){
+	inline bool Set(bool value = true)throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
 			ting::Mutex::Guard mutexGuard(this->mutex);

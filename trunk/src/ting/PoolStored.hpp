@@ -93,11 +93,11 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 			ASSERT(this->Size() > 1)
 		}
 
-		inline bool IsFull()const{
+		inline bool IsFull()const throw(){
 			return this->numAllocated == this->Size();
 		}
 		
-		inline bool IsEmpty()const{
+		inline bool IsEmpty()const throw(){
 			return this->numAllocated == 0;
 		}
 		
@@ -135,7 +135,7 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 	class Lock{
 		ting::atomic::Flag& flag;
 	public:
-		Lock(ting::atomic::Flag& flag) :
+		Lock(ting::atomic::Flag& flag)throw() :
 				flag(flag)
 		{
 			while(this->flag.Set(true)){
@@ -144,20 +144,16 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 			atomic::MemoryBarrier();
 		}
 		
-		~Lock(){
+		~Lock()throw(){
 			atomic::MemoryBarrier();
 			this->flag.Clear();
 		}
 	};
 	
 public:
-	~MemoryPool(){
+	~MemoryPool()throw(){
 		ASSERT_INFO(this->numChunks == 0, "MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
 	}
-
-private:
-	
-	
 	
 public:
 	void* Alloc_ts(){
@@ -190,7 +186,7 @@ public:
 		return ret;
 	}
 
-	void Free_ts(void* p){
+	void Free_ts(void* p)throw(){
 		if(p == 0){
 			return;
 		}
@@ -254,7 +250,7 @@ public:
 		return instance.Alloc_ts();
 	}
 	
-	static inline void Free_ts(void* p){
+	static inline void Free_ts(void* p)throw(){
 		instance.Free_ts(p);
 	}
 };
@@ -296,7 +292,7 @@ public:
 		return StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Alloc_ts();
 	}
 
-	inline static void operator delete(void *p){
+	inline static void operator delete(void *p)throw(){
 		StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Free_ts(p);
 	}
 
