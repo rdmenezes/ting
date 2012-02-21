@@ -392,7 +392,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAdd(ting::s32 value){
+	inline ting::s32 FetchAndAdd(ting::s32 value)throw(){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		{
@@ -452,7 +452,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return old current value.
 	 */
-	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy){
+	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		ting::s32 old;

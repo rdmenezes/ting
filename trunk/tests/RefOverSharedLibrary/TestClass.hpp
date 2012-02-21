@@ -16,7 +16,7 @@ public:
 	{
 //		TRACE(<< "TestClass(): constructed, this->a = " << this->a << std::endl)
 	}
-	~TestClass(){
+	~TestClass()throw(){
 //		TRACE(<< "~TestClass(): destructed" << std::endl)
 		*this->destroyed = true;
 	}

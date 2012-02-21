@@ -129,7 +129,7 @@ public:
 		return ting::Ref<TestClass>(new TestClass());
 	}
 
-	~TestClass(){
+	~TestClass()throw(){
 		if(this->destroyed){
 			*this->destroyed = true;
 		}
@@ -223,8 +223,7 @@ public:
 
 	TestClass() :
 			destroyed(0)
-	{
-	}
+	{}
 
 	static inline ting::Ref<TestClass> New(){
 		return ting::Ref<TestClass>(new TestClass());
@@ -234,9 +233,10 @@ public:
 		return new TestClass();
 	}
 
-	~TestClass(){
-		if(this->destroyed)
+	~TestClass()throw(){
+		if(this->destroyed){
 			*this->destroyed = true;
+		}
 	}
 };
 
@@ -429,7 +429,7 @@ public:
 			destroyed(destroyed)
 	{}
 
-	~C(){
+	~C()throw(){
 		this->destroyed = true;
 	}
 

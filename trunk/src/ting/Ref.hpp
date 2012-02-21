@@ -113,7 +113,7 @@ private:
 			M_REF_PRINT(<< "Counter::Counter(): counter object created" << std::endl)
 		}
 
-		inline ~Counter(){
+		inline ~Counter()throw(){
 			M_REF_PRINT(<< "Counter::~Counter(): counter object destroyed" << std::endl)
 		}
 		
@@ -123,7 +123,7 @@ private:
 			return RefCounted::memoryPool.Alloc_ts();
 		}
 
-		inline static void operator delete(void *p){
+		inline static void operator delete(void *p)throw(){
 			RefCounted::memoryPool.Free_ts(p);
 		}
 	};
@@ -181,7 +181,7 @@ protected:
 	 *       from the same place where the operator new is used.
 	 * @param p - address of the memory block to release.
 	 */
-	inline static void operator delete(void *p){
+	inline static void operator delete(void *p)throw(){
 		::operator delete(p);
 	}
 
@@ -189,7 +189,7 @@ protected:
 	 * @brief Destructor.
 	 * Destructor is protected because of the same reason as operator delete is.
 	 */
-	virtual ~RefCounted(){
+	virtual ~RefCounted()throw(){
 		//Remove reference to Counter object held by this RefCounted
 		ASSERT(this->counter)
 
@@ -216,7 +216,7 @@ public:
 	 * One should not rely on the returned value unless he knows what he is doing!
 	 * @return number of strong references.
 	 */
-	inline unsigned NumRefs()const{
+	inline unsigned NumRefs()const throw(){
 		ASSERT(this->counter)
 		ting::s32 ret = this->counter->numStrongRefs.FetchAndAdd(0);
 		ASSERT(ret > 0)
@@ -253,7 +253,7 @@ public:
 	 * Performs standard C++ static_cast().
 	 * @return reference to object of casted class.
 	 */
-	template <class TS> inline Ref<TS> StaticCast()const{
+	template <class TS> inline Ref<TS> StaticCast()const throw(){
 		return Ref<TS>(static_cast<TS*>(this->operator->()));
 	}
 
@@ -266,12 +266,13 @@ public:
 	 *         object can be cast to requested class.
 	 * @return invalid reference otherwise, i. e. if the object cannot be cast to requested class.
 	 */
-	template <class TS> inline const Ref<TS> DynamicCast()const{
+	template <class TS> inline const Ref<TS> DynamicCast()const throw(){
 		const TS* t = dynamic_cast<const TS*>(this->operator->());
-		if(t)
+		if(t){
 			return Ref<TS>(const_cast<TS*>(t));
-		else
+		}else{
 			return Ref<TS>();
+		}
 	}
 
 
@@ -287,7 +288,7 @@ public:
 	//auto conversion from 0 to invalid Ref object
 	//i.e. it will be possible to write 'return 0;'
 	//from the function returning Ref
-	inline Ref(int v = 0) :
+	inline Ref(int v = 0)throw() :
 			p(0)
 	{
 		M_REF_PRINT(<< "Ref::Ref(): invoked, p=" << (this->p) << std::endl)
@@ -306,7 +307,7 @@ public:
 	 * @param rc - ordinary pointer to ting::RefCounted object.
 	 */
 	//NOTE: this constructor should be explicit to prevent undesired conversions from T* to Ref<T>
-	explicit inline Ref(T* rc) :
+	explicit inline Ref(T* rc)throw() :
 			p(rc)
 	{
 		M_REF_PRINT(<< "Ref::Ref(rc): invoked, p = " << (this->p) << std::endl)
@@ -329,12 +330,12 @@ public:
 	 * @brief Construct reference from weak reference.
 	 * @param r - weak reference.
 	 */
-	inline Ref(const WeakRef<T> &r);
+	inline Ref(const WeakRef<T> &r)throw();
 
 
 
 private:
-	template <class TS>inline void InitFromStrongRef(const Ref<TS>& r){
+	template <class TS> inline void InitFromStrongRef(const Ref<TS>& r)throw(){
 		this->p = r.p; //should downcast automatically
 		if(this->p){
 			//NOTE: first, static cast to const RefCounted, because even if T is a const type
@@ -354,7 +355,7 @@ public:
 	 * @param r - existing Ref object to make copy of.
 	 */
 	//copy constructor
-	inline Ref(const Ref& r){
+	inline Ref(const Ref& r)throw(){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
 		this->InitFromStrongRef<T>(r);
 	}
@@ -367,7 +368,7 @@ public:
 	 * @param r - strong reference to cast.
 	 */
 	//downcast / to-const cast constructor
-	template <class TS> inline Ref(const Ref<TS>& r){
+	template <class TS> inline Ref(const Ref<TS>& r)throw(){
 		M_REF_PRINT(<< "Ref::Ref(copy): invoked, r.p = " << (r.p) << std::endl)
 		this->InitFromStrongRef<TS>(r);
 	}
@@ -377,7 +378,7 @@ public:
 	/**
 	 * @brief Destructor.
 	 */
-	inline ~Ref(){
+	inline ~Ref()throw(){
 		M_REF_PRINT(<< "Ref::~Ref(): invoked, p = " << (this->p) << std::endl)
 		this->Destroy();
 	}
@@ -390,7 +391,7 @@ public:
 	 * @return false if the reference does not point to any object.
 	 */
 	//returns true if the reference is valid (not 0)
-	inline bool IsValid()const{
+	inline bool IsValid()const throw(){
 		M_REF_PRINT(<<"Ref::IsValid(): invoked, this->p="<<(this->p)<<std::endl)
 		return (this->p != 0);
 	}
@@ -403,7 +404,7 @@ public:
 	 * @return false if reference is pointing to valid object.
 	 * @return true if the reference does not point to any object.
 	 */
-	inline bool IsNotValid()const{
+	inline bool IsNotValid()const throw(){
 		M_REF_PRINT(<<"Ref::IsNotValid(): invoked, this->p="<<(this->p)<<std::endl)
 		return !this->IsValid();
 	}
@@ -416,7 +417,7 @@ public:
 	 * @return true if both references are pointing to the same object or both are invalid.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator==(const Ref<TS>& r)const{
+	template <class TS> inline bool operator==(const Ref<TS>& r)const throw(){
 		return this->p == r.p;
 	}
 
@@ -428,7 +429,7 @@ public:
 	 * @return false if both references are pointing to the same object or both are invalid.
 	 * @return true otherwise.
 	 */
-	template <class TS> inline bool operator!=(const Ref<TS>& r)const{
+	template <class TS> inline bool operator!=(const Ref<TS>& r)const throw(){
 		return !(this->operator==<TS>(r));
 	}
 
@@ -441,7 +442,7 @@ public:
 	 * @return true if the address of this object is less than the address of object referred by 'r'.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator<(const Ref<TS>& r)const{
+	template <class TS> inline bool operator<(const Ref<TS>& r)const throw(){
 		return this->p < r.p;
 	}
 
@@ -454,7 +455,7 @@ public:
 	 * @return true if the address of this object is less or equal to the address of object referred by 'r'.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator<=(const Ref<TS>& r)const{
+	template <class TS> inline bool operator<=(const Ref<TS>& r)const throw(){
 		return this->p <= r.p;
 	}
 
@@ -467,7 +468,7 @@ public:
 	 * @return true if the address of this object is greater than the address of object referred by 'r'.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator>(const Ref<TS>& r)const{
+	template <class TS> inline bool operator>(const Ref<TS>& r)const throw(){
 		return this->p > r.p;
 	}
 
@@ -480,7 +481,7 @@ public:
 	 * @return true if the address of this object is greater or equal to the address of object referred by 'r'.
 	 * @return false otherwise.
 	 */
-	template <class TS> inline bool operator>=(const Ref<TS>& r)const{
+	template <class TS> inline bool operator>=(const Ref<TS>& r)const throw(){
 		return this->p >= r.p;
 	}
 
@@ -491,7 +492,7 @@ public:
 	 * @return true if the reference is invalid.
 	 * @return false if the reference is valid.
 	 */
-	inline bool operator!()const{
+	inline bool operator!()const throw(){
 		return !this->IsValid();
 	}
 
@@ -527,7 +528,7 @@ public:
 	//NOTE: Safe conversion to bool type.
 	//      Because if using simple "operator bool()" it may result in chained automatic
 	//      conversion to undesired types such as int.
-	inline operator unspecified_bool_type() const{
+	inline operator unspecified_bool_type()const throw(){
 		return this->IsValid() ? &Ref::Reset : 0;//Ref::Reset is taken just because it has matching signature
 	}
 
@@ -544,7 +545,7 @@ public:
 	 * Resets this reference making it invalid and destroying the
 	 * object it points to if necessary (if no references to the object left).
 	 */
-	void Reset(){
+	void Reset()throw(){
 		this->Destroy();
 		this->p = 0;
 	}
@@ -559,11 +560,12 @@ public:
 	 * @param r - reference to assign to this reference.
 	 * @return reference to this Ref object.
 	 */
-	Ref& operator=(const Ref& r){
+	Ref& operator=(const Ref& r)throw(){
 		M_REF_PRINT(<< "Ref::operator=(): invoked, p = " << (this->p) << std::endl)
-		if(this == &r)
+		if(this == &r){
 			return *this;//detect self assignment
-
+		}
+		
 		this->Destroy();
 		this->InitFromStrongRef<T>(r);
 		return *this;
@@ -572,13 +574,13 @@ public:
 
 
 	/**
-	 * @brief operator =.
+	 * @brief Assignment operator.
 	 * Assignment operator which also does automatic downcast and const cast if needed.
      * @param r - strong reference to assign from.
      * @return reference to this strong reference object.
      */
 	//downcast / to-const assignment
-	template <class TS> Ref<T>& operator=(const Ref<TS>& r){
+	template <class TS> Ref<T>& operator=(const Ref<TS>& r)throw(){
 		//self-assignment should be impossible
 		ASSERT(reinterpret_cast<const void*>(this) != reinterpret_cast<const void*>(&r))
 
@@ -596,7 +598,7 @@ public:
 	 * weak reference.
 	 * @return weak reference created from this strong reference.
 	 */
-	inline WeakRef<T> GetWeakRef()const{
+	inline WeakRef<T> GetWeakRef()const throw(){
 		return WeakRef<T>(*this);
 	}
 
@@ -609,7 +611,7 @@ public:
      */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
-	inline T& operator*()const{
+	inline T& operator*()const throw(){
 		M_REF_PRINT(<< "Ref::operator*(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator*(): this->p is zero")
 		return static_cast<T&>(*this->p);
@@ -623,7 +625,7 @@ public:
      */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
-	inline T* operator->()const{
+	inline T* operator->()const throw(){
 		M_REF_PRINT(<< "Ref::operator->(): invoked, p = " << (this->p) << std::endl)
 		ASSERT_INFO(this->p, "Ref::operator->(): this->p is zero")
 		return this->p;
@@ -632,7 +634,7 @@ public:
 
 
 private:
-	inline void Destroy(){
+	inline void Destroy()throw(){
 		if(this->IsValid()){
 			ASSERT(this->p->counter)
 			if(this->p->counter->numStrongRefs.FetchAndAdd(-1) == 1){//if there was only one strong ref
@@ -649,11 +651,8 @@ private:
 
 	//Ref objects can only be created on stack
 	//or as a member of other object or array,
-	//thus, make operator-new private.
-	inline static void* operator new(size_t size){
-		ASSERT_ALWAYS(false)//forbidden
-		return 0;
-	}
+	//thus, make "operator new" private.
+	static void* operator new(size_t size);
 };//~class Ref
 
 
@@ -699,7 +698,7 @@ template <class T> class WeakRef{
 
 
 
-	inline void InitFromRefCounted(T *rc){
+	inline void InitFromRefCounted(T *rc)throw(){
 		M_REF_PRINT(<< "WeakRef::InitFromRefCounted(): invoked " << std::endl)
 		if(!rc){
 			this->counter = 0;
@@ -722,7 +721,7 @@ template <class T> class WeakRef{
 
 
 
-	inline void InitFromStrongRef(Ref<T> &r){
+	inline void InitFromStrongRef(Ref<T> &r)throw(){
 		M_REF_PRINT(<< "WeakRef::InitFromStrongRef(): invoked " << std::endl)
 
 		//it is ok if 'r' is not valid, InitFromRefCounted() does check for zero pointer.
@@ -731,7 +730,7 @@ template <class T> class WeakRef{
 
 
 
-	template <class TS> inline void InitFromWeakRef(const WeakRef<TS>& r){
+	template <class TS> inline void InitFromWeakRef(const WeakRef<TS>& r)throw(){
 		M_REF_PRINT(<< "WeakRef::InitFromWeakRef(): invoked " << std::endl)
 		if(r.counter == 0){
 			this->counter = 0;
@@ -754,9 +753,10 @@ template <class T> class WeakRef{
 
 
 
-	inline void Destroy(){
-		if(this->counter == 0)
+	inline void Destroy()throw(){
+		if(this->counter == 0){
 			return;
+		}
 
 		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//if there was only 1 weak reference before decrement
 			ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
@@ -780,7 +780,7 @@ public:
 	 * finished construction.
 	 * @param rc - ordinary pointer to a RefCounted object.
 	 */
-	inline WeakRef(T* rc = 0){
+	inline WeakRef(T* rc = 0)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(T*): invoked" << std::endl)
 		this->InitFromRefCounted(rc);
 	}
@@ -792,7 +792,7 @@ public:
 	 * Creates weak reference from strong reference.
      * @param r
      */
-	inline WeakRef(const Ref<T> &r){
+	inline WeakRef(const Ref<T> &r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const Ref<T>&): invoked" << std::endl)
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
 	}
@@ -803,7 +803,7 @@ public:
 	 * @brief Copy constructor.
      * @param r - weak reference to copy from.
      */
-	inline WeakRef(const WeakRef& r){
+	inline WeakRef(const WeakRef& r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef&): invoked" << std::endl)
 		this->InitFromWeakRef<T>(r);
 	}
@@ -817,7 +817,7 @@ public:
      * @param r - weak reference to copy from.
      */
 	//downcast / to-const cast constructor
-	template <class TS> inline WeakRef(const WeakRef<TS>& r){
+	template <class TS> inline WeakRef(const WeakRef<TS>& r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TS>&): invoked" << std::endl)
 		this->InitFromWeakRef<TS>(r);
 	}
@@ -827,10 +827,10 @@ public:
 	/**
 	 * @brief Get strong reference.
 	 * This is just a convenience method which creates and returns a strong
-	 * reference from this weak reaference.
+	 * reference from this weak reference.
 	 * @return Strong reference created from this weak reference.
 	 */
-	inline Ref<T> GetRef()const{
+	inline Ref<T> GetRef()const throw(){
 		return Ref<T>(*this);
 	}
 
@@ -839,7 +839,7 @@ public:
 	/**
 	 * @brief Destructor.
 	 */
-	inline ~WeakRef(){
+	inline ~WeakRef()throw(){
 		M_REF_PRINT(<< "WeakRef::~WeakRef(): invoked" << std::endl)
 		this->Destroy();
 	}
@@ -849,13 +849,13 @@ public:
 	/**
 	 * @brief operator =.
 	 * Re-initializes this weak reference object by assignment of RefCounted pointer.
-	 * This operator is useful when it is necessary to init some weak reference from
+	 * This operator is useful when it is necessary to initialize some weak reference from
 	 * right within the constructor of RefCounted-derived object, thus it is possible
 	 * to just assign 'this' to the weak reference.
      * @param rc - pointer to RefCounted object.
      * @return reference to this weak reference object.
      */
-	inline WeakRef& operator=(T* rc){
+	inline WeakRef& operator=(T* rc)throw(){
 		ASSERT(rc)
 		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
 
@@ -872,7 +872,7 @@ public:
      * @param r - strong reference to assign from.
      * @return reference to this weak reference object.
      */
-	inline WeakRef& operator=(const Ref<T> &r){
+	inline WeakRef& operator=(const Ref<T> &r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
 		this->Destroy();
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
@@ -882,12 +882,12 @@ public:
 
 
 	/**
-	 * @brief operator =.
+	 * @brief Assignment operator.
 	 * Assign this weak reference from another weak reference.
      * @param r - weak reference to assign from.
      * @return reference to this weak reference object.
      */
-	inline WeakRef& operator=(const WeakRef& r){
+	inline WeakRef& operator=(const WeakRef& r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
 		this->InitFromWeakRef<T>(r);
@@ -903,7 +903,7 @@ public:
      * @param r - weak reference to assign from.
      * @return reference to this weak reference object.
      */
-	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r){
+	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
 		this->InitFromWeakRef<TS>(r);
@@ -917,7 +917,7 @@ public:
 	 * After calling this method the reference becomes invalid, i.e. it
 	 * does not refer to any object.
 	 */
-	inline void Reset(){
+	inline void Reset()throw(){
 		M_REF_PRINT(<< "WeakRef::Reset(): invoked" << std::endl)
 		this->Destroy();
 		this->counter = 0;
@@ -930,23 +930,20 @@ public:
      * @return true if this weak reference is invalid for sure.
 	 * @return false otherwise which means that is is unknown if this weak ref is valid or not.
      */
-	inline bool IsSurelyInvalid()const{
+	inline bool IsSurelyInvalid()const throw(){
 		return this->counter == 0 || this->counter->numStrongRefs.FetchAndAdd(0) == 0;
 	}
 
 
 private:
-	inline static void* operator new(size_t size){
-		ASSERT_ALWAYS(false)//forbidden
-		//WeakRef objects can only be created on stack
-		//or as a member of other object or array
-		return 0;
-	}
+	//WeakRef objects can only be created on stack
+	//or as a member of other object or array
+	static void* operator new(size_t size);
 };//~class WeakRef
 
 
 
-template <class T> inline Ref<T>::Ref(const WeakRef<T> &r){
+template <class T> inline Ref<T>::Ref(const WeakRef<T> &r)throw(){
 	if(r.counter == 0){
 		this->p = 0;
 		return;
