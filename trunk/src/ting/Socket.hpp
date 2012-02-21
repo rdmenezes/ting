@@ -186,7 +186,7 @@ public:
 
 	
 	
-	virtual ~Socket();
+	virtual ~Socket()throw();
 
 
 
@@ -213,7 +213,7 @@ public:
 	/**
 	 * @brief Closes the socket disconnecting it if necessary.
 	 */
-	void Close() throw();
+	void Close()throw();
 
 
 

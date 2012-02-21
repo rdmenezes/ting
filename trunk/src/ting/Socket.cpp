@@ -1100,13 +1100,13 @@ Socket::Socket(const Socket& s) :
 
 
 
-Socket::~Socket(){
+Socket::~Socket()throw(){
 	this->Close();
 }
 
 
 
-void Socket::Close() throw(){
+void Socket::Close()throw(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 	ASSERT_INFO(!this->IsAdded(), "Socket::Close(): trying to close socket which is added to the WaitSet. Remove the socket from WaitSet before closing.")
 	

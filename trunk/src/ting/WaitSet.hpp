@@ -37,20 +37,14 @@ THE SOFTWARE. */
 #include <sstream>
 #include <cerrno>
 
+#include "config.hpp"
 #include "types.hpp"
 #include "debug.hpp"
 #include "Exc.hpp"
 #include "Array.hpp"
 
 
-
-#if defined(__WIN32__) || defined(WIN32)
-#ifndef __WIN32__
-#define __WIN32__
-#endif
-#ifndef WIN32
-#define WIN32
-#endif
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 
 //if _WINSOCKAPI_ macro is not defined then it means that the winsock header file
 //has not been included. Here we temporarily define the macro in order to prevent
@@ -116,7 +110,7 @@ protected:
 
 
 
-	inline bool IsAdded()const{
+	inline bool IsAdded()const throw(){
 		return this->isAdded;
 	}
 
@@ -135,8 +129,9 @@ protected:
 			readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
 	{
 		//cannot copy from waitable which is added to WaitSet
-		if(w.isAdded)
+		if(w.isAdded){
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+		}
 
 		const_cast<Waitable&>(w).ClearAllReadinessFlags();
 		const_cast<Waitable&>(w).userData = 0;
@@ -153,12 +148,14 @@ protected:
 	 */
 	inline Waitable& operator=(const Waitable& w){
 		//cannot copy because this Waitable is added to WaitSet
-		if(this->isAdded)
+		if(this->isAdded){
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy while this Waitable is added to WaitSet");
+		}
 
 		//cannot copy from waitable which is adde to WaitSet
-		if(w.isAdded)
+		if(w.isAdded){
 			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+		}
 
 		ASSERT(!this->isAdded)
 
@@ -178,7 +175,7 @@ protected:
 		this->readinessFlags |= READ;
 	}
 
-	inline void ClearCanReadFlag(){
+	inline void ClearCanReadFlag()throw(){
 		this->readinessFlags &= (~READ);
 	}
 
@@ -186,24 +183,24 @@ protected:
 		this->readinessFlags |= WRITE;
 	}
 
-	inline void ClearCanWriteFlag(){
+	inline void ClearCanWriteFlag()throw(){
 		this->readinessFlags &= (~WRITE);
 	}
 
-	inline void SetErrorFlag(){
+	inline void SetErrorFlag()throw(){
 		this->readinessFlags |= ERROR_CONDITION;
 	}
 
-	inline void ClearErrorFlag(){
+	inline void ClearErrorFlag()throw(){
 		this->readinessFlags &= (~ERROR_CONDITION);
 	}
 
-	inline void ClearAllReadinessFlags(){
+	inline void ClearAllReadinessFlags()throw(){
 		this->readinessFlags = NOT_READY;
 	}
 
 public:
-	virtual ~Waitable(){
+	virtual ~Waitable()throw(){
 		ASSERT(!this->isAdded)
 	}
 
@@ -219,7 +216,7 @@ public:
 	 * @brief Check if "Can write" flag is set.
 	 * @return true if Waitable is ready for writing.
 	 */
-	inline bool CanWrite()const{
+	inline bool CanWrite()const throw(){
 		return (this->readinessFlags & WRITE) != 0;
 	}
 
@@ -227,7 +224,7 @@ public:
 	 * @brief Check if "error" flag is set.
 	 * @return true if Waitable is in error state.
 	 */
-	inline bool ErrorCondition()const{
+	inline bool ErrorCondition()const throw(){
 		return (this->readinessFlags & ERROR_CONDITION) != 0;
 	}
 
@@ -237,7 +234,7 @@ public:
 	 * @return pointer to the user data.
 	 * @return zero pointer if the user data was not set.
 	 */
-	inline void* GetUserData(){
+	inline void* GetUserData()throw(){
 		return this->userData;
 	}
 
@@ -246,11 +243,11 @@ public:
 	 * See description of GetUserData() for more details.
 	 * @param data - pointer to the user data to associate with this Waitable.
 	 */
-	inline void SetUserData(void* data){
+	inline void SetUserData(void* data)throw(){
 		this->userData = data;
 	}
 
-#ifdef __WIN32__
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 protected:
 	virtual HANDLE GetHandle() = 0;
 
@@ -270,7 +267,7 @@ protected:
 
 
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 
 };//~class Waitable
@@ -286,7 +283,7 @@ class WaitSet{
 	const unsigned size;
 	ting::Inited<unsigned, 0> numWaitables;//number of Waitables added
 
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	Array<Waitable*> waitables;
 	Array<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
 
@@ -345,13 +342,14 @@ public:
 	 */
 	WaitSet(unsigned maxSize) :
 			size(maxSize)
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 			,waitables(maxSize)
 			,handles(maxSize)
 	{
 		ASSERT_INFO(maxSize <= MAXIMUM_WAIT_OBJECTS, "maxSize should be less than " << MAXIMUM_WAIT_OBJECTS)
-		if(maxSize > MAXIMUM_WAIT_OBJECTS)
+		if(maxSize > MAXIMUM_WAIT_OBJECTS){
 			throw ting::Exc("WaitSet::WaitSet(): requested WaitSet size is too big");
+		}
 	}
 
 #elif defined(__linux__)
@@ -384,17 +382,17 @@ public:
 	 * It is user's responsibility to remove any waitable objects from the waitset
 	 * before the wait set object is destroyed.
 	 */
-	~WaitSet(){
+	~WaitSet()throw(){
 		//assert the wait set is empty
 		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 		//do nothing
 #elif defined(__linux__)
 		close(this->epollSet);
 #elif defined(__APPLE__)
 		close(this->kq_queue);
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 	}
 
@@ -404,7 +402,7 @@ public:
 	 * @brief Get maximum size of the wait set.
 	 * @return maximum number of Waitables this WaitSet can hold.
 	 */
-	inline unsigned Size()const{
+	inline unsigned Size()const throw(){
 		return this->size;
 	}
 
@@ -412,7 +410,7 @@ public:
 	 * @brief Get number of Waitables already added to this WaitSet.
 	 * @return number of Waitables added to this WaitSet.
 	 */
-	inline unsigned NumWaitables()const{
+	inline unsigned NumWaitables()const throw(){
 		return this->numWaitables;
 	}
 
@@ -445,7 +443,7 @@ public:
 	 * @throw ting::Exc - in case the given Waitable is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	void Remove(Waitable* w);
+	void Remove(Waitable* w)throw();
 
 
 

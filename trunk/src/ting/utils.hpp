@@ -84,7 +84,7 @@ namespace ting{
  * @param v - reference to the value which top is to be clamped.
  * @param top - value to clamp the top to.
  */
-template <class T> inline void ClampTop(T& v, const T top){
+template <class T> inline void ClampTop(T& v, const T top)throw(){
 	if(v > top){
 		v = top;
 	}
@@ -97,7 +97,7 @@ template <class T> inline void ClampTop(T& v, const T top){
  * @param v - reference to the value which bottom is to be clamped.
  * @param bottom - value to clamp the bottom to.
  */
-template <class T> inline void ClampBottom(T& v, const T bottom){
+template <class T> inline void ClampBottom(T& v, const T bottom)throw(){
 	if(v < bottom){
 		v = bottom;
 	}
@@ -111,7 +111,7 @@ template <class T> inline void ClampBottom(T& v, const T bottom){
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16LE(u16 value, u8* out_buf){
+inline void Serialize16LE(u16 value, u8* out_buf)throw(){
 	out_buf[0] = value & 0xff;
 	out_buf[1] = value >> 8;
 }
@@ -124,7 +124,7 @@ inline void Serialize16LE(u16 value, u8* out_buf){
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32LE(u32 value, u8* out_buf){
+inline void Serialize32LE(u32 value, u8* out_buf)throw(){
 	*out_buf = u8(value & 0xff);
 	++out_buf;
 	*out_buf = u8((value >> 8) & 0xff);
@@ -143,7 +143,7 @@ inline void Serialize32LE(u32 value, u8* out_buf){
  * @param buf - pointer to buffer containing 2 bytes to convert from little-endian format.
  * @return 16 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u16 Deserialize16LE(const u8* buf){
+inline u16 Deserialize16LE(const u8* buf)throw(){
 	u16 ret;
 
 	//assume little-endian
@@ -163,7 +163,7 @@ inline u16 Deserialize16LE(const u8* buf){
  * @param buf - pointer to buffer containing 4 bytes to convert from little-endian format.
  * @return 32 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u32 Deserialize32LE(const u8* buf){
+inline u32 Deserialize32LE(const u8* buf)throw(){
 	u32 ret;
 
 	//assume little-endian
@@ -186,7 +186,7 @@ inline u32 Deserialize32LE(const u8* buf){
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16BE(u16 value, u8* out_buf){
+inline void Serialize16BE(u16 value, u8* out_buf)throw(){
 	out_buf[0] = value >> 8;
 	out_buf[1] = value & 0xff;
 }
@@ -199,7 +199,7 @@ inline void Serialize16BE(u16 value, u8* out_buf){
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32BE(u32 value, u8* out_buf){
+inline void Serialize32BE(u32 value, u8* out_buf)throw(){
 	*out_buf = u8((value >> 24) & 0xff);
 	++out_buf;
 	*out_buf = u8((value >> 16) & 0xff);
@@ -218,7 +218,7 @@ inline void Serialize32BE(u32 value, u8* out_buf){
  * @param buf - pointer to buffer containing 2 bytes to convert from big-endian format.
  * @return 16 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline u16 Deserialize16BE(const u8* buf){
+inline u16 Deserialize16BE(const u8* buf)throw(){
 	u16 ret;
 
 	//assume big-endian
@@ -238,7 +238,7 @@ inline u16 Deserialize16BE(const u8* buf){
  * @param buf - pointer to buffer containing 4 bytes to convert from big-endian format.
  * @return 32 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline u32 Deserialize32BE(const u8* buf){
+inline u32 Deserialize32BE(const u8* buf)throw(){
 	u32 ret;
 
 	//assume big-endian

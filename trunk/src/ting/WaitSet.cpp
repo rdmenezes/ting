@@ -38,10 +38,11 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	ASSERT(!w->isAdded)
 
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	ASSERT(this->numWaitables <= this->handles.Size())
-	if(this->numWaitables == this->handles.Size())
+	if(this->numWaitables == this->handles.Size()){
 		throw ting::Exc("WaitSet::Add(): wait set is full");
+	}
 
 	//NOTE: Setting wait flags may throw an exception, so do that before
 	//adding object to the array and incrementing number of added objects.
@@ -64,8 +65,9 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 			w->GetHandle(),
 			&e
 		);
-	if(res < 0)
+	if(res < 0){
 		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
+	}
 #elif defined(__APPLE__)
 	if(u32(flagsToWaitFor) & Waitable::READ){
 		AddEvent(w, EVENT_READ);
@@ -75,7 +77,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		AddEvent(w, EVENT_WRITE);
 	}
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 
 	++this->numWaitables;
@@ -91,7 +93,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	ASSERT(w->isAdded)
 
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	//check if the Waitable object is added to this wait set
 	{
 		unsigned i;
@@ -123,8 +125,9 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 			w->GetHandle(),
 			&e
 		);
-	if(res < 0)
+	if(res < 0){
 		throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
+	}
 #elif defined(__APPLE__)
 	if(u32(flagsToWaitFor) & Waitable::READ){
 		AddEvent(w, EVENT_READ);
@@ -134,28 +137,28 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		AddEvent(w, EVENT_WRITE);
 	}
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 }
 
 
 
-void WaitSet::Remove(Waitable* w){
+void WaitSet::Remove(Waitable* w)throw(){
 	ASSERT(w)
 
 	ASSERT(w->isAdded)
 
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	//remove object from array
 	{
 		unsigned i;
 		for(i = 0; i < this->numWaitables; ++i){
-			if(this->waitables[i] == w)
+			if(this->waitables[i] == w){
 				break;
+			}
 		}
 		ASSERT(i <= this->numWaitables)
-		if(i == this->numWaitables)
-			throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
+		ASSERT_INFO(i != this->numWaitables, "WaitSet::Remove(): Waitable is not added to wait set")
 
 		unsigned numObjects = this->numWaitables - 1;//decrease number of objects before shifting the object handles in the array
 		//shift object handles in the array
@@ -175,13 +178,14 @@ void WaitSet::Remove(Waitable* w){
 			w->GetHandle(),
 			0
 		);
-	if(res < 0)
-		throw ting::Exc("WaitSet::Remove(): epoll_ctl() failed");
+	if(res < 0){
+		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
+	}
 #elif defined(__APPLE__)
 		RemoveEvent(w, EVENT_READ);
 		RemoveEvent(w, EVENT_WRITE);
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 
 	--this->numWaitables;
@@ -203,7 +207,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}
 	}
 
-#if defined(__WIN32__)
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	DWORD waitTimeout = waitInfinitly ? (INFINITE) : DWORD(timeout);
 
 	DWORD res = WaitForMultipleObjectsEx(
@@ -352,6 +356,6 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}
 	}
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 }

@@ -125,7 +125,7 @@ public:
 	 * @brief Constructor.
 	 * @param initialValue - initial value of the flag.
 	 */
-	inline Flag(bool initialValue = false)throw(){
+	inline Flag(bool initialValue = false){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK) || \
 		M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
@@ -245,7 +245,7 @@ public:
 	 * its implementation can be faster.
 	 * It does not set any memory barrier.
 	 */
-	inline void Clear(){
+	inline void Clear()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
 			//still need to lock the mutex to generate the memory barrier.
@@ -315,7 +315,7 @@ public:
 	 * @brief Lock the spinlock.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
-	inline void Lock(){
+	inline void Lock()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Lock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
@@ -336,7 +336,7 @@ public:
 	 * @brief Unlock the spinlock.
 	 * Right before releasing the lock the memory barrier is set.
 	 */
-	inline void Unlock(){
+	inline void Unlock()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Unlock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
