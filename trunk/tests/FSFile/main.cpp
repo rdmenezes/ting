@@ -9,7 +9,7 @@ using namespace ting;
 
 namespace TestSeekForward{
 void Run(){
-	ting::FSFile f("test.file.txt");
+	ting::fs::FSFile f("test.file.txt");
 	ASSERT_ALWAYS(!f.IsDir())
 	ASSERT_ALWAYS(!f.IsOpened())
 	
@@ -18,7 +18,7 @@ void Run(){
 		{
 			ting::Array<ting::u8> buf(numToSeek);
 			
-			ting::File::Guard fileGuard(f, ting::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 			
 			unsigned res = f.Read(buf);
 			ASSERT_ALWAYS(res == buf.Size())
@@ -30,7 +30,7 @@ void Run(){
 		}
 		
 		{
-			ting::File::Guard fileGuard(f, ting::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 
 			f.File::SeekForward(numToSeek);
 
@@ -43,7 +43,7 @@ void Run(){
 		}
 
 		{
-			ting::File::Guard fileGuard(f, ting::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 
 			f.SeekForward(numToSeek);
 
@@ -62,8 +62,8 @@ void Run(){
 
 namespace TestListDirContents{
 void Run(){
-	ting::FSFile curDir("./");
-	ting::File& f = curDir;
+	ting::fs::FSFile curDir("./");
+	ting::fs::File& f = curDir;
 	
 	ting::Array<std::string> r = f.ListDirContents();
 	ASSERT_ALWAYS(r.Size() >= 3)
@@ -84,7 +84,7 @@ void Run(){
 
 namespace TestHomeDir{
 void Run(){
-	std::string hd = FSFile::GetHomeDir();
+	std::string hd = ting::fs::FSFile::GetHomeDir();
 	
 	ASSERT_ALWAYS(hd.size() > 1) //There is always a trailing '/' character, so make sure there is something else besides that.
 	ASSERT_ALWAYS(hd[hd.size() - 1] == '/')
@@ -97,7 +97,7 @@ void Run(){
 
 namespace TestLoadWholeFileToMemory{
 void Run(){
-	ting::FSFile f("test.file.txt");
+	ting::fs::FSFile f("test.file.txt");
 	ASSERT_ALWAYS(!f.IsDir())
 	ASSERT_ALWAYS(!f.IsOpened())
 	

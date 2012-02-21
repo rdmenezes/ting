@@ -39,6 +39,7 @@ THE SOFTWARE. */
 
 
 namespace ting{
+namespace fs{
 
 
 
@@ -167,4 +168,5 @@ public:
 
 
 
+}//~namespace
 }//~namespace

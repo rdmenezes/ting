@@ -31,7 +31,7 @@ THE SOFTWARE. */
 
 
 
-using namespace ting;
+using namespace ting::fs;
 
 
 

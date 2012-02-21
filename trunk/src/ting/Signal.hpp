@@ -32,7 +32,8 @@ THE SOFTWARE. */
 
 #pragma once
 
-#include <vector>
+#include <list>
+
 #include "codegen.h"
 #include "Ref.hpp"
 #include "Thread.hpp"

@@ -613,7 +613,7 @@ private:
 			}
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-			ting::FSFile f("/etc/resolv.conf");
+			ting::fs::FSFile f("/etc/resolv.conf");
 			
 			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
 			
