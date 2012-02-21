@@ -242,7 +242,7 @@ class TimerLib : public IntrusiveSingleton<TimerLib>{
 			ASSERT(!this->quitFlag)
 		}
 
-		~TimerThread(){
+		~TimerThread()throw(){
 			//at the time of TimerLib destroying there should be no active timers
 			ASSERT(this->timers.size() == 0)
 		}

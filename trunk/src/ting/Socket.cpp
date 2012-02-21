@@ -491,7 +491,7 @@ private:
 		this->socket.Open();
 	}
 public:
-	~LookupThread(){
+	~LookupThread()throw(){
 		ASSERT(this->sendList.size() == 0)
 		ASSERT(this->resolversMap.size() == 0)
 		ASSERT(this->resolversByTime1.size() == 0)

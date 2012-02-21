@@ -51,14 +51,18 @@ Mutex::Mutex(){
 
 
 
-Mutex::~Mutex(){
+Mutex::~Mutex()throw(){
 	M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
 #ifdef WIN32
 	DeleteCriticalSection(&this->m);
 #elif defined(__SYMBIAN32__)
 	this->m.Close();
 #elif defined(__linux__) || defined(__APPLE__)
-	int ret = pthread_mutex_destroy(&this->m);
+	#ifdef DEBUG
+	int ret =
+	#endif
+	pthread_mutex_destroy(&this->m);
+	#ifdef DEBUG
 	if(ret != 0){
 		std::stringstream ss;
 		ss << "Mutex::~Mutex(): pthread_mutex_destroy() failed"
@@ -68,8 +72,9 @@ Mutex::~Mutex(){
 		}
 		ASSERT_INFO_ALWAYS(false, ss.str())
 	}
+	#endif
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 }
 
@@ -111,7 +116,7 @@ Semaphore::Semaphore(unsigned initialValue){
 
 
 
-Semaphore::~Semaphore(){
+Semaphore::~Semaphore()throw(){
 #ifdef WIN32
 	CloseHandle(this->s);
 #elif defined(__SYMBIAN32__)
@@ -121,7 +126,7 @@ Semaphore::~Semaphore(){
 #elif defined(__linux__)
 	sem_destroy(&this->s);
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 }
 
@@ -223,13 +228,13 @@ CondVar::CondVar(){
 
 
 
-CondVar::~CondVar(){
+CondVar::~CondVar()throw(){
 #if defined(WIN32) || defined(__SYMBIAN32__)
 	//do nothing
 #elif defined(__linux__) || defined(__APPLE__)
-pthread_cond_destroy(&this->cond);
+	pthread_cond_destroy(&this->cond);
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 }
 
@@ -271,7 +276,7 @@ Queue::Queue(){
 
 
 
-Queue::~Queue(){
+Queue::~Queue()throw(){
 	//destroy messages which are currently on the queue
 	{
 		Mutex::Guard mutexGuard(this->mut);
@@ -282,7 +287,9 @@ Queue::~Queue(){
 			//use Ptr to kill messages instead of "delete msg;" because
 			//the messages are passed to PushMessage() as Ptr, and thus, it is better
 			//to use Ptr to delete them.
-			{Ptr<Message> killer(msg);}
+			{
+				Ptr<Message> killer(msg);
+			}
 
 			msg = nextMsg;
 		}
@@ -295,13 +302,13 @@ Queue::~Queue(){
 #elif defined(__linux__)
 	close(this->eventFD);
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 }
 
 
 
-void Queue::PushMessage(Ptr<Message> msg) throw(){
+void Queue::PushMessage(Ptr<Message> msg)throw(){
 	ASSERT(msg.IsValid())
 	Mutex::Guard mutexGuard(this->mut);
 	if(this->first){
@@ -639,7 +646,7 @@ Thread::Thread(){
 
 
 
-Thread::~Thread(){
+Thread::~Thread()throw(){
 	ASSERT_INFO(
 			this->state == JOINED || this->state == NEW,
 			"~Thread() destructor is called while the thread was not joined before. "

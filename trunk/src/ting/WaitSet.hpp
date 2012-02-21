@@ -174,7 +174,7 @@ protected:
 
 
 
-	inline void SetCanReadFlag(){
+	inline void SetCanReadFlag()throw(){
 		this->readinessFlags |= READ;
 	}
 
@@ -182,7 +182,7 @@ protected:
 		this->readinessFlags &= (~READ);
 	}
 
-	inline void SetCanWriteFlag(){
+	inline void SetCanWriteFlag()throw(){
 		this->readinessFlags |= WRITE;
 	}
 
@@ -211,7 +211,7 @@ public:
 	 * @brief Check if "Can read" flag is set.
 	 * @return true if Waitable is ready for reading.
 	 */
-	inline bool CanRead()const{
+	inline bool CanRead()const throw(){
 		return (this->readinessFlags & READ) != 0;
 	}
 

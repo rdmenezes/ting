@@ -165,7 +165,7 @@ public:
 	 */
 	Mutex();
 
-	~Mutex();
+	~Mutex()throw();
 
 
 	/**
@@ -174,7 +174,7 @@ public:
 	 * attempting to acquire the lock on the same mutex will wait until the
 	 * mutex lock will be released with Mutex::Unlock().
 	 */
-	inline void Lock(){
+	inline void Lock()throw(){
 		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #ifdef WIN32
 		EnterCriticalSection(&this->m);
@@ -183,7 +183,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_lock(&this->m);
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 	}
 
@@ -192,7 +192,7 @@ public:
 	/**
 	 * @brief Release mutex lock.
 	 */
-	inline void Unlock(){
+	inline void Unlock()throw(){
 		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #ifdef WIN32
 		LeaveCriticalSection(&this->m);
@@ -201,7 +201,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_unlock(&this->m);
 #else
-#error "unknown system"
+	#error "unknown system"
 #endif
 	}
 
@@ -221,12 +221,12 @@ public:
 		Guard(const Guard& );
 		Guard& operator=(const Guard& );
 	public:
-		Guard(Mutex &m):
+		Guard(Mutex &m)throw() :
 				mutex(m)
 		{
 			this->mutex.Lock();
 		}
-		~Guard(){
+		~Guard()throw(){
 			this->mutex.Unlock();
 		}
 	};//~class Guard
@@ -270,7 +270,7 @@ public:
 	 */
 	Semaphore(unsigned initialValue = 0);
 
-	~Semaphore();
+	~Semaphore()throw();
 
 	
 	/**
@@ -345,7 +345,7 @@ public:
 	 * Because of that, in the debug mode (DEBUG macro defined) there are assertions to
 	 * detect such a condition.
 	 */
-	inline void Signal() throw(){
+	inline void Signal()throw(){
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #ifdef WIN32
 		if(ReleaseSemaphore(this->s, 1, NULL) == 0){
@@ -391,7 +391,7 @@ public:
 
 	CondVar();
 
-	~CondVar();
+	~CondVar()throw();
 
 	void Wait(Mutex& mutex){
 #if defined(WIN32) || defined(__SYMBIAN32__)
@@ -419,7 +419,7 @@ public:
 #endif
 	}
 
-	void Notify(){
+	void Notify()throw(){
 #if defined(WIN32) || defined(__SYMBIAN32__)
 		this->cvMutex.Lock();
 
@@ -453,12 +453,12 @@ class Message{
 	Message *next;//pointer to the next message in a single-linked list
 
 protected:
-	Message() :
+	Message()throw() :
 			next(0)
 	{}
 
 public:
-	virtual ~Message(){}
+	virtual ~Message()throw(){}
 
 	/**
 	 * @brief message handler function.
@@ -516,7 +516,7 @@ public:
 	 * @brief Destructor.
 	 * When called, it also destroys all messages on the queue.
 	 */
-	~Queue();
+	~Queue()throw();
 
 
 
@@ -524,7 +524,7 @@ public:
 	 * @brief Pushes a new message to the queue.
 	 * @param msg - the message to push into the queue.
 	 */
-	void PushMessage(Ptr<Message> msg) throw();
+	void PushMessage(Ptr<Message> msg)throw();
 
 
 
@@ -649,7 +649,7 @@ public:
 	Thread();
 	
 	
-	virtual ~Thread();
+	virtual ~Thread()throw();
 
 
 
@@ -680,7 +680,7 @@ public:
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
 	 */
-	void Join() throw();
+	void Join()throw();
 
 
 
@@ -709,7 +709,7 @@ public:
 			usleep(msec * 1000);
 		}
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 	}
 
@@ -732,7 +732,7 @@ public:
 	 * created.
 	 * @return unique thread identifier.
 	 */
-	static inline T_ThreadID GetCurrentThreadID(){
+	static inline T_ThreadID GetCurrentThreadID()throw(){
 #ifdef WIN32
 		return T_ThreadID(GetCurrentThreadId());
 #elif defined(__APPLE__) || defined(__linux__)
@@ -740,7 +740,7 @@ public:
 		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(T_ThreadID))
 		return T_ThreadID(t);
 #else
-#error "Unsupported OS"
+	#error "Unsupported OS"
 #endif
 	}
 };
@@ -789,7 +789,7 @@ public:
 	 * @brief Send preallocated 'Quit' message to thread's queue.
 	 * This function throws no exceptions. It can send the quit message only once.
 	 */
-	void PushPreallocatedQuitMessage() throw();
+	void PushPreallocatedQuitMessage()throw();
 	
 	
 	
@@ -811,7 +811,7 @@ public:
 	 * @brief Send a message to thread's queue.
 	 * @param msg - a message to send.
 	 */
-	inline void PushMessage(Ptr<ting::Message> msg){
+	inline void PushMessage(Ptr<ting::Message> msg)throw(){
 		this->queue.PushMessage(msg);
 	}
 };
