@@ -105,7 +105,7 @@ void FSFile::Open(EMode mode){
 
 
 //override
-void FSFile::Close(){
+void FSFile::Close()throw(){
 	if(!this->IsOpened()){
 		return;
 	}

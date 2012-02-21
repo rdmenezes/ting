@@ -56,13 +56,15 @@ std::string File::ExtractExtension()const{
 
 
 
-bool File::IsDir()const{
-	if(this->Path().size() == 0)
+bool File::IsDir()const throw(){
+	if(this->Path().size() == 0){
 		return true;
+	}
 
 	ASSERT(this->Path().size() > 0)
-	if(this->Path()[this->Path().size() - 1] == '/')
+	if(this->Path()[this->Path().size() - 1] == '/'){
 		return true;
+	}
 
 	return false;
 }
@@ -253,11 +255,13 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 
 
 bool File::Exists()const{
-	if(this->IsDir())
+	if(this->IsDir()){
 		throw File::Exc("File::Exists(): Checking for directory existence is not supported");
+	}
 
-	if(this->IsOpened())
+	if(this->IsOpened()){
 		return true;
+	}
 
 	//try opening and closing the file to find out if it exists or not
 	ASSERT(!this->IsOpened())

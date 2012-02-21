@@ -114,7 +114,7 @@ public:
 	 * The file shall be closed upon the object destruction, all the implementations should
 	 * assure that.
 	 */
-	virtual ~File(){
+	virtual ~File()throw(){
 		ASSERT(!this->IsOpened())
 	}
 
@@ -134,7 +134,7 @@ public:
 	 * @brief Get the current path being held by this File instance.
 	 * @return The path this File instance holds.
 	 */
-	inline const std::string& Path()const{
+	inline const std::string& Path()const throw(){
 		return this->path;
 	}
 
@@ -164,14 +164,14 @@ public:
 	/**
 	 * @brief Close file.
 	 */
-	virtual void Close() = 0;
+	virtual void Close()throw() = 0;
 
 	/**
 	 * @brief Check if the file is opened.
 	 * @return true - if the file is opened.
 	 * @return false - otherwise.
 	 */
-	inline bool IsOpened()const{
+	inline bool IsOpened()const throw(){
 		return this->isOpened;
 	}
 
@@ -184,7 +184,7 @@ public:
 	 * @return true - if current path points to a directory.
 	 * @return false - otherwise.
 	 */
-	bool IsDir()const;
+	bool IsDir()const throw();
 
 	/**
 	 * @brief Get list of files and subdirectories of a directory.

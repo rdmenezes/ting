@@ -70,7 +70,7 @@ public:
 	 * @brief Destructor.
 	 * This destructor calls the Close() method.
 	 */
-	~FSFile(){
+	~FSFile()throw(){
 		this->Close();
 	}
 
@@ -87,11 +87,11 @@ public:
 
 	/**
 	 * @brief Get current root directory.
-	 * Returns the current rot directory. See description of SetRootDir() method
+	 * Returns the current root directory. See description of SetRootDir() method
 	 * for more details.
      * @return Current root directory.
      */
-	inline std::string GetRootDir()const{
+	inline const std::string& GetRootDir()const throw(){
 		return this->rootDir;
 	}
 
@@ -102,7 +102,7 @@ public:
 
 
 	//override
-	virtual void Close();
+	virtual void Close()throw();
 
 
 
