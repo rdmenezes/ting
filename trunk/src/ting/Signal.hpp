@@ -382,7 +382,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 M_TEMPLATE(n) class Signal##n{ \
 	class SlotLink{ \
 	public: \
-		virtual ~SlotLink(){} \
+		virtual ~SlotLink()throw(){} \
 		virtual bool Execute(M_FUNC_PARAMS_FULL(n)) = 0; \
 		virtual bool IsAlive()const throw(){ \
 			return true; \
