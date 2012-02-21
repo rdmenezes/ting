@@ -5,6 +5,7 @@
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/Array.hpp"
 #include "../../src/ting/config.hpp"
+#include "../../src/ting/util.hpp"
 
 #include "socket.hpp"
 
@@ -149,9 +150,9 @@ void Run(){
 	unsigned recvBufBytes = 0;
 
 
-	ting::u32 startTime = ting::GetTicks();
+	ting::u32 startTime = ting::timer::GetTicks();
 	
-	while(ting::GetTicks() - startTime < 5000){ //5 seconds
+	while(ting::timer::GetTicks() - startTime < 5000){ //5 seconds
 		ting::StaticBuffer<ting::Waitable*, 2> triggered;
 
 		unsigned numTriggered = ws.WaitWithTimeout(1000, &triggered);
@@ -198,7 +199,7 @@ void Run(){
 					ting::u8* p = sendBuffer.Begin();
 					for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
 						ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
-						ting::Serialize32LE(scnt, p);
+						ting::util::Serialize32LE(scnt, p);
 						++scnt;
 					}
 					ASSERT_ALWAYS(p == sendBuffer.End())
@@ -251,7 +252,7 @@ void Run(){
 
 						if(recvBufBytes == recvBuffer.Size()){
 							recvBufBytes = 0;
-							ting::u32 num = ting::Deserialize32LE(recvBuffer.Begin());
+							ting::u32 num = ting::util::Deserialize32LE(recvBuffer.Begin());
 							ASSERT_INFO_ALWAYS(
 									rcnt == num,
 									"num = " << num << " rcnt = " << rcnt
@@ -312,9 +313,9 @@ void Run(){
 	ting::u8 rcnt = 0;
 
 
-	ting::u32 startTime = ting::GetTicks();
+	ting::u32 startTime = ting::timer::GetTicks();
 
-	while(ting::GetTicks() - startTime < 5000){ //5 seconds
+	while(ting::timer::GetTicks() - startTime < 5000){ //5 seconds
 
 		//SEND
 

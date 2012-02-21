@@ -56,6 +56,7 @@ THE SOFTWARE. */
 
 
 namespace ting{
+namespace util{
 
 
 
@@ -255,5 +256,5 @@ inline u32 Deserialize32BE(const u8* buf)throw(){
 
 
 
+}//~namespace
 }//~namespace ting
-

@@ -28,15 +28,15 @@ THE SOFTWARE. */
 
 
 
-using namespace ting;
+using namespace ting::timer;
 
 
 
-IntrusiveSingleton<TimerLib>::T_Instance TimerLib::instance;
+ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 
 
-bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
+bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
@@ -63,12 +63,12 @@ bool TimerLib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 
 
 
-void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
+void Lib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
 	if(timer->isRunning){
-		throw ting::Exc("TimerLib::TimerThread::AddTimer(): timer is already running!");
+		throw ting::Exc("Lib::TimerThread::AddTimer(): timer is already running!");
 	}
 
 	timer->isRunning = true;
@@ -76,7 +76,7 @@ void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
 
 	timer->i = this->timers.insert(
-			std::pair<ting::u64, ting::Timer*>(stopTicks, timer)
+			std::pair<ting::u64, Timer*>(stopTicks, timer)
 		);
 
 	ASSERT(timer->i != this->timers.end())
@@ -89,8 +89,8 @@ void TimerLib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
 
 
 //override
-void TimerLib::TimerThread::Run(){
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): enter" << std::endl)
+void Lib::TimerThread::Run(){
+	M_TIMER_TRACE(<< "Lib::TimerThread::Run(): enter" << std::endl)
 
 	while(!this->quitFlag){
 		ting::u32 millis;
@@ -145,5 +145,5 @@ void TimerLib::TimerThread::Run(){
 		this->sema.Wait(millis);
 	}//~while(!this->quitFlag)
 
-	M_TIMER_TRACE(<< "TimerLib::TimerThread::Run(): exit" << std::endl)
+	M_TIMER_TRACE(<< "Lib::TimerThread::Run(): exit" << std::endl)
 }//~Run()

@@ -78,7 +78,7 @@ THE SOFTWARE. */
 
 
 namespace ting{
-
+namespace timer{
 
 
 /**
@@ -128,7 +128,7 @@ inline ting::u32 GetTicks(){
  * description of ting::TimerLib class for details.
  */
 class Timer{
-	friend class TimerLib;
+	friend class Lib;
 
 	//This constant is for testing purposes.
 	//Should be set to ting::u32(-1) in release.
@@ -208,11 +208,11 @@ public:
  * the timer library, this is done just by creating the singleton object of
  * the timer library class.
  */
-class TimerLib : public IntrusiveSingleton<TimerLib>{
-	friend class IntrusiveSingleton<TimerLib>;
-	static IntrusiveSingleton<TimerLib>::T_Instance instance;
+class Lib : public IntrusiveSingleton<Lib>{
+	friend class IntrusiveSingleton<Lib>;
+	static IntrusiveSingleton<Lib>::T_Instance instance;
 	
-	friend class ting::Timer;
+	friend class ting::timer::Timer;
 
 	class TimerThread : public ting::Thread{
 	public:
@@ -274,7 +274,7 @@ class TimerLib : public IntrusiveSingleton<TimerLib>{
 	} halfMaxTicksTimer;
 
 public:
-	inline TimerLib(){
+	inline Lib(){
 		this->thread.Start();
 
 		//start timer for half of the max ticks
@@ -286,7 +286,7 @@ public:
 	 * Note, that before destroying the timer library singleton object all the
 	 * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
 	 */
-	~TimerLib()throw(){
+	~Lib()throw(){
 		//stop half max ticks timer
 		while(!this->halfMaxTicksTimer.Stop()){
 			ting::Thread::Sleep(10);
@@ -311,22 +311,22 @@ inline Timer::~Timer()throw(){
 
 
 inline void Timer::Start(ting::u32 millisec){
-	ASSERT_INFO(TimerLib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
+	ASSERT_INFO(Lib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
-	TimerLib::Inst().thread.AddTimer_ts(this, millisec);
+	Lib::Inst().thread.AddTimer_ts(this, millisec);
 }
 
 
 
 inline bool Timer::Stop()throw(){
-	ASSERT(TimerLib::IsCreated())
-	return TimerLib::Inst().thread.RemoveTimer_ts(this);
+	ASSERT(Lib::IsCreated())
+	return Lib::Inst().thread.RemoveTimer_ts(this);
 }
 
 
 
-inline ting::u64 TimerLib::TimerThread::GetTicks(){
-	ting::u32 ticks = ting::GetTicks() % Timer::DMaxTicks();
+inline ting::u64 Lib::TimerThread::GetTicks(){
+	ting::u32 ticks = ting::timer::GetTicks() % Timer::DMaxTicks();
 
 	if(this->incTicks){
 		if(ticks < Timer::DMaxTicks() / 2){
@@ -344,4 +344,5 @@ inline ting::u64 TimerLib::TimerThread::GetTicks(){
 
 
 
+}//~namespace
 }//~namespace

@@ -31,6 +31,7 @@ THE SOFTWARE. */
 #include "PoolStored.hpp"
 #include "Timer.hpp"
 #include "FSFile.hpp"
+#include "util.hpp"
 
 #include "Socket.hpp"
 
@@ -203,27 +204,27 @@ public:
 		ting::u8* p = buf.Begin();
 		
 		//ID
-		ting::Serialize16BE(r->id, p);
+		ting::util::Serialize16BE(r->id, p);
 		p += 2;
 		
 		//flags
-		ting::Serialize16BE(0x100, p);
+		ting::util::Serialize16BE(0x100, p);
 		p += 2;
 		
 		//Number of questions
-		ting::Serialize16BE(1, p);
+		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
 		//Number of answers
-		ting::Serialize16BE(0, p);
+		ting::util::Serialize16BE(0, p);
 		p += 2;
 		
 		//Number of authority records
-		ting::Serialize16BE(0, p);
+		ting::util::Serialize16BE(0, p);
 		p += 2;
 		
 		//Number of other records
-		ting::Serialize16BE(0, p);
+		ting::util::Serialize16BE(0, p);
 		p += 2;
 		
 		//domain name
@@ -253,11 +254,11 @@ public:
 		++p;
 		
 		//Question type (1 means A query)
-		ting::Serialize16BE(1, p);
+		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
 		//Question class (1 means inet)
-		ting::Serialize16BE(1, p);
+		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
 		ASSERT(buf.Begin() <= p && p <= buf.End());
@@ -315,7 +316,7 @@ public:
 		p += 2;//skip ID
 		
 		{
-			ting::u16 flags = ting::Deserialize16BE(p);
+			ting::u16 flags = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
@@ -338,7 +339,7 @@ public:
 		}
 		
 		{//check number of questions
-			ting::u16 numQuestions = ting::Deserialize16BE(p);
+			ting::u16 numQuestions = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(numQuestions != 1){
@@ -347,7 +348,7 @@ public:
 			}
 		}
 		
-		ting::u16 numAnswers = ting::Deserialize16BE(p);
+		ting::u16 numAnswers = ting::util::Deserialize16BE(p);
 		p += 2;
 		ASSERT(buf.Begin() <= p)
 		ASSERT(p <= (buf.End() - 1) || p == buf.End())
@@ -358,12 +359,12 @@ public:
 		}
 		
 		{
-//			ting::u16 nscount = ting::Deserialize16BE(p);
+//			ting::u16 nscount = ting::util::Deserialize16BE(p);
 			p += 2;
 		}
 		
 		{
-//			ting::u16 arcount = ting::Deserialize16BE(p);
+//			ting::u16 arcount = ting::util::Deserialize16BE(p);
 			p += 2;
 		}
 		
@@ -381,7 +382,7 @@ public:
 		
 		//check query type, we sent question type 1 (A query).
 		{
-			ting::u16 type = ting::Deserialize16BE(p);
+			ting::u16 type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(type != 1){
@@ -392,7 +393,7 @@ public:
 		
 		//check query class, we sent question class 1 (inet).
 		{
-			ting::u16 cls = ting::Deserialize16BE(p);
+			ting::u16 cls = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(cls != 1){
@@ -431,28 +432,28 @@ public:
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-			ting::u16 type = ting::Deserialize16BE(p);
+			ting::u16 type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < 2){
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-//			ting::u16 cls = ting::Deserialize16(p);
+//			ting::u16 cls = ting::util::Deserialize16(p);
 			p += 2;
 			
 			if(buf.End() - p < 4){
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-//			ting::u32 ttl = ting::Deserialize32(p);//time till the returned value can be cached.
+//			ting::u32 ttl = ting::util::Deserialize32(p);//time till the returned value can be cached.
 			p += 4;
 			
 			if(buf.End() - p < 2){
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-			ting::u16 dataLen = ting::Deserialize16BE(p);
+			ting::u16 dataLen = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < dataLen){
@@ -465,7 +466,7 @@ public:
 					return;
 				}
 				
-				ting::u32 address = ting::Deserialize32BE(p);
+				ting::u32 address = ting::util::Deserialize32BE(p);
 				this->CallCallback(r, ting::net::HostNameResolver::OK, address);
 				TRACE(<< "host resolved: " << r->hostName << " = " << address << std::endl)
 				return;
@@ -699,7 +700,7 @@ private:
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.Size())
 						if(ret >= 13){//at least there should be standard header and host name, otherwise ignore received UDP packet
-							ting::u16 id = ting::Deserialize16BE(buf.Begin());
+							ting::u16 id = ting::util::Deserialize16BE(buf.Begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
@@ -772,7 +773,7 @@ private:
 					}
 				}
 				
-				ting::u32 curTime = ting::GetTicks();
+				ting::u32 curTime = ting::timer::GetTicks();
 				{//check if time has warped around and it is necessary to swap time maps
 					bool isFirstHalf = curTime < (ting::u32(-1) / 2);
 					if(isFirstHalf && !this->lastTicksInFirstHalf){
@@ -820,14 +821,14 @@ private:
 			}
 			
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
-			ting::ClampTop(timeout, ting::u32(-1) / 4);
+			ting::util::ClampTop(timeout, ting::u32(-1) / 4);
 			
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just check every 100ms if it is OK to write to UDP socket.
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 			if(this->sendList.size() > 0){
-				ting::ClampTop(timeout, ting::u32(100));
+				ting::util::ClampTop(timeout, ting::u32(100));
 			}
 #endif
 			
@@ -952,7 +953,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	}
 	
 	//calculate time
-	ting::u32 curTime = ting::GetTicks();
+	ting::u32 curTime = ting::timer::GetTicks();
 	{
 		ting::u32 endTime = curTime + timeoutMillis;
 //		TRACE(<< "HostNameResolver::Resolve_ts(): curTime = " << curTime << std::endl)

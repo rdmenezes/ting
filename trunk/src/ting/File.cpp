@@ -27,7 +27,7 @@ THE SOFTWARE. */
 #include <list>
 
 #include "File.hpp"
-#include "utils.hpp"
+#include "util.hpp"
 
 
 
@@ -144,7 +144,7 @@ void File::SeekForward(size_t numBytesToSeek){
 	
 	for(size_t bytesRead = 0; bytesRead != numBytesToSeek;){
 		size_t curNumToRead = numBytesToSeek - bytesRead;
-		ting::ClampTop(curNumToRead, buf.Size());
+		ting::util::ClampTop(curNumToRead, buf.Size());
 		size_t res = this->Read(buf, curNumToRead);
 		if(res != curNumToRead){//if end of file reached
 			throw ting::Exc("File::SeekForward(): end of file reached, seeking did not complete");
@@ -211,7 +211,7 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 		ASSERT(maxBytesToLoad > bytesRead)
 		
 		size_t numBytesToRead = maxBytesToLoad - bytesRead;
-		ting::ClampTop(numBytesToRead, chunks.back().Size());
+		ting::util::ClampTop(numBytesToRead, chunks.back().Size());
 		
 		res = this->Read(chunks.back(), numBytesToRead);
 

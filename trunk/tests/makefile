@@ -14,7 +14,7 @@ subdirs += Socket
 subdirs += Thread
 subdirs += Timer
 subdirs += types
-subdirs += utils
+subdirs += util
 subdirs += WaitSet
 
 

@@ -8,7 +8,7 @@
 
 namespace BasicTimerTest{
 
-struct TestTimer1 : public ting::Timer{
+struct TestTimer1 : public ting::timer::Timer{
 	volatile bool *e;
 
 	TestTimer1(volatile bool* exitFlag) :
@@ -24,7 +24,7 @@ struct TestTimer1 : public ting::Timer{
 
 
 
-struct TestTimer2 : public ting::Timer{
+struct TestTimer2 : public ting::timer::Timer{
 	TestTimer2(){}
 
 	//override
@@ -69,7 +69,7 @@ void Run(){
 
 namespace SeveralTimersForTheSameInterval{
 
-struct TestTimer : public ting::Timer{
+struct TestTimer : public ting::timer::Timer{
 	unsigned *e;
 	ting::Mutex* m;
 
@@ -124,7 +124,7 @@ void Run(){
 
 namespace StoppingTimers{
 
-struct TestTimer : public ting::Timer{
+struct TestTimer : public ting::timer::Timer{
 	bool *e;
 
 	TestTimer(bool* exitFlag) :
@@ -184,7 +184,7 @@ void Run(){
 
 int main(int argc, char *argv[]){
 //	TRACE_ALWAYS(<< "Timer test " << std::endl)
-	ting::TimerLib timerLib;
+	ting::timer::Lib timerLib;
 
 	BasicTimerTest::Run();
 	SeveralTimersForTheSameInterval::Run();

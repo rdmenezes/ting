@@ -39,7 +39,6 @@ THE SOFTWARE. */
 
 #include "debug.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 #include "Thread.hpp"
 #include "Exc.hpp"
 #include "Array.hpp"
