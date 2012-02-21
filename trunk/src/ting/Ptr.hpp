@@ -55,7 +55,7 @@ template <class T> class Ptr{
 
 	T* p;
 public:
-	explicit inline Ptr(T* ptr = 0) :
+	explicit inline Ptr(T* ptr = 0)throw() :
 			p(ptr)
 	{}
 
@@ -72,38 +72,38 @@ public:
 	 * @param ptr - pointer to copy.
 	 */
 	//const copy constructor
-	inline Ptr(const Ptr& ptr){
+	inline Ptr(const Ptr& ptr)throw(){
 		M_PTR_PRINT(<< "Ptr::Ptr(copy): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
 	}
 
-	template <class TS> inline Ptr(const Ptr<TS>& ptr){
+	template <class TS> inline Ptr(const Ptr<TS>& ptr)throw(){
 		M_PTR_PRINT(<< "Ptr::Ptr(conversion): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr<TS>&>(ptr).p = 0;
 	}
 
-	inline ~Ptr(){
+	inline ~Ptr()throw(){
 		this->Destroy();
 	}
 
-	inline T* operator->(){
+	inline T* operator->()throw(){
 		ASSERT_INFO(this->p, "Ptr::operator->(): this->p is zero")
 		return this->p;
 	}
 
-	inline T* operator->()const{
+	inline T* operator->()const throw(){
 		ASSERT_INFO(this->p, "const Ptr::operator->(): this->p is zero")
 		return this->p;
 	}
 
-	inline T& operator*(){
+	inline T& operator*()throw(){
 		ASSERT_INFO(this->p, "Ptr::operator*(): this->p is zero")
 		return *(this->operator->());
 	}
 
-	inline T& operator*()const{
+	inline T& operator*()const throw(){
 		ASSERT_INFO(this->p, "const Ptr::operator*(): this->p is zero")
 		return *(this->operator->());
 	}
@@ -119,7 +119,7 @@ public:
 	 * Thus, no memory leak occurs.
 	 * @param ptr - pointer to assign from.
 	 */
-	inline Ptr& operator=(const Ptr& ptr){
+	inline Ptr& operator=(const Ptr& ptr)throw(){
 		M_PTR_PRINT(<< "Ptr::operator=(Ptr&): enter, this->p = " << (this->p) << std::endl)
 		this->Destroy();
 		this->p = ptr.p;
@@ -128,7 +128,7 @@ public:
 		return (*this);
 	}
 
-	template <class TS> inline Ptr& operator=(const Ptr<TS>& ptr){
+	template <class TS> inline Ptr& operator=(const Ptr<TS>& ptr)throw(){
 		M_PTR_PRINT(<< "Ptr::operator=(conversion): enter, this->p = " << (this->p) << std::endl)
 		this->Destroy();
 		this->p = ptr.p;
@@ -137,15 +137,15 @@ public:
 		return (*this);
 	}
 
-	inline bool operator==(const T* ptr)const{
+	inline bool operator==(const T* ptr)const throw(){
 		return this->p == ptr;
 	}
 
-	inline bool operator!=(const T* ptr)const{
+	inline bool operator!=(const T* ptr)const throw(){
 		return !this->operator==(ptr);
 	}
 
-	inline bool operator!()const{
+	inline bool operator!()const throw(){
 		return this->IsNotValid();
 	}
 
@@ -155,7 +155,7 @@ public:
 	//Because if using simple "operator bool()" it may result in chained automatic
 	//conversion to undesired types such as int.
 	typedef void (Ptr::*unspecified_bool_type)();
-	inline operator unspecified_bool_type() const{
+	inline operator unspecified_bool_type()const throw(){
 		return this->IsValid() ? &Ptr::Reset : 0; //Ptr::Reset is taken just because it has matching signature
 	}
 
@@ -173,7 +173,7 @@ public:
 	 * at this point.
 	 * @return pointer to object previously owned by that Ptr instance.
 	 */
-	inline T* Extract(){
+	inline T* Extract()throw(){
 		T* pp = this->p;
 		this->p = 0;
 		return pp;
@@ -184,7 +184,7 @@ public:
 	 * This will destroy the object this pointer points to if any.
 	 * After that the pointer becomes invalid.
 	 */
-	inline void Reset(){
+	inline void Reset()throw(){
 		this->Destroy();
 		this->p = 0;
 	}
@@ -194,7 +194,7 @@ public:
 	 * @return true if pointer is valid and holding some object.
 	 * @return false otherwise.
 	 */
-	inline bool IsValid()const{
+	inline bool IsValid()const throw(){
 		return this->p != 0;
 	}
 
@@ -203,7 +203,7 @@ public:
 	 * @return false if object is valid.
 	 * @return true otherwise.
 	 */
-	inline bool IsNotValid()const{
+	inline bool IsNotValid()const throw(){
 		return !this->IsValid();
 	}
 
@@ -215,19 +215,19 @@ public:
 	 * will cause double 'delete' when both Ptr instances go out of scope.
 	 * @return pointer to casted class.
 	 */
-	template <class TS> inline TS* StaticCast(){
+	template <class TS> inline TS* StaticCast()throw(){
 		return static_cast<TS*>(this->operator->());
 	}
 
 private:
-	inline void Destroy(){
+	inline void Destroy()throw(){
 		M_PTR_PRINT(<< "Ptr::~Ptr(): delete invoked, this->p = " << this->p << std::endl)
 		delete this->p;
 	}
 
-	inline void* operator new(size_t);
+	void* operator new(size_t);
 
-	inline void operator delete(void*);
+	void operator delete(void*);
 };
 
 }//~namespace ting
