@@ -8,7 +8,7 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := ../../src/libting.a
+    libs :=
     remove := del /Q /F 
 endif
 ifeq ($(platform),darwin)
@@ -16,7 +16,7 @@ ifeq ($(platform),darwin)
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := ../../src/libting.so
+    libs :=
     remove := rm -rf
 endif
 
@@ -39,9 +39,11 @@ else
 	@LD_LIBRARY_PATH=../../src ./$^
 endif
 
-$(binary_name): main.cpp
+include ../libting.mk
+
+$(binary_name): main.cpp $(libting)
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+	@g++ -o $@ $(cf) $< $(libs) $(libting)
 
 
 

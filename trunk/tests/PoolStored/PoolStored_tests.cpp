@@ -4,7 +4,11 @@
 #include "../../src/ting/PoolStored.hpp"
 #include "../../src/ting/Ptr.hpp"
 
+#include "PoolStored_tests.hpp"
 
+
+
+namespace BasicPoolStoredTest{
 
 class TestClass : public ting::PoolStored<TestClass, 13>{
 public:
@@ -19,9 +23,7 @@ public:
 };
 
 
-int main(int argc, char *argv[]){
-//	TRACE(<< "PoolStored test" << std::endl)
-
+void Run(){
 	std::vector<ting::Ptr<TestClass> > vec;
 
 	for(unsigned i = 0; i < 10000; ++i){
@@ -33,8 +35,6 @@ int main(int argc, char *argv[]){
 	while(vec.size() != 0){
 		vec.pop_back();
 	}
-
-	TRACE_ALWAYS(<< "[PASSED]: PoolStored test" << std::endl)
-
-	return 0;
 }
+
+}//~namespace

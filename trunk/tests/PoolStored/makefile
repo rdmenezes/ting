@@ -1,6 +1,6 @@
 platform := linux
 
-binary_name := PoolStored_test
+binary_name := tests
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -8,7 +8,7 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := ../../src/libting.a
+    libs :=
     remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
@@ -16,7 +16,7 @@ ifeq ($(platform),darwin)
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := ../../src/libting.so -lpthread
+    libs := -lpthread
     remove := rm -rf
 endif
 
@@ -40,10 +40,11 @@ else
 	@LD_LIBRARY_PATH=../../src ./$^
 endif
 
+include ../libting.mk
 
-$(binary_name): PoolStored_test.cpp
+$(binary_name): main.cpp PoolStored_tests.cpp $(libting)
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+	g++ -o $@ $(cf) $^ $(libs)
 
 
 
