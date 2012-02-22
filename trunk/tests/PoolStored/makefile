@@ -2,6 +2,10 @@ platform := linux
 
 binary_name := tests
 
+default: $(binary_name)
+
+
+
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
 endif
@@ -29,8 +33,6 @@ cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 cf += -g
-
-default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
