@@ -25,7 +25,7 @@
 #include <ting/Thread.hpp>
 #include <ting/Timer.hpp>
 #include <ting/types.hpp>
-#include <ting/utils.hpp>
+#include <ting/util.hpp>
 #include <ting/WaitSet.hpp>
 
 
@@ -175,7 +175,7 @@ public:
 		return ting::Ref<TestClass>(new TestClass());
 	}
 
-	~TestClass(){
+	~TestClass()throw(){
 		if(this->destroyed){
 			*this->destroyed = true;
 		}
@@ -280,7 +280,7 @@ public:
 		return new TestClass();
 	}
 
-	~TestClass(){
+	~TestClass()throw(){
 		if(this->destroyed)
 			*this->destroyed = true;
 	}
@@ -475,7 +475,7 @@ public:
 			destroyed(destroyed)
 	{}
 
-	~C(){
+	~C()throw(){
 		this->destroyed = true;
 	}
 
@@ -915,21 +915,21 @@ void android_main(struct android_app* state) {
 	
 	TRACE_ALWAYS(<< "STARTING!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl)
 
-	ting::TimerLib timerLib;
+	ting::timer::Lib timerLib;
 	
-	ASSERT_ALWAYS(ting::TimerLib::IsCreated())
+	ASSERT_ALWAYS(ting::timer::Lib::IsCreated())
 	
 	ting::Mutex testMutex;
 
 	ting::WaitSet testWaitset(3);
 
-	ting::FSFile testFSFile("testfile.txt");
+	ting::fs::FSFile testFSFile("testfile.txt");
 
 
-	ting::TCPSocket testSocket;
+	ting::net::TCPSocket testSocket;
 	
 	try{
-		testSocket.Open(ting::IPAddress("127.0.0.1", 80));
+		testSocket.Open(ting::net::IPAddress("127.0.0.1", 80));
 	}catch(std::exception& e){
 		TRACE_ALWAYS(<< "exception caught: " << e.what() << std::endl)
 	}
