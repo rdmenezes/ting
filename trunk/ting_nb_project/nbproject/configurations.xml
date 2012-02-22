@@ -85,7 +85,7 @@
         <in>debug.hpp</in>
         <in>math.hpp</in>
         <in>types.hpp</in>
-        <in>utils.hpp</in>
+        <in>util.hpp</in>
       </df>
     </df>
     <df name="tests" root="/home/ivan/prj/ting/tests">
@@ -147,8 +147,10 @@
       <df name="types">
         <in>main.cpp</in>
       </df>
-      <df name="utils">
-        <in>utils_test.cpp</in>
+      <df name="util">
+        <in>main.cpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
       </df>
       <df name="WaitSet">
         <in>WaitSet_test.cpp</in>
@@ -213,11 +215,6 @@
             flavor="0">
       </item>
       <item path="/home/ivan/prj/ting/src/ting/math.hpp"
-            ex="true"
-            tool="3"
-            flavor="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/utils.hpp"
             ex="true"
             tool="3"
             flavor="0">
@@ -303,11 +300,6 @@
             flavor="0">
       </item>
       <item path="/home/ivan/prj/ting/tests/math/math_test.cpp"
-            ex="true"
-            tool="1"
-            flavor="0">
-      </item>
-      <item path="/home/ivan/prj/ting/tests/utils/utils_test.cpp"
             ex="true"
             tool="1"
             flavor="0">

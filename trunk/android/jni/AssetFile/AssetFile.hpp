@@ -48,9 +48,9 @@ namespace ting_android{
 
 /**
  * @brief Android assets implementation of File interface.
- * Implementation of a ting::File interface for Android assets file system.
+ * Implementation of a ting::fs::File interface for Android assets file system.
  */
-class AssetFile : public ting::File{
+class AssetFile : public ting::fs::File{
 	AAssetManager* manager;
 	
 	ting::Inited<AAsset*, 0> handle;

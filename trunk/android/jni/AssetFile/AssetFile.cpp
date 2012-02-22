@@ -47,17 +47,19 @@ using namespace ting_android;
 
 //override
 void AssetFile::Open(EMode mode){
-	if(this->IsOpened())
+	if(this->IsOpened()){
 		throw File::Exc("file already opened");
+	}
 
-	if(this->IsDir())
+	if(this->IsDir()){
 		throw File::Exc("path refers to a directory, directories can't be opened");
+	}
 	
 
 	switch(mode){
 		case File::WRITE:
 		case File::CREATE:
-			throw ting::File::Exc("WRITE and CREATE open modes are not supported by Android assets");
+			throw File::Exc("WRITE and CREATE open modes are not supported by Android assets");
 			break;
 		case File::READ:
 			break;
@@ -115,7 +117,7 @@ size_t AssetFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
 
 
 void AssetFile::Seek(size_t numBytesToSeek, bool seekForward){
-		if(!this->IsOpened()){
+	if(!this->IsOpened()){
 		throw File::Exc("file is not opened, cannot seek");
 	}
 
@@ -185,11 +187,13 @@ void AssetFile::Rewind(){
 
 //override
 bool AssetFile::Exists()const{
-	if(this->IsOpened()) //file is opened => it exists
+	if(this->IsOpened()){ //file is opened => it exists
 		return true;
+	}
 	
-	if(this->Path().size() == 0)
+	if(this->Path().size() == 0){
 		return false;
+	}
 
 	if(this->IsDir()){
 		//try opening the directory to check its existence
@@ -210,8 +214,9 @@ bool AssetFile::Exists()const{
 
 //override
 ting::Array<std::string> AssetFile::ListDirContents(size_t maxEntries){
-	if(!this->IsDir())
+	if(!this->IsDir()){
 		throw File::Exc("AndroidAssetFile::ListDirContents(): this is not a directory");
+	}
 
 	std::vector<std::string> files;
 
@@ -253,8 +258,9 @@ ting::Array<std::string> AssetFile::ListDirContents(size_t maxEntries){
 	
 	ting::Array<std::string> filesArray(files.size());
 	
-	for(size_t i = 0; i < files.size(); ++i)
+	for(size_t i = 0; i < files.size(); ++i){
 		filesArray[i] = files[i];
+	}
 
 	return filesArray;
 }//~ListDirContents()
