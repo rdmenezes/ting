@@ -80,7 +80,7 @@ void AssetFile::Open(EMode mode){
 
 
 //override
-void AssetFile::Close(){
+void AssetFile::Close()throw(){
 	if(!this->IsOpened())
 		return;
 

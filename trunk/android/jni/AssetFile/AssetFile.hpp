@@ -71,7 +71,7 @@ public:
 	 * @brief Destructor.
 	 * This destructor calls the Close() method.
 	 */
-	~AssetFile(){
+	~AssetFile()throw(){
 		this->Close();
 	}
 
@@ -82,7 +82,7 @@ public:
 
 
 	//override
-	virtual void Close();
+	virtual void Close()throw();
 
 
 
