@@ -1,12 +1,18 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/math.hpp"
 
+#include "tests.hpp"
+
+
+
 using namespace ting;
 
 
 
-int main(int argc, char *argv[]){
+namespace TestBasicMathStuff{
 
+
+void Run(){
 	ASSERT_ALWAYS(math::Sin((long double)(0)) == 0)
 	ASSERT_ALWAYS(math::Abs(math::Sin(math::DPi<long double>() / 2) - 1) < 0.00001)
 	ASSERT_ALWAYS(math::Abs(math::Sin(math::DPi<long double>())) < 0.00001)
@@ -22,8 +28,6 @@ int main(int argc, char *argv[]){
 
 	ASSERT_ALWAYS(math::Ln((long double)(1)) == 0)
 	ASSERT_ALWAYS(math::Abs(math::Ln((long double)(2)) - math::DLnOf2<long double>()) < 0.00001)
-
-	TRACE_ALWAYS(<<"[PASSED]: math test"<<std::endl)
-
-	return 0;
 }
+
+}//~namespace
