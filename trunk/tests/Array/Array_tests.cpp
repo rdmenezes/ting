@@ -2,9 +2,11 @@
 #include "../../src/ting/Array.hpp"
 #include "../../src/ting/Exc.hpp"
 
+#include "Array_tests.hpp"
 
 
-namespace BasicTest{
+
+namespace BasicArrayTest{
 
 void Run(){
 	{
@@ -347,19 +349,3 @@ void Run(){
 }
 
 }//~namespace
-
-
-
-
-
-int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<< "Array test " << std::endl)
-
-	BasicTest::Run();
-	TestConstructorsAndDestructors::Run();
-	FromBufferConstructorTest::Run();
-
-	TRACE_ALWAYS(<< "[PASSED]: Array test" << std::endl)
-
-	return 0;
-}
