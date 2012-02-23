@@ -3,6 +3,7 @@
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/types.hpp"
 
+#include "tests.hpp"
 
 
 
@@ -23,7 +24,7 @@ public:
 
 
 
-static void Run(){
+void Run(){
 
 	//Test join after thread has finished
 	{
@@ -70,7 +71,7 @@ public:
 
 
 
-static void Run(){
+void Run(){
 	//TODO: read ulimit
 	ting::StaticBuffer<TestThread1, 500> thr;
 
@@ -106,7 +107,7 @@ public:
 };
 
 
-static void Run(){
+void Run(){
 	for(unsigned i = 0; i < 100; ++i){
 		ImmediateExitThread t;
 		t.Start();
@@ -157,7 +158,7 @@ public:
 
 
 
-static void Run(){
+void Run(){
 	TestRunnerThread runner;
 	runner.Start();
 
@@ -170,25 +171,3 @@ static void Run(){
 
 
 }//~namespace
-
-
-
-int main(int argc, char *argv[]){
-//	TRACE(<< "Thread test" << std::endl)
-
-//	TRACE(<< "running TestManyThreads..." << std::endl)
-	TestManyThreads::Run();
-
-//	TRACE(<< "running TestJoinBeforeAndAfterThreadHasFinished" << std::endl)
-	TestJoinBeforeAndAfterThreadHasFinished::Run();
-
-//	TRACE(<< "running TestImmediateExitThread" << std::endl)
-	TestImmediateExitThread::Run();
-
-//	TRACE(<< "running TestNestedJoin" << std::endl)
-	TestNestedJoin::Run();
-
-	TRACE_ALWAYS(<< "[PASSED]: Thread test" << std::endl)
-
-	return 0;
-}
