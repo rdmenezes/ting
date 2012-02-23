@@ -4,6 +4,8 @@
 #include "../../src/ting/Ptr.hpp"
 #include "../../src/ting/Timer.hpp"
 
+#include "tests.hpp"
+
 
 
 namespace BasicTimerTest{
@@ -179,18 +181,3 @@ void Run(){
 }
 
 }//~namespace
-
-
-
-int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<< "Timer test " << std::endl)
-	ting::timer::Lib timerLib;
-
-	BasicTimerTest::Run();
-	SeveralTimersForTheSameInterval::Run();
-	StoppingTimers::Run();
-
-	TRACE_ALWAYS(<< "[PASSED]: Timer test" << std::endl)
-
-	return 0;
-}
