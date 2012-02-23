@@ -1,5 +1,7 @@
 #include "../../src/ting/Ptr.hpp"
 
+#include "tests.hpp"
+
 
 
 namespace BasicTest{
@@ -153,16 +155,3 @@ void Run(){
 }
 
 }//~namespace
-
-
-int main(int argc, char *argv[]){
-//	TRACE_ALWAYS(<< "Ptr test " << std::endl)
-
-	BasicTest::Run();
-	TypeCastTest::Run();
-	ConstPtrTest::Run();
-
-	TRACE_ALWAYS(<< "[PASSED]: Ptr test" << std::endl)
-
-	return 0;
-}
