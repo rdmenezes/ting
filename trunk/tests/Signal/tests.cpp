@@ -2,6 +2,9 @@
 #include "../../src/ting/Signal.hpp"
 #include "../../src/ting/Ref.hpp"
 
+#include "tests.hpp"
+
+
 
 
 //Test function signal-slot connections
@@ -38,7 +41,7 @@ static int FuncDoSomethingWithB(){
 }
 
 
-static void Test(){
+void Run(){
 	//test zero parameters signal
 	{
 		ting::Signal0 sig;
@@ -291,7 +294,7 @@ public:
 
 
 
-void Test(){
+void Run(){
 	TestClass tc;
 
 	{
@@ -461,7 +464,7 @@ public:
 
 
 
-static void Test(){
+void Run(){
 	{
 		ting::Signal0 signal0;
 		ting::Signal1<int> signal1;
@@ -668,7 +671,7 @@ static void DoSomethingWithA(){
 
 
 
-static void Test(){
+void Run(){
 	ting::Ref<TestRefClass> rc = TestRefClass::New();
 	TestClass tc;
 
@@ -727,25 +730,3 @@ static void Test(){
 }
 
 }//~namespace
-
-
-
-
-
-
-
-
-
-int main(int argc, char *argv[]){
-//	TRACE(<< "Signal test" << std::endl)
-
-
-	FuncConnectionTest::Test();
-	MethodConnectionTest::Test();
-	WeakRefConnectionTest::Test();
-	MixedConnectionTest::Test();
-
-	TRACE_ALWAYS(<< "[PASSED]: Signal test" << std::endl)
-
-	return 0;
-}
