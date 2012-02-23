@@ -46,7 +46,7 @@ include ../libting.mk
 
 $(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
-	g++ -o $@ $(cf) $^ $(libs)
+	@g++ -o $@ $(cf) $^ $(libs)
 
 
 
