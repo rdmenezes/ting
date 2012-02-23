@@ -2,6 +2,10 @@ platform := linux
 
 binary_name := tests
 
+default: $(binary_name)
+
+
+
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
 endif
@@ -29,15 +33,17 @@ cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
-default: $(binary_name)
+
 
 test: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): main.cpp
+include ../libting.mk
+
+$(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+	@g++ -o $@ $(cf) $^ $(libs)
 
 
 
