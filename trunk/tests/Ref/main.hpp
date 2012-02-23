@@ -1,6 +1,6 @@
 #include "../../src/ting/debug.hpp"
 
-#include "Ref_tests.hpp"
+#include "tests.hpp"
 
 
 inline void TestTingRef(){

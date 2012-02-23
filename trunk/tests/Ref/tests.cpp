@@ -4,7 +4,7 @@
 #include "../../src/ting/Thread.hpp"
 #include "../../src/ting/Ref.hpp"
 
-#include "Ref_tests.hpp"
+#include "tests.hpp"
 
 
 
