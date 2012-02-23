@@ -12,7 +12,7 @@ endif
 
 
 ifeq ($(platform),win32)
-    libs := ../../src/libting.a -lws2_32
+    libs := -lws2_32
     remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
@@ -20,7 +20,7 @@ ifeq ($(platform),darwin)
     remove := rm -rf
 endif
 ifeq ($(platform),linux)
-    libs := ../../src/libting.so
+    libs :=
     remove := rm -rf
 endif
 
