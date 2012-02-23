@@ -5,8 +5,12 @@
 
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/Ref.hpp"
-#include "../../src/ting/Ptr.hpp"
 
+#include "tests.hpp"
+
+
+namespace TestBasicDebugStuff{
+	
 
 
 bool DoSomethingAndReturnTrueOnSuccess(){
@@ -34,7 +38,7 @@ public:
 
 
 
-int main(int argc, char *argv[]){
+void Run(){
 //	TRACE(<< "debug test" << std::endl)
 
 	{
@@ -94,8 +98,6 @@ int main(int argc, char *argv[]){
 
 		STATIC_ASSERT(sizeof(TestClass) == sizeof(int))
 	}
-
-	TRACE_ALWAYS(<< "[PASSED]: debug test" << std::endl)
-
-	return 0;
 }
+
+}//~namespace
