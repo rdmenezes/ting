@@ -2,6 +2,10 @@ platform := linux
 
 binary_name := tests
 
+default: $(binary_name)
+
+
+
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
 endif
@@ -30,9 +34,6 @@ cf += -Wall
 cf += -g
 
 
-
-default: $(binary_name)
-
 test: $(binary_name)
 	@echo running $^...
 ifeq ($(platform),win32)
@@ -46,7 +47,9 @@ endif
 	@echo Compiling $<...
 	@g++ -c -o $@ $(cf) $<
 
-$(binary_name): socket.o dns.o main.o
+include ../libting.mk
+
+$(binary_name): socket.o dns.o main.o $(libting)
 	@echo Linking $@...
 	@g++ $^ -o $@ $(cf) $(libs)
 
