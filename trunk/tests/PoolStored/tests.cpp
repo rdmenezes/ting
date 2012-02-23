@@ -4,7 +4,7 @@
 #include "../../src/ting/PoolStored.hpp"
 #include "../../src/ting/Ptr.hpp"
 
-#include "PoolStored_tests.hpp"
+#include "tests.hpp"
 
 
 

@@ -44,7 +44,7 @@ endif
 
 include ../libting.mk
 
-$(binary_name): main.cpp PoolStored_tests.cpp $(libting)
+$(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
 	g++ -o $@ $(cf) $^ $(libs)
 

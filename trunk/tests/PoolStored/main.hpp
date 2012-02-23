@@ -2,7 +2,7 @@
 
 #include "../../src/ting/debug.hpp"
 
-#include "PoolStored_tests.hpp"
+#include "tests.hpp"
 
 
 inline void TestTingPoolStored(){
