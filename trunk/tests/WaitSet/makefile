@@ -1,6 +1,10 @@
 platform := linux
 
-binary_name := WaitSet_test
+binary_name := tests
+
+default: $(binary_name)
+
+
 
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
@@ -29,7 +33,7 @@ cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
-default: $(binary_name)
+
 
 test: $(binary_name)
 	@echo running $^...
@@ -39,10 +43,11 @@ else
 	@LD_LIBRARY_PATH=../../src ./$^
 endif
 
+include ../libting.mk
 
-$(binary_name): WaitSet_test.cpp
+$(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs)
+	@g++ -o $@ $(cf) $^ $(libs)
 
 
 

@@ -4,6 +4,8 @@
 #include "../../src/ting/WaitSet.hpp"
 #include "../../src/ting/Thread.hpp"
 
+#include "tests.hpp"
+
 
 
 namespace test_message_queue_as_waitable{
@@ -109,16 +111,3 @@ void Run(){
 	ws.Remove(&q2);
 }
 }//~namespace
-
-
-int main(int argc, char *argv[]){
-//	TRACE(<< "Ref test" << std::endl)
-
-	test_general::Run();
-
-	test_message_queue_as_waitable::Run();
-
-	TRACE_ALWAYS(<< "[PASSED]: WaitSet test" << std::endl)
-
-	return 0;
-}
