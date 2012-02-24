@@ -192,6 +192,8 @@ public:
 	 * Stops the timer if it was started before. In case it was not started
 	 * or it has already expired this method does nothing.
 	 * This method is thread-safe.
+	 * After this method has returned you may be sure that the OnExpired() callback
+	 * will not be called anymore.
 	 * @return true if timer was running and was stopped.
 	 * @return false if timer was not running already when the Stop() method was called. I.e.
 	 *         the timer has expired already or was not started.
@@ -221,6 +223,10 @@ class Lib : public IntrusiveSingleton<Lib>{
 		ting::Mutex mutex;
 		ting::Semaphore sema;
 
+		//mutex used to make sure that after Timer::Stop() method is called the
+		//expired notification callback will not be called
+		ting::Mutex expiredTimersNotifyMutex;
+		
 		//map requires key uniqueness, but in our case the key is a stop ticks,
 		//so, use std::multimap to allow similar keys.
 		Timer::T_TimerList timers;

@@ -41,6 +41,9 @@ bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
 	if(!timer->isRunning){
+		//lock and unlock the 'expired' mutex to make sure that the timer's callback
+		//has been called if the timer has expired and is awaiting the notification callback to be called.
+		ting::Mutex::Guard mutexGuard(this->expiredTimersNotifyMutex);
 		return false;
 	}
 
@@ -133,13 +136,23 @@ void Lib::TimerThread::Run(){
 
 					break;//~while(true)
 				}
+				
+				this->expiredTimersNotifyMutex.Lock();
 			}
 
-			//emit expired signal for expired timers
-			for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
-				ASSERT(*i)
-				(*i)->OnExpired();
+			try{
+				//emit expired signal for expired timers
+				for(std::vector<Timer*>::iterator i = expiredTimers.begin(); i != expiredTimers.end(); ++i){
+					ASSERT(*i)
+					(*i)->OnExpired();
+				}
+			}catch(...){
+				//no exceptions should be thrown by this code. Especially we don't want them here because
+				//mutex locking/unlocking is used without mutex guard.
+				ASSERT(false)
 			}
+			
+			this->expiredTimersNotifyMutex.Unlock();
 		}
 
 		this->sema.Wait(millis);
