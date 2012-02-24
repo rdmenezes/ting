@@ -420,7 +420,9 @@ public:
 	 * @brief Cancel current DNS lookup operation.
 	 * The method is thread-safe.
 	 * After this method has returned it is guaranteed that the OnCompleted_ts()
-	 * callback will not be called anymore.
+	 * callback will not be called anymore, unless another resolve request has been
+	 * started from within the callback if it was called before the Cancel_ts() method returns.
+	 * Such case can be caught by checking the return value of the method.
 	 * @return true - if the ongoing DNS lookup operation was canceled.
 	 * @return false - if there was no ongoing DNS lookup operation to cancel.
 	 *                 This means that the DNS lookup operation was not started

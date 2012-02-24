@@ -193,7 +193,9 @@ public:
 	 * or it has already expired this method does nothing.
 	 * This method is thread-safe.
 	 * After this method has returned you may be sure that the OnExpired() callback
-	 * will not be called anymore.
+	 * will not be called anymore, unless the timer was not started again from within the callback
+	 * if the callback was called before returning from Stop() method.
+	 * Such case can be caught by checking the return value of the method.
 	 * @return true if timer was running and was stopped.
 	 * @return false if timer was not running already when the Stop() method was called. I.e.
 	 *         the timer has expired already or was not started.
