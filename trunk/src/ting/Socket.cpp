@@ -1036,6 +1036,8 @@ bool HostNameResolver::Cancel_ts()throw(){
 	
 	if(!ret){
 		//Make sure the callback has finished if it is in process of calling the callback.
+		//Because upon calling the callback the resolver object is already removed from all the lists and maps
+		//and if 'ret' is false then it is possible that the resolver is in process of calling the callback.
 		//To do that, lock and unlock the mutex.
 		ting::Mutex::Guard mutexGuard(dns::thread->completedMutex);
 	}
