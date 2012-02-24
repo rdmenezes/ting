@@ -133,6 +133,10 @@ class LookupThread : public ting::MsgThread{
 public:
 	ting::Mutex mutex;//this mutex is used to protect access to members of the thread object.
 	
+	//this mutex is used to make sure that the callback has finished calling when Cancel_ts() method is called.
+	//I.e. to guarantee that after Cancel_ts() method has returned the callback will not be called anymore.
+	ting::Mutex completedMutex;
+	
 	//this variable is for joining and destroying previous thread object if there was any.
 	ting::Ptr<ting::MsgThread> prevThread;
 	
@@ -282,8 +286,10 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex
 	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0)throw(){
+		this->completedMutex.Lock();
 		this->mutex.Unlock();
 		r->hnr->OnCompleted_ts(result, ip);
+		this->completedMutex.Unlock();
 		this->mutex.Lock();
 	}
 	
@@ -503,7 +509,7 @@ public:
 	//returns Ptr owning the removed resolver, returns invalid Ptr if there was
 	//no such resolver object found.
 	//NOTE: call to this function should be protected by mutex.
-	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver){
+	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver)throw(){
 		ting::Ptr<dns::Resolver> r;
 		{
 			dns::T_ResolversIter i = this->resolversMap.find(resolver);
@@ -1013,7 +1019,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 
 
 
-bool HostNameResolver::Cancel_ts(){
+bool HostNameResolver::Cancel_ts()throw(){
 	ting::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsNotValid()){
@@ -1024,8 +1030,14 @@ bool HostNameResolver::Cancel_ts(){
 	
 	bool ret = dns::thread->RemoveResolver(this).IsValid();
 	
-	if(dns::thread->resolversMap.size() == 0 && ret){
-		dns::thread->PushQuitMessage();
+	if(dns::thread->resolversMap.size() == 0){
+		dns::thread->PushPreallocatedQuitMessage();
+	}
+	
+	if(!ret){
+		//Make sure the callback has finished if it is in process of calling the callback.
+		//To do that, lock and unlock the mutex.
+		ting::Mutex::Guard mutexGuard(dns::thread->completedMutex);
 	}
 	
 	return ret;

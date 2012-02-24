@@ -13,6 +13,7 @@ inline void TestTingSocket(){
 
 	TestSimpleDNSLookup::Run();
 	TestRequestFromCallback::Run();
+	TestCancelDNSLookup::Run();
 		
 	BasicClientServerTest::Run();
 	BasicUDPSocketsTest::Run();

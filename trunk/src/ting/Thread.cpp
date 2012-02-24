@@ -785,7 +785,7 @@ ting::Mutex quitMessageMutex;
 
 
 
-void MsgThread::PushPreallocatedQuitMessage() throw(){
+void MsgThread::PushPreallocatedQuitMessage()throw(){
 	ting::Mutex::Guard mutexGuard(quitMessageMutex);
 	
 	if(this->quitMessage.IsNotValid()){

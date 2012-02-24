@@ -133,7 +133,6 @@ public:
 };
 
 void Run(){
-	
 	ting::Semaphore sema;
 	
 	Resolver r(sema);
@@ -150,3 +149,38 @@ void Run(){
 	ASSERT_ALWAYS(r.ip != 0)
 }
 }
+
+
+
+namespace TestCancelDNSLookup{
+class Resolver : public ting::net::HostNameResolver{
+	
+public:
+	
+	Resolver(){}
+	
+	ting::Inited<volatile bool, false> called;
+	
+	//override
+	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+		this->called = true;
+	}
+};
+
+void Run(){
+	TRACE_ALWAYS(<< "\tRunning 'cacnel DNS lookup' test, it will take about 4 seconds" << std::endl)
+	Resolver r;
+	
+	r.Resolve_ts("rfesweefdqfdf.ru", 3000, ting::net::IPAddress("1.2.3.4", 53));
+	
+	ting::Thread::Sleep(500);
+	
+	bool res = r.Cancel_ts();
+	
+	ting::Thread::Sleep(3000);
+	
+	ASSERT_ALWAYS(res)
+	
+	ASSERT_ALWAYS(!r.called)
+}
+}//~namespace

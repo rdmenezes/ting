@@ -419,15 +419,14 @@ public:
 	/**
 	 * @brief Cancel current DNS lookup operation.
 	 * The method is thread-safe.
+	 * After this method has returned it is guaranteed that the OnCompleted_ts()
+	 * callback will not be called anymore.
 	 * @return true - if the ongoing DNS lookup operation was canceled.
 	 * @return false - if there was no ongoing DNS lookup operation to cancel.
 	 *                 This means that the DNS lookup operation was not started
 	 *                 or has finished before the Cancel_ts() method was called.
-	 *                 In the latter case if destroying the object one must make
-	 *                 sure that the OnCompleted_ts() callback function has been called before
-	 *                 destroying the HostNameResolver object.
      */
-	bool Cancel_ts();
+	bool Cancel_ts()throw();
 	
 	/**
 	 * @brief Enumeration of the DNS lookup operation result.
@@ -470,7 +469,7 @@ public:
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::IPAddress object.
 	 */
-	virtual void OnCompleted_ts(E_Result result, ting::u32 ip) throw() = 0;
+	virtual void OnCompleted_ts(E_Result result, ting::u32 ip)throw() = 0;
 };
 
 
