@@ -63,7 +63,7 @@ try{
     sock.Open(ip);
     
     ting::WaitSet waitSet(1);
-    waitSet.Add(&sock, ting::Waitable::READ);
+    waitSet.Add(&sock, ting::Waitable::WRITE);
     waitSet.Wait(); //Wait for connection to complete.
 
     //receive data (expecting 4 bytes)
