@@ -332,26 +332,6 @@ public:
 
 
 /**
- * @brief Socket library singleton class.
- * This is a Socket library singleton class. Creating an object of this class initializes the library
- * while destroying this object de-initializes it. So, the convenient way of initializing the library
- * is to create an object of this class on the stack. Thus, when the object goes out of scope its
- * destructor will be called and the library will be de-initialized automatically.
- * This is what C++ RAII is all about.
- */
-class Lib : public IntrusiveSingleton<Lib>{
-	friend class IntrusiveSingleton<Lib>;
-	static IntrusiveSingleton<Lib>::T_Instance instance;
-	
-public:
-	Lib();
-
-	~Lib();
-};
-
-
-
-/**
  * @brief Class for resolving IP-address of the host by its domain name.
  * This class allows asynchronous DNS lookup.
  * One has to derive his/her own class from this class to override the

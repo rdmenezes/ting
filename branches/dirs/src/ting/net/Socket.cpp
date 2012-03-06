@@ -41,10 +41,6 @@ using namespace ting::net;
 
 
 
-ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
-
-
-
 namespace{
 namespace dns{
 
@@ -1043,59 +1039,6 @@ bool HostNameResolver::Cancel_ts()throw(){
 	}
 	
 	return ret;
-}
-
-
-
-Lib::Lib(){
-#ifdef WIN32
-	WORD versionWanted = MAKEWORD(2,2);
-	WSADATA wsaData;
-	if(WSAStartup(versionWanted, &wsaData) != 0 ){
-		throw net::Exc("SocketLib::SocketLib(): Winsock 2.2 initialization failed");
-	}
-#else //assume linux/unix
-	// SIGPIPE is generated when a remote socket is closed
-	void (*handler)(int);
-	handler = signal(SIGPIPE, SIG_IGN);
-	if(handler != SIG_DFL){
-		signal(SIGPIPE, handler);
-	}
-#endif
-}
-
-
-
-Lib::~Lib(){
-	//check that there are no active dns lookups and finish the DNS request thread
-	{
-		ting::Mutex::Guard mutexGuard(dns::mutex);
-		
-		if(dns::thread.IsValid()){
-			dns::thread->PushPreallocatedQuitMessage();
-			dns::thread->Join();
-			
-			ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
-			
-			dns::thread.Reset();
-		}
-	}
-	
-#ifdef WIN32
-	// Clean up windows networking
-	if(WSACleanup() == SOCKET_ERROR)
-		if(WSAGetLastError() == WSAEINPROGRESS){
-			WSACancelBlockingCall();
-			WSACleanup();
-		}
-#else //assume linux/unix
-	// Restore the SIGPIPE handler
-	void (*handler)(int);
-	handler = signal(SIGPIPE, SIG_DFL);
-	if(handler != SIG_IGN){
-		signal(SIGPIPE, handler);
-	}
-#endif
 }
 
 
