@@ -26,8 +26,6 @@ THE SOFTWARE. */
 
 #include "IPAddress.hpp"
 
-#include "../config.hpp"
-
 
 
 using namespace ting::net;
