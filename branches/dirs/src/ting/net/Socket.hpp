@@ -25,10 +25,7 @@ THE SOFTWARE. */
 
 
 /**
- * @file Socket.hpp
  * @author Ivan Gagis <igagis@gmail.com>
- * @brief Main header file of the socket network library.
- * This is the main header file of socket network library, cross platform C++ Sockets wrapper.
  */
 
 #pragma once
@@ -45,17 +42,17 @@ THE SOFTWARE. */
 	#include <windows.h>
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include <stdlib.h>
+//	#include <stdlib.h>
 	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netinet/tcp.h>
-	#include <netdb.h>
-	#include <arpa/inet.h>
-	#include <fcntl.h>
-	#include <signal.h>
-	#include <errno.h>
-	#include <unistd.h>
-//TODO: clean up this include list
+//	#include <netinet/in.h>
+//	#include <netinet/tcp.h>
+//	#include <netdb.h>
+//	#include <arpa/inet.h>
+//	#include <fcntl.h>
+//	#include <signal.h>
+//	#include <errno.h>
+//	#include <unistd.h>
+//TODO: remove commented includes
 
 #else
 	#error "Unsupported OS"

@@ -28,6 +28,20 @@ THE SOFTWARE. */
 
 
 
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+
+
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	#include <fcntl.h>
+
+#else
+	#error "Unsupported OS"
+#endif
+
+
+
 using namespace ting::net;
 
 

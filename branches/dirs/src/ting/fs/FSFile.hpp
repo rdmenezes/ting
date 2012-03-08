@@ -33,7 +33,8 @@ THE SOFTWARE. */
 
 #include <cstdio>
 
-#include "debug.hpp"
+#include "../debug.hpp"
+
 #include "File.hpp"
 
 
