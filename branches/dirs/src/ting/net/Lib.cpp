@@ -27,7 +27,8 @@ THE SOFTWARE. */
 #include "../config.hpp"
 
 #include "Lib.hpp"
-
+#include "Exc.hpp"
+#include "HostNameResolver.hpp"
 
 
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
@@ -35,16 +36,16 @@ THE SOFTWARE. */
 	#include <windows.h>
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
-	#include <stdlib.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <netinet/tcp.h>
-	#include <netdb.h>
-	#include <arpa/inet.h>
-	#include <fcntl.h>
+//	#include <stdlib.h>
+//	#include <sys/socket.h>
+//	#include <netinet/in.h>
+//	#include <netinet/tcp.h>
+//	#include <netdb.h>
+//	#include <arpa/inet.h>
+//	#include <fcntl.h>
 	#include <signal.h>
-	#include <errno.h>
-	#include <unistd.h>
+//	#include <errno.h>
+//	#include <unistd.h>
 //TODO: cleanup this list of inicludes
 
 #else
@@ -84,18 +85,7 @@ Lib::Lib(){
 
 Lib::~Lib()throw(){
 	//check that there are no active dns lookups and finish the DNS request thread
-	{
-		ting::Mutex::Guard mutexGuard(dns::mutex);
-		
-		if(dns::thread.IsValid()){
-			dns::thread->PushPreallocatedQuitMessage();
-			dns::thread->Join();
-			
-			ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
-			
-			dns::thread.Reset();
-		}
-	}
+	HostNameResolver::CleanUp();
 	
 #if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	// Clean up windows networking

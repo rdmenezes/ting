@@ -1,6 +1,8 @@
-#include "../../src/ting/Timer.hpp"
+#include "../../src/ting/timer.hpp"
 #include "../../src/ting/Thread.hpp"
-#include "../../src/ting/Socket.hpp"
+#include "../../src/ting/net/TCPSocket.hpp"
+#include "../../src/ting/net/TCPServerSocket.hpp"
+#include "../../src/ting/net/UDPSocket.hpp"
 #include "../../src/ting/WaitSet.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/Array.hpp"
@@ -12,6 +14,32 @@
 
 
 namespace BasicClientServerTest{
+
+void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
+	if(!s.IsValid()){
+		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
+	}
+
+	DEBUG_CODE(int left = int(buf.Size());)
+	ASSERT(left >= 0)
+
+	size_t offset = 0;
+
+	while(true){
+		int res = s.Send(buf, offset);
+		DEBUG_CODE(left -= res;)
+		ASSERT(left >= 0)
+		offset += res;
+		if(offset == buf.Size()){
+				break;
+		}
+		//give 30ms to allow data from send buffer to be sent
+		ting::Thread::Sleep(30);
+	}
+
+	ASSERT(left == 0)
+}
+
 
 class ServerThread : public ting::MsgThread{
 public:
@@ -44,7 +72,7 @@ public:
 			data[1] = '1';
 			data[2] = '2';
 			data[3] = '4';
-			sock.SendAll(data);
+			SendAll(sock, data);
 		}catch(ting::net::Exc &e){
 			ASSERT_INFO_ALWAYS(false, "Network error: " << e.What())
 		}

@@ -45,6 +45,11 @@ namespace net{
 
 
 
+//forward declarations
+class Lib;
+
+
+
 /**
  * @brief Class for resolving IP-address of the host by its domain name.
  * This class allows asynchronous DNS lookup.
@@ -166,6 +171,10 @@ public:
 	 *             ting::IPAddress object.
 	 */
 	virtual void OnCompleted_ts(E_Result result, ting::u32 ip)throw() = 0;
+	
+private:
+	friend class ting::net::Lib;
+	static void CleanUp();
 };
 
 

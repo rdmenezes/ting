@@ -1045,3 +1045,19 @@ bool HostNameResolver::Cancel_ts()throw(){
 	
 	return ret;
 }
+
+
+
+//static
+void HostNameResolver::CleanUp(){
+	ting::Mutex::Guard mutexGuard(dns::mutex);
+
+	if(dns::thread.IsValid()){
+		dns::thread->PushPreallocatedQuitMessage();
+		dns::thread->Join();
+
+		ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
+
+		dns::thread.Reset();
+	}
+}

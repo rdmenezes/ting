@@ -1,7 +1,7 @@
-#include "../../src/ting/Socket.hpp"
-
 #include "dns.hpp"
 
+#include "../../src/ting/net/HostNameResolver.hpp"
+#include "../../src/ting/Thread.hpp"
 
 
 namespace TestSimpleDNSLookup{

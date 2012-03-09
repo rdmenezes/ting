@@ -1,5 +1,5 @@
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/FSFile.hpp"
+#include "../../src/ting/fs/FSFile.hpp"
 
 #include "tests.hpp"
 

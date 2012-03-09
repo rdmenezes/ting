@@ -41,6 +41,7 @@ srcs += ting/fs/File.cpp
 srcs += ting/fs/FSFile.cpp
 srcs += ting/net/HostNameResolver.cpp
 srcs += ting/net/IPAddress.cpp
+srcs += ting/net/Lib.cpp
 srcs += ting/net/Socket.cpp
 srcs += ting/net/TCPServerSocket.cpp
 srcs += ting/net/TCPSocket.cpp

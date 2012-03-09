@@ -33,16 +33,13 @@ THE SOFTWARE. */
 
 
 
-#include "Singleton.hpp"
+#include "../Singleton.hpp"
 
 
 
-
-/**
- * @brief the main namespace of ting library.
- * All the declarations of ting library are made inside this namespace.
- */
 namespace ting{
+
+//TODO: doxygen
 namespace net{
 
 
