@@ -39,10 +39,12 @@ endif
 srcs :=
 srcs += ting/fs/File.cpp
 srcs += ting/fs/FSFile.cpp
+srcs += ting/net/HostNameResolver.cpp
 srcs += ting/net/IPAddress.cpp
 srcs += ting/net/Socket.cpp
 srcs += ting/net/TCPServerSocket.cpp
 srcs += ting/net/TCPSocket.cpp
+srcs += ting/net/UDPSocket.cpp
 srcs += ting/Ref.cpp
 srcs += ting/Thread.cpp
 srcs += ting/timer.cpp
