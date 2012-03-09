@@ -26,6 +26,15 @@ THE SOFTWARE. */
 
 #include "TCPSocket.hpp"
 
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+	#include <netinet/in.h>
+
+#else
+	#error "Unsupported OS"
+#endif
+
 
 
 using namespace ting::net;
@@ -164,33 +173,6 @@ size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
 
 	ASSERT(len >= 0)
 	return size_t(len);
-}
-
-
-
-void TCPSocket::SendAll(const ting::Buffer<u8>& buf){
-	if(!this->IsValid()){
-		throw net::Exc("TCPSocket::Send(): socket is not opened");
-	}
-
-	DEBUG_CODE(int left = int(buf.Size());)
-	ASSERT(left >= 0)
-
-	size_t offset = 0;
-
-	while(true){
-		int res = this->Send(buf, offset);
-		DEBUG_CODE(left -= res;)
-		ASSERT(left >= 0)
-		offset += res;
-		if(offset == buf.Size()){
-			break;
-		}
-		//give 30ms to allow data from send buffer to be sent
-		Thread::Sleep(30);
-	}
-
-	ASSERT(left == 0)
 }
 
 

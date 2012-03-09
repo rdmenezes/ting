@@ -32,11 +32,18 @@ THE SOFTWARE. */
 
 
 #include "Socket.hpp"
+#include "IPAddress.hpp"
+
 
 
 
 namespace ting{
 namespace net{
+
+
+
+//forward declarations
+class TCPServerSocket;
 
 
 
@@ -104,15 +111,6 @@ public:
 	 * @return the number of bytes actually sent.
 	 */
 	size_t Send(const ting::Buffer<u8>& buf, size_t offset = 0);
-
-
-
-	/**
-	 * @brief Send data to connected socket.
-	 * Sends data on connected socket. This method blocks until all data is completely sent.
-	 * @param buf - the buffer with data to send.
-	 */
-	void SendAll(const ting::Buffer<u8>& buf);
 
 
 

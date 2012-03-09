@@ -26,6 +26,14 @@ THE SOFTWARE. */
 
 #include "TCPServerSocket.hpp"
 
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+	#include <netinet/in.h>
+
+#else
+	#error "Unsupported OS"
+#endif
 
 
 using namespace ting::net;
@@ -39,13 +47,13 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 
 	this->disableNaggle = disableNaggle;
 
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	this->CreateEventForWaitable();
 #endif
 
 	this->socket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if(this->socket == DInvalidSocket()){
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 		this->CloseEventForWaitable();
 #endif
 		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
@@ -93,7 +101,7 @@ TCPSocket TCPServerSocket::Accept(){
 
 	sockaddr_in sockAddr;
 
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	int sock_alen = sizeof(sockAddr);
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	socklen_t sock_alen = sizeof(sockAddr);
@@ -117,7 +125,7 @@ TCPSocket TCPServerSocket::Accept(){
 		return sock;//no connections to be accepted, return invalid socket
 	}
 
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	sock.CreateEventForWaitable();
 
 	//NOTE: accepted socket is associated with the same event object as the listening socket which accepted it.
@@ -136,7 +144,7 @@ TCPSocket TCPServerSocket::Accept(){
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 //override
 void TCPServerSocket::SetWaitingEvents(u32 flagsToWaitFor){
 	if(flagsToWaitFor != 0 && flagsToWaitFor != Waitable::READ){
