@@ -37,12 +37,18 @@ endif
 
 #Sources
 srcs :=
-srcs += ting/File.cpp
-srcs += ting/FSFile.cpp
+srcs += ting/fs/File.cpp
+srcs += ting/fs/FSFile.cpp
+srcs += ting/net/HostNameResolver.cpp
+srcs += ting/net/IPAddress.cpp
+srcs += ting/net/Lib.cpp
+srcs += ting/net/Socket.cpp
+srcs += ting/net/TCPServerSocket.cpp
+srcs += ting/net/TCPSocket.cpp
+srcs += ting/net/UDPSocket.cpp
 srcs += ting/Ref.cpp
-srcs += ting/Socket.cpp
 srcs += ting/Thread.cpp
-srcs += ting/Timer.cpp
+srcs += ting/timer.cpp
 srcs += ting/WaitSet.cpp
 
 

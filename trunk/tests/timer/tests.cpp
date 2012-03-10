@@ -2,7 +2,7 @@
 
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/Ptr.hpp"
-#include "../../src/ting/Timer.hpp"
+#include "../../src/ting/timer.hpp"
 
 #include "tests.hpp"
 

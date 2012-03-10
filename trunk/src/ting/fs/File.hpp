@@ -33,10 +33,11 @@ THE SOFTWARE. */
 
 #include <string>
 
-#include "debug.hpp"
-#include "types.hpp"
-#include "Buffer.hpp"
-#include "Array.hpp"
+#include "../debug.hpp"
+#include "../types.hpp"
+#include "../Buffer.hpp"
+#include "../Array.hpp"
+
 #include "Exc.hpp"
 
 
@@ -62,14 +63,14 @@ public:
 	/**
 	 * @brief Basic exception class.
 	 */
-	class Exc : public ting::Exc{
+	class Exc : public fs::Exc{
 	public:
 		/**
 		 * @brief Constructor.
 		 * @param descr - human readable description of the error.
 		 */
 		Exc(const std::string& descr) :
-				ting::Exc(std::string("[File::Exc]: ") + descr)
+				ting::fs::Exc(std::string("[File::Exc]: ") + descr)
 		{}
 	};
 
