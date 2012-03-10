@@ -38,7 +38,7 @@ THE SOFTWARE. */
 #include <android/asset_manager.h>
 
 #include <ting/debug.hpp>
-#include <ting/File.hpp>
+#include <ting/fs/File.hpp>
 
 
 
