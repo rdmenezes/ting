@@ -9,12 +9,18 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := ting
 
 LOCAL_SRC_FILES :=
-LOCAL_SRC_FILES += ting/File.cpp
-LOCAL_SRC_FILES += ting/FSFile.cpp
+LOCAL_SRC_FILES += ting/fs/File.cpp
+LOCAL_SRC_FILES += ting/fs/FSFile.cpp
 LOCAL_SRC_FILES += ting/Ref.cpp
-LOCAL_SRC_FILES += ting/Socket.cpp
+LOCAL_SRC_FILES += ting/net/HostNameResolver.cpp
+LOCAL_SRC_FILES += ting/net/IPAddress.cpp
+LOCAL_SRC_FILES += ting/net/Lib.cpp
+LOCAL_SRC_FILES += ting/net/Socket.cpp
+LOCAL_SRC_FILES += ting/net/TCPServerSocket.cpp
+LOCAL_SRC_FILES += ting/net/TCPSocket.cpp
+LOCAL_SRC_FILES += ting/net/UDPSocket.cpp
 LOCAL_SRC_FILES += ting/Thread.cpp
-LOCAL_SRC_FILES += ting/Timer.cpp
+LOCAL_SRC_FILES += ting/timer.cpp
 LOCAL_SRC_FILES += ting/WaitSet.cpp
 
 #LOCAL_CFLAGS := -DDEBUG
