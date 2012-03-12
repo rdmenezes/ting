@@ -232,6 +232,7 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 }
 
 //Search for existing connection to a given WeakRef_object-method slot
+//NOTE: call to this function should be protected by mutex, since it can modify the list of connected slots.
 #define M_SEARCH_METHSLOT_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 		const ting::WeakRef<T_Ob>& o, \
