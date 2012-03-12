@@ -542,8 +542,12 @@ private:
 			ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
 			ASSERT(r)
 
+#if (M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64) && defined(ERROR)
+#	undef ERROR
+#endif
+
 			//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
-			this->CallCallback(r.operator->(), HostNameResolver::ERROR, 0);
+			this->CallCallback(r.operator->(), HostNameResolver::ERROR);
 		}
 	}
 	

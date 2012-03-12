@@ -2,13 +2,11 @@ platform := linux
 
 binary_name := tests
 
-default: $(binary_name)
-
-
 ifeq ($(platform),win32)
 binary_name := $(binary_name).exe
 endif
 
+default: $(binary_name)
 
 ifeq ($(platform),win32)
     libs := 
