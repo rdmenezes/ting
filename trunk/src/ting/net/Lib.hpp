@@ -39,7 +39,9 @@ THE SOFTWARE. */
 
 namespace ting{
 
-//TODO: doxygen
+/**
+ * @brief Namespace where all network-related classes are defined.
+ */
 namespace net{
 
 

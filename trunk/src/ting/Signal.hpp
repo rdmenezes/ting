@@ -321,7 +321,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 //======  "IsConnected()" family of functions.
 //===
 
-//Disconnect function slot
+//Function slot
 	//TODO: make const
 #define M_ISCONNECTED_FUNC(num_func_params, unused) \
 template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
@@ -334,7 +334,7 @@ template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_pa
 	return false; \
 }
 
-//Disconnect object-method slot
+//Object-method slot
 	//TODO: make const
 #define M_ISCONNECTED_METH(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool IsConnected( \
@@ -352,7 +352,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 	return false; \
 }
 
-//Disconnect WeakRef_object-method slot
+//WeakRef_object-method slot
 	//TODO: make const
 #define M_ISCONNECTED_METH_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool IsConnected( \

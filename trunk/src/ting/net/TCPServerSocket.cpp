@@ -114,11 +114,7 @@ TCPSocket TCPServerSocket::Accept(){
 	sock.socket = ::accept(
 			this->socket,
 			reinterpret_cast<sockaddr*>(&sockAddr),
-#ifdef USE_GUSI_SOCKETS //TODO: what is this?
-			(unsigned int *)&sock_alen
-#else
 			&sock_alen
-#endif
 		);
 
 	if(sock.socket == DInvalidSocket()){

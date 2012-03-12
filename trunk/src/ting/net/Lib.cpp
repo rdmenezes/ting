@@ -36,17 +36,7 @@ THE SOFTWARE. */
 	#include <windows.h>
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
-//	#include <stdlib.h>
-//	#include <sys/socket.h>
-//	#include <netinet/in.h>
-//	#include <netinet/tcp.h>
-//	#include <netdb.h>
-//	#include <arpa/inet.h>
-//	#include <fcntl.h>
 	#include <signal.h>
-//	#include <errno.h>
-//	#include <unistd.h>
-//TODO: cleanup this list of inicludes
 
 #else
 	#error "Unsupported OS"
