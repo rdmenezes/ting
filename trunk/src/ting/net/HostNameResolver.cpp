@@ -39,6 +39,7 @@ THE SOFTWARE. */
 #endif
 
 #include "UDPSocket.hpp"
+#include "Lib.hpp"
 
 
 
