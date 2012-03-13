@@ -2,9 +2,11 @@
 
 = Server side =
 
-first of all we need to include corresponding header file
+first of all we need to include corresponding header files
 {{{
-#include <ting/Socket.hpp>
+#include <ting/net/Lib.hpp>
+#include <ting/net/TCPSocket.hpp>
+#include <ting/net/TCPServerSocket.hpp>
 }}}
 
 After that we can start using the library
@@ -39,7 +41,7 @@ try{
     data[1] = '1';
     data[2] = '2';
     data[3] = '4';
-    sock.SendAll(data);
+    sock.Send(data);
 }catch(ting::net::Exc &e){
     std::cout << "Network error: " << e.What() << std::endl;
 }
@@ -139,7 +141,7 @@ Note that in case of errors a ting::Socket::Exc exception is thrown. Some of the
 
 =UDP Socket server side=
 {{{
-#include <ting/Socket.hpp>
+#include <ting/net/UDPSocket.hpp>
 
 try {
     ting::net::Lib socketsLib;
@@ -158,7 +160,7 @@ try {
 =UDP Sending side=
 
 {{{
-#include <ting/Socket.hpp>
+#include <ting/net/UDPSocket.hpp>
 
 try {
     ting::net::Lib socketsLib;
