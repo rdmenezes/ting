@@ -4,4 +4,6 @@
 
 * update Version in pkg-config/ting.pc file
 
+* Check if SO-name needs increment and update debian/control file accordingly if needed
+
 * generate debian package using dpkg-buildpackage
