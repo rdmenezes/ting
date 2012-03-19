@@ -146,6 +146,8 @@ public:
         ting::WeakRef<TestClass> wr(this); // OK!
     }
 
+    ~TestClass()throw(){}
+
     void Func(){
         ting::Ref<TestClass> sr(this); // OK!
         ting::WeakRef<TestClass> wr(this); // OK!
