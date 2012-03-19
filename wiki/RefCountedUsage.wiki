@@ -34,7 +34,7 @@ protected:
             b(valueB)
     {}
 public:
-    //Need to define destructor to indicate that it throws no exception.
+    //Need to define destructor to indicate that it throws no exceptions.
     ~MyClass()throw(){}
 
     int a;
