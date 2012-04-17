@@ -52,8 +52,6 @@ THE SOFTWARE. */
 namespace ting{
 namespace atomic{
 
-
-
 /**
  * @brief Set full memory barrier.
  * Full memory barrier means that all load/store memory access
@@ -67,7 +65,9 @@ namespace atomic{
  * provide explicit operation for setting the memory barrier but, instead, they guarantee
  * that atomic operations they provide are setting implicit memory barriers.
  */
+    //TODO: remove this function
 inline void MemoryBarrier()throw(){
+    TRACE(<< "atomic::MemoryBarrier(): DEPRECATED!" << std::endl)
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 
@@ -107,6 +107,38 @@ STATIC_ASSERT(sizeof(int) == 4)
 M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class Flag{
+
+	//declare these classes as friends so they will be able to access the memory barrier function
+	friend class atomic::SpinLock;
+	friend class atomic::S32;
+    
+	inline static void MemoryBarrier()throw(){
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		//do nothing
+
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
+		//do nothing, because locked operations on x86 make memory barrier
+
+#elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 7 && M_CPU_ARM_THUMB != 1 //DMB instruction is available only on ARMv7
+		__asm__ __volatile__(
+				"dmb" : : :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
+			);
+
+#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1 //for older ARMs use CP15 data memory barrier operation
+		__asm__ __volatile__(
+				"mcr p15, 0, %0, c7, c10, 5" : :"r"(1) :"memory" //modifies "memory" is for compiler barrier to avoid instruction reordering by compiler
+			);
+
+#elif M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB == 1
+#	error "ARM Thumb-1 mode does not support atomic operations"
+
+#else
+#	error "ASSERT(false)"
+#endif
+	}
+
+
+
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	ting::Mutex mutex;
 	volatile bool flag;
@@ -117,7 +149,7 @@ class Flag{
 	volatile int flag;
 
 #else
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 
 public:
@@ -134,7 +166,7 @@ public:
 		this->Set(initialValue);
 
 #else
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 	}
 
@@ -154,7 +186,7 @@ public:
 #endif
 	}
 
-	
+	//TODO: add acquire and release memory semantics methods
 
 	/**
 	 * @brief Set the flag value.
@@ -173,7 +205,7 @@ public:
 		}
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 		int old;
-	#if M_COMPILER == M_COMPILER_MSVC
+#	if M_COMPILER == M_COMPILER_MSVC
 		__asm{
 			mov ebx, this
 			xor eax, eax
@@ -182,7 +214,7 @@ public:
 			mov [old], eax
 		}
 		return old == 0 ? false : true; // this ternary ? : stuff is to avoid compiler warning
-	#else
+#	else
 		__asm__ __volatile__(
 				"lock; xchgl %0, %1"
 						: "=r"(old), "=m"(this->flag)
@@ -190,7 +222,7 @@ public:
 						: "memory"
 			);
 		return old;
-	#endif
+#	endif
 
 #elif M_CPU == M_CPU_ARM
 		int old;
@@ -255,7 +287,7 @@ public:
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 		this->Set(false);
 
-#else //unknown cpu architecture, unkown OS, will be using plain mutex
+#else //unknown cpu architecture
 	#error "ASSERT(false)"
 #endif
 	}
@@ -323,7 +355,7 @@ public:
 		while(this->flag.Set(true)){
 			while(this->flag.Get()){}
 		}
-		atomic::MemoryBarrier();
+		atomic::Flag::MemoryBarrier();
 
 #else
 	#error "ASSERT(false)"
@@ -341,7 +373,7 @@ public:
 		this->mutex.Unlock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
-		atomic::MemoryBarrier();
+		atomic::Flag::MemoryBarrier();
 		this->flag.Clear();
 
 #else
