@@ -47,9 +47,9 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_POOL_TRACE
 #ifdef M_ENABLE_POOL_TRACE
-#define M_POOL_TRACE(x) TRACE(<<"[POOL] ") TRACE(x)
+#	define M_POOL_TRACE(x) TRACE(<<"[POOL] ") TRACE(x)
 #else
-#define M_POOL_TRACE(x)
+#	define M_POOL_TRACE(x)
 #endif
 
 namespace ting{
