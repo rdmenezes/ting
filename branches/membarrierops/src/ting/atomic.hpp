@@ -43,8 +43,8 @@ THE SOFTWARE. */
 		(M_CPU == M_CPU_ARM && M_CPU_ARM_THUMB != 1)
 
 #else
-	#define M_ATOMIC_USE_MUTEX_FALLBACK
-	#include "Thread.hpp"
+#	define M_ATOMIC_USE_MUTEX_FALLBACK
+#	include "Thread.hpp"
 #endif
 
 
@@ -52,22 +52,29 @@ THE SOFTWARE. */
 namespace ting{
 namespace atomic{
 
+
+//forward declarations
+class SpinLock;
+class S32;
+
+
+
 /**
- * @brief Set full memory barrier.
- * Full memory barrier means that all load/store memory access
- * which goes before the barrier will be executed before all load/store access which goes after the barrier.
- * Because of possible unordered execution on some fancy CPUs it is necessary to
- * use memory barriers.
- * Note, that this barrier function should only be used right before or right after
- * one of the atomic operations provided by the 'atomic' namespace.
- * If used in other places, it is not guaranteed that the barrier will actually be set
- * and the behavior will be CPU-architecture dependent. This is because some CPUs does not
- * provide explicit operation for setting the memory barrier but, instead, they guarantee
- * that atomic operations they provide are setting implicit memory barriers.
- */
-    //TODO: remove this function
+* @brief Set full memory barrier.
+* Full memory barrier means that all load/store memory access
+* which goes before the barrier will be executed before all load/store access which goes after the barrier.
+* Because of possible unordered execution on some fancy CPUs it is necessary to
+* use memory barriers.
+* Note, that this barrier function should only be used right before or right after
+* one of the atomic operations provided by the 'atomic' namespace.
+* If used in other places, it is not guaranteed that the barrier will actually be set
+* and the behavior will be CPU-architecture dependent. This is because some CPUs does not
+* provide explicit operation for setting the memory barrier but, instead, they guarantee
+* that atomic operations they provide are setting implicit memory barriers.
+*/
+	//TODO: remove this function
 inline void MemoryBarrier()throw(){
-    TRACE(<< "atomic::MemoryBarrier(): DEPRECATED!" << std::endl)
+	TRACE(<< "atomic::MemoryBarrier(): DEPRECATED!" << std::endl)
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 	//do nothing
 
@@ -111,7 +118,7 @@ class Flag{
 	//declare these classes as friends so they will be able to access the memory barrier function
 	friend class atomic::SpinLock;
 	friend class atomic::S32;
-    
+
 	inline static void MemoryBarrier()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		//do nothing
@@ -226,9 +233,9 @@ public:
 
 #elif M_CPU == M_CPU_ARM
 		int old;
-	#if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
-		#if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
-			#error "Not implemented"
+#	if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
+#		if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
+#			error "Not implemented"
 		ting::u32 tmp;
 		__asm__ __volatile__(
 				"mrs    %0, PRIMASK" "\n" //save interrupts mask
@@ -240,7 +247,7 @@ public:
 						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
-		#else //Thumb2 or not thumb mode at all
+#		else //Thumb2 or not thumb mode at all
 		int res;
 		__asm__ __volatile__(
 				"1:"                       "\n"
@@ -253,24 +260,54 @@ public:
 						: "cc", "memory" // "cc" stands for "condition codes"
 			);
 
-		#endif
-	#else // ARM older than v6
+#		endif
+#	else // ARM older than v6
 		__asm__ __volatile__(
 				"swp %0, %1, [%2]"
 						: "=&r"(old)
 						: "r"(value), "r"(&this->flag)
 						: "memory"
 			);
-	#endif
+#	endif
 		return old;
 
 #else //unknown cpu architecture, will be using plain mutex
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 	}
 
 
+	/**
+	 * @brief Set the flag value with acquire memory semantics.
+	 * Sets the flag to the new value and returns its previous value as atomic operation.
+	 * It sets acquire memory semantics barrier. It means that on weakly ordered architectures
+	 * memory access operations which go after the SetAcquire() will not be executed before it.
+	 * @param value - the flag value to set.
+	 * @return old flag value.
+	 */
+	inline bool SetAcquire(bool value = true)throw(){
+		bool ret = this->Set(value);
+		atomic::Flag::MemoryBarrier();
+		return ret;
+	}
 
+
+
+	/**
+	 * @brief Set the flag value with release memory semantics.
+	 * Sets the flag to the new value and returns its previous value as atomic operation.
+	 * It sets release memory semantics barrier. It means that on weakly ordered architectures
+	 * memory access operations which go before the SetRelease() will not be executed after it.
+	 * @param value - the flag value to set.
+	 * @return old flag value.
+	 */
+	inline bool SetRelease(bool value = true)throw(){
+		atomic::Flag::MemoryBarrier();
+		return this->Set(value);
+	}
+	
+	
+	
 	/**
 	 * @brief Clear flag.
 	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
@@ -288,8 +325,36 @@ public:
 		this->Set(false);
 
 #else //unknown cpu architecture
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
+	}
+	
+	
+	
+	/**
+	 * @brief Clear flag with acquire memory semantics.
+	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
+	 * its implementation can be faster.
+	 * It sets acquire memory semantics barrier. It means that on weakly ordered architectures
+	 * memory access operations which go after the ClearAcquire() will be executed exactly after it.
+	 */
+	inline void ClearAcquire()throw(){
+		this->Clear();
+		Flag::MemoryBarrier();
+	}
+	
+	
+	
+	/**
+	 * @brief Clear flag with release memory semantics.
+	 * Basically, it is equivalent to Flag::Set(false), but on some architectures
+	 * its implementation can be faster.
+	 * It sets release memory semantics barrier. It means that on weakly ordered architectures
+	 * memory access operations which go before the ClearRelease() will be executed exactly before it.
+	 */
+	inline void ClearRelease()throw(){
+		Flag::MemoryBarrier();
+		this->Clear();
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
@@ -319,7 +384,7 @@ class SpinLock{
 	atomic::Flag flag;
 
 #else //unknown cpu architecture, will be using plain mutex
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 
 
@@ -337,7 +402,7 @@ public:
 		//initially unlocked.
 
 #else //unknown cpu architecture, will be using plain mutex
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 	}
 
@@ -358,7 +423,7 @@ public:
 		atomic::Flag::MemoryBarrier();
 
 #else
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 	}
 
@@ -377,7 +442,7 @@ public:
 		this->flag.Clear();
 
 #else
-	#error "ASSERT(false)"
+#	error "ASSERT(false)"
 #endif
 	}
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
@@ -429,21 +494,21 @@ public:
 
 		{
 			ting::s32 old;
-	#if M_COMPILER == M_COMPILER_MSVC
+#	if M_COMPILER == M_COMPILER_MSVC
 			__asm{
 				mov ebx, this
 				mov eax, [value]
 				lock xadd [ebx].v, eax
 				mov [old], eax
 			}
-	#else
+#	else
 			__asm__ __volatile__ (
 					"lock; xaddl %0, %1"
 							: "=r"(old), "=m"(this->v)
 							: "0"(value), "m"(this->v)
 							: "memory"
 				);
-	#endif
+#	endif
 			return old;
 		}
 
@@ -472,6 +537,33 @@ public:
 #endif
 	}
 
+	
+	
+	/**
+	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It sets acquire memory semantics barrier.
+	 * @param value - the value to add to this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
+	inline ting::s32 FetchAndAddAcquire(ting::s32 value)throw(){
+		ting::s32 ret = this->FetchAndAdd(value);
+		atomic::Flag::MemoryBarrier();
+		return ret;
+	}
+	
+	
+	
+	/**
+	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It sets release memory semantics barrier.
+	 * @param value - the value to add to this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
+	inline ting::s32 FetchAndAddRelease(ting::s32 value)throw(){
+		atomic::Flag::MemoryBarrier();
+		return this->FetchAndAdd(value);
+	}
+	
 
 
 	/**
@@ -488,7 +580,7 @@ public:
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		ting::s32 old;
-	#if M_COMPILER == M_COMPILER_MSVC
+#	if M_COMPILER == M_COMPILER_MSVC
 		__asm{
 			mov ebx, this
 			mov eax, [compareTo]
@@ -496,20 +588,20 @@ public:
 			lock cmpxchg [ebx].v, edx
 			mov [old], eax
 		}
-	#else
+#	else
 		__asm__ __volatile__(
 				"lock; cmpxchgl %3, %2"
 						: "=m"(this->v), "=a"(old) // 'a' is 'eax' or 'ax' or 'al' or 'ah'
 						: "m"(this->v), "r"(exchangeBy), "a"(compareTo)
 						: "memory"
 			);
-	#endif
+#	endif
 		return old;
 
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
 		ting::s32 old;
 		int res;
-	#if M_CPU_ARM_THUMB == 2
+#	if M_CPU_ARM_THUMB == 2
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
@@ -521,20 +613,20 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to label 3 forward (exit) if succeeded
 				"2:"                         "\n"
-		#if M_CPU_VERSION >= 7                          // CLREX instruction for Thumb-2 is only supported in ARMv7
+#		if M_CPU_VERSION >= 7                          // CLREX instruction for Thumb-2 is only supported in ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
-		#else
+#		else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
-		#endif
+#		endif
 				"3:"                         "\n"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
-	#else //non-Thumb 2 mode
-		#if M_CPU_ARM_THUMB != 0
+#	else //non-Thumb 2 mode
+#		if M_CPU_ARM_THUMB != 0
 			#error "ASSERT(false)"
-		#endif
+#		endif
 		__asm__ __volatile__(
 				"1:"                         "\n"
 				"	ldrex   %0, [%4]"        "\n" //load old value
@@ -545,17 +637,17 @@ public:
 				"	bne     1b"              "\n" //jump to label 1 backwards (to the beginning) to try again if %1 is not 0, i.e. storing has failed
 				"	b       3f"              "\n" //jump to exit if succeeded
 				"2:"                         "\n"
-		#if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat it as it is available from ARMv7
+#		if M_CPU_VERSION >= 7                          // CLREX instruction for ARM is supported in ARMv6K and higher, we don't detect this K and treat it as it is available from ARMv7
 				"	clrex"                   "\n" //was not equal, clear exclusive access
-		#else
+#		else
 				"	strex   %1, %0, [%4]"    "\n" //store previous value, we don't care if it fails, since we just need to clear exclusive access
-		#endif
+#		endif
 				"3:"
 						: "=&r"(old), "=&r"(res)  //res is not used, thus we need this & early-clobber to avoid gcc assign the same register to it as to something else.
 						: "r"(compareTo), "r"(exchangeBy), "r"(&this->v)
 						: "cc", "memory" // "cc" = "condition codes"
 			);
-	#endif
+#	endif
 		return old;
 
 #else
@@ -568,6 +660,42 @@ public:
 		return old;
 #endif
 	}
+	
+	
+	
+	/**
+	 * @brief Atomic compare and exchange operation
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+	 * It sets acquire memory semantics barrier.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+	 * @return old current value.
+	 */
+	inline ting::s32 CompareAndExchangeAcquire(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
+		ting::s32 ret = CompareAndExchange(compareTo, exchangeBy);
+		atomic::Flag::MemoryBarrier();
+		return ret;
+	}
+	
+	
+	
+	/**
+	 * @brief Atomic compare and exchange operation
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+	 * It sets release memory semantics barrier.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+	 * @return old current value.
+	 */
+	inline ting::s32 CompareAndExchangeRelease(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
+		atomic::Flag::MemoryBarrier();
+		return CompareAndExchange(compareTo, exchangeBy);
+	}
+	
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
 

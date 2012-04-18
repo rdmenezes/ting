@@ -137,15 +137,13 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 		Lock(ting::atomic::Flag& flag)throw() :
 				flag(flag)
 		{
-			while(this->flag.Set(true)){
+			while(this->flag.SetAcquire(true)){
 				ting::Thread::Sleep(0);
 			}
-			atomic::MemoryBarrier();
 		}
 		
 		~Lock()throw(){
-			atomic::MemoryBarrier();
-			this->flag.Clear();
+			this->flag.ClearRelease();
 		}
 	};
 	
