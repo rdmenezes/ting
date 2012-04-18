@@ -128,24 +128,7 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 	ting::Inited<unsigned, 0> numChunks; //this is only used for making sure that there are no chunks upon memory pool destruction
 	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list (looped list)
 	
-	ting::atomic::Flag lockFlag;
-	
-	//lock
-	class Lock{
-		ting::atomic::Flag& flag;
-	public:
-		Lock(ting::atomic::Flag& flag)throw() :
-				flag(flag)
-		{
-			while(this->flag.SetAcquire(true)){
-				ting::Thread::Sleep(0);
-			}
-		}
-		
-		~Lock()throw(){
-			this->flag.ClearRelease();
-		}
-	};
+	ting::atomic::SpinLock lock;
 	
 public:
 	~MemoryPool()throw(){
@@ -154,7 +137,7 @@ public:
 	
 public:
 	void* Alloc_ts(){
-		Lock guard(this->lockFlag);
+		atomic::SpinLock::GuardYield guard(this->lock);
 		
 		if(this->freeHead == 0){
 			Chunk* c = new Chunk();
@@ -188,7 +171,7 @@ public:
 			return;
 		}
 		
-		Lock guard(this->lockFlag);
+		atomic::SpinLock::GuardYield guard(this->lock);
 		
 		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
 		

@@ -35,6 +35,7 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "types.hpp"
 #include "util.hpp"
+#include "Thread.hpp"
 
 
 
@@ -410,6 +411,8 @@ public:
 
 	/**
 	 * @brief Lock the spinlock.
+	 * If the lock cannot be acquired immediately it will enter a busy loop
+	 * reading the lock value until it becomes 'unlocked' and then try to lock again.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
 	inline void Lock()throw(){
@@ -427,6 +430,28 @@ public:
 #endif
 	}
 
+	
+	
+	/**
+	 * @brief Lock the spinlock.
+	 * This will do Thread::Sleep(0) in the busy loop if the lock cannot be acquired immediately.
+	 * Right after acquiring the lock the memory barrier is set.
+	 */
+	inline void LockYield()throw(){
+#if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
+		this->mutex.Lock();
+#elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
+
+		while(this->flag.Set(true)){
+			ting::Thread::Sleep(0);
+		}
+		atomic::Flag::MemoryBarrier();
+
+#else
+#	error "ASSERT(false)"
+#endif
+	}
+	
 
 
 	/**
@@ -445,6 +470,50 @@ public:
 #	error "ASSERT(false)"
 #endif
 	}
+	
+	
+	
+	/**
+	 * @brief Helper class which automatically Locks the given spinlock.
+	 * This helper class automatically locks the given spinlock in the constructor and
+	 * unlocks the spinlock in destructor. This class is useful if the code between
+	 * spinlock lock/unlock may return or throw an exception,
+	 * then the spinlock will be automatically unlocked in such case.
+	 */
+	class Guard{
+		SpinLock& sl;
+	public:
+		Guard(SpinLock& sl)throw() :
+				sl(sl)
+		{
+			this->sl.Lock();
+		}
+		
+		~Guard()throw(){
+			this->sl.Unlock();
+		}
+	};
+	
+	
+	
+	/**
+	 * @brief Helper class which automatically Locks the given spinlock.
+	 * This is the same as SpinLock::Guard except it locks the spinlock with
+	 * SpinLock::LockYield() method.
+	 */
+	class GuardYield{
+		SpinLock& sl;
+	public:
+		GuardYield(SpinLock& sl)throw() :
+				sl(sl)
+		{
+			this->sl.LockYield();
+		}
+		
+		~GuardYield()throw(){
+			this->sl.Unlock();
+		}
+	};
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
 
