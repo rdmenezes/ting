@@ -53,15 +53,15 @@ THE SOFTWARE. */
 //has not been included. Here we temporarily define the macro in order to prevent
 //inclusion of winsock.h from within the windows.h. Because it may later conflict with
 //winsock2.h if it is included later.
-#ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_
-#include <windows.h>
-#undef _WINSOCKAPI_
-#else
-#include <windows.h>
-#endif
+#	ifndef _WINSOCKAPI_
+#		define _WINSOCKAPI_
+#		include <windows.h>
+#		undef _WINSOCKAPI_
+#	else
+#		include <windows.h>
+#	endif
 
-#include <process.h>
+#	include <process.h>
 
 
 
@@ -69,9 +69,9 @@ THE SOFTWARE. */
 //= Symbian =
 //===========
 #elif defined(__SYMBIAN32__)
-#include <string.h>
-#include <e32std.h>
-#include <hal.h>
+#	include <string.h>
+#	include <e32std.h>
+#	include <hal.h>
 
 
 
@@ -80,25 +80,25 @@ THE SOFTWARE. */
 //========================================
 #elif defined(__linux__) || defined(__APPLE__) || defined(sun) || defined(__sun)
 
-#include <unistd.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <ctime>
+#	include <unistd.h>
+#	include <pthread.h>
+#	include <semaphore.h>
+#	include <errno.h>
+#	include <ctime>
 
 //if we have Solaris
-#if defined(sun) || defined(__sun)
-#include <sched.h>	//	for sched_yield();
-#endif
+#	if defined(sun) || defined(__sun)
+#		include <sched.h>	//	for sched_yield();
+#	endif
 
-#if defined(__ANDROID__)
+#	if defined(__ANDROID__)
 //TODO: revert to using sys/eventfd.h when it becomes available in Android NDK
-#elif defined(__linux__)
-#include <sys/eventfd.h>
-#endif
+#	elif defined(__linux__)
+#		include <sys/eventfd.h>
+#	endif
 
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -106,25 +106,25 @@ THE SOFTWARE. */
 //if Microsoft MSVC compiler,
 //then disable warning about throw specification is ignored.
 #if M_COMPILER == M_COMPILER_MSVC
-#pragma warning(push) //push warnings state
-#pragma warning( disable : 4290)
+#	pragma warning(push) //push warnings state
+#	pragma warning( disable : 4290)
 #endif
 
 
 
 //#define M_ENABLE_MUTEX_TRACE
 #ifdef M_ENABLE_MUTEX_TRACE
-#define M_MUTEX_TRACE(x) TRACE(<< "[MUTEX] ") TRACE(x)
+#	define M_MUTEX_TRACE(x) TRACE(<< "[MUTEX] ") TRACE(x)
 #else
-#define M_MUTEX_TRACE(x)
+#	define M_MUTEX_TRACE(x)
 #endif
 
 
 //#define M_ENABLE_QUEUE_TRACE
 #ifdef M_ENABLE_QUEUE_TRACE
-#define M_QUEUE_TRACE(x) TRACE(<< "[QUEUE] ") TRACE(x)
+#	define M_QUEUE_TRACE(x) TRACE(<< "[QUEUE] ") TRACE(x)
 #else
-#define M_QUEUE_TRACE(x)
+#	define M_QUEUE_TRACE(x)
 #endif
 
 
@@ -151,7 +151,7 @@ class Mutex{
 #elif defined(__linux__) || defined(__APPLE__)
 	pthread_mutex_t m;
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 
 private:
@@ -183,7 +183,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_lock(&this->m);
 #else
-	#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 
@@ -201,7 +201,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_mutex_unlock(&this->m);
 #else
-	#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 
@@ -212,7 +212,7 @@ public:
 	 * This helper class automatically locks the given mutex in the constructor and
 	 * unlocks the mutex in destructor. This class is useful if the code between
 	 * mutex lock/unlock may return or throw an exception,
-	 * then the mutex be automaticlly unlocked in such case.
+	 * then the mutex will be automatically unlocked in such case.
 	 */
 	class Guard{
 		Mutex &mutex;
@@ -256,7 +256,7 @@ class Semaphore{
 #elif defined(__linux__)
 	sem_t s;
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 
 	//forbid copying
@@ -313,7 +313,7 @@ public:
 			throw ting::Exc("Semaphore::Wait(): wait failed");
 		}
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 	
@@ -362,7 +362,7 @@ public:
 			ASSERT(false)
 		}
 #else
-	#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 };//~class Semaphore
@@ -380,7 +380,7 @@ class CondVar{
 	//A pointer to store system dependent handle
 	pthread_cond_t cond;
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 
 	//forbid copying
@@ -415,7 +415,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_cond_wait(&this->cond, &mutex.m);
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 
@@ -434,7 +434,7 @@ public:
 #elif defined(__linux__) || defined(__APPLE__)
 		pthread_cond_signal(&this->cond);
 #else
-#error "unknown system"
+#	error "unknown system"
 #endif
 	}
 };
@@ -498,7 +498,7 @@ class Queue : public Waitable{
 	//use eventfd()
 	int eventFD;
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	//forbid copying
@@ -575,7 +575,7 @@ private:
 	int GetHandle();
 
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 };//~class Queue
 
@@ -595,7 +595,7 @@ class Thread{
 #elif defined(__linux__) || defined(__APPLE__)
 	static void* RunThread(void *data);
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -619,7 +619,7 @@ class Thread{
 #elif defined(__linux__) || defined(__APPLE__)
 	pthread_t th;
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	//forbid copying
@@ -698,18 +698,18 @@ public:
 		User::After(msec * 1000);
 #elif defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__linux__)
 		if(msec == 0){
-	#if defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__ANDROID__)
+#	if defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__ANDROID__)
 			sched_yield();
-	#elif defined(__linux__)
+#	elif defined(__linux__)
 			pthread_yield();
-	#else
-	#error "Should not get here"
-	#endif
+#	else
+#		error "Should not get here"
+#	endif
 		}else{
 			usleep(msec * 1000);
 		}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	}
 
@@ -740,7 +740,7 @@ public:
 		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(T_ThreadID))
 		return T_ThreadID(t);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	}
 };
@@ -884,7 +884,7 @@ inline void MsgThread::PushQuitMessage(){
 
 //if Microsoft MSVC compiler, restore warnings state
 #if M_COMPILER == M_COMPILER_MSVC
-#pragma warning(pop) //pop warnings state
+#	pragma warning(pop) //pop warnings state
 #endif
 
 

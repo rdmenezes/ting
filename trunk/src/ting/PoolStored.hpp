@@ -47,9 +47,9 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_POOL_TRACE
 #ifdef M_ENABLE_POOL_TRACE
-#define M_POOL_TRACE(x) TRACE(<<"[POOL] ") TRACE(x)
+#	define M_POOL_TRACE(x) TRACE(<<"[POOL] ") TRACE(x)
 #else
-#define M_POOL_TRACE(x)
+#	define M_POOL_TRACE(x)
 #endif
 
 namespace ting{
@@ -128,26 +128,7 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 	ting::Inited<unsigned, 0> numChunks; //this is only used for making sure that there are no chunks upon memory pool destruction
 	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list (looped list)
 	
-	ting::atomic::Flag lockFlag;
-	
-	//lock
-	class Lock{
-		ting::atomic::Flag& flag;
-	public:
-		Lock(ting::atomic::Flag& flag)throw() :
-				flag(flag)
-		{
-			while(this->flag.Set(true)){
-				ting::Thread::Sleep(0);
-			}
-			atomic::MemoryBarrier();
-		}
-		
-		~Lock()throw(){
-			atomic::MemoryBarrier();
-			this->flag.Clear();
-		}
-	};
+	ting::atomic::SpinLock lock;
 	
 public:
 	~MemoryPool()throw(){
@@ -156,7 +137,7 @@ public:
 	
 public:
 	void* Alloc_ts(){
-		Lock guard(this->lockFlag);
+		atomic::SpinLock::GuardYield guard(this->lock);
 		
 		if(this->freeHead == 0){
 			Chunk* c = new Chunk();
@@ -190,7 +171,7 @@ public:
 			return;
 		}
 		
-		Lock guard(this->lockFlag);
+		atomic::SpinLock::GuardYield guard(this->lock);
 		
 		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
 		
