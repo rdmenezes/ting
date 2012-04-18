@@ -45,7 +45,6 @@ THE SOFTWARE. */
 
 #else
 #	define M_ATOMIC_USE_MUTEX_FALLBACK
-#	include "Thread.hpp"
 #endif
 
 
