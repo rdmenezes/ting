@@ -149,7 +149,7 @@ public:
 #endif
 	}
 
-	//TODO: add acquire and release memory semantics methods
+
 
 	/**
 	 * @brief Set the flag value.
