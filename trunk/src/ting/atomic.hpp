@@ -507,6 +507,10 @@ public:
 
 
 
+	inline ~S32()throw(){}
+
+
+
 	/**
 	 * @brief Adds the value to this atomic variable and returns its initial value.
 	 * It does not set any memory barrier.
@@ -723,6 +727,54 @@ public:
 } M_DECLARE_ALIGNED(sizeof(int)); //On most architectures, atomic operations require that the value to be naturally aligned.
 
 
+
+//TODO: add doxygen docs
+class U32{
+	atomic::S32 v;
+public:
+	
+	inline U32(ting::u32 initialValue = 0) :
+			v(ting::s32(initialValue))
+	{}
+			
+	inline ~U32()throw(){}
+	
+	inline ting::u32 FetchAndAdd(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAdd(ting::s32(value)));
+	}
+	
+	inline ting::u32 FetchAndAddAcquire(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAddAcquire(ting::s32(value)));
+	}
+	
+	inline ting::u32 FetchAndAddRelease(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAddRelease(ting::s32(value)));
+	}
+	
+	inline ting::u32 FetchAndSubtract(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAdd(-ting::s32(value)));
+	}
+	
+	inline ting::u32 FetchAndSubtractAcquire(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAddAcquire(-ting::s32(value)));
+	}
+	
+	inline ting::u32 FetchAndSubtractRelease(ting::u32 value)throw(){
+		return ting::u32(this->v.FetchAndAddRelease(-ting::s32(value)));
+	}
+	
+	inline ting::u32 CompareAndExchange(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+		return ting::u32(this->v.CompareAndExchange(ting::s32(compareTo), ting::s32(exchangeBy)));
+	}
+
+	inline ting::u32 CompareAndExchangeAcquire(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+		return ting::u32(this->v.CompareAndExchangeAcquire(ting::s32(compareTo), ting::s32(exchangeBy)));
+	}
+	
+	inline ting::u32 CompareAndExchangeRelease(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+		return ting::u32(this->v.CompareAndExchangeRelease(ting::s32(compareTo), ting::s32(exchangeBy)));
+	}
+};
 
 }//~namespace atomic
 }//~namespace ting

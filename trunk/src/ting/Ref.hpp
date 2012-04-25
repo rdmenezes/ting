@@ -99,13 +99,13 @@ class RefCounted{
 private:
 
 	struct Counter{
-		ting::atomic::S32 numStrongRefs;
+		ting::atomic::U32 numStrongRefs;
 
 		//WeakRef's are the references which control the life time of the Counter object.
 		//I.e. WeakRef's are playing role of _strong_ references for Counter object.
 		//Think of RefCounted object as additional _strong_ reference to the Counter object,
 		//this is why number of WeakRef's is initialized to 1.
-		ting::atomic::S32 numWeakRefs;
+		ting::atomic::U32 numWeakRefs;
 
 		inline Counter() :
 				numWeakRefs(1)//1 because RefCounted acts as weak reference.
@@ -197,12 +197,12 @@ protected:
 		//since RefCounted is being destroyed, that means that there are no strong ref's left
 		ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
 {
-		ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(0);
+		ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(0);
 		ASSERT_INFO(res >= 1, "res = " << res)
 }
 #endif
 
-		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//there was only 1 weak ref
+		if(this->counter->numWeakRefs.FetchAndSubtract(1) == 1){//if there was only 1 weak ref
 			delete this->counter;
 		}
 	}
@@ -218,7 +218,7 @@ public:
 	 */
 	inline unsigned NumRefs()const throw(){
 		ASSERT(this->counter)
-		ting::s32 ret = this->counter->numStrongRefs.FetchAndAdd(0);
+		ting::u32 ret = this->counter->numStrongRefs.FetchAndAdd(0);
 		ASSERT(ret > 0)
 		return unsigned(ret);
 	}
@@ -637,7 +637,7 @@ private:
 	inline void Destroy()throw(){
 		if(this->IsValid()){
 			ASSERT(this->p->counter)
-			if(this->p->counter->numStrongRefs.FetchAndAdd(-1) == 1){//if there was only one strong ref
+			if(this->p->counter->numStrongRefs.FetchAndSubtract(1) == 1){//if there was only one strong ref
 				M_REF_PRINT(<< "Ref::Destroy(): deleting " << (this->p) << std::endl)
 				//deleting should be ok without type casting, because RefCounted
 				//destructor is virtual.
@@ -714,7 +714,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT_INFO(res >= 1, "res = " << res)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
@@ -746,7 +746,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			ting::s32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
@@ -758,7 +758,7 @@ template <class T> class WeakRef{
 			return;
 		}
 
-		if(this->counter->numWeakRefs.FetchAndAdd(-1) == 1){//if there was only 1 weak reference before decrement
+		if(this->counter->numWeakRefs.FetchAndSubtract(1) == 1){//if there was only 1 weak reference before decrement
 			ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
 			delete this->counter;
 		}
@@ -951,8 +951,8 @@ template <class T> inline Ref<T>::Ref(const WeakRef<T> &r)throw(){
 
 	//Try incrementing number of strong references.
 	//We want to increment only if it is not 0.
-	for(ting::s32 guess = 1; ;){//start with 1, not with 0, since we don't want to increment if value is 0.
-		ting::s32 oldVal = r.counter->numStrongRefs.CompareAndExchange(guess, guess + 1);
+	for(ting::u32 guess = 1; ;){//start with 1, not with 0, since we don't want to increment if value is 0.
+		ting::u32 oldVal = r.counter->numStrongRefs.CompareAndExchange(guess, guess + 1);
 		if(oldVal == 0){
 			//there are no strong references, weak ref is invalid
 			this->p = 0;
