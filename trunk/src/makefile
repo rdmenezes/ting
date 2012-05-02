@@ -21,7 +21,7 @@ build_config := release
 
 name := libting
 
-so_name := 0
+so_name := 1
 
 ifeq ($(platform), linux)
     name := $(name).so
