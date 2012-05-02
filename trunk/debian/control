@@ -5,7 +5,7 @@ Maintainer: Ivan Gagis <igagis@gmail.com>
 Build-Depends: libc6-dev, doxygen, awk
 Standards-Version: 3.7.2
 
-Package: libting0
+Package: libting1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -14,16 +14,16 @@ Description: cross-platform C++ utility library.
  For network development it provides TCPSocket, UDPSocket classes, etc.
  It also provides reference counted pointers, smart pointers for buffers.
 
-Package: libting0-dbg
+Package: libting1-dbg
 Section: devel
 Architecture: any
-Depends: ${shlibs:Depends}, libting0 (= ${binary:Version})
-Description: debugging symbols for libting0 package.
+Depends: ${shlibs:Depends}, libting1 (= ${binary:Version})
+Description: debugging symbols for libting1 package.
 
 Package: libting-dev
 Section: devel
 Architecture: any
-Depends: libting0 (= ${binary:Version})
+Depends: libting1 (= ${binary:Version})
 Suggests: libting-doc
 Description: cross-platform C++ utility library.
  For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.

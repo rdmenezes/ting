@@ -2,7 +2,7 @@
 
 packageName=libting-dev
 
-soName=0
+soName=1
 
 libFileName=libting.so
 

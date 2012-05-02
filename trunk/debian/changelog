@@ -1,3 +1,10 @@
+libting (2.0.0-1) stable; urgency=low
+
+  * Acquire/Release semantics for atomic operations
+  * atomic::U32 class
+
+ -- Ivan Gagis <igagis@gmail.com>  Wed, 02 May 2012 16:48:00 +0200
+
 libting (1.0.0-1) stable; urgency=low
 
   * Some directory structure refactoring

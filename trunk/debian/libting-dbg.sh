@@ -1,6 +1,6 @@
 #!/bin/sh
 
-soName=0
+soName=1
 
 packageName=libting${soName}-dbg
 
