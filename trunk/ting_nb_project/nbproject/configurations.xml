@@ -1,6 +1,315 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="80">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df name="jni" root="../android/jni">
+      <df name="AssetFile">
+        <in>AssetFile.cpp</in>
+        <in>AssetFile.hpp</in>
+      </df>
+      <df name="test">
+        <in>Android.mk</in>
+        <in>main.cpp</in>
+      </df>
+      <df name="ting">
+        <df name="ting">
+          <df name="fs">
+            <in>Exc.hpp</in>
+            <in>FSFile.cpp</in>
+            <in>FSFile.hpp</in>
+            <in>File.cpp</in>
+            <in>File.hpp</in>
+          </df>
+          <df name="net">
+            <in>Exc.hpp</in>
+            <in>HostNameResolver.cpp</in>
+            <in>HostNameResolver.hpp</in>
+            <in>IPAddress.cpp</in>
+            <in>IPAddress.hpp</in>
+            <in>Lib.cpp</in>
+            <in>Lib.hpp</in>
+            <in>Socket.cpp</in>
+            <in>Socket.hpp</in>
+            <in>TCPServerSocket.cpp</in>
+            <in>TCPServerSocket.hpp</in>
+            <in>TCPSocket.cpp</in>
+            <in>TCPSocket.hpp</in>
+            <in>UDPSocket.cpp</in>
+            <in>UDPSocket.hpp</in>
+          </df>
+          <in>Array.hpp</in>
+          <in>Buffer.hpp</in>
+          <in>Exc.hpp</in>
+          <in>PoolStored.hpp</in>
+          <in>Ptr.hpp</in>
+          <in>Ref.cpp</in>
+          <in>Ref.hpp</in>
+          <in>Signal.hpp</in>
+          <in>Singleton.hpp</in>
+          <in>Thread.cpp</in>
+          <in>Thread.hpp</in>
+          <in>WaitSet.cpp</in>
+          <in>WaitSet.hpp</in>
+          <in>atomic.hpp</in>
+          <in>codegen.h</in>
+          <in>config.hpp</in>
+          <in>debug.hpp</in>
+          <in>math.hpp</in>
+          <in>timer.cpp</in>
+          <in>timer.hpp</in>
+          <in>types.hpp</in>
+          <in>util.hpp</in>
+        </df>
+        <in>Android.mk</in>
+      </df>
+      <in>Android.mk</in>
+      <in>Application.mk</in>
+    </df>
+    <df name="src" root="../src">
+      <df name="obj">
+        <df name="1">
+          <df name="2">
+            <df name="ting">
+              <df name="fs">
+                <in>FSFile.d</in>
+                <in>File.d</in>
+              </df>
+              <df name="net">
+                <in>HostNameResolver.d</in>
+                <in>IPAddress.d</in>
+                <in>Lib.d</in>
+                <in>Socket.d</in>
+                <in>TCPServerSocket.d</in>
+                <in>TCPSocket.d</in>
+                <in>UDPSocket.d</in>
+              </df>
+              <in>Ref.d</in>
+              <in>Thread.d</in>
+              <in>WaitSet.d</in>
+              <in>timer.d</in>
+            </df>
+          </df>
+        </df>
+      </df>
+      <df name="ting">
+        <df name="fs">
+          <in>Exc.hpp</in>
+          <in>FSFile.cpp</in>
+          <in>FSFile.hpp</in>
+          <in>File.cpp</in>
+          <in>File.hpp</in>
+        </df>
+        <df name="net">
+          <in>Exc.hpp</in>
+          <in>HostNameResolver.cpp</in>
+          <in>HostNameResolver.hpp</in>
+          <in>IPAddress.cpp</in>
+          <in>IPAddress.hpp</in>
+          <in>Lib.cpp</in>
+          <in>Lib.hpp</in>
+          <in>Socket.cpp</in>
+          <in>Socket.hpp</in>
+          <in>TCPServerSocket.cpp</in>
+          <in>TCPServerSocket.hpp</in>
+          <in>TCPSocket.cpp</in>
+          <in>TCPSocket.hpp</in>
+          <in>UDPSocket.cpp</in>
+          <in>UDPSocket.hpp</in>
+        </df>
+        <in>Array.hpp</in>
+        <in>Buffer.hpp</in>
+        <in>Exc.hpp</in>
+        <in>PoolStored.hpp</in>
+        <in>Ptr.hpp</in>
+        <in>Ref.cpp</in>
+        <in>Ref.hpp</in>
+        <in>Signal.hpp</in>
+        <in>Singleton.hpp</in>
+        <in>Thread.cpp</in>
+        <in>Thread.hpp</in>
+        <in>WaitSet.cpp</in>
+        <in>WaitSet.hpp</in>
+        <in>atomic.hpp</in>
+        <in>codegen.h</in>
+        <in>config.hpp</in>
+        <in>debug.hpp</in>
+        <in>math.hpp</in>
+        <in>timer.cpp</in>
+        <in>timer.hpp</in>
+        <in>types.hpp</in>
+        <in>util.hpp</in>
+      </df>
+      <in>libting.so.0</in>
+      <in>libting.so.1</in>
+      <in>makefile</in>
+    </df>
+    <df name="tests" root="../tests">
+      <df name="Array">
+        <in>Array_tests.cpp</in>
+        <in>Array_tests.hpp</in>
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+      </df>
+      <df name="atomic">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Buffer">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="debug">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="FSFile">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>test.file.txt</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="math">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="net">
+        <in>dns.cpp</in>
+        <in>dns.hpp</in>
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>socket.cpp</in>
+        <in>socket.hpp</in>
+        <in>tests</in>
+      </df>
+      <df name="PoolStored">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Ptr">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Ref">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="RefOverSharedLibrary">
+        <in>Ref_test</in>
+        <in>Ref_test.cpp</in>
+        <in>TestClass.hpp</in>
+        <in>makefile</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="Signal">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="SingletonOverSharedLibrary">
+        <in>Singleton_test</in>
+        <in>Singleton_test.cpp</in>
+        <in>TestSingleton.hpp</in>
+        <in>makefile</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="Thread">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="timer">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="types">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="util">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="WaitSet">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>makefile</in>
+        <in>makefile_msvc</in>
+        <in>tests</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <in>libting.mk</in>
+      <in>makefile</in>
+      <in>makefile_msvc</in>
+    </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -10,9 +319,9 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
-    <Elem>/home/ivan/prj/ting/src</Elem>
-    <Elem>/home/ivan/prj/ting/tests</Elem>
-    <Elem>/home/ivan/prj/ting/android/jni</Elem>
+    <Elem>../src</Elem>
+    <Elem>../tests</Elem>
+    <Elem>../android/jni</Elem>
   </sourceRootList>
   <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
   <confs>

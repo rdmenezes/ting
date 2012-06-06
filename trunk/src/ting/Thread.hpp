@@ -483,6 +483,7 @@ public:
 class Queue : public Waitable{
 	Semaphore sem;
 
+	//TODO: use spinlock instead of mutex?
 	Mutex mut;
 
 	ting::Inited<Message*, 0> first;
