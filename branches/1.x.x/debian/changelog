@@ -1,3 +1,9 @@
+libting (1.1.0-1) stable; urgency=low
+
+  * Merging from trunk
+
+ -- Ivan Gagis <igagis@gmail.com>  Wed, 20 Jun 2012 14:50:00 +0200
+
 libting (1.0.0-1) stable; urgency=low
 
   * Some directory structure refactoring
