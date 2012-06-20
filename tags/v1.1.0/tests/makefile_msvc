@@ -1,0 +1,28 @@
+subdirs :=
+subdirs += Array
+subdirs += atomic
+subdirs += Buffer
+subdirs += debug
+subdirs += FSFile
+subdirs += math
+subdirs += net
+subdirs += PoolStored
+subdirs += Ptr
+subdirs += Ref
+subdirs += Signal
+subdirs += Thread
+subdirs += timer
+subdirs += types
+subdirs += util
+subdirs += WaitSet
+
+
+
+default all clean:
+	@$(MAKE) -f makefile_msvc $(subdirs) target=$@
+
+.PHONY: $(subdirs)
+$(subdirs):
+	@$(MAKE) -C $@ -f makefile_msvc $(target)
+
+
