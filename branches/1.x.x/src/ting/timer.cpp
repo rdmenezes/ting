@@ -66,7 +66,7 @@ bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 
 
 
-void Lib::TimerThread::AddTimer_ts(Timer* timer, u32 timeout){
+void Lib::TimerThread::AddTimer_ts(Timer* timer, ting::u32 timeout){
 	ASSERT(timer)
 	ting::Mutex::Guard mutexGuard(this->mutex);
 
