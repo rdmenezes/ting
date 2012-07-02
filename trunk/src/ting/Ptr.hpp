@@ -89,12 +89,13 @@ public:
 	}
 
 	inline T* operator->()throw(){
-		ASSERT_INFO(this->p, "Ptr::operator->(): this->p is zero")
 		return this->p;
 	}
 
+	//NOTE: the operator is const but returns non-const value because const Ptr
+	//      doesn't mean that it points to constant object, it means that
+	//      the pointer itself cannot be changed to point to another value.
 	inline T* operator->()const throw(){
-		ASSERT_INFO(this->p, "const Ptr::operator->(): this->p is zero")
 		return this->p;
 	}
 
