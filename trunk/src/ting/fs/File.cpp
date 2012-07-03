@@ -276,7 +276,7 @@ bool File::Exists()const{
 
 
 
-File::Guard::Guard(File& file, EMode mode) :
+File::Guard::Guard(File& file, E_Mode mode) :
 		f(file)
 {
 	if(this->f.IsOpened())

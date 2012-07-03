@@ -84,14 +84,14 @@ public:
 	/**
 	 * @brief Modes of opening the file.
 	 */
-	enum EMode{
+	enum E_Mode{
 		READ,  ///Open existing file for read only
 		WRITE, ///Open existing file for read and write
 		CREATE ///Create new file and open it for read and write. If file exists it will be replaced by empty file.
 	};
 
 protected:
-	EMode ioMode;//mode only matters when file is opened
+	E_Mode ioMode;//mode only matters when file is opened
 public:
 
 	/**
@@ -161,7 +161,7 @@ public:
 	 * @param mode - file opening mode (reading/writing/create).
 	 * @throw IllegalStateExc - if file already opened.
 	 */
-	virtual void Open(EMode mode) = 0;
+	virtual void Open(E_Mode mode) = 0;
 
 	/**
 	 * @brief Close file.
@@ -338,7 +338,7 @@ public:
 	class Guard{
 		File& f;
 	public:
-		Guard(File &file, EMode mode);
+		Guard(File &file, E_Mode mode);
 
 		~Guard();
 	};

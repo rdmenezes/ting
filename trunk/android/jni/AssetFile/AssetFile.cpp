@@ -46,7 +46,7 @@ using namespace ting_android;
 
 
 //override
-void AssetFile::Open(EMode mode){
+void AssetFile::Open(E_Mode mode){
 	if(this->IsOpened()){
 		throw File::Exc("file already opened");
 	}

@@ -62,7 +62,7 @@ void FSFile::SetRootDir(const std::string &dir){
 
 
 //override
-void FSFile::Open(EMode mode){
+void FSFile::Open(E_Mode mode){
 	if(this->IsOpened()){
 		throw File::IllegalStateExc("cannot open, file is already opened.");
 	}

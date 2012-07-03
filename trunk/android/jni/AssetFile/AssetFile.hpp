@@ -77,7 +77,7 @@ public:
 
 
 	//override
-	virtual void Open(EMode mode);
+	virtual void Open(E_Mode mode);
 
 
 
