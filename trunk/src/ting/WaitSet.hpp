@@ -51,31 +51,31 @@ THE SOFTWARE. */
 //inclusion of winsock.h from within the windows.h. Because it may later conflict with
 //winsock2.h if it is included later.
 #ifndef _WINSOCKAPI_
-#define _WINSOCKAPI_
-	#include <windows.h>
-#undef _WINSOCKAPI_
+#	define _WINSOCKAPI_
+#	include <windows.h>
+#	undef _WINSOCKAPI_
 #else
-	#include <windows.h>
+#	include <windows.h>
 #endif
 
 #elif defined(__linux__)
-	#include <sys/epoll.h>
+#	include <sys/epoll.h>
 
 #elif defined(__APPLE__)
-	#include <sys/types.h>
-	#include <sys/event.h>
-	#include <sys/time.h>
+#	include <sys/types.h>
+#	include <sys/event.h>
+#	include <sys/time.h>
 
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
 //if Microsoft MSVC compiler,
 //then disable warning about throw specification is ignored.
 #ifdef _MSC_VER
-#pragma warning(push) //push warnings state
-#pragma warning( disable : 4290)
+#	pragma warning(push) //push warnings state
+#	pragma warning( disable : 4290)
 #endif
 
 
@@ -253,8 +253,8 @@ protected:
 
 	virtual void SetWaitingEvents(u32 /*flagsToWaitFor*/){}
 
-	//returns true if signalled
-	virtual bool CheckSignalled(){
+	//returns true if signaled
+	virtual bool CheckSignaled(){
 		return this->readinessFlags != 0;
 	}
 
@@ -267,7 +267,7 @@ protected:
 
 
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 };//~class Waitable
@@ -331,7 +331,7 @@ class WaitSet{
 		SetEvent(w, rw, false);
 	}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 public:
@@ -370,7 +370,7 @@ public:
 		}
 	}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -392,7 +392,7 @@ public:
 #elif defined(__APPLE__)
 		close(this->kq_queue);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	}
 
@@ -449,10 +449,11 @@ public:
 
 	/**
 	 * @brief wait for event.
-	 * This function blocks calling thread exectution until one of the Waitable objects in the WaitSet
+	 * This function blocks calling thread execution until one of the Waitable objects in the WaitSet
 	 * triggers. Upon return from the function, pointers to triggered objects are placed in the
 	 * 'out_events' buffer and the return value from the function indicates number of these objects
 	 * which have triggered.
+	 * Note, that it does not change the readiness state of non-triggered objects.
 	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
 	 *                     The buffer will not be initialized to 0's by this function.
 	 *                     The buffer shall be large enough to hold maxmimum number of Waitables
@@ -500,6 +501,6 @@ private:
 
 //if Microsoft MSVC compiler, restore warnings state
 #ifdef _MSC_VER
-#pragma warning(pop) //pop warnings state
+#	pragma warning(pop) //pop warnings state
 #endif
 

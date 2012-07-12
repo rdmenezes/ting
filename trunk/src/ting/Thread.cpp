@@ -527,9 +527,9 @@ void Queue::SetWaitingEvents(u32 flagsToWaitFor){
 
 
 
-//returns true if signalled
+//returns true if signaled
 //override
-bool Queue::CheckSignalled(){
+bool Queue::CheckSignaled(){
 	//error condition is not possible for queue
 	ASSERT((this->readinessFlags & ting::Waitable::ERROR_CONDITION) == 0)
 

@@ -563,9 +563,9 @@ private:
 	//override
 	virtual void SetWaitingEvents(u32 flagsToWaitFor);
 
-	//returns true if signalled
+	//returns true if signaled
 	//override
-	virtual bool CheckSignalled();
+	virtual bool CheckSignaled();
 
 #elif defined(__linux__)
 	//override

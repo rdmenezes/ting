@@ -201,7 +201,7 @@ private:
 	HANDLE GetHandle();
 
 	//override
-	bool CheckSignalled();
+	bool CheckSignaled();
 
 protected:
 	void CreateEventForWaitable();

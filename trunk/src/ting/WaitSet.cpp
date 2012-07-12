@@ -77,7 +77,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		AddEvent(w, EVENT_WRITE);
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	++this->numWaitables;
@@ -137,7 +137,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		AddEvent(w, EVENT_WRITE);
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
@@ -185,7 +185,7 @@ void WaitSet::Remove(Waitable* w)throw(){
 		RemoveEvent(w, EVENT_READ);
 		RemoveEvent(w, EVENT_WRITE);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	--this->numWaitables;
@@ -236,7 +236,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	//check for activities
 	unsigned numEvents = 0;
 	for(unsigned i = 0; i < this->numWaitables; ++i){
-		if(this->waitables[i]->CheckSignalled()){
+		if(this->waitables[i]->CheckSignaled()){
 			if(out_events){
 				ASSERT(numEvents < out_events->Size())
 				out_events->operator[](numEvents) = this->waitables[i];
@@ -356,6 +356,6 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }

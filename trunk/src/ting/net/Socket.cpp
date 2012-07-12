@@ -205,12 +205,12 @@ HANDLE Socket::GetHandle(){
 
 
 //override
-bool Socket::CheckSignalled(){
+bool Socket::CheckSignaled(){
 	WSANETWORKEVENTS events;
 	memset(&events, 0, sizeof(events));
 	ASSERT(this->IsValid())
 	if(WSAEnumNetworkEvents(this->socket, this->eventForWaitable, &events) != 0){
-		throw net::Exc("Socket::CheckSignalled(): WSAEnumNetworkEvents() failed");
+		throw net::Exc("Socket::CheckSignaled(): WSAEnumNetworkEvents() failed");
 	}
 
 	//NOTE: sometimes no events are reported, don't know why.
@@ -255,7 +255,7 @@ bool Socket::CheckSignalled(){
 	}
 #endif
 
-	return this->Waitable::CheckSignalled();
+	return this->Waitable::CheckSignaled();
 }
 
 
