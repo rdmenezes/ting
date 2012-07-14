@@ -66,8 +66,6 @@
           <df name="2">
             <df name="ting">
               <df name="fs">
-                <in>FSFile.d</in>
-                <in>File.d</in>
               </df>
               <df name="net">
               </df>

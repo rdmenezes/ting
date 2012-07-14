@@ -768,7 +768,14 @@ template <class T> class WeakRef{
 
 public:
 	/**
-	 * @brief make weak reference from pointer to RefCounted.
+	 * @brief Create initially invalid weak reference.
+     */
+	inline WeakRef()throw() :
+			counter(0)
+	{}
+	
+	/**
+	 * @brief Make weak reference from pointer to RefCounted.
 	 * This constructor makes a weak reference from ordinary pointer to a
 	 * RefCounted object. Mainly, weak references should be constructed this way
 	 * only from within the constructor of the class derived from RefCounted.
@@ -780,7 +787,7 @@ public:
 	 * finished construction.
 	 * @param rc - ordinary pointer to a RefCounted object.
 	 */
-	inline WeakRef(T* rc = 0)throw(){
+	inline WeakRef(T* rc)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(T*): invoked" << std::endl)
 		this->InitFromRefCounted(rc);
 	}
