@@ -156,6 +156,14 @@ public:
 	std::string ExtractExtension()const;
 
 	/**
+	 * @brief Get directory part of the path.
+	 * Example: if path is '/home/user/some.file.txt' then the return value
+	 * will be '/home/user/'.
+     * @return String representation of directory part of the path.
+     */
+	std::string ExtractDirectory()const;
+	
+	/**
 	 * @brief Open file.
 	 * Opens file for reading/writing or creates the file.
 	 * @param mode - file opening mode (reading/writing/create).

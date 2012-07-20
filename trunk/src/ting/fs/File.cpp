@@ -57,6 +57,21 @@ std::string File::ExtractExtension()const{
 
 
 
+std::string File::ExtractDirectory()const{
+	size_t slashPos = this->Path().rfind('/');
+	if(slashPos == std::string::npos){//no slash found
+		return std::string();
+	}
+
+	ASSERT(slashPos > 0)
+	ASSERT(this->Path().size() > 0)
+	ASSERT(this->Path().size() >= slashPos + 1)
+
+	return std::string(this->Path(), 0, slashPos + 1);
+}
+
+
+
 bool File::IsDir()const throw(){
 	if(this->Path().size() == 0){
 		return true;
