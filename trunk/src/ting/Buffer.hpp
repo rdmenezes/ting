@@ -130,7 +130,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline const T& operator[](size_t i)const throw(){
+	inline T& operator[](size_t i)const throw(){
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -163,7 +163,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	inline const T* Begin()const throw(){
+	inline T* Begin()const throw(){
 		return this->buf;
 	}
 
@@ -183,7 +183,7 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	inline const T* End()const throw(){
+	inline T* End()const throw(){
 		return this->buf + this->size;
 	}
 
@@ -199,7 +199,12 @@ public:
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 
-
+	
+	operator Buffer<const T>& (){
+		return *reinterpret_cast<Buffer<const T>* >(this);
+	}
+	
+	
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
 		for(size_t i = 0; i < buf.Size(); ++i){

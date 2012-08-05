@@ -8,3 +8,7 @@ void Run();
 namespace TestStaticBufferOperatorEquals{
 void Run();
 }//~namespace
+
+namespace TestBufferConstCast{
+void Run();
+}//~namespace

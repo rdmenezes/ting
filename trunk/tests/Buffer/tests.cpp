@@ -83,3 +83,50 @@ void Run(){
 }
 
 }//~namespace
+
+
+
+namespace TestBufferConstCast{
+
+class TestClass{
+public:
+	int a;
+
+	TestClass() :
+			a(0)
+	{}
+};
+
+int Func(ting::Buffer<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+int Func2(const ting::Buffer<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+void Run(){
+	{
+		ting::StaticBuffer<const TestClass, 20> buf;
+
+		Func(buf);
+		Func2(buf);
+	}
+	
+	{
+		ting::StaticBuffer<TestClass, 20> buf;
+		
+		Func(buf);
+		Func2(buf);
+	}
+}
+
+}//~namespace
