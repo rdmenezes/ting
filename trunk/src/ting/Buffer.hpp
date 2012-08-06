@@ -197,10 +197,7 @@ public:
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 
-	
-	operator const Buffer<const T>& ()throw(){
-		return *reinterpret_cast<Buffer<const T>* >(this);
-	}
+
 	
 	operator const Buffer<const T>& ()const throw(){
 		return *reinterpret_cast<const Buffer<const T>* >(this);

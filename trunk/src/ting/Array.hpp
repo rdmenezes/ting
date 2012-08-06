@@ -333,10 +333,6 @@ public:
 	
 	
 	
-	operator const Array<const T>& ()throw(){
-		return *reinterpret_cast<Array<const T>* >(this);
-	}
-	
 	operator const Array<const T>& ()const throw(){
 		return *reinterpret_cast<const Array<const T>* >(this);
 	}

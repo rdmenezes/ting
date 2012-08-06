@@ -66,6 +66,20 @@
           <df name="2">
             <df name="ting">
               <df name="fs">
+                <in>FSFile.d</in>
+                <in>File.d</in>
+              </df>
+              <df name="net">
+              </df>
+              <df name="net">
+              </df>
+            </df>
+          </df>
+        </df>
+        <df name="1">
+          <df name="2">
+            <df name="ting">
+              <df name="fs">
               </df>
               <df name="net">
               </df>
@@ -124,10 +138,10 @@
     </df>
     <df name="tests" root="../tests">
       <df name="Array">
-        <in>Array_tests.cpp</in>
-        <in>Array_tests.hpp</in>
         <in>main.cpp</in>
         <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
       </df>
       <df name="atomic">
         <in>main.cpp</in>
