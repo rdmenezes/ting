@@ -25,10 +25,10 @@ THE SOFTWARE. */
 
 
 /**
- * @author Ivan Gagis <igagis@gmail.com>
- * @brief buffer abstract class and static buffer wrapper.
- */
- 
+* @author Ivan Gagis <igagis@gmail.com>
+* @brief buffer abstract class and static buffer wrapper.
+*/
+
 
 #pragma once
 
@@ -46,56 +46,56 @@ namespace ting{
 
 
 /**
- * @brief abstract buffer template class.
- * This class is supposed to be ancestor of all buffer-like objects.
- */
+* @brief abstract buffer template class.
+* This class is supposed to be ancestor of all buffer-like objects.
+*/
 template <class T> class Buffer{
-	
+
 	//forbid copying
 	inline Buffer(const Buffer&);
-	
+
 protected:
 	T* buf;
 	size_t size;
 
 
 	/**
-	 * @brief Default constructor.
-	 * It is protected, so only accessible by subclasses.
-     */
+	* @brief Default constructor.
+	* It is protected, so only accessible by subclasses.
+	*/
 	inline Buffer(){}
 
 	/**
-	 * @brief Assignment operator.
-	 * This operator implementation does nothing.
-	 * This operator is defined because it should not be available for outside use,
-	 * so make it protected. But it should be defined, because some subclass may have
-	 * meaningful automatically generated operator=() (e.g. StaticBuffer)
-	 * which subsequently will call this operator=().
-     * @param - Buffer to assign from.
-     * @return reference to this Buffer object.
-     */
+	* @brief Assignment operator.
+	* This operator implementation does nothing.
+	* This operator is defined because it should not be available for outside use,
+	* so make it protected. But it should be defined, because some subclass may have
+	* meaningful automatically generated operator=() (e.g. StaticBuffer)
+	* which subsequently will call this operator=().
+	* @param - Buffer to assign from.
+	* @return reference to this Buffer object.
+	*/
 	inline Buffer& operator=(const Buffer&){
 		//do nothing
 		return *this;
 	}
 public:
 	/**
-	 * @brief Create a Buffer object.
-	 * Creates a Buffer object which wraps given memory buffer of specified size.
-	 * Note, the memory will not be freed upon this Buffer object destruction.
-	 * @param bufPtr - pointer to the memory buffer.
-	 * @param bufSize - size of the memory buffer.
-	 */
+	* @brief Create a Buffer object.
+	* Creates a Buffer object which wraps given memory buffer of specified size.
+	* Note, the memory will not be freed upon this Buffer object destruction.
+	* @param bufPtr - pointer to the memory buffer.
+	* @param bufSize - size of the memory buffer.
+	*/
 	inline Buffer(T* bufPtr, size_t bufSize)throw() :
 			buf(bufPtr),
 			size(bufSize)
 	{}
 
 	/**
-	 * @brief get buffer size.
-	 * @return number of elements in buffer.
-	 */
+	* @brief get buffer size.
+	* @return number of elements in buffer.
+	*/
 	inline size_t Size()const throw(){
 		return this->size;
 	}
@@ -103,9 +103,9 @@ public:
 
 
 	/**
-	 * @brief get size of element.
-	 * @return size of element in bytes.
-	 */
+	* @brief get size of element.
+	* @return size of element in bytes.
+	*/
 	inline size_t SizeOfElem()const throw(){
 		return sizeof(this->buf[0]);
 	}
@@ -113,9 +113,9 @@ public:
 
 
 	/**
-	 * @brief get size of buffer in bytes.
-	 * @return size of array in bytes.
-	 */
+	* @brief get size of buffer in bytes.
+	* @return size of array in bytes.
+	*/
 	inline size_t SizeInBytes()const throw(){
 		return this->Size() * this->SizeOfElem();
 	}
@@ -123,11 +123,11 @@ public:
 
 
 	/**
-	 * @brief access specified element of the buffer.
-	 * Const version of Buffer::operator[].
-	 * @param i - element index.
-	 * @return reference to i'th element of the buffer.
-	 */
+	* @brief access specified element of the buffer.
+	* Const version of Buffer::operator[].
+	* @param i - element index.
+	* @return reference to i'th element of the buffer.
+	*/
 	inline T& operator[](size_t i)const throw(){
 		ASSERT(i < this->Size())
 		return this->buf[i];
@@ -136,10 +136,10 @@ public:
 
 
 	/**
-	 * @brief access specified element of the buffer.
-	 * @param i - element index.
-	 * @return reference to i'th element of the buffer.
-	 */
+	* @brief access specified element of the buffer.
+	* @param i - element index.
+	* @return reference to i'th element of the buffer.
+	*/
 	inline T& operator[](size_t i)throw(){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
@@ -148,9 +148,9 @@ public:
 
 
 	/**
-	 * @brief get pointer to first element of the buffer.
-	 * @return pointer to first element of the buffer.
-	 */
+	* @brief get pointer to first element of the buffer.
+	* @return pointer to first element of the buffer.
+	*/
 	inline T* Begin()throw(){
 		return this->buf;
 	}
@@ -158,9 +158,9 @@ public:
 
 
 	/**
-	 * @brief get pointer to first element of the buffer.
-	 * @return pointer to first element of the buffer.
-	 */
+	* @brief get pointer to first element of the buffer.
+	* @return pointer to first element of the buffer.
+	*/
 	inline T* Begin()const throw(){
 		return this->buf;
 	}
@@ -168,9 +168,9 @@ public:
 
 
 	/**
-	 * @brief get pointer to "after last" element of the buffer.
-	 * @return pointer to "after last" element of the buffer.
-	 */
+	* @brief get pointer to "after last" element of the buffer.
+	* @return pointer to "after last" element of the buffer.
+	*/
 	inline T* End()throw(){
 		return this->buf + this->size;
 	}
@@ -178,32 +178,32 @@ public:
 
 
 	/**
-	 * @brief get const pointer to "after last" element of the buffer.
-	 * @return const pointer to "after last" element of the buffer.
-	 */
+	* @brief get const pointer to "after last" element of the buffer.
+	* @return const pointer to "after last" element of the buffer.
+	*/
 	inline T* End()const throw(){
 		return this->buf + this->size;
 	}
 
-	
-	
+
+
 	/**
-	 * @brief Checks if pointer points somewhere within the buffer.
-     * @param p - pointer to check.
-     * @return true - if pointer passed as argument points somewhere within the buffer.
-	 * @return false otherwise.
-     */
+	* @brief Checks if pointer points somewhere within the buffer.
+	* @param p - pointer to check.
+	* @return true - if pointer passed as argument points somewhere within the buffer.
+	* @return false otherwise.
+	*/
 	inline bool Overlaps(const T* p)const throw(){
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 
 
-	
+
 	inline operator const Buffer<const T>& ()const throw(){
 		return *reinterpret_cast<const Buffer<const T>* >(this);
 	}
-	
-	
+
+
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
 		for(size_t i = 0; i < buf.Size(); ++i){
@@ -217,9 +217,9 @@ public:
 
 
 /**
- * @brief static buffer class template.
- * The static buffer template.
- */
+* @brief static buffer class template.
+* The static buffer template.
+*/
 template <class T, size_t bufSize> class StaticBuffer : public ting::Buffer<T>{
 	T staticBuffer[bufSize];
 public:
@@ -230,10 +230,10 @@ public:
 
 
 	/**
-	 * @brief Copy constructor.
-	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
-	 * @param buf - static buffer to copy.
-	 */
+	* @brief Copy constructor.
+	* Performs a copy of a buffer, calling copy constructor on each element of the buffer.
+	* @param buf - static buffer to copy.
+	*/
 	inline StaticBuffer(const StaticBuffer<T, bufSize>& buf) :
 			ting::Buffer<T>(staticBuffer, bufSize),
 			staticBuffer(buf.staticBuffer)
