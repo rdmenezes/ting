@@ -92,8 +92,6 @@ public:
 			size(bufSize)
 	{}
 
-
-
 	/**
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
@@ -200,8 +198,12 @@ public:
 	}
 
 	
-	operator Buffer<const T>& (){
+	operator const Buffer<const T>& ()throw(){
 		return *reinterpret_cast<Buffer<const T>* >(this);
+	}
+	
+	operator const Buffer<const T>& ()const throw(){
+		return *reinterpret_cast<const Buffer<const T>* >(this);
 	}
 	
 	
@@ -214,7 +216,6 @@ public:
 	}
 #endif
 };//~template class Buffer
-
 
 
 

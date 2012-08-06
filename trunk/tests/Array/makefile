@@ -38,7 +38,7 @@ test: $(binary_name)
 
 include ../libting.mk
 
-$(binary_name): main.cpp Array_tests.cpp $(libting)
+$(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
 	@g++ -o $@ $(cf) $^ $(libs)
 

@@ -12,3 +12,7 @@ void Run();
 namespace FromBufferConstructorTest{
 void Run();
 }//~namespace
+
+namespace ArrayToConstConversionTest{
+void Run();
+}//~namespace

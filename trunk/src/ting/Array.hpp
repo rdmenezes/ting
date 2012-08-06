@@ -73,13 +73,13 @@ template <class T> class Array : public ting::Buffer<T>{
 
 		//check for strict aliasing
 		ASSERT(this->buf)
-		ASSERT(reinterpret_cast<void*>(this->buf) == buffer)
+		ASSERT(reinterpret_cast<const void*>(this->buf) == buffer)
 	}
 
 	inline void InitObjectsByDefaultConstructor(){
 		for(T* p = this->Begin(); p != this->End(); ++p){
 			try{
-				new (p) T();
+				new (const_cast<void*>(reinterpret_cast<const void*>(p))) T();
 			}catch(...){
 				//exception thrown from one of the objects constructor,
 				//destroy all previously created objects.
@@ -115,10 +115,10 @@ template <class T> class Array : public ting::Buffer<T>{
 	}
 
 	inline void FreeMemory()throw(){
-		ting::u8 *buffer = reinterpret_cast<ting::u8*>(this->buf);
+		ting::u8 *buffer = const_cast<ting::u8*>(reinterpret_cast<const ting::u8*>(this->buf));
 
 		//check for strict aliasing
-		ASSERT(reinterpret_cast<void*>(this->buf) == buffer)
+		ASSERT(reinterpret_cast<const void*>(this->buf) == buffer)
 
 		delete[] buffer;//It is ok to delete 0 pointer
 	}
@@ -330,6 +330,17 @@ public:
 		this->buf = 0;
 		this->size = 0;
 	}
+	
+	
+	
+	operator const Array<const T>& ()throw(){
+		return *reinterpret_cast<Array<const T>* >(this);
+	}
+	
+	operator const Array<const T>& ()const throw(){
+		return *reinterpret_cast<const Array<const T>* >(this);
+	}
+	
 };//~template class Array
 
 }//~namespace ting

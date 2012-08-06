@@ -2,7 +2,7 @@
 #include "../../src/ting/Array.hpp"
 #include "../../src/ting/Exc.hpp"
 
-#include "Array_tests.hpp"
+#include "tests.hpp"
 
 
 
@@ -345,6 +345,122 @@ void Run(){
 				ASSERT_ALWAYS(false)
 			}
 		}
+	}
+}
+
+}//~namespace
+
+
+
+namespace ArrayToConstConversionTest{
+
+class TestClass{
+public:
+	int a;
+
+	TestClass() :
+			a(0)
+	{}
+};
+
+//this type of argument seems useless, but should work for some cases
+int Func(ting::Buffer<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+int Func2(const ting::Buffer<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+//this type of argument seems useless, but should work in some cases
+int Func3(ting::Array<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+//this type of argument seems useless, but should work
+int Func4(const ting::Array<const TestClass>& buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+int Func5(ting::Array<const TestClass> buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+int Func6(const ting::Array<const TestClass> buf){
+	if(buf.Size() == 0){
+		return 0;
+	}
+	
+	return buf[0].a;
+}
+
+void Run(){
+	{
+		ting::Array<const TestClass> buf(20);
+
+		Func(buf);
+		Func2(buf);
+		Func3(buf);
+		Func4(buf);
+	}
+	
+	{
+		const ting::Array<const TestClass> buf(20);
+
+//		Func(buf);
+		Func2(buf);
+//		Func3(buf);
+		Func4(buf);
+	}
+	
+	{
+		ting::Array<TestClass> buf(20);
+		
+//		Func(buf);
+		Func2(buf);
+//		Func3(buf);
+		Func4(buf);
+	}
+	
+	{
+		const ting::Array<TestClass> buf(20);
+		
+//		Func(buf);
+		Func2(buf);
+//		Func3(buf);
+		Func4(buf);
+	}
+	
+	{
+		ting::Array<TestClass> buf(20);
+		
+		Func5(buf);
+	}
+	
+	{
+		ting::Array<TestClass> buf(20);
+		
+		Func6(buf);
 	}
 }
 

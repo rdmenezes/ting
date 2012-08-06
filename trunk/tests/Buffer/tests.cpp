@@ -124,9 +124,12 @@ void Run(){
 	{
 		ting::StaticBuffer<TestClass, 20> buf;
 		
-		Func(buf);
+//		Func(buf);
 		Func2(buf);
 	}
+	
+//	Func(ting::Buffer<TestClass>(0, 0));
+	Func2(ting::Buffer<const TestClass>(0, 0));
 }
 
 }//~namespace
