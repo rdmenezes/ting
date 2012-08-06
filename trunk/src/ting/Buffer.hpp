@@ -199,7 +199,7 @@ public:
 
 
 	
-	operator const Buffer<const T>& ()const throw(){
+	inline operator const Buffer<const T>& ()const throw(){
 		return *reinterpret_cast<const Buffer<const T>* >(this);
 	}
 	

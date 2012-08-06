@@ -333,7 +333,7 @@ public:
 	
 	
 	
-	operator const Array<const T>& ()const throw(){
+	inline operator const Array<const T>& ()const throw(){
 		return *reinterpret_cast<const Array<const T>* >(this);
 	}
 	
