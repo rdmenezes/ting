@@ -94,7 +94,7 @@ ting::Array<std::string> File::ListDirContents(size_t maxEntries){
 
 
 size_t File::Read(
-			ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<ting::u8>& buf,
 			size_t numBytesToRead,
 			size_t offset
 		)
@@ -115,14 +115,13 @@ size_t File::Read(
 	}
 
 	ASSERT(actualNumBytesToRead + offset <= buf.Size())
-	ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
-	return this->ReadInternal(b);
+	return this->ReadInternal(ting::Buffer<ting::u8>(buf.Begin() + offset, actualNumBytesToRead));
 }
 
 
 
 size_t File::Write(
-			const ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<const ting::u8>& buf,
 			size_t numBytesToWrite,
 			size_t offset
 		)
@@ -147,7 +146,7 @@ size_t File::Write(
 	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-	return this->WriteInternal(ting::Buffer<ting::u8>(const_cast<ting::u8*>(buf.Begin() + offset), actualNumBytesToWrite));
+	return this->WriteInternal(ting::Buffer<const ting::u8>(buf.Begin() + offset, actualNumBytesToWrite));
 }
 
 

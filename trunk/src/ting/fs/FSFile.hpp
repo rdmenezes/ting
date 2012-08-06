@@ -109,12 +109,12 @@ public:
 
 
 	//override
-	virtual size_t ReadInternal(ting::Buffer<ting::u8>& buf);
+	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf);
 
 
 
 	//override
-	virtual size_t WriteInternal(const ting::Buffer<ting::u8>& buf);
+	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf);
 
 
 

@@ -104,7 +104,7 @@ void UDPSocket::Open(u16 port){
 
 
 
-size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destinationIP){
+size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress& destinationIP){
 	if(!this->IsValid()){
 		throw net::Exc("UDPSocket::Send(): socket is not opened");
 	}
@@ -172,7 +172,7 @@ size_t UDPSocket::Send(const ting::Buffer<u8>& buf, const IPAddress& destination
 
 
 
-size_t UDPSocket::Recv(ting::Buffer<u8>& buf, IPAddress &out_SenderIP){
+size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderIP){
 	if(!this->IsValid()){
 		throw net::Exc("UDPSocket::Recv(): socket is not opened");
 	}

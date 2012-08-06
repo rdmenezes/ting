@@ -237,7 +237,7 @@ public:
 	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
 	 * @param buf - static buffer to copy.
 	 */
-	inline StaticBuffer(const StaticBuffer<T, bufSize> &buf) :
+	inline StaticBuffer(const StaticBuffer<T, bufSize>& buf) :
 			ting::Buffer<T>(staticBuffer, bufSize),
 			staticBuffer(buf.staticBuffer)
 	{}

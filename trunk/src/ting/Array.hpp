@@ -91,7 +91,7 @@ template <class T> class Array : public ting::Buffer<T>{
 		}
 	}
 
-	inline void InitObjectsByCopyConstructor(const ting::Buffer<T>& buffer){
+	inline void InitObjectsByCopyConstructor(const ting::Buffer<const T>& buffer){
 		ASSERT(this->Size() == buffer.Size())
 		const T* s = buffer.Begin();
 		for(T* p = this->Begin(); p != this->End(); ++p, ++s){
@@ -165,7 +165,7 @@ public:
 	 * @param b - the buffer from which the data will be copied.
 	 */
 	//NOTE: the constructor is explicit to avoid possible ambiguities.
-	explicit inline Array(const ting::Buffer<T>& b){
+	explicit inline Array(const ting::Buffer<const T>& b){
 		this->AllocateMemory(b.Size());
 		try{
 			this->InitObjectsByCopyConstructor(b);
@@ -268,7 +268,7 @@ public:
 	 * created using copy constructors.
 	 * @param b - the buffer from which the data will be copied.
 	 */
-	void Init(const ting::Buffer<T>& b){
+	void Init(const ting::Buffer<const T>& b){
 		this->Destroy();
 		this->AllocateMemory(b.Size());
 		try{

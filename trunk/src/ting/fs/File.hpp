@@ -218,7 +218,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Read(
-			ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<ting::u8>& buf,
 			size_t numBytesToRead = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -232,7 +232,7 @@ protected:
      * @param buf - buffer to fill with read data.
      * @return number of bytes actually read.
      */
-	virtual size_t ReadInternal(ting::Buffer<ting::u8>& buf) = 0;
+	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf) = 0;
 	
 public:
 	/**
@@ -248,7 +248,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Write(
-			const ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<const ting::u8>& buf,
 			size_t numBytesToWrite = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -262,7 +262,7 @@ protected:
      * @param buf - buffer containing the data to write.
      * @return number of bytes actually written.
      */
-	virtual size_t WriteInternal(const ting::Buffer<ting::u8>& buf) = 0;
+	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) = 0;
 	
 public:
 	/**

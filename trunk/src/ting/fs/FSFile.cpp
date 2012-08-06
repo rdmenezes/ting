@@ -121,7 +121,7 @@ void FSFile::Close()throw(){
 
 
 //override
-size_t FSFile::ReadInternal(ting::Buffer<ting::u8>& buf){
+size_t FSFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
 	size_t numBytesRead = fread(buf.Begin(), 1, buf.Size(), this->handle);
 	if(numBytesRead != buf.Size()){//something happened
@@ -135,7 +135,7 @@ size_t FSFile::ReadInternal(ting::Buffer<ting::u8>& buf){
 
 
 //override
-size_t FSFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
+size_t FSFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 	ASSERT(this->handle)
 	size_t bytesWritten = fwrite(buf.Begin(), 1, buf.Size(), this->handle);
 	if(bytesWritten != buf.Size()){//something bad has happened

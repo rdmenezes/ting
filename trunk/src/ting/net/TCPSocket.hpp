@@ -110,7 +110,7 @@ public:
 	 * @param offset - offset inside the buffer from where to start sending the data.
 	 * @return the number of bytes actually sent.
 	 */
-	size_t Send(const ting::Buffer<u8>& buf, size_t offset = 0);
+	size_t Send(const ting::Buffer<const ting::u8>& buf, size_t offset = 0);
 
 
 
@@ -125,7 +125,7 @@ public:
 	 * @param offset - offset inside the buffer where to start putting data from.
 	 * @return the number of bytes written to the buffer.
 	 */
-	size_t Recv(ting::Buffer<u8>& buf, size_t offset = 0);
+	size_t Recv(const ting::Buffer<ting::u8>& buf, size_t offset = 0);
 
 	
 	

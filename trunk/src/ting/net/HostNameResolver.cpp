@@ -299,7 +299,7 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex
 	//This function will call the Resolver callback.
-	void ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<ting::u8>& buf){
+	void ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
 //		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
 //#ifdef DEBUG
 //		for(unsigned i = 0; i < buf.Size(); ++i){

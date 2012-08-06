@@ -115,7 +115,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 
 
-size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
+size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 	if(!this->IsValid()){
 		throw net::Exc("TCPSocket::Send(): socket is not opened");
 	}
@@ -177,7 +177,7 @@ size_t TCPSocket::Send(const ting::Buffer<u8>& buf, size_t offset){
 
 
 
-size_t TCPSocket::Recv(ting::Buffer<u8>& buf, size_t offset){
+size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 	//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 	//calls to Recv() because it indicates that there's activity.
 	//So, do it at the beginning of the function.
