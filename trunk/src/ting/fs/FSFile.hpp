@@ -36,6 +36,7 @@ THE SOFTWARE. */
 #include "../debug.hpp"
 
 #include "File.hpp"
+#include "../Ptr.hpp"
 
 
 
@@ -165,6 +166,15 @@ public:
 
 	//override
 	virtual ting::Array<std::string> ListDirContents(size_t maxEntries = 0);
+	
+	/**
+	 * @brief Create new instance managed by auto-pointer.
+     * @param pathName - path to a file.
+     * @return Auto-pointer holding a new FSFile instance.
+     */
+	static inline ting::Ptr<FSFile> New(const std::string& pathName = std::string()){
+		return ting::Ptr<FSFile>(new FSFile(pathName));
+	}
 };
 
 
