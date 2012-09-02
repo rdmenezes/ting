@@ -14,6 +14,19 @@
             <in>File.cpp</in>
             <in>File.hpp</in>
           </df>
+          <df name="mt">
+            <in>Message.hpp</in>
+            <in>MsgThread.cpp</in>
+            <in>MsgThread.hpp</in>
+            <in>Mutex.cpp</in>
+            <in>Mutex.hpp</in>
+            <in>Queue.cpp</in>
+            <in>Queue.hpp</in>
+            <in>Semaphore.cpp</in>
+            <in>Semaphore.hpp</in>
+            <in>Thread.cpp</in>
+            <in>Thread.hpp</in>
+          </df>
           <df name="net">
             <in>Exc.hpp</in>
             <in>HostNameResolver.cpp</in>
@@ -40,8 +53,6 @@
           <in>Ref.hpp</in>
           <in>Signal.hpp</in>
           <in>Singleton.hpp</in>
-          <in>Thread.cpp</in>
-          <in>Thread.hpp</in>
           <in>WaitSet.cpp</in>
           <in>WaitSet.hpp</in>
           <in>atomic.hpp</in>
@@ -62,6 +73,7 @@
           <df name="2">
             <df name="ting">
               <df name="fs">
+                <in>File.d</in>
               </df>
               <df name="mt">
                 <in>Mutex.d</in>
@@ -325,16 +337,6 @@
             flavor2="0">
       </item>
       <item path="/home/ivan/prj/ting/android/jni/ting/ting/Singleton.hpp"
-            ex="true"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/android/jni/ting/ting/Thread.cpp"
-            ex="true"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/android/jni/ting/ting/Thread.hpp"
             ex="true"
             tool="3"
             flavor2="0">
@@ -1073,16 +1075,6 @@
             flavor2="0">
       </item>
       <item path="/home/ivan/prj/ting/android/jni/ting/ting/Singleton.hpp"
-            ex="true"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/android/jni/ting/ting/Thread.cpp"
-            ex="true"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/android/jni/ting/ting/Thread.hpp"
             ex="true"
             tool="3"
             flavor2="0">

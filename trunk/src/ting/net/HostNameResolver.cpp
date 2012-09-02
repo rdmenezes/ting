@@ -35,7 +35,7 @@ THE SOFTWARE. */
 #include "../timer.hpp"
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include "../fs/FSFile.hpp"
+#	include "../fs/FSFile.hpp"
 #endif
 
 #include "UDPSocket.hpp"
@@ -271,7 +271,8 @@ public:
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << (r->dns.host) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		size_t ret = this->socket.Send(ting::Buffer<const ting::u8>(buf.Begin(), packetSize), r->dns);
+		ting::Buffer<const ting::u8> bufToSend(buf.Begin(), packetSize);
+		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
 		
