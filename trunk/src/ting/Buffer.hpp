@@ -48,7 +48,6 @@ namespace ting{
 /**
  * @brief Memory buffer wrapper template class.
  * This class is a wrapper of memory buffer, it encapsulates pointer to memory block and size of that memory block.
- * 
  */
 template <class T> class Buffer{
 

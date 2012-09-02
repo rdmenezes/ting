@@ -31,15 +31,15 @@ THE SOFTWARE. */
 #include "HostNameResolver.hpp"
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-	#include <winsock2.h>
-	#include <windows.h>
+#if M_OS == M_OS_WINDOWS
+#	include <winsock2.h>
+#	include <windows.h>
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
-	#include <signal.h>
+#	include <signal.h>
 
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -53,7 +53,7 @@ ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 
 Lib::Lib(){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	WORD versionWanted = MAKEWORD(2,2);
 	WSADATA wsaData;
 	if(WSAStartup(versionWanted, &wsaData) != 0 ){
@@ -77,7 +77,7 @@ Lib::~Lib()throw(){
 	//check that there are no active dns lookups and finish the DNS request thread
 	HostNameResolver::CleanUp();
 	
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	// Clean up windows networking
 	if(WSACleanup() == SOCKET_ERROR){
 		if(WSAGetLastError() == WSAEINPROGRESS){

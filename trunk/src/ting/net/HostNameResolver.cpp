@@ -543,7 +543,7 @@ private:
 			ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
 			ASSERT(r)
 
-#if (M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64) && defined(ERROR)
+#if M_OS == M_OS_WINDOWS && defined(ERROR)
 #	undef ERROR
 #endif
 
@@ -555,7 +555,7 @@ private:
 	
 	void InitDNS(){
 		try{
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			struct WinRegKey{
 				HKEY	key;
 			
@@ -739,7 +739,7 @@ private:
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just try to send data to the socket without waiting for WRITE.
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 				if(this->sendList.size() != 0)
 #else
 				if(this->socket.CanWrite())
@@ -838,7 +838,7 @@ private:
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just check every 100ms if it is OK to write to UDP socket.
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			if(this->sendList.size() > 0){
 				ting::util::ClampTop(timeout, ting::u32(100));
 			}

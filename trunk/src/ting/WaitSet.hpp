@@ -44,24 +44,24 @@ THE SOFTWARE. */
 #include "Array.hpp"
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 
 //if _WINSOCKAPI_ macro is not defined then it means that the winsock header file
 //has not been included. Here we temporarily define the macro in order to prevent
 //inclusion of winsock.h from within the windows.h. Because it may later conflict with
 //winsock2.h if it is included later.
-#ifndef _WINSOCKAPI_
-#	define _WINSOCKAPI_
-#	include <windows.h>
-#	undef _WINSOCKAPI_
-#else
-#	include <windows.h>
-#endif
+#	ifndef _WINSOCKAPI_
+#		define _WINSOCKAPI_
+#		include <windows.h>
+#		undef _WINSOCKAPI_
+#	else
+#		include <windows.h>
+#	endif
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 #	include <sys/epoll.h>
 
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 #	include <sys/types.h>
 #	include <sys/event.h>
 #	include <sys/time.h>
@@ -71,12 +71,12 @@ THE SOFTWARE. */
 #endif
 
 
-//if Microsoft MSVC compiler,
-//then disable warning about throw specification is ignored.
-#ifdef _MSC_VER
+//disable warning about throw specification is ignored.
+#if M_COMPILER == M_COMPILER_MSVC
 #	pragma warning(push) //push warnings state
 #	pragma warning( disable : 4290)
 #endif
+
 
 
 namespace ting{
@@ -247,7 +247,7 @@ public:
 		this->userData = data;
 	}
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 protected:
 	virtual HANDLE GetHandle() = 0;
 
@@ -260,7 +260,7 @@ protected:
 
 
 
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 protected:
 	virtual int GetHandle() = 0;
 
@@ -283,15 +283,15 @@ class WaitSet{
 	const unsigned size;
 	ting::Inited<unsigned, 0> numWaitables;//number of Waitables added
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	Array<Waitable*> waitables;
 	Array<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
 
-#elif defined(__linux__) 
+#elif M_OS == M_OS_LINUX
 	int epollSet;
 
 	Array<epoll_event> revents;//used for getting the result from epoll_wait()
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	int kq_queue; // kqueue, file descriptor
 	Array<struct kevent> kq_output; // events (size*2)
 
@@ -342,7 +342,7 @@ public:
 	 */
 	WaitSet(unsigned maxSize) :
 			size(maxSize)
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			,waitables(maxSize)
 			,handles(maxSize)
 	{
@@ -352,7 +352,7 @@ public:
 		}
 	}
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 			,revents(maxSize)
 	{
 		ASSERT(int(maxSize) > 0)
@@ -361,7 +361,7 @@ public:
 			throw ting::Exc("WaitSet::WaitSet(): epoll_create() failed");
 		}
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 			,kq_output(maxSize * 2)
 	{
 		this->kq_queue = kqueue();
@@ -385,11 +385,11 @@ public:
 	~WaitSet()throw(){
 		//assert the wait set is empty
 		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		//do nothing
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 		close(this->epollSet);
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 		close(this->kq_queue);
 #else
 #	error "Unsupported OS"
@@ -499,8 +499,7 @@ private:
 }//~namespace ting
 
 
-//if Microsoft MSVC compiler, restore warnings state
-#ifdef _MSC_VER
+//restore warnings state
+#if M_COMPILER == M_COMPILER_MSVC
 #	pragma warning(pop) //pop warnings state
 #endif
-

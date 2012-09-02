@@ -37,15 +37,15 @@ THE SOFTWARE. */
 #include "../config.hpp"
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-	#include <winsock2.h>
-	#include <windows.h>
+#if M_OS == M_OS_WINDOWS
+#	include <winsock2.h>
+#	include <windows.h>
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include <sys/socket.h>
+#	include <sys/socket.h>
 
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -71,7 +71,7 @@ namespace net{
  */
 class Socket : public Waitable{
 protected:
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	typedef SOCKET T_Socket;
 
 	inline static T_Socket DInvalidSocket(){
@@ -117,17 +117,17 @@ protected:
 		return EINPROGRESS;
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	WSAEVENT eventForWaitable;
 #endif
 
 	T_Socket socket;
 
 	Socket() :
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			eventForWaitable(WSA_INVALID_EVENT),
 #endif
 			socket(DInvalidSocket())
@@ -195,7 +195,7 @@ public:
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 private:
 	//override
 	HANDLE GetHandle();

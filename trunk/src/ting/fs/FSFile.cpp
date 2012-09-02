@@ -24,7 +24,7 @@ THE SOFTWARE. */
 
 #include "../config.hpp"
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 #	include <windows.h>
 
 #elif M_OS == M_OS_LINUX
@@ -273,11 +273,11 @@ void FSFile::MakeDir(){
 std::string FSFile::GetHomeDir(){
 	std::string ret;
 	
-#if M_OS == M_OS_LINUX || M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_LINUX || M_OS == M_OS_WINDOWS
 	
 #	if M_OS == M_OS_LINUX
 	char * home = getenv("HOME");
-#	elif M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#	elif M_OS == M_OS_WINDOWS
 	char * home = getenv("USERPROFILE");
 #	else
 #		error "unsupported OS"
@@ -310,7 +310,7 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 
 	std::vector<std::string> files;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	{
 		std::string pattern = this->TruePath();
 		pattern += '*';

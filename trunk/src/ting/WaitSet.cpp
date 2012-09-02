@@ -38,7 +38,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	ASSERT(!w->isAdded)
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	ASSERT(this->numWaitables <= this->handles.Size())
 	if(this->numWaitables == this->handles.Size()){
 		throw ting::Exc("WaitSet::Add(): wait set is full");
@@ -93,7 +93,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	ASSERT(w->isAdded)
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	//check if the Waitable object is added to this wait set
 	{
 		unsigned i;
@@ -148,7 +148,7 @@ void WaitSet::Remove(Waitable* w)throw(){
 
 	ASSERT(w->isAdded)
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	//remove object from array
 	{
 		unsigned i;
@@ -207,7 +207,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}
 	}
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	DWORD waitTimeout = waitInfinitly ? (INFINITE) : DWORD(timeout);
 
 	DWORD res = WaitForMultipleObjectsEx(

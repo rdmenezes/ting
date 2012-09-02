@@ -26,13 +26,8 @@ THE SOFTWARE. */
 
 #include "TCPSocket.hpp"
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include <netinet/in.h>
-
-#else
-	#error "Unsupported OS"
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#	include <netinet/in.h>
 #endif
 
 
@@ -47,13 +42,13 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	}
 
 	//create event for implementing Waitable
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	this->CreateEventForWaitable();
 #endif
 
 	this->socket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if(this->socket == DInvalidSocket()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
 #endif
 		throw net::Exc("TCPSocket::Open(): Couldn't create socket");
@@ -82,12 +77,12 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 			sizeof(sockAddr)
 		) == DSocketError())
 	{
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		int errorCode = WSAGetLastError();
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 		int errorCode = errno;
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 		if(errorCode == DEIntr()){
 			//do nothing, for non-blocking socket the connection request still should remain active
@@ -141,7 +136,7 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 				0
 			);
 		if(len == DSocketError()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
 #else
 			int errorCode = errno;
@@ -206,7 +201,7 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 				0
 			);
 		if(len == DSocketError()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
 #else
 			int errorCode = errno;
@@ -250,7 +245,7 @@ IPAddress TCPSocket::GetLocalAddress(){
 
 	sockaddr_in addr;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
 #else
 	socklen_t len = sizeof(addr);
@@ -280,7 +275,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 
 	sockaddr_in addr;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
 #else
 	socklen_t len = sizeof(addr);
@@ -303,7 +298,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 //override
 void TCPSocket::SetWaitingEvents(u32 flagsToWaitFor){
 	long flags = FD_CLOSE;

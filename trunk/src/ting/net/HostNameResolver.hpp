@@ -154,8 +154,8 @@ public:
 		 */
 		DNS_ERROR,
 		
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-	#undef ERROR
+#if M_OS == M_OS_WINDOWS
+#	undef ERROR
 #endif
 		/**
 		 * @brief Local error occurred.

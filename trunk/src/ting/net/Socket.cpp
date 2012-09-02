@@ -28,16 +28,10 @@ THE SOFTWARE. */
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-
-
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include <netinet/in.h>
-	#include <netinet/tcp.h>
-	#include <fcntl.h>
-
-#else
-	#error "Unsupported OS"
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#	include <netinet/in.h>
+#	include <netinet/tcp.h>
+#	include <fcntl.h>
 #endif
 
 
@@ -50,7 +44,7 @@ Socket::Socket(const Socket& s) :
 		ting::Waitable(),
 		//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
 		//Therefore, initialize variables to invalid values.
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		eventForWaitable(WSA_INVALID_EVENT),
 #endif
 		socket(DInvalidSocket())
@@ -74,7 +68,7 @@ void Socket::Close()throw(){
 	if(this->IsValid()){
 		ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		//Closing socket in Win32.
 		//refer to http://tangentsoft.net/wskfaq/newbie.html#howclose for details
 		shutdown(this->socket, SD_BOTH);
@@ -107,7 +101,7 @@ Socket& Socket::operator=(const Socket& s){
 	this->Close();
 	this->socket = s.socket;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	this->eventForWaitable = s.eventForWaitable;
 	const_cast<Socket&>(s).eventForWaitable = WSA_INVALID_EVENT;
 #endif
@@ -123,7 +117,7 @@ void Socket::DisableNaggle(){
 		throw net::Exc("Socket::DisableNaggle(): socket is not valid");
 	}
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64 || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	{
 		int yes = 1;
 		setsockopt(this->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(yes));
@@ -140,7 +134,7 @@ void Socket::SetNonBlockingMode(){
 		throw net::Exc("Socket::SetNonBlockingMode(): socket is not valid");
 	}
 
-#if  M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	{
 		u_long mode = 1;
 		if(ioctlsocket(this->socket, FIONBIO, &mode) != 0){
@@ -172,7 +166,7 @@ ting::u16 Socket::GetLocalPort(){
 
 	sockaddr_in addr;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	socklen_t len = sizeof(addr);
@@ -194,7 +188,7 @@ ting::u16 Socket::GetLocalPort(){
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 
 //override
 HANDLE Socket::GetHandle(){

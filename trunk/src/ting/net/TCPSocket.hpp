@@ -145,7 +145,7 @@ public:
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 private:
 	//override
 	void SetWaitingEvents(u32 flagsToWaitFor);

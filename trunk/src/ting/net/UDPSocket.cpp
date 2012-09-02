@@ -26,14 +26,10 @@ THE SOFTWARE. */
 
 #include "UDPSocket.hpp"
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
-
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
-	#include <netinet/in.h>
-
-#else
-	#error "Unsupported OS"
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#	include <netinet/in.h>
 #endif
+
 
 
 using namespace ting::net;
@@ -45,13 +41,13 @@ void UDPSocket::Open(u16 port){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	this->CreateEventForWaitable();
 #endif
 
 	this->socket = ::socket(AF_INET, SOCK_DGRAM, 0);
 	if(this->socket == DInvalidSocket()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
 #endif
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
@@ -80,7 +76,7 @@ void UDPSocket::Open(u16 port){
 	this->SetNonBlockingMode();
 
 	//Allow broadcasting
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64 || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	{
 		int yes = 1;
 		if(setsockopt(
@@ -132,7 +128,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 			);
 
 		if(len == DSocketError()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
 #else
 			int errorCode = errno;
@@ -185,12 +181,12 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 
 	sockaddr_in sockAddr;
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 	int sockLen = sizeof(sockAddr);
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	socklen_t sockLen = sizeof(sockAddr);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	ssize_t len;
@@ -206,7 +202,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 			);
 
 		if(len == DSocketError()){
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
 #else
 			int errorCode = errno;
@@ -248,7 +244,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 
 
 
-#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#if M_OS == M_OS_WINDOWS
 //override
 void UDPSocket::SetWaitingEvents(u32 flagsToWaitFor){
 	long flags = FD_CLOSE;
