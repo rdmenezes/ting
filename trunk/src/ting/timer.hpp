@@ -35,41 +35,39 @@ THE SOFTWARE. */
 
 //#define M_ENABLE_TIMER_TRACE
 #ifdef M_ENABLE_TIMER_TRACE
-#define M_TIMER_TRACE(x) TRACE(<<"[Timer]" x)
+#	define M_TIMER_TRACE(x) TRACE(<< "[Timer]" x)
 #else
-#define M_TIMER_TRACE(x)
+#	define M_TIMER_TRACE(x)
 #endif
 
-#ifdef _MSC_VER //If Microsoft C++ compiler
-#pragma warning(disable:4290) //WARNING: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+
+#include "config.hpp"
+
+
+#if M_COMPILER == M_COMPILER_MSVC
+#	pragma warning(disable:4290) //WARNING: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 #endif
 
-//  ==System dependent headers inclusion==
-#if defined(__WIN32__) || defined(WIN32)
-#ifndef __WIN32__
-#define __WIN32__
-#endif
 
-#include <windows.h>
+#if M_OS == M_OS_WINDOWS
+#	include <windows.h>
 
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
+#	include<sys/time.h>
 
-#include<sys/time.h>
-
-#elif defined(__linux__)
-
+#elif M_OS == M_OS_LINUX
 #include <ctime>
 
 #else
-#error "Unknown OS"
+#	error "Unknown OS"
 #endif
-//~ ==System dependent headers inclusion==
+
 
 #include <vector>
 #include <map>
 #include <algorithm>
 
-#include "debug.hpp" //debugging facilities
+#include "debug.hpp"
 #include "types.hpp"
 #include "Singleton.hpp"
 #include "Thread.hpp"
@@ -87,7 +85,7 @@ namespace timer{
  * @return constantly increasing millisecond ticks.
  */
 inline ting::u32 GetTicks(){
-#ifdef __WIN32__
+#if M_OS == M_OS_WINDOWS
 	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
 	if(perfCounterFreq.QuadPart == 0){
 		if(QueryPerformanceFrequency(&perfCounterFreq) == FALSE){
@@ -101,12 +99,12 @@ inline ting::u32 GetTicks(){
 	}
 
 	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	//Mac os X doesn't support clock_gettime
 	timeval t;
 	gettimeofday(&t, 0);
 	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1){
 		throw ting::Exc("GetTicks(): clock_gettime() returned error");
@@ -114,7 +112,7 @@ inline ting::u32 GetTicks(){
 
 	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
