@@ -13,17 +13,19 @@
 #include <ting/Buffer.hpp>
 #include <ting/debug.hpp>
 #include <ting/Exc.hpp>
-#include <ting/File.hpp>
-#include <ting/FSFile.hpp>
+#include <ting/fs/File.hpp>
+#include <ting/fs/FSFile.hpp>
 #include <ting/math.hpp>
 #include <ting/PoolStored.hpp>
 #include <ting/Ptr.hpp>
 #include <ting/Ref.hpp>
 #include <ting/Signal.hpp>
 #include <ting/Singleton.hpp>
-#include <ting/Socket.hpp>
-#include <ting/Thread.hpp>
-#include <ting/Timer.hpp>
+#include <ting/net/Socket.hpp>
+#include <ting/net/TCPSocket.hpp>
+#include <ting/mt/Thread.hpp>
+#include <ting/mt/Semaphore.hpp>
+#include <ting/timer.hpp>
 #include <ting/types.hpp>
 #include <ting/util.hpp>
 #include <ting/WaitSet.hpp>
@@ -598,14 +600,14 @@ namespace TestFetchAndAdd{
 
 const unsigned DNumOps = 0xffff;
 
-class Thread : public ting::Thread{
+class Thread : public ting::mt::Thread{
 	ting::atomic::S32 &a;
 public:
 	Thread(ting::atomic::S32 &a) :
 			a(a)
 	{}
 	
-	ting::Semaphore sema;
+	ting::mt::Semaphore sema;
 	
 	//override
 	void Run(){
@@ -633,7 +635,7 @@ void Run(){
 	}
 	
 	//wait till all the threads enter their Run() methods and start waiting on the semaphores
-	ting::Thread::Sleep(500);
+	ting::mt::Thread::Sleep(500);
 	
 	//signal all threads semaphores
 //	TRACE(<< "Signalling..." << std::endl)
@@ -919,7 +921,7 @@ void android_main(struct android_app* state) {
 	
 	ASSERT_ALWAYS(ting::timer::Lib::IsCreated())
 	
-	ting::Mutex testMutex;
+	ting::mt::Mutex testMutex;
 
 	ting::WaitSet testWaitset(3);
 
