@@ -1,8 +1,11 @@
 #include "dns.hpp"
 
 #include "../../src/ting/net/HostNameResolver.hpp"
-#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/mt/Thread.hpp"
+#include "../../src/ting/mt/Semaphore.hpp"
+#include "../../src/ting/Ptr.hpp"
 
+#include <vector>
 
 namespace TestSimpleDNSLookup{
 
@@ -10,14 +13,14 @@ class Resolver : public ting::net::HostNameResolver{
 	
 public:
 	
-	Resolver(ting::Semaphore& sema, const std::string& hostName = std::string()) :
+	Resolver(ting::mt::Semaphore& sema, const std::string& hostName = std::string()) :
 			sema(sema),
 			hostName(hostName)
 	{}
 	
 	ting::u32 ip;
 	
-	ting::Semaphore& sema;
+	ting::mt::Semaphore& sema;
 	
 	E_Result result;
 	
@@ -40,7 +43,7 @@ public:
 
 void Run(){
 	{//test one resolve at a time
-		ting::Semaphore sema;
+		ting::mt::Semaphore sema;
 
 		Resolver r(sema);
 
@@ -59,7 +62,7 @@ void Run(){
 	}
 	
 	{//test several resolves at a time
-		ting::Semaphore sema;
+		ting::mt::Semaphore sema;
 
 		typedef std::vector<ting::Ptr<Resolver> > T_ResolverList;
 		typedef T_ResolverList::iterator T_ResolverIter;
@@ -101,7 +104,7 @@ class Resolver : public ting::net::HostNameResolver{
 	
 public:
 	
-	Resolver(ting::Semaphore& sema) :
+	Resolver(ting::mt::Semaphore& sema) :
 			sema(sema)
 	{}
 	
@@ -109,7 +112,7 @@ public:
 	
 	ting::u32 ip;
 	
-	ting::Semaphore& sema;
+	ting::mt::Semaphore& sema;
 	
 	E_Result result;
 	
@@ -133,7 +136,7 @@ public:
 };
 
 void Run(){
-	ting::Semaphore sema;
+	ting::mt::Semaphore sema;
 	
 	Resolver r(sema);
 	
@@ -173,11 +176,11 @@ void Run(){
 	
 	r.Resolve_ts("rfesweefdqfdf.ru", 3000, ting::net::IPAddress("1.2.3.4", 53));
 	
-	ting::Thread::Sleep(500);
+	ting::mt::Thread::Sleep(500);
 	
 	bool res = r.Cancel_ts();
 	
-	ting::Thread::Sleep(3000);
+	ting::mt::Thread::Sleep(3000);
 	
 	ASSERT_ALWAYS(res)
 	

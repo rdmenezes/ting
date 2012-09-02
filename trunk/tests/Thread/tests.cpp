@@ -1,5 +1,6 @@
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/mt/Thread.hpp"
+#include "../../src/ting/mt/MsgThread.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/types.hpp"
 
@@ -9,7 +10,7 @@
 
 namespace TestJoinBeforeAndAfterThreadHasFinished{
 
-class TestThread : public ting::Thread{
+class TestThread : public ting::mt::Thread{
 public:
 	int a, b;
 
@@ -17,7 +18,7 @@ public:
 	void Run(){
 		this->a = 10;
 		this->b = 20;
-		ting::Thread::Sleep(1000);
+		ting::mt::Thread::Sleep(1000);
 		this->a = this->b;
 	}
 };
@@ -32,7 +33,7 @@ void Run(){
 
 		t.Start();
 
-		ting::Thread::Sleep(2000);
+		ting::mt::Thread::Sleep(2000);
 
 		t.Join();
 	}
@@ -57,7 +58,7 @@ void Run(){
 //====================
 namespace TestManyThreads{
 
-class TestThread1 : public ting::MsgThread{
+class TestThread1 : public ting::mt::MsgThread{
 public:
 	int a, b;
 
@@ -79,7 +80,7 @@ void Run(){
 		i->Start();
 	}
 
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 
 	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
 		i->PushQuitMessage();
@@ -97,7 +98,7 @@ void Run(){
 
 namespace TestImmediateExitThread{
 
-class ImmediateExitThread : public ting::Thread{
+class ImmediateExitThread : public ting::mt::Thread{
 public:
 
 	//override
@@ -121,12 +122,12 @@ void Run(){
 
 namespace TestNestedJoin{
 
-class TestRunnerThread : public ting::Thread{
+class TestRunnerThread : public ting::mt::Thread{
 public:
-	class TopLevelThread : public ting::Thread{
+	class TopLevelThread : public ting::mt::Thread{
 	public:
 
-		class InnerLevelThread : public ting::Thread{
+		class InnerLevelThread : public ting::mt::Thread{
 		public:
 
 			//overrun
@@ -137,7 +138,7 @@ public:
 		//override
 		void Run(){
 			this->inner.Start();
-			ting::Thread::Sleep(100);
+			ting::mt::Thread::Sleep(100);
 			this->inner.Join();
 		}
 	} top;
@@ -162,7 +163,7 @@ void Run(){
 	TestRunnerThread runner;
 	runner.Start();
 
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 
 	ASSERT_ALWAYS(runner.success)
 

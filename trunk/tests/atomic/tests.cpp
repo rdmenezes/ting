@@ -1,6 +1,7 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/atomic.hpp"
-#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/mt/Thread.hpp"
+#include "../../src/ting/mt/Semaphore.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/Ptr.hpp"
 
@@ -15,14 +16,14 @@ namespace TestFetchAndAdd{
 
 const unsigned DNumOps = 0xffff;
 
-class Thread : public ting::Thread{
+class Thread : public ting::mt::Thread{
 	ting::atomic::S32 &a;
 public:
 	Thread(ting::atomic::S32 &a) :
 			a(a)
 	{}
 	
-	ting::Semaphore sema;
+	ting::mt::Semaphore sema;
 	
 	//override
 	void Run(){
@@ -50,7 +51,7 @@ void Run(){
 	}
 	
 	//wait till all the threads enter their Run() methods and start waiting on the semaphores
-	ting::Thread::Sleep(500);
+	ting::mt::Thread::Sleep(500);
 	
 	//signal all threads semaphores
 //	TRACE(<< "Signalling..." << std::endl)

@@ -36,7 +36,6 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "atomic.hpp"
 #include "PoolStored.hpp"
-#include "Thread.hpp"
 
 //#define M_ENABLE_REF_PRINT
 #ifdef M_ENABLE_REF_PRINT

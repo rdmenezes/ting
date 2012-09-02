@@ -36,7 +36,8 @@ THE SOFTWARE. */
 
 #include "codegen.h"
 #include "Ref.hpp"
-#include "Thread.hpp"
+#include "Ptr.hpp"
+#include "mt/Mutex.hpp"
 #include "debug.hpp"
 
 
@@ -147,7 +148,7 @@ template <class T_Ret> void Connect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>( new FuncSlot##num_func_params<T_Ret>(f)) \
 		); \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 }
 
@@ -159,7 +160,7 @@ template <class T_Ob, class T_Ret> void Connect(T_Ob* o, T_Ret(T_Ob::*m)(M_FUNC_
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new MethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
 		); \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 }
 
@@ -170,7 +171,7 @@ template <class T_Ob, class T_Ret> void Connect(const WeakRef<T_Ob>& o, T_Ret(T_
 	Ptr<SlotLink> sl( \
 			static_cast<SlotLink*>(new WeakRefMethodSlot##num_meth_params<T_Ob, T_Ret>(o, m)) \
 		); \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	this->slotLink.push_back(sl); \
 \
 	for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end();){ \
@@ -272,7 +273,7 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 #define M_DISCONNECT_FUNC(num_func_params, unused) \
 template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
 	ASSERT(f) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchFuncSlot(f); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -290,7 +291,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -307,7 +308,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 	)throw() \
 { \
 	ASSERT(m) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchWeakRefMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		this->slotLink.erase(i); \
@@ -327,7 +328,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 #define M_ISCONNECTED_FUNC(num_func_params, unused) \
 template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
 	ASSERT(f) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchFuncSlot(f); \
 	if(i != this->slotLink.end()){ \
 		return true; \
@@ -345,7 +346,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		return true; \
@@ -362,7 +363,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 	)throw() \
 { \
 	ASSERT(m) \
-	ting::Mutex::Guard mutexGuard(this->mutex); \
+	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchWeakRefMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		return true; \
@@ -403,11 +404,11 @@ M_TEMPLATE(n) class Signal##n{ \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT, n) \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT_WEAKREF, n) \
 \
-	mutable ting::Mutex mutex; \
+	mutable ting::mt::Mutex mutex; \
 \
 public: \
 	void Emit(M_FUNC_PARAMS_FULL(n)){ \
-		ting::Mutex::Guard mutexGuard(this->mutex); \
+		ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 		for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end();){ \
 			if((*i)->Execute(M_FUNC_PARAM_NAMES(n))){ \
 				i = this->slotLink.erase(i); \
@@ -430,7 +431,7 @@ public: \
 	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_METH_WEAKREF, ) \
 \
 	void DisconnectAll()throw(){ \
-		ting::Mutex::Guard mutexGuard(this->mutex); \
+		ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 		this->slotLink.clear(); \
 	} \
 \

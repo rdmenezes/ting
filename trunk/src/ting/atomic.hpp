@@ -35,7 +35,7 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "types.hpp"
 #include "util.hpp"
-#include "Thread.hpp"
+#include "mt/Thread.hpp"
 
 
 
@@ -45,6 +45,7 @@ THE SOFTWARE. */
 
 #else
 #	define M_ATOMIC_USE_MUTEX_FALLBACK
+#	include "mt/Mutex.hpp"
 #endif
 
 
@@ -103,7 +104,7 @@ class Flag{
 
 
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
-	ting::Mutex mutex;
+	ting::mt::Mutex mutex;
 	volatile bool flag;
 #elif M_CPU == M_CPU_X86 || \
 		M_CPU == M_CPU_X86_64 || \
@@ -161,7 +162,7 @@ public:
 	inline bool Set(bool value = true)throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
-			ting::Mutex::Guard mutexGuard(this->mutex);
+			ting::mt::Mutex::Guard mutexGuard(this->mutex);
 			bool old = this->flag;
 			this->flag = value;
 			return old;
@@ -274,7 +275,7 @@ public:
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
 			//still need to lock the mutex to generate the memory barrier.
-			ting::Mutex::Guard mutexGuard(this->mutex);
+			ting::mt::Mutex::Guard mutexGuard(this->mutex);
 			this->flag = false;
 		}
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
@@ -334,7 +335,7 @@ M_DECLARE_ALIGNED_MSVC(4)
 #endif
 class SpinLock{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
-	ting::Mutex mutex;
+	ting::mt::Mutex mutex;
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 	atomic::Flag flag;
@@ -398,7 +399,7 @@ public:
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
 
 		while(this->flag.Set(true)){
-			ting::Thread::Sleep(0);
+			ting::mt::Thread::Sleep(0);
 		}
 		atomic::Flag::MemoryBarrier();
 

@@ -2,7 +2,7 @@
 
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/WaitSet.hpp"
-#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/mt/MsgThread.hpp"
 
 #include "tests.hpp"
 
@@ -10,7 +10,7 @@
 
 namespace test_message_queue_as_waitable{
 
-class TestThread : public ting::MsgThread{
+class TestThread : public ting::mt::MsgThread{
 public:
 	//override
 	void Run(){
@@ -31,7 +31,7 @@ void Run(){
 
 	t.Start();
 
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 
 	t.PushNopMessage();
 
@@ -45,7 +45,7 @@ namespace test_general{
 void Run(){
 	ting::WaitSet ws(4);
 
-	ting::Queue q1, q2;
+	ting::mt::Queue q1, q2;
 
 	ws.Add(&q1, ting::Waitable::READ);
 	ws.Add(&q2, ting::Waitable::READ);
@@ -67,7 +67,7 @@ void Run(){
 
 
 	//test Wait with 1 triggered object
-	q1.PushMessage(ting::Ptr<ting::Message>(new ting::NopMessage()));
+	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
 	ASSERT_ALWAYS(ws.Wait() == 1)
 	ASSERT_ALWAYS(ws.Wait(&buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q1)
@@ -85,8 +85,8 @@ void Run(){
 
 
 	//test Wait with 2 triggered objects
-	q1.PushMessage(ting::Ptr<ting::Message>(new ting::NopMessage()));
-	q2.PushMessage(ting::Ptr<ting::Message>(new ting::NopMessage()));
+	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
+	q2.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
 	ASSERT_ALWAYS(ws.Wait() == 2)
 	ASSERT_ALWAYS(ws.Wait(&buf) == 2)
 	ASSERT_ALWAYS((buf[0] == &q1 && buf[1] == &q2) || (buf[0] == &q2 && buf[1] == &q1))

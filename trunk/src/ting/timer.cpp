@@ -38,12 +38,12 @@ ting::IntrusiveSingleton<Lib>::T_Instance Lib::instance;
 
 bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 	ASSERT(timer)
-	ting::Mutex::Guard mutexGuard(this->mutex);
+	ting::mt::Mutex::Guard mutexGuard(this->mutex);
 
 	if(!timer->isRunning){
 		//lock and unlock the 'expired' mutex to make sure that the timer's callback
 		//has been called if the timer has expired and is awaiting the notification callback to be called.
-		ting::Mutex::Guard mutexGuard(this->expiredTimersNotifyMutex);
+		ting::mt::Mutex::Guard mutexGuard(this->expiredTimersNotifyMutex);
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)throw(){
 
 void Lib::TimerThread::AddTimer_ts(Timer* timer, ting::u32 timeout){
 	ASSERT(timer)
-	ting::Mutex::Guard mutexGuard(this->mutex);
+	ting::mt::Mutex::Guard mutexGuard(this->mutex);
 
 	if(timer->isRunning){
 		throw ting::Exc("Lib::TimerThread::AddTimer(): timer is already running!");
@@ -102,7 +102,7 @@ void Lib::TimerThread::Run(){
 			std::vector<Timer*> expiredTimers;
 
 			{
-				ting::Mutex::Guard mutexGuard(this->mutex);
+				ting::mt::Mutex::Guard mutexGuard(this->mutex);
 
 				ting::u64 ticks = this->GetTicks();
 

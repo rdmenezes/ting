@@ -54,14 +54,14 @@ void Run(){
 //	TRACE_ALWAYS(<< "loop " << std::endl)
 	
 	for(unsigned i = 0; !exit; ++i){
-		ting::Thread::Sleep(100);
+		ting::mt::Thread::Sleep(100);
 		ASSERT_ALWAYS(i != 60)
 	}
 
-	ting::Thread::Sleep(50);
+	ting::mt::Thread::Sleep(50);
 	
 	while(!timer2.Stop()){
-		ting::Thread::Sleep(50);
+		ting::mt::Thread::Sleep(50);
 	}
 }
 
@@ -73,9 +73,9 @@ namespace SeveralTimersForTheSameInterval{
 
 struct TestTimer : public ting::timer::Timer{
 	unsigned *e;
-	ting::Mutex* m;
+	ting::mt::Mutex* m;
 
-	TestTimer(unsigned* cnt, ting::Mutex* mut) :
+	TestTimer(unsigned* cnt, ting::mt::Mutex* mut) :
 			e(cnt),
 			m(mut)
 	{
@@ -86,7 +86,7 @@ struct TestTimer : public ting::timer::Timer{
 	//override
 	void OnExpired()throw(){
 //		TRACE_ALWAYS(<<"\t- timer fired!"<<std::endl)
-		ting::Mutex::Guard mutexGuard(*this->m);
+		ting::mt::Mutex::Guard mutexGuard(*this->m);
 		++(*this->e);
 	}
 };
@@ -96,7 +96,7 @@ struct TestTimer : public ting::timer::Timer{
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning SeveralTimersForTheSameInterval, it will take about 1 second..." << std::endl)
 	
-	ting::Mutex mutex;
+	ting::mt::Mutex mutex;
 	unsigned counter = 0;
 	
 	const unsigned DNumTimers = 100;
@@ -115,7 +115,7 @@ void Run(){
 		(*i)->Start(500);
 	}
 	
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 	
 	ASSERT_ALWAYS(counter == DNumTimers)
 }
@@ -156,13 +156,13 @@ void Run(){
 	ASSERT_ALWAYS(!exit1)
 	ASSERT_ALWAYS(!exit2)
 	
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 	ASSERT_ALWAYS(!exit1)
 	ASSERT_ALWAYS(!exit2)
 	
 	timer2.Start(1000);
 	
-	ting::Thread::Sleep(500);
+	ting::mt::Thread::Sleep(500);
 	ASSERT_ALWAYS(!exit1)
 	ASSERT_ALWAYS(!exit2)
 	
@@ -171,11 +171,11 @@ void Run(){
 	ASSERT_ALWAYS(!exit1)
 	ASSERT_ALWAYS(!exit2)
 	
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 	ASSERT_ALWAYS(!exit1)
 	ASSERT_ALWAYS(!exit2)
 	
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 	ASSERT_ALWAYS(exit1)
 	ASSERT_ALWAYS(!exit2)
 }

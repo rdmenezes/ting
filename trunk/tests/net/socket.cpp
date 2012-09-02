@@ -1,8 +1,11 @@
 #include "../../src/ting/timer.hpp"
-#include "../../src/ting/Thread.hpp"
+#include "../../src/ting/mt/Thread.hpp"
+#include "../../src/ting/mt/MsgThread.hpp"
+#include "../../src/ting/mt/Message.hpp"
 #include "../../src/ting/net/TCPSocket.hpp"
 #include "../../src/ting/net/TCPServerSocket.hpp"
 #include "../../src/ting/net/UDPSocket.hpp"
+#include "../../src/ting/Ptr.hpp"
 #include "../../src/ting/WaitSet.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/Array.hpp"
@@ -34,14 +37,14 @@ void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
 				break;
 		}
 		//give 30ms to allow data from send buffer to be sent
-		ting::Thread::Sleep(30);
+		ting::mt::Thread::Sleep(30);
 	}
 
 	ASSERT(left == 0)
 }
 
 
-class ServerThread : public ting::MsgThread{
+class ServerThread : public ting::mt::MsgThread{
 public:
 	//override
 	void Run(){
@@ -56,8 +59,8 @@ public:
 			ting::net::TCPSocket sock;
 			while(!sock.IsValid() && !this->quitFlag){
 				sock = listenSock.Accept();
-				ting::Thread::Sleep(100);
-				if(ting::Ptr<ting::Message> m = this->queue.PeekMsg()){
+				ting::mt::Thread::Sleep(100);
+				if(ting::Ptr<ting::mt::Message> m = this->queue.PeekMsg()){
 					m->Handle();
 				}
 			}
@@ -86,7 +89,7 @@ void Run(){
 	
 	serverThread.Start();
 	
-	ting::Thread::Sleep(1000);
+	ting::mt::Thread::Sleep(1000);
 	
 	try{
 		ting::net::IPAddress ip("127.0.0.1", 13666);
@@ -109,7 +112,7 @@ void Run(){
 			if(bytesReceived == 4)
 				break;
 
-			ting::Thread::Sleep(100);
+			ting::mt::Thread::Sleep(100);
 		}
 		ASSERT_ALWAYS(bytesReceived == 4)
 		
@@ -146,7 +149,7 @@ void Run(){
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::net::TCPSocket sockR;
 	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
-		ting::Thread::Sleep(100);
+		ting::mt::Thread::Sleep(100);
 		sockR = serverSock.Accept();
 	}
 
@@ -327,7 +330,7 @@ void Run(){
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::net::TCPSocket sockR;
 	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
-		ting::Thread::Sleep(100);
+		ting::mt::Thread::Sleep(100);
 		sockR = serverSock.Accept();
 	}
 
@@ -470,7 +473,7 @@ void Run(){
 			if(bytesSent == 4)
 				break;
 			
-			ting::Thread::Sleep(100);
+			ting::mt::Thread::Sleep(100);
 		}
 		ASSERT_ALWAYS(bytesSent == 4)
 	}catch(ting::net::Exc &e){
@@ -490,7 +493,7 @@ void Run(){
 				break;
 			}
 			
-			ting::Thread::Sleep(100);
+			ting::mt::Thread::Sleep(100);
 		}
 		ASSERT_ALWAYS(bytesReceived == 4)
 		ASSERT_ALWAYS(buf[0] == '0')

@@ -70,8 +70,10 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "types.hpp"
 #include "Singleton.hpp"
-#include "Thread.hpp"
 #include "math.hpp"
+
+#include "mt/Thread.hpp"
+#include "mt/Semaphore.hpp"
 
 
 
@@ -216,16 +218,16 @@ class Lib : public IntrusiveSingleton<Lib>{
 	
 	friend class ting::timer::Timer;
 
-	class TimerThread : public ting::Thread{
+	class TimerThread : public ting::mt::Thread{
 	public:
 		ting::Inited<volatile bool, false> quitFlag;
 
-		ting::Mutex mutex;
-		ting::Semaphore sema;
+		ting::mt::Mutex mutex;
+		ting::mt::Semaphore sema;
 
 		//mutex used to make sure that after Timer::Stop() method is called the
 		//expired notification callback will not be called
-		ting::Mutex expiredTimersNotifyMutex;
+		ting::mt::Mutex expiredTimersNotifyMutex;
 		
 		//map requires key uniqueness, but in our case the key is a stop ticks,
 		//so, use std::multimap to allow similar keys.
@@ -295,11 +297,11 @@ public:
 	~Lib()throw(){
 		//stop half max ticks timer
 		while(!this->halfMaxTicksTimer.Stop()){
-			ting::Thread::Sleep(10);
+			ting::mt::Thread::Sleep(10);
 		}
 #ifdef DEBUG
 		{
-			ting::Mutex::Guard mutexGuard(this->thread.mutex);
+			ting::mt::Mutex::Guard mutexGuard(this->thread.mutex);
 			ASSERT(this->thread.timers.size() == 0)
 		}
 #endif

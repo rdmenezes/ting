@@ -24,6 +24,9 @@ cp src/ting/fs/*.hpp $incDir/fs
 mkdir -p $incDir/net
 cp src/ting/net/*.hpp $incDir/net
 
+mkdir -p $incDir/mt
+cp src/ting/mt/*.hpp $incDir/mt
+
 #create symbolic .so link to latest .so name
 libDir=$baseDir/usr/lib
 mkdir -p $libDir
