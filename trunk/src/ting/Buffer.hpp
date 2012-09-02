@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 /**
  * @author Ivan Gagis <igagis@gmail.com>
- * @brief buffer abstract class and static buffer wrapper.
+ * @brief buffer wrapper class and static buffer wrapper.
  */
 
 
@@ -46,8 +46,9 @@ namespace ting{
 
 
 /**
- * @brief abstract buffer template class.
- * This class is supposed to be ancestor of all buffer-like objects.
+ * @brief Memory buffer wrapper template class.
+ * This class is a wrapper of memory buffer, it encapsulates pointer to memory block and size of that memory block.
+ * 
  */
 template <class T> class Buffer{
 

@@ -22,15 +22,15 @@ THE SOFTWARE. */
 
 // Home page: http://ting.googlecode.com
 
+#include "../config.hpp"
 
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
+#	include <windows.h>
 
-#ifdef WIN32
-#include <windows.h>
-
-#elif defined(__linux__)
-#include <dirent.h>
-#include <sys/stat.h>
-#include <cerrno>
+#elif M_OS == M_OS_LINUX
+#	include <dirent.h>
+#	include <sys/stat.h>
+#	include <cerrno>
 
 #endif
 
@@ -228,7 +228,7 @@ bool FSFile::Exists()const{
 
 	//if it is a directory, check directory existence
 	if(this->Path()[this->Path().size() - 1] == '/'){
-#if defined(__linux__)
+#if M_OS == M_OS_LINUX
 		DIR *pdir = opendir(this->TruePath().c_str());
 		if(!pdir){
 			return false;
@@ -256,7 +256,7 @@ void FSFile::MakeDir(){
 		throw File::Exc("invalid directory name");
 	}
 
-#if defined(__linux__)
+#if M_OS == M_OS_LINUX
 //	TRACE(<< "creating directory = " << this->Path() << std::endl)
 	umask(0);//clear umask for proper permissions of newly created directory
 	if(mkdir(this->TruePath().c_str(), 0777) != 0){
@@ -273,15 +273,15 @@ void FSFile::MakeDir(){
 std::string FSFile::GetHomeDir(){
 	std::string ret;
 	
-#if defined(__linux__) || defined(WIN32)
+#if M_OS == M_OS_LINUX || M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	
-#if defined(__linux__)
+#	if M_OS == M_OS_LINUX
 	char * home = getenv("HOME");
-#elif defined(WIN32)
+#	elif M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	char * home = getenv("USERPROFILE");
-#else
-#error "ASSERTION FAILURE: should never get here"
-#endif
+#	else
+#		error "unsupported OS"
+#	endif
 	
 	if(!home){
 		throw File::Exc("HOME environment variable does not exist");
@@ -289,7 +289,7 @@ std::string FSFile::GetHomeDir(){
 
 	ret = std::string(home);
 #else
-#error "unsupported os"
+#	error "unsupported os"
 #endif
 	
 	//append trailing '/' if needed
@@ -304,12 +304,13 @@ std::string FSFile::GetHomeDir(){
 
 //override
 ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
-	if(!this->IsDir())
+	if(!this->IsDir()){
 		throw File::Exc("FSFile::ListDirContents(): this is not a directory");
+	}
 
 	std::vector<std::string> files;
 
-#ifdef __WIN32__
+#if M_OS == M_OS_WIN32 || M_OS == M_OS_WIN64
 	{
 		std::string pattern = this->TruePath();
 		pattern += '*';
@@ -354,7 +355,7 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 				throw File::Exc("ListDirContents(): find next file failed");
 		}
 	}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	{
 		DIR *pdir = opendir(this->TruePath().c_str());
 
@@ -412,13 +413,13 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 			throw File::Exc(ss.str());
 		}
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 
-#error "FSFile::ListDirContents(): MacOSx version is not implemented yet"
+#	error "FSFile::ListDirContents(): MacOSx version is not implemented yet"
 
 #else
 
-#error "FSFile::ListDirContents(): version is not implemented yet for this os"
+#	error "FSFile::ListDirContents(): version is not implemented yet for this os"
 
 #endif
 	
