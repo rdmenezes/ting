@@ -51,7 +51,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	this->handles[this->numWaitables] = w->GetHandle();
 	this->waitables[this->numWaitables] = w;
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	epoll_event e;
 	e.data.fd = w->GetHandle();
 	e.data.ptr = w;
@@ -68,7 +68,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	if(res < 0){
 		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	if(u32(flagsToWaitFor) & Waitable::READ){
 		AddEvent(w, EVENT_READ);
 	}
@@ -111,7 +111,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	//set new wait flags
 	w->SetWaitingEvents(flagsToWaitFor);
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	epoll_event e;
 	e.data.fd = w->GetHandle();
 	e.data.ptr = w;
@@ -128,7 +128,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	if(res < 0){
 		throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	if(u32(flagsToWaitFor) & Waitable::READ){
 		AddEvent(w, EVENT_READ);
 	}
@@ -171,7 +171,7 @@ void WaitSet::Remove(Waitable* w)throw(){
 	//clear wait flags (disassociate socket and Windows event)
 	w->SetWaitingEvents(0);
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	int res = epoll_ctl(
 			this->epollSet,
 			EPOLL_CTL_DEL,
@@ -181,7 +181,7 @@ void WaitSet::Remove(Waitable* w)throw(){
 	if(res < 0){
 		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 		RemoveEvent(w, EVENT_READ);
 		RemoveEvent(w, EVENT_WRITE);
 #else
@@ -255,7 +255,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 
 	return numEvents;
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	ASSERT(int(timeout) >= 0)
 	int epollTimeout = waitInfinitly ? (-1) : int(timeout);
 
@@ -316,7 +316,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 
 	ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
 	return unsigned(res);
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	struct timespec tmout = {
 		timeout / 1000, //seconds
 		(timeout % 1000) * 1000000 //nanoseconds

@@ -34,18 +34,18 @@ using namespace ting;
 
 Mutex::Mutex(){
 	M_MUTEX_TRACE(<< "Mutex::Mutex(): invoked " << this << std::endl)
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	InitializeCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	if(this->m.CreateLocal() != KErrNone){
 		throw ting::Exc("Mutex::Mutex(): failed creating mutex (CreateLocal() failed)");
 	}
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	if(pthread_mutex_init(&this->m, NULL) != 0){
 		throw ting::Exc("Mutex::Mutex(): failed creating mutex (pthread_mutex_init() failed)");
 	}
 #else
-#error "unknown system"
+#	error "unknown OS"
 #endif
 }
 
@@ -53,16 +53,16 @@ Mutex::Mutex(){
 
 Mutex::~Mutex()throw(){
 	M_MUTEX_TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	DeleteCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	this->m.Close();
-#elif defined(__linux__) || defined(__APPLE__)
-	#ifdef DEBUG
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
+#	ifdef DEBUG
 	int ret =
-	#endif
+#	endif
 	pthread_mutex_destroy(&this->m);
-	#ifdef DEBUG
+#	ifdef DEBUG
 	if(ret != 0){
 		std::stringstream ss;
 		ss << "Mutex::~Mutex(): pthread_mutex_destroy() failed"
@@ -72,20 +72,20 @@ Mutex::~Mutex()throw(){
 		}
 		ASSERT_INFO_ALWAYS(false, ss.str())
 	}
-	#endif
+#	endif
 #else
-	#error "unknown system"
+#	error "unknown OS"
 #endif
 }
 
 
 
 Semaphore::Semaphore(unsigned initialValue){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	if( (this->s = CreateSemaphore(NULL, initialValue, 0xffffff, NULL)) == NULL)
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	if(this->s.CreateLocal(initialValue) != KErrNone)
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	// Darwin/BSD/... semaphores are named semaphores, we need to create a 
 	// different name for new semaphores.
 	char name[256];
@@ -103,10 +103,10 @@ Semaphore::Semaphore(unsigned initialValue){
 	name[p] = '\0';
 	this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
 	if (this->s == SEM_FAILED)
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	if(sem_init(&this->s, 0, initialValue) < 0)
 #else
-#error "unknown system"
+#	error "unknown OS"
 #endif
 	{
 		LOG(<< "Semaphore::Semaphore(): failed" << std::endl)
@@ -117,23 +117,23 @@ Semaphore::Semaphore(unsigned initialValue){
 
 
 Semaphore::~Semaphore()throw(){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	CloseHandle(this->s);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	this->s.Close();
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	sem_close(this->s);
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	sem_destroy(&this->s);
 #else
-	#error "unknown system"
+#	error "unknown OS"
 #endif
 }
 
 
 
 bool Semaphore::Wait(ting::u32 timeoutMillis){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	STATIC_ASSERT(INFINITE == 0xffffffff)
 	switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == INFINITE ? INFINITE - 1 : timeoutMillis))){
 		case WAIT_OBJECT_0:
@@ -144,7 +144,7 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			throw ting::Exc("Semaphore::Wait(u32): wait failed");
 			break;
 	}
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	int retVal = 0;
 
 	// simulate the behavior of wait
@@ -178,7 +178,7 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 	if(timeoutMillis == 0){
 		return false;
 	}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	//if timeoutMillis is 0 then use sem_trywait() to avoid unnecessary time calculation for sem_timedwait()
 	if(timeoutMillis == 0){
 		if(sem_trywait(&this->s) == -1){
@@ -208,7 +208,7 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 		}
 	}
 #else
-#error "unknown system"
+#	error "unknown OS"
 #endif
 	return true;
 }
@@ -216,25 +216,25 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 
 
 CondVar::CondVar(){
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_SYMBIAN
 	this->numWaiters = 0;
 	this->numSignals = 0;
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	pthread_cond_init(&this->cond, NULL);
 #else
-#error "unknown system"
+#	error "unknown OS"
 #endif
 }
 
 
 
 CondVar::~CondVar()throw(){
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_SYMBIAN
 	//do nothing
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	pthread_cond_destroy(&this->cond);
 #else
-	#error "unknown system"
+#	error "unknown OS"
 #endif
 }
 
@@ -244,7 +244,7 @@ Queue::Queue(){
 	//can write will always be set because it is always possible to post a message to the queue
 	this->SetCanWriteFlag();
 
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 	this->eventForWaitable = CreateEvent(
 			NULL, //security attributes
 			TRUE, //manual-reset
@@ -254,14 +254,14 @@ Queue::Queue(){
 	if(this->eventForWaitable == NULL){
 		throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
 	}
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	if(::pipe(&this->pipeEnds[0]) < 0){
 		std::stringstream ss;
 		ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
 				<< " error code = " << errno << ": " << strerror(errno);
 		throw ting::Exc(ss.str().c_str());
 	}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	this->eventFD = eventfd(0, EFD_NONBLOCK);
 	if(this->eventFD < 0){
 		std::stringstream ss;
@@ -270,7 +270,7 @@ Queue::Queue(){
 		throw ting::Exc(ss.str().c_str());
 	}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
@@ -294,15 +294,15 @@ Queue::~Queue()throw(){
 			msg = nextMsg;
 		}
 	}
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 	CloseHandle(this->eventForWaitable);
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	close(this->pipeEnds[0]);
 	close(this->pipeEnds[1]);
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	close(this->eventFD);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
@@ -328,23 +328,23 @@ void Queue::PushMessage(Ptr<Message> msg)throw(){
 		ASSERT(!this->CanRead())
 		this->SetCanReadFlag();
 
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 		if(SetEvent(this->eventForWaitable) == 0){
 			ASSERT(false)
 		}
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 		{
 			u8 oneByteBuf[1];
 			if(write(this->pipeEnds[1], oneByteBuf, 1) != 1){
 				ASSERT(false)
 			}
 		}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 		if(eventfd_write(this->eventFD, 1) < 0){
 			ASSERT(false)
 		}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	}
 
@@ -368,19 +368,19 @@ Ptr<Message> Queue::PeekMsg(){
 
 		ASSERT(this->first)
 		if(this->first->next == 0){//if we are taking away the last message from the queue
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 			{
 				u8 oneByteBuf[1];
 				if(read(this->pipeEnds[0], oneByteBuf, 1) != 1){
 					throw ting::Exc("Queue::Wait(): read() failed");
 				}
 			}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 			{
 				eventfd_t value;
 				if(eventfd_read(this->eventFD, &value) < 0){
@@ -389,7 +389,7 @@ Ptr<Message> Queue::PeekMsg(){
 				ASSERT(value == 1)
 			}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 			this->ClearCanReadFlag();
 		}else{
@@ -422,17 +422,17 @@ Ptr<Message> Queue::GetMsg(){
 			ASSERT(this->first)
 			
 			if(this->first->next == 0){//if we are taking away the last message from the queue
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 				{
 					u8 oneByteBuf[1];
 					read(this->pipeEnds[0], oneByteBuf, 1);
 				}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 				{
 					eventfd_t value;
 					if(eventfd_read(this->eventFD, &value) < 0){
@@ -441,7 +441,7 @@ Ptr<Message> Queue::GetMsg(){
 					ASSERT(value == 1)
 				}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 				this->ClearCanReadFlag();
 			}else{
@@ -466,17 +466,17 @@ Ptr<Message> Queue::GetMsg(){
 		ASSERT(this->first)
 
 		if(this->first->next == 0){//if we are taking away the last message from the queue
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 			{
 				u8 oneByteBuf[1];
 				read(this->pipeEnds[0], oneByteBuf, 1);
 			}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 			{
 				eventfd_t value;
 				if(eventfd_read(this->eventFD, &value) < 0){
@@ -485,7 +485,7 @@ Ptr<Message> Queue::GetMsg(){
 				ASSERT(value == 1)
 			}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 			this->ClearCanReadFlag();
 		}else{
@@ -502,7 +502,7 @@ Ptr<Message> Queue::GetMsg(){
 
 
 
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 //override
 HANDLE Queue::GetHandle(){
 	//return event handle
@@ -563,21 +563,21 @@ bool Queue::CheckSignaled(){
 	return (this->readinessFlags & this->flagsMask) != 0;
 }
 
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 //override
 int Queue::GetHandle(){
 	//return read end of pipe
 	return this->pipeEnds[0];
 }
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 //override
 int Queue::GetHandle(){
 	return this->eventFD;
 }
 
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 
@@ -590,14 +590,14 @@ ting::Mutex threadMutex2;
 
 //Tread Run function
 //static
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 unsigned int __stdcall Thread::RunThread(void *data)
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 TInt Thread::RunThread(TAny *data)
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 void* Thread::RunThread(void *data)
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 {
 	ting::Thread *thr = reinterpret_cast<ting::Thread*>(data);
@@ -619,13 +619,13 @@ void* Thread::RunThread(void *data)
 		thr->state = STOPPED;
 	}
 
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	//Do nothing, _endthreadex() will be called   automatically
 	//upon returning from the thread routine.
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	pthread_exit(0);
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	return 0;
 }
@@ -633,14 +633,14 @@ void* Thread::RunThread(void *data)
 
 
 Thread::Thread(){
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 	this->th = NULL;
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	//do nothing
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	//do nothing
 #else
-#error "Unsuported OS"
+#	error "Unsuported OS"
 #endif
 }
 
@@ -678,7 +678,7 @@ void Thread::Start(size_t stackSize){
 		throw HasAlreadyBeenStartedExc();
 	}
 
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	this->th = reinterpret_cast<HANDLE>(
 			_beginthreadex(
 					NULL,
@@ -692,7 +692,7 @@ void Thread::Start(size_t stackSize){
 	if(this->th == NULL){
 		throw Exc("Thread::Start(): _beginthreadex failed");
 	}
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	if(this->th.Create(_L("ting thread"), &RunThread,
 				stackSize == 0 ? KDefaultStackSize : stackSize,
 				NULL, reinterpret_cast<TAny*>(this)) != KErrNone
@@ -701,7 +701,7 @@ void Thread::Start(size_t stackSize){
 		throw Exc("Thread::Start(): starting thread failed");
 	}
 	this->th.Resume();//start the thread execution
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	{
 		pthread_attr_t attr;
 
@@ -722,7 +722,7 @@ void Thread::Start(size_t stackSize){
 		pthread_attr_destroy(&attr);
 	}
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	this->state = RUNNING;
 }
@@ -749,23 +749,23 @@ void Thread::Join() throw(){
 	
 	ASSERT_INFO(T_ThreadID(this->th) != ting::Thread::GetCurrentThreadID(), "tried to call Join() on the current thread")
 
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	WaitForSingleObject(this->th, INFINITE);
 	CloseHandle(this->th);
 	this->th = NULL;
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	TRequestStatus reqStat;
 	this->th.Logon(reqStat);
 	User::WaitForRequest(reqStat);
 	this->th.Close();
-#elif defined(__linux__) || defined(__APPLE__)
-#ifdef DEBUG
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
+#	ifdef DEBUG
 	int res =
-#endif
+#	endif
 			pthread_join(this->th, 0);
 	ASSERT_INFO(res == 0, "res = " << strerror(res))
 #else
-#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	//NOTE: at this point the thread's Run() method should already exit and state

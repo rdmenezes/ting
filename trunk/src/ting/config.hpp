@@ -144,6 +144,7 @@ THE SOFTWARE. */
 #define M_OS_WINDOWS                    2
 #define M_OS_MACOSX                     3
 #define M_OS_SOLARIS                    4
+#define M_OS_SYMBIAN                    5
 
 #if defined(__linux__)
 #	define M_OS M_OS_LINUX
@@ -153,6 +154,8 @@ THE SOFTWARE. */
 #	define M_OS M_OS_MACOSX
 #elif defined(sun) || defined(__sun)
 #	define M_OS M_OS_SOLARIS
+#elif defined(__SYMBIAN32__)
+#	define M_OS M_OS_SYMBIAN
 #else
 #	define M_OS M_OS_UNKNOWN
 #endif

@@ -44,10 +44,8 @@ THE SOFTWARE. */
 #include "WaitSet.hpp"
 
 
-//=========
-//= WIN32 =
-//=========
-#if defined(WIN32)
+
+#if M_OS == M_OS_WINDOWS
 
 //if _WINSOCKAPI_ macro is not defined then it means that the winsock header file
 //has not been included. Here we temporarily define the macro in order to prevent
@@ -65,35 +63,27 @@ THE SOFTWARE. */
 
 
 
-//===========
-//= Symbian =
-//===========
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 #	include <string.h>
 #	include <e32std.h>
 #	include <hal.h>
 
 
 
-//========================================
-//= Linux, Mac OS (Apple), Solaris (Sun) =
-//========================================
-#elif defined(__linux__) || defined(__APPLE__) || defined(sun) || defined(__sun)
-
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <unistd.h>
 #	include <pthread.h>
 #	include <semaphore.h>
 #	include <errno.h>
 #	include <ctime>
 
-//if we have Solaris
-#	if defined(sun) || defined(__sun)
-#		include <sched.h>	//	for sched_yield();
+#	if M_OS == M_OS_SOLARIS
+#		include <sched.h> // for sched_yield();
 #	endif
 
 #	if defined(__ANDROID__)
 //TODO: revert to using sys/eventfd.h when it becomes available in Android NDK
-#	elif defined(__linux__)
+#	elif M_OS == M_OS_LINUX
 #		include <sys/eventfd.h>
 #	endif
 
@@ -101,16 +91,7 @@ THE SOFTWARE. */
 #	error "Unsupported OS"
 #endif
 
-
-
-//if Microsoft MSVC compiler,
-//then disable warning about throw specification is ignored.
-#if M_COMPILER == M_COMPILER_MSVC
-#	pragma warning(push) //push warnings state
-#	pragma warning( disable : 4290)
-#endif
-
-
+//TODO: move Mutex, Queue, Semaphore etc. classes to separate files.
 
 //#define M_ENABLE_MUTEX_TRACE
 #ifdef M_ENABLE_MUTEX_TRACE
@@ -144,14 +125,14 @@ class Mutex{
 	friend class CondVar;
 
 	//system dependent handle
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	CRITICAL_SECTION m;
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	RCriticalSection m;
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	pthread_mutex_t m;
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 
 private:
@@ -176,14 +157,14 @@ public:
 	 */
 	inline void Lock()throw(){
 		M_MUTEX_TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		EnterCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 		this->m.Wait();
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 		pthread_mutex_lock(&this->m);
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 
@@ -194,14 +175,14 @@ public:
 	 */
 	inline void Unlock()throw(){
 		M_MUTEX_TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		LeaveCriticalSection(&this->m);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 		this->m.Signal();
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 		pthread_mutex_unlock(&this->m);
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 
@@ -246,17 +227,17 @@ public:
  */
 class Semaphore{
 	//system dependent handle
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	HANDLE s;
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	RSemaphore s;
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 	//TODO: consider using the MPCreateSemaphore
 	sem_t *s;
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	sem_t s;
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 
 	//forbid copying
@@ -280,10 +261,10 @@ public:
 	 * by calling Semaphore::Signal() on that semaphore.
 	 */
 	void Wait(){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		switch(WaitForSingleObject(this->s, DWORD(INFINITE))){
 			case WAIT_OBJECT_0:
-//				LOG(<<"Semaphore::Wait(): exit"<<std::endl)
+//				TRACE(<< "Semaphore::Wait(): exit" << std::endl)
 				break;
 			case WAIT_TIMEOUT:
 				ASSERT(false)
@@ -292,9 +273,9 @@ public:
 				throw ting::Exc("Semaphore::Wait(): wait failed");
 				break;
 		}
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 		this->s.Wait();
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 		int retVal = 0;
 
 		do{
@@ -304,7 +285,7 @@ public:
 		if(retVal < 0){
 			throw ting::Exc("Semaphore::Wait(): wait failed");
 		}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 		int retVal;
 		do{
 			retVal = sem_wait(&this->s);
@@ -313,7 +294,7 @@ public:
 			throw ting::Exc("Semaphore::Wait(): wait failed");
 		}
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 	
@@ -347,22 +328,22 @@ public:
 	 */
 	inline void Signal()throw(){
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		if(ReleaseSemaphore(this->s, 1, NULL) == 0){
 			ASSERT(false)
 		}
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 		this->s.Signal();
-#elif defined(__APPLE__)
+#elif M_OS == M_OS_MACOSX
 		if(sem_post(this->s) < 0){
 			ASSERT(false)
 		}
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 		if(sem_post(&this->s) < 0){
 			ASSERT(false)
 		}
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 };//~class Semaphore
@@ -370,17 +351,17 @@ public:
 
 
 class CondVar{
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_SYMBIAN
 	Mutex cvMutex;
 	Semaphore semWait;
 	Semaphore semDone;
 	unsigned numWaiters;
 	unsigned numSignals;
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	//A pointer to store system dependent handle
 	pthread_cond_t cond;
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 
 	//forbid copying
@@ -394,7 +375,7 @@ public:
 	~CondVar()throw();
 
 	void Wait(Mutex& mutex){
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_SYMBIAN
 		this->cvMutex.Lock();
 		++this->numWaiters;
 		this->cvMutex.Unlock();
@@ -412,15 +393,15 @@ public:
 		this->cvMutex.Unlock();
 
 		mutex.Lock();
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 		pthread_cond_wait(&this->cond, &mutex.m);
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 
 	void Notify()throw(){
-#if defined(WIN32) || defined(__SYMBIAN32__)
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_SYMBIAN
 		this->cvMutex.Lock();
 
 		if(this->numWaiters > this->numSignals){
@@ -431,10 +412,10 @@ public:
 		}else{
 			this->cvMutex.Unlock();
 		}
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 		pthread_cond_signal(&this->cond);
 #else
-#	error "unknown system"
+#	error "unknown OS"
 #endif
 	}
 };
@@ -489,13 +470,13 @@ class Queue : public Waitable{
 	ting::Inited<Message*, 0> first;
 	ting::Inited<Message*, 0> last;
 
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 	//use additional semaphore to implement Waitable on Windows
 	HANDLE eventForWaitable;
-#elif defined(__APPLE__) || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	//use pipe to implement Waitable in *nix systems
 	int pipeEnds[2];
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	//use eventfd()
 	int eventFD;
 #else
@@ -554,7 +535,7 @@ public:
 	Ptr<Message> GetMsg();
 
 private:
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	//override
 	HANDLE GetHandle();
 
@@ -567,11 +548,11 @@ private:
 	//override
 	virtual bool CheckSignaled();
 
-#elif defined(__linux__)
+#elif M_OS == M_OS_LINUX
 	//override
 	int GetHandle();
 
-#elif defined(__APPLE__) //Mac OS
+#elif M_OS == M_OS_MACOSX //Mac OS
 	//override
 	int GetHandle();
 
@@ -589,11 +570,11 @@ private:
  */
 class Thread{
 //Tread Run function
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 	static unsigned int __stdcall RunThread(void *data);
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	static TInt RunThread(TAny *data);
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	static void* RunThread(void *data);
 #else
 #	error "Unsupported OS"
@@ -613,11 +594,11 @@ class Thread{
 	ting::Inited<volatile E_State, NEW> state;
 
 	//system dependent handle
-#if defined(WIN32)
+#if M_OS == M_OS_WINDOWS
 	HANDLE th;
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 	RThread th;
-#elif defined(__linux__) || defined(__APPLE__)
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	pthread_t th;
 #else
 #	error "Unsupported OS"
@@ -693,18 +674,18 @@ public:
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
 	static void Sleep(unsigned msec = 0)throw(){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
-#elif defined(__SYMBIAN32__)
+#elif M_OS == M_OS_SYMBIAN
 		User::After(msec * 1000);
-#elif defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__linux__)
+#elif M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX
 		if(msec == 0){
-#	if defined(sun) || defined(__sun) || defined(__APPLE__) || defined(__ANDROID__)
+#	if M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX || defined(__ANDROID__)
 			sched_yield();
-#	elif defined(__linux__)
+#	elif M_OS == M_OS_LINUX
 			pthread_yield();
 #	else
-#		error "Should not get here"
+#		error "Unsupported OS"
 #	endif
 		}else{
 			usleep(msec * 1000);
@@ -734,9 +715,9 @@ public:
 	 * @return unique thread identifier.
 	 */
 	static inline T_ThreadID GetCurrentThreadID()throw(){
-#ifdef WIN32
+#if M_OS == M_OS_WINDOWS
 		return T_ThreadID(GetCurrentThreadId());
-#elif defined(__APPLE__) || defined(__linux__)
+#elif M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX
 		pthread_t t = pthread_self();
 		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(T_ThreadID))
 		return T_ThreadID(t);
@@ -880,12 +861,3 @@ inline void MsgThread::PushQuitMessage(){
 }//~namespace ting
 
 //NOTE: do not put semicolon after namespace, some compilers issue a warning on this thinking that it is a declaration.
-
-
-
-//if Microsoft MSVC compiler, restore warnings state
-#if M_COMPILER == M_COMPILER_MSVC
-#	pragma warning(pop) //pop warnings state
-#endif
-
-
