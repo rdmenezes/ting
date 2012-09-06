@@ -151,8 +151,8 @@ public:
 	//False otherwise.
 	bool lastTicksInFirstHalf;
 	
-	T_ResolversTimeMap& timeMap1;
-	T_ResolversTimeMap& timeMap2;
+	T_ResolversTimeMap* timeMap1;
+	T_ResolversTimeMap* timeMap2;
 	
 	T_RequestsToSendList sendList;
 	
@@ -491,8 +491,8 @@ public:
 private:
 	LookupThread() :
 			waitSet(2),
-			timeMap1(resolversByTime1),
-			timeMap2(resolversByTime2)
+			timeMap1(&resolversByTime1),
+			timeMap2(&resolversByTime2)
 	{
 		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
 		
@@ -792,27 +792,27 @@ private:
 					if(isFirstHalf && !this->lastTicksInFirstHalf){
 						//Time warped.
 						//Timeout all requests from first time map
-						while(this->timeMap1.size() != 0){
-							ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+						while(this->timeMap1->size() != 0){
+							ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
 							ASSERT(r)
 
 							//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
 							this->CallCallback(r.operator->(), HostNameResolver::TIMEOUT, 0);
 						}
 						
-						ASSERT(this->timeMap1.size() == 0)
+						ASSERT(this->timeMap1->size() == 0)
 						std::swap(this->timeMap1, this->timeMap2);
 					}
 					this->lastTicksInFirstHalf = isFirstHalf;
 				}
 				
-				while(this->timeMap1.size() != 0){
-					if(this->timeMap1.begin()->first > curTime){
+				while(this->timeMap1->size() != 0){
+					if(this->timeMap1->begin()->first > curTime){
 						break;
 					}
 					
 					//timeout
-					ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1.begin()->second->hnr);
+					ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
 					ASSERT(r)
 					
 					//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
@@ -824,13 +824,13 @@ private:
 					break;//exit thread
 				}
 				
-				ASSERT(this->timeMap1.size() > 0)
-				ASSERT(this->timeMap1.begin()->first > curTime)
+				ASSERT(this->timeMap1->size() > 0)
+				ASSERT(this->timeMap1->begin()->first > curTime)
 				
 //				TRACE(<< "DNS thread: curTime = " << curTime << std::endl)
-//				TRACE(<< "DNS thread: this->timeMap1.begin()->first = " << (this->timeMap1.begin()->first) << std::endl)
+//				TRACE(<< "DNS thread: this->timeMap1->begin()->first = " << (this->timeMap1->begin()->first) << std::endl)
 				
-				timeout = this->timeMap1.begin()->first - curTime;
+				timeout = this->timeMap1->begin()->first - curTime;
 			}
 			
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
@@ -972,9 +972,9 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 //		TRACE(<< "HostNameResolver::Resolve_ts(): curTime = " << curTime << std::endl)
 //		TRACE(<< "HostNameResolver::Resolve_ts(): endTime = " << endTime << std::endl)
 		if(endTime < curTime){//if warped around
-			r->timeMap = &dns::thread->timeMap2;
+			r->timeMap = dns::thread->timeMap2;
 		}else{
-			r->timeMap = &dns::thread->timeMap1;
+			r->timeMap = dns::thread->timeMap1;
 		}
 		try{
 			r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));

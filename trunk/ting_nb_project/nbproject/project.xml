@@ -11,9 +11,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>/home/ivan/prj/ting/tests</sourceRootElem>
-                <sourceRootElem>/home/ivan/prj/ting/android/jni</sourceRootElem>
-                <sourceRootElem>/home/ivan/prj/ting/src</sourceRootElem>
+                <sourceRootElem>../src</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
