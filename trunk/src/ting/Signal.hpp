@@ -208,8 +208,16 @@ template <class T_Ret> T_SlotLinkIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPE
 	return this->slotLink.end(); \
 }
 
+//const version
+#define M_SEARCH_FUNCSLOT_CONST(num_func_params, num_sig_params) \
+template <class T_Ret> inline T_SlotLinkConstIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const throw(){ \
+	return const_cast<Signal##num_sig_params*>(this)->SearchFuncSlot(f); \
+}
+
+
+
 //Search for existing connection to a given object-method slot
-#define M_SEARCH_METHSLOT(num_meth_params, unused) \
+#define M_SEARCH_METHSLOT(num_meth_params, num_sig_params) \
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
@@ -232,9 +240,23 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 	return this->slotLink.end(); \
 }
 
+
+
+//Const version
+#define M_SEARCH_METHSLOT_CONST(num_meth_params, num_sig_params) \
+template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchMethSlot( \
+		T_Ob* o, \
+		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
+	)const throw() \
+{ \
+	return const_cast<Signal##num_sig_params*>(this)->SearchMethSlot(o, m); \
+}
+
+
+
 //Search for existing connection to a given WeakRef_object-method slot
 //NOTE: call to this function should be protected by mutex, since it can modify the list of connected slots.
-#define M_SEARCH_METHSLOT_WEAKREF(num_meth_params, unused) \
+#define M_SEARCH_METHSLOT_WEAKREF(num_meth_params, num_sig_params) \
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
@@ -261,6 +283,18 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 		++i; \
 	} \
 	return this->slotLink.end(); \
+}
+
+
+
+//Const version
+#define M_SEARCH_METHSLOT_WEAKREF_CONST(num_meth_params, num_sig_params) \
+template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchWeakRefMethSlot( \
+		const ting::WeakRef<T_Ob>& o, \
+		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
+	)const throw() \
+{ \
+	return const_cast<Signal##num_sig_params*>(this)->SearchWeakRefMethSlot(o, m); \
 }
 
 
@@ -324,12 +358,11 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 //===
 
 //Function slot
-	//TODO: make const
 #define M_ISCONNECTED_FUNC(num_func_params, unused) \
-template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
+template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const throw(){ \
 	ASSERT(f) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
-	T_SlotLinkIter i = this->SearchFuncSlot(f); \
+	T_SlotLinkConstIter i = this->SearchFuncSlot(f); \
 	if(i != this->slotLink.end()){ \
 		return true; \
 	} \
@@ -337,17 +370,16 @@ template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_pa
 }
 
 //Object-method slot
-	//TODO: make const
 #define M_ISCONNECTED_METH(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool IsConnected( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)const throw() \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
-	T_SlotLinkIter i = this->SearchMethSlot(o, m); \
+	T_SlotLinkConstIter i = this->SearchMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		return true; \
 	} \
@@ -355,16 +387,15 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 }
 
 //WeakRef_object-method slot
-	//TODO: make const
 #define M_ISCONNECTED_METH_WEAKREF(num_meth_params, unused) \
 template <class T_Ob, class T_Ret> bool IsConnected( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)const throw() \
 { \
 	ASSERT(m) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
-	T_SlotLinkIter i = this->SearchWeakRefMethSlot(o, m); \
+	T_SlotLinkConstIter i = this->SearchWeakRefMethSlot(o, m); \
 	if(i != this->slotLink.end()){ \
 		return true; \
 	} \
@@ -398,11 +429,15 @@ M_TEMPLATE(n) class Signal##n{ \
 \
 	typedef std::list<Ptr<SlotLink> > T_SlotLinkList; \
 	typedef M_IF_NOT_0(n, typename, ) T_SlotLinkList::iterator T_SlotLinkIter; \
+	typedef M_IF_NOT_0(n, typename, ) T_SlotLinkList::const_iterator T_SlotLinkConstIter; \
 	T_SlotLinkList slotLink; \
 \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_FUNCSLOT, n) \
+	M_REPEAT2(M_INCREMENT(n), M_SEARCH_FUNCSLOT_CONST, n) \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT, n) \
+	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT_CONST, n) \
 	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT_WEAKREF, n) \
+	M_REPEAT2(M_INCREMENT(n), M_SEARCH_METHSLOT_WEAKREF_CONST, n) \
 \
 	mutable ting::mt::Mutex mutex; \
 \
