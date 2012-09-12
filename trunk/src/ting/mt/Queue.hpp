@@ -35,9 +35,9 @@ THE SOFTWARE. */
 #include "../debug.hpp"
 #include "../WaitSet.hpp"
 #include "../Ptr.hpp"
+#include "../atomic.hpp"
 
 #include "Message.hpp"
-#include "Mutex.hpp"
 #include "Semaphore.hpp"
 
 
@@ -60,8 +60,7 @@ namespace mt{
 class Queue : public ting::Waitable{
 	Semaphore sem;
 
-	//TODO: use spinlock instead of mutex?
-	Mutex mut;
+	atomic::SpinLock mut;
 
 	ting::Inited<Message*, 0> first;
 	ting::Inited<Message*, 0> last;

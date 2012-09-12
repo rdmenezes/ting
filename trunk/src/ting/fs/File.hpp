@@ -207,14 +207,18 @@ public:
 
 	/**
 	 * @brief Read data from file.
-	 * All sane file systems should support file reading. 
+	 * All sane file systems should support file reading.
+	 * Returns number of bytes actually read. It always reads the requested number
+	 * of bytes, unless end of file reached, in which case the return value will
+	 * be less than number of bytes to read was requested by argument.
 	 * @param buf - buffer where to store the read data.
 	 * @param numBytesToRead - number of bytes to read. If this value is more than
 	 *                         the buffer holds (minus the offset) then an exception will be thrown.
 	 *                         Zero passed value means the whole buffer size.
 	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
-	 * @return Number of bytes actually read.
+	 * @return Number of bytes actually read. Shall always be equal to number of bytes requested to read
+	 *         except the case when end of file reached.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Read(
@@ -244,7 +248,9 @@ public:
 	 *                          Zero passed value means the whole buffer size.
 	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
 	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
-	 * @return Number of bytes actually written.
+	 * @return Number of bytes actually written. Normally, should always write all the passed data,
+	 *         the only reasonable case when less data is written is when there is no more free space
+	 *         in the file system.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Write(

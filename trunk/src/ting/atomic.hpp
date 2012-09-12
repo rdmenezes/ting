@@ -596,14 +596,14 @@ public:
 
 
 	/**
-	 * @brief Atomic compare and exchange operation
+	 * @brief Atomic compare and exchange operation.
 	 * Compares the current value to the 'compareTo' value and if they are equal
 	 * it will store the 'exchangeBy' value to the current value.
 	 * It does not set any memory barrier.
 	 * @param compareTo - the value to compare the current value to.
 	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
 	 *                     Otherwise, the current value will remain untouched.
-	 * @return old current value.
+	 * @return Previous value.
 	 */
 	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
@@ -693,14 +693,14 @@ public:
 	
 	
 	/**
-	 * @brief Atomic compare and exchange operation
+	 * @brief Atomic compare and exchange operation.
 	 * Compares the current value to the 'compareTo' value and if they are equal
 	 * it will store the 'exchangeBy' value to the current value.
 	 * It sets acquire memory semantics barrier.
 	 * @param compareTo - the value to compare the current value to.
 	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
 	 *                     Otherwise, the current value will remain untouched.
-	 * @return old current value.
+	 * @return Previous value.
 	 */
 	inline ting::s32 CompareAndExchangeAcquire(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
 		ting::s32 ret = CompareAndExchange(compareTo, exchangeBy);
@@ -711,14 +711,14 @@ public:
 	
 	
 	/**
-	 * @brief Atomic compare and exchange operation
+	 * @brief Atomic compare and exchange operation.
 	 * Compares the current value to the 'compareTo' value and if they are equal
 	 * it will store the 'exchangeBy' value to the current value.
 	 * It sets release memory semantics barrier.
 	 * @param compareTo - the value to compare the current value to.
 	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
 	 *                     Otherwise, the current value will remain untouched.
-	 * @return old current value.
+	 * @return Previous value.
 	 */
 	inline ting::s32 CompareAndExchangeRelease(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
 		atomic::Flag::MemoryBarrier();
@@ -729,49 +729,120 @@ public:
 
 
 
-//TODO: add doxygen docs
+/**
+ * @brief Atomic unsigned 32bit integer.
+ */
 class U32{
 	atomic::S32 v;
 public:
-	
+	/**
+	 * @brief Constructor.
+	 * @param initialValue - initial value to assign to this atomic variable.
+	 */
 	inline U32(ting::u32 initialValue = 0) :
 			v(ting::s32(initialValue))
 	{}
 			
 	inline ~U32()throw(){}
 	
+	/**
+	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It does not set any memory barrier.
+	 * @param value - the value to add to this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndAdd(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAdd(ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It sets acquire memory semantics barrier.
+	 * @param value - the value to add to this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndAddAcquire(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAddAcquire(ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Adds the value to this atomic variable and returns its initial value.
+	 * It sets release memory semantics barrier.
+	 * @param value - the value to add to this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndAddRelease(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAddRelease(ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Subtracts the value from this atomic variable and returns its initial value.
+	 * It does not set any memory barrier.
+	 * @param value - the value to subtract from this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndSubtract(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAdd(-ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Subtracts the value from this atomic variable and returns its initial value.
+	 * It sets acquire memory semantics barrier.
+	 * @param value - the value to subtract from this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndSubtractAcquire(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAddAcquire(-ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Subtracts the value from this atomic variable and returns its initial value.
+	 * It sets release memory semantics barrier.
+	 * @param value - the value to subtract from this atomic variable.
+	 * @return initial value of this atomic variable.
+	 */
 	inline ting::u32 FetchAndSubtractRelease(ting::u32 value)throw(){
 		return ting::u32(this->v.FetchAndAddRelease(-ting::s32(value)));
 	}
 	
+	/**
+	 * @brief Atomic compare and exchange operation.
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+	 * It does not set any memory barrier.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+	 * @return Previous value.
+	 */
 	inline ting::u32 CompareAndExchange(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
 		return ting::u32(this->v.CompareAndExchange(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}
 
+	/**
+	 * @brief Atomic compare and exchange operation.
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+	 * It sets acquire memory semantics barrier.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+	 * @return Previous value.
+	 */
 	inline ting::u32 CompareAndExchangeAcquire(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
 		return ting::u32(this->v.CompareAndExchangeAcquire(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}
 	
+	/**
+	 * @brief Atomic compare and exchange operation.
+	 * Compares the current value to the 'compareTo' value and if they are equal
+	 * it will store the 'exchangeBy' value to the current value.
+	 * It sets release memory semantics barrier.
+	 * @param compareTo - the value to compare the current value to.
+	 * @param exchangeBy - the value to store as the the current value in case the comparison will result in equals.
+	 *                     Otherwise, the current value will remain untouched.
+	 * @return Previous value.
+	 */
 	inline ting::u32 CompareAndExchangeRelease(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
 		return ting::u32(this->v.CompareAndExchangeRelease(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}

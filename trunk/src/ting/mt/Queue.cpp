@@ -60,7 +60,7 @@ Queue::Queue(){
 Queue::~Queue()throw(){
 	//destroy messages which are currently on the queue
 	{
-		Mutex::Guard mutexGuard(this->mut);
+		atomic::SpinLock::GuardYield mutexGuard(this->mut);
 		Message *msg = this->first;
 		Message	*nextMsg;
 		while(msg){
@@ -91,7 +91,7 @@ Queue::~Queue()throw(){
 
 void Queue::PushMessage(Ptr<Message> msg)throw(){
 	ASSERT(msg.IsValid())
-	Mutex::Guard mutexGuard(this->mut);
+	atomic::SpinLock::GuardYield mutexGuard(this->mut);
 	if(this->first){
 		ASSERT(this->last && this->last->next == 0)
 		this->last = this->last->next = msg.Extract();
@@ -137,7 +137,7 @@ void Queue::PushMessage(Ptr<Message> msg)throw(){
 
 
 ting::Ptr<Message> Queue::PeekMsg(){
-	Mutex::Guard mutexGuard(this->mut);
+	atomic::SpinLock::GuardYield mutexGuard(this->mut);
 	if(this->first){
 		ASSERT(this->CanRead())
 		//NOTE: Decrement semaphore value, because we take one message from queue.
@@ -190,7 +190,7 @@ ting::Ptr<Message> Queue::PeekMsg(){
 ting::Ptr<Message> Queue::GetMsg(){
 	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): enter" << std::endl)
 	{
-		Mutex::Guard mutexGuard(this->mut);
+		atomic::SpinLock::GuardYield mutexGuard(this->mut);
 		if(this->first){
 			ASSERT(this->CanRead())
 			//NOTE: Decrement semaphore value, because we take one message from queue.
@@ -242,7 +242,7 @@ ting::Ptr<Message> Queue::GetMsg(){
 
 	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): signaled" << std::endl)
 	{
-		Mutex::Guard mutexGuard(this->mut);
+		atomic::SpinLock::GuardYield mutexGuard(this->mut);
 		ASSERT(this->CanRead())
 		ASSERT(this->first)
 
@@ -317,7 +317,7 @@ bool Queue::CheckSignaled(){
 /*
 #ifdef DEBUG
 	{
-		Mutex::Guard mutexGuard(this->mut);
+		atomic::SpinLock::GuardYield mutexGuard(this->mut);
 		if(this->first){
 			ASSERT_ALWAYS(this->CanRead())
 
