@@ -372,6 +372,32 @@ public:
 		this->InitFromStrongRef<TS>(r);
 	}
 
+	
+	
+	/**
+	 * @brief Move reference.
+	 * Takes reference to the object from given Ref leaving his given Ref invalid.
+	 * Example:
+	 * @code
+	 * ting::Ref<Object> r1 = ...; //let's assume r1 refers to some object.
+	 * ting::Ref<Object> r2; //r2 is invalid.
+	 * 
+	 * r2.TakeFrom(r1);
+	 * 
+	 * //at this point r1 is invalid and r2 refers to the object previously referenced by r1.
+	 * 
+	 * @endcode
+	 * In sense of performance this method is "cheaper" than simple assignment operator
+	 * or copy constructor because it does not perform any atomic operations.
+     * @param ref - Ref to take object from.
+     * @return Reference to this Ref object.
+     */
+	Ref& TakeFrom(Ref& ref){
+		this->Destroy();
+		this->p = ref.p;
+		ref.p = 0;
+	}
+	
 
 
 	/**
@@ -634,15 +660,16 @@ public:
 
 private:
 	inline void Destroy()throw(){
-		if(this->IsValid()){
-			ASSERT(this->p->counter)
-			if(this->p->counter->numStrongRefs.FetchAndSubtract(1) == 1){//if there was only one strong ref
-				M_REF_PRINT(<< "Ref::Destroy(): deleting " << (this->p) << std::endl)
-				//deleting should be ok without type casting, because RefCounted
-				//destructor is virtual.
-				delete this->p;
-				M_REF_PRINT(<< "Ref::Destroy(): object " << (this->p) << " deleted" << std::endl)
-			}
+		if(this->IsNotValid()){
+			return;
+		}
+		ASSERT(this->p->counter)
+		if(this->p->counter->numStrongRefs.FetchAndSubtract(1) == 1){//if there was only one strong ref
+			M_REF_PRINT(<< "Ref::Destroy(): deleting " << (this->p) << std::endl)
+			//deleting should be ok without type casting, because RefCounted
+			//destructor is virtual.
+			delete this->p;
+			M_REF_PRINT(<< "Ref::Destroy(): object " << (this->p) << " deleted" << std::endl)
 		}
 	}
 

@@ -7,28 +7,12 @@
           <df name="2">
             <df name="ting">
               <df name="fs">
-                <in>FSFile.d</in>
-                <in>File.d</in>
               </df>
               <df name="mt">
-                <in>MsgThread.d</in>
                 <in>Mutex.d</in>
-                <in>Queue.d</in>
-                <in>Semaphore.d</in>
-                <in>Thread.d</in>
               </df>
               <df name="net">
-                <in>HostNameResolver.d</in>
-                <in>IPAddress.d</in>
-                <in>Lib.d</in>
-                <in>Socket.d</in>
-                <in>TCPServerSocket.d</in>
-                <in>TCPSocket.d</in>
-                <in>UDPSocket.d</in>
               </df>
-              <in>Ref.d</in>
-              <in>WaitSet.d</in>
-              <in>timer.d</in>
             </df>
           </df>
         </df>
@@ -92,9 +76,6 @@
         <in>types.hpp</in>
         <in>util.hpp</in>
       </df>
-      <in>libting.so.0</in>
-      <in>libting.so.1</in>
-      <in>makefile</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
