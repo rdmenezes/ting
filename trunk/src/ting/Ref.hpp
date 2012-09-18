@@ -376,11 +376,20 @@ public:
 	
 	/**
 	 * @brief Const cast.
-	 * Automatic cast to const. Ref<t> can automatically be cast to Ref<const T>.
+	 * Automatic cast to const. 'Ref<T>' can automatically be cast to 'Ref<const T>'.
      * @return Reference to this Ref object.
      */
 	inline operator Ref<const T>&()throw(){
 		return reinterpret_cast<Ref<const T>&>(*this);
+	}
+	
+	/**
+	 * @brief Const cast.
+     * 'const Ref<T>' can automatically be cast to 'const Ref<const T>'.
+     * @return Reference to this Ref object.
+     */
+	inline operator const Ref<const T>&()const throw(){
+		return reinterpret_cast<const Ref<const T>&>(*this);
 	}
 	
 	
