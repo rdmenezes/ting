@@ -115,7 +115,7 @@ private:
 		inline ~Counter()throw(){
 			M_REF_PRINT(<< "Counter::~Counter(): counter object destroyed" << std::endl)
 		}
-		
+
 		inline static void* operator new(size_t size){
 			ASSERT(size == sizeof(Counter))
 
@@ -127,7 +127,7 @@ private:
 		}
 	};
 
-	
+
 	//Memory pool for Counter objects
 	static ting::MemoryPool<sizeof(Counter), 512> memoryPool;
 
@@ -372,28 +372,30 @@ public:
 		this->InitFromStrongRef<TS>(r);
 	}
 
-	
-	
+
+
 	/**
 	 * @brief Const cast.
 	 * Automatic cast to const. 'Ref<T>' can automatically be cast to 'Ref<const T>'.
-     * @return Reference to this Ref object.
-     */
+	 * @return Reference to this Ref object.
+	 */
 	inline operator Ref<const T>&()throw(){
 		return reinterpret_cast<Ref<const T>&>(*this);
 	}
-	
+
+
+
 	/**
 	 * @brief Const cast.
-     * 'const Ref<T>' can automatically be cast to 'const Ref<const T>'.
-     * @return Reference to this Ref object.
-     */
+	 * 'const Ref<T>' can automatically be cast to 'const Ref<const T>'.
+	 * @return Reference to this Ref object.
+	 */
 	inline operator const Ref<const T>&()const throw(){
 		return reinterpret_cast<const Ref<const T>&>(*this);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @brief Move reference.
 	 * Takes reference to the object from given Ref leaving his given Ref invalid.
@@ -409,15 +411,15 @@ public:
 	 * @endcode
 	 * In sense of performance this method is "cheaper" than simple assignment operator
 	 * or copy constructor because it does not perform any atomic operations.
-     * @param ref - Ref to take object from.
-     * @return Reference to this Ref object.
-     */
+	 * @param ref - Ref to take object from.
+	 * @return Reference to this Ref object.
+	 */
 	Ref& TakeFrom(Ref& ref){
 		this->Destroy();
 		this->p = ref.p;
 		ref.p = 0;
 	}
-	
+
 
 
 	/**
@@ -610,7 +612,7 @@ public:
 		if(this == &r){
 			return *this;//detect self assignment
 		}
-		
+
 		this->Destroy();
 		this->InitFromStrongRef<T>(r);
 		return *this;
@@ -621,9 +623,9 @@ public:
 	/**
 	 * @brief Assignment operator.
 	 * Assignment operator which also does automatic downcast and const cast if needed.
-     * @param r - strong reference to assign from.
-     * @return reference to this strong reference object.
-     */
+	 * @param r - strong reference to assign from.
+	 * @return reference to this strong reference object.
+	 */
 	//downcast / to-const assignment
 	template <class TS> Ref<T>& operator=(const Ref<TS>& r)throw(){
 		//self-assignment should be impossible
@@ -652,8 +654,8 @@ public:
 	/**
 	 * @brief operator *.
 	 * Works the same way as operator * for ordinary pointers.
-     * @return reference to RefCounted object pointed by this strong reference object.
-     */
+	 * @return reference to RefCounted object pointed by this strong reference object.
+	 */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
 	inline T& operator*()const throw(){
@@ -666,8 +668,8 @@ public:
 
 	/**
 	 * @brief opearator->.
-     * @return pointer to the RefCounted object pointed by this strong reference.
-     */
+	 * @return pointer to the RefCounted object pointed by this strong reference.
+	 */
 	//NOTE: the operator is const because const Ref does not mean that the object it points to cannot be changed,
 	//it means that the Ref itself cannot be changed to point to another object.
 	inline T* operator->()const throw(){
@@ -815,11 +817,11 @@ template <class T> class WeakRef{
 public:
 	/**
 	 * @brief Create initially invalid weak reference.
-     */
+	 */
 	inline WeakRef()throw() :
 			counter(0)
 	{}
-	
+
 	/**
 	 * @brief Make weak reference from pointer to RefCounted.
 	 * This constructor makes a weak reference from ordinary pointer to a
@@ -843,8 +845,8 @@ public:
 	/**
 	 * @brief Constructor.
 	 * Creates weak reference from strong reference.
-     * @param r
-     */
+	 * @param r
+	 */
 	inline WeakRef(const Ref<T> &r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const Ref<T>&): invoked" << std::endl)
 		this->InitFromStrongRef(const_cast<Ref<T>&>(r));
@@ -854,8 +856,8 @@ public:
 
 	/**
 	 * @brief Copy constructor.
-     * @param r - weak reference to copy from.
-     */
+	 * @param r - weak reference to copy from.
+	 */
 	inline WeakRef(const WeakRef& r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef&): invoked" << std::endl)
 		this->InitFromWeakRef<T>(r);
@@ -867,8 +869,8 @@ public:
 	 * @brief Constructor.
 	 * Template constructor for automatic type down-casting and const-casting.
 	 * Normally, this constructor should not be used explicitly.
-     * @param r - weak reference to copy from.
-     */
+	 * @param r - weak reference to copy from.
+	 */
 	//downcast / to-const cast constructor
 	template <class TS> inline WeakRef(const WeakRef<TS>& r)throw(){
 		M_REF_PRINT(<< "WeakRef::WeakRef(const WeakRef<TS>&): invoked" << std::endl)
@@ -905,9 +907,9 @@ public:
 	 * This operator is useful when it is necessary to initialize some weak reference from
 	 * right within the constructor of RefCounted-derived object, thus it is possible
 	 * to just assign 'this' to the weak reference.
-     * @param rc - pointer to RefCounted object.
-     * @return reference to this weak reference object.
-     */
+	 * @param rc - pointer to RefCounted object.
+	 * @return reference to this weak reference object.
+	 */
 	inline WeakRef& operator=(T* rc)throw(){
 		ASSERT(rc)
 		M_REF_PRINT(<< "WeakRef::operator=(T*): invoked" << std::endl)
@@ -922,9 +924,9 @@ public:
 	/**
 	 * @brief operator =.
 	 * Assign this weak reference from a strong reference.
-     * @param r - strong reference to assign from.
-     * @return reference to this weak reference object.
-     */
+	 * @param r - strong reference to assign from.
+	 * @return reference to this weak reference object.
+	 */
 	inline WeakRef& operator=(const Ref<T> &r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const Ref<T>&): invoked" << std::endl)
 		this->Destroy();
@@ -937,9 +939,9 @@ public:
 	/**
 	 * @brief Assignment operator.
 	 * Assign this weak reference from another weak reference.
-     * @param r - weak reference to assign from.
-     * @return reference to this weak reference object.
-     */
+	 * @param r - weak reference to assign from.
+	 * @return reference to this weak reference object.
+	 */
 	inline WeakRef& operator=(const WeakRef& r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
@@ -953,9 +955,9 @@ public:
 	 * @brief Template operator =.
 	 * Template operator = for automatic down-casting and const-casting when assigning
 	 * this weak reference from another weak reference.
-     * @param r - weak reference to assign from.
-     * @return reference to this weak reference object.
-     */
+	 * @param r - weak reference to assign from.
+	 * @return reference to this weak reference object.
+	 */
 	template <class TS> inline WeakRef& operator=(const WeakRef<TS>& r)throw(){
 		M_REF_PRINT(<< "WeakRef::operator=(const WeakRef<TS>&): invoked" << std::endl)
 		this->Destroy();
@@ -980,9 +982,9 @@ public:
 
 	/**
 	 * @brief Check if this weak reference is invalid.
-     * @return true if this weak reference is invalid for sure.
+	 * @return true if this weak reference is invalid for sure.
 	 * @return false otherwise which means that is is unknown if this weak ref is valid or not.
-     */
+	 */
 	inline bool IsSurelyInvalid()const throw(){
 		return this->counter == 0 || this->counter->numStrongRefs.FetchAndAdd(0) == 0;
 	}
