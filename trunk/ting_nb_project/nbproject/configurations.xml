@@ -9,7 +9,6 @@
               <df name="fs">
               </df>
               <df name="mt">
-                <in>Mutex.d</in>
               </df>
               <df name="net">
               </df>

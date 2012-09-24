@@ -77,6 +77,48 @@ template <typename T> inline T Abs(T n)throw(){
 
 
 /**
+ * @brief Round number to closest integer which is bigger or equal to the value.
+ * @param n - value to round.
+ * @return Rounded value.
+ */
+template <typename T> inline T Ceil(T n)throw();
+
+
+
+template <> inline float Ceil<float>(float n)throw(){
+	return ::ceil(n);
+}
+
+
+
+template <> inline double Ceil<double>(double n)throw(){
+	return ::ceil(n);
+}
+
+
+
+/**
+ * @brief Round number to closest integer which is less or equal to the value.
+ * @param n - value to round.
+ * @return Rounded value.
+ */
+template <typename T> inline T Floor(T n)throw();
+
+
+
+template <> inline float Floor<float>(float n)throw(){
+	return ::floor(n);
+}
+
+
+
+template <> inline double Floor<double>(double n)throw(){
+	return ::floor(n);
+}
+
+
+
+/**
  * @brief Get number Pi.
  * @return number Pi.
  */
