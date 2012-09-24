@@ -119,6 +119,27 @@ template <> inline double Floor<double>(double n)throw(){
 
 
 /**
+ * @brief Round number to closest integer.
+ * @param n - value to round.
+ * @return Rounded value.
+ */
+template <typename T> inline T Round(T n)throw();
+
+
+
+template <> inline float Round<float>(float n)throw(){
+	return ::round(n);
+}
+
+
+
+template <> inline double Round<double>(double n)throw(){
+	return ::round(n);
+}
+
+
+
+/**
  * @brief Get number Pi.
  * @return number Pi.
  */
