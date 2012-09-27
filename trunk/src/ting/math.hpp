@@ -81,7 +81,9 @@ template <typename T> inline T Abs(T n)throw(){
  * @param n - value to round.
  * @return Rounded value.
  */
-template <typename T> inline T Ceil(T n)throw();
+template <typename T> inline T Ceil(T n)throw(){
+	return n.Ceil();
+}
 
 
 
@@ -102,7 +104,9 @@ template <> inline double Ceil<double>(double n)throw(){
  * @param n - value to round.
  * @return Rounded value.
  */
-template <typename T> inline T Floor(T n)throw();
+template <typename T> inline T Floor(T n)throw(){
+	return n.Floor();
+}
 
 
 
