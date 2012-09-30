@@ -10,3 +10,4 @@ Following tutorials are available:
  * [SocketsUsage SocketLib] - network sockets wrapper
  * [SignalSlotUsage Signal-Slot] - signal-slot callback technique
  * [SingletonUsage Singleton] - template for singleton pattern
+ * [AtomicUsage atomic] - atomic operations
