@@ -50,7 +50,14 @@ public:
 	~StrUTF8()throw(){
 		this->Destroy();
 	}
+
+
+	explicit inline StrUTF8(const char* str);
 	
+	
+	inline StrUTF8(const ting::Buffer<const ting::u8>& buf){
+		this->InitInternal(buf.Begin(), buf.Size());
+	}
 
 	
 	//move semantics
