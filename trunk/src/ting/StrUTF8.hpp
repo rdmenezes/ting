@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2012 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include "types.hpp"
+#include "Buffer.hpp"
 
 
 
@@ -39,9 +40,58 @@ namespace ting{
 
 
 
+//TODO: doxygen
 class StrUTF8{
+	ting::Inited<ting::u8*, 0> s;//null-terminated
 public:
 	
+	inline StrUTF8()throw(){}
+	
+	~StrUTF8()throw(){
+		this->Destroy();
+	}
+	
+
+	
+	//move semantics
+	inline StrUTF8(const StrUTF8& str){
+		this->s = str.s;
+		str.s = 0;
+	}
+
+	//move semantics
+	StrUTF8& operator=(const StrUTF8& str){
+		this->Destroy();
+		this->s = str.s;
+		str.s = 0;
+		return *this;
+	}
+	
+	
+	
+	void Init(const ting::Buffer<const ting::u8>& buf){
+		this->Destroy();
+		this->InitInternal(buf.Begin(), buf.Size());
+	}
+	
+	
+	
+	StrUTF8& operator=(const char* str);
+	
+	
+	//TODO:
+	
+	void Reset()throw(){
+		this->Destroy();
+		this->s = 0;
+	}
+	
+private:
+	void Destroy(){
+		delete[] s;
+	}
+	
+	void InitInternal(const char*, size_t len);
 };
 
 

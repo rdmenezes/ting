@@ -63,6 +63,7 @@
         <in>Ref.hpp</in>
         <in>Signal.hpp</in>
         <in>Singleton.hpp</in>
+        <in>StrUTF8.hpp</in>
         <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
         <in>atomic.hpp</in>
