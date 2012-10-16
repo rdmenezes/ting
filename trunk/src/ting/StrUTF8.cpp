@@ -10,13 +10,13 @@ using namespace ting;
 StrUTF8& StrUTF8::operator=(const char* str){
 	size_t len = strlen(str);
 	this->Destroy();
-	this->Init(str, len);
+	this->InitInternal(reinterpret_cast<const ting::u8*>(str), len);
 	return *this;
 }
 
 
 
-void StrUTF8::InitInternal(const char* str, size_t len){
+void StrUTF8::InitInternal(const ting::u8* str, size_t len){
 	if(len == 0){
 		this->s = 0;
 		return;

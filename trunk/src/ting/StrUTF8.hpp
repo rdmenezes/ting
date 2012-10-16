@@ -91,7 +91,7 @@ private:
 		delete[] s;
 	}
 	
-	void InitInternal(const char*, size_t len);
+	void InitInternal(const ting::u8*, size_t len);
 };
 
 
