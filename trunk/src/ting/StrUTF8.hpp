@@ -99,6 +99,34 @@ private:
 	}
 	
 	void InitInternal(const ting::u8*, size_t len);
+	
+public:
+	
+	class Iterator{
+		ting::u32 c;
+		ting::u8* n;
+	public:
+		inline ting::u32 operator*()const throw(){
+			return this->c;
+		}
+		
+		//prefix ++
+		//if ++ end iterator then undefined behavior
+		Iterator& operator++()throw(){
+			//TODO:
+			return *this;
+		}
+		
+		//no postfix ++ operator, there is no need in it.
+		
+		inline bool IsEnd()const throw(){
+			return this->c == 0;
+		}
+		
+		inline bool IsNotEnd()const throw(){
+			return !this->IsEnd();
+		}
+	};
 };
 
 
