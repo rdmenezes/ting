@@ -111,13 +111,19 @@ private:
 public:
 	
 	class Iterator{
+		friend class StrUTF8;
+		
 		ting::u32 c;
 		const ting::u8* n;
 		
 		Iterator(const ting::u8* begin) :
 				n(begin)
 		{
-			this->operator++();
+			if(this->n == 0){
+				this->c = 0;
+			}else{
+				this->operator++();
+			}
 		}
 	public:
 		Iterator() :
@@ -161,6 +167,11 @@ public:
 			return !this->IsEnd();
 		}
 	};
+	
+	
+	Iterator Begin()const throw(){
+		return Iterator(this->s);
+	}
 };
 
 
