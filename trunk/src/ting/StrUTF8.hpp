@@ -86,11 +86,19 @@ public:
 	StrUTF8& operator=(const char* str);
 	
 	
-	//TODO:
+	//TODO: add stuff if needed
 	
 	void Reset()throw(){
 		this->Destroy();
 		this->s = 0;
+	}
+	
+	inline bool IsValid()const throw(){
+		return this->s != 0;
+	}
+	
+	inline bool IsNotValid()const throw(){
+		return !this->IsValid();
 	}
 	
 private:
@@ -104,16 +112,42 @@ public:
 	
 	class Iterator{
 		ting::u32 c;
-		ting::u8* n;
+		const ting::u8* n;
+		
+		Iterator(const ting::u8* begin) :
+				n(begin)
+		{
+			this->operator++();
+		}
 	public:
-		inline ting::u32 operator*()const throw(){
+		Iterator() :
+				c(0)
+		{}
+		
+		inline ting::u32 Char()const throw(){
 			return this->c;
 		}
 		
 		//prefix ++
 		//if ++ end iterator then undefined behavior
 		Iterator& operator++()throw(){
-			//TODO:
+			ting::u8 b = *this->n;
+			++this->n;
+			if((b & 0x80) == 0){
+				this->c = ting::u32(b);
+				return *this;
+			}
+			
+			this->c = (*this->n) & 0x3f;
+			++this->n;
+			
+			unsigned i = 2;
+			for(; ((b << i) >> 7); ++i, ++this->n){
+				this->c <<= (6 * i);
+				this->c |= (*this->n) & 0x3f;
+			}
+			this->c |= (ting::u32((b << (i + 1)) >> (i + 1)) << (6 * (i - 1)));
+			
 			return *this;
 		}
 		
