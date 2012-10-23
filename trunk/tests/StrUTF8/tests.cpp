@@ -24,6 +24,7 @@ void Run(){
 	ASSERT_ALWAYS(str.Char(2) == 0x0446) //small russian C
 	ASSERT_INFO_ALWAYS(str.Char(3) == 0xfeb6, "str.Char(3) = " << str.Char(3)) //some arabic stuff
 	ASSERT_INFO_ALWAYS(str.Char(4) == 0x2000b, "str.Char(4) = " << str.Char(4)) //some compatibility char
+	ASSERT_ALWAYS(str.Char(5) == 0)
 }
 
 }//~namespace
