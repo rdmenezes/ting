@@ -10,6 +10,7 @@ subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
 subdirs += Signal
+subdirs += StrUTF8
 subdirs += Thread
 subdirs += timer
 subdirs += types

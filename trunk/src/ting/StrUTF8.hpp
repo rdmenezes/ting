@@ -101,6 +101,16 @@ public:
 		return !this->IsValid();
 	}
 	
+	inline ting::u32 Char(size_t index)const throw(){
+		Iterator i = this->Begin();
+		
+		for(size_t k = 0; k != index; ++k, ++i){
+			ASSERT(!i.IsEnd())
+		}
+		
+		return i.Char();
+	}
+	
 private:
 	void Destroy(){
 		delete[] s;
@@ -138,6 +148,7 @@ public:
 		//if ++ end iterator then undefined behavior
 		Iterator& operator++()throw(){
 			ting::u8 b = *this->n;
+//			TRACE(<< "StrUTF8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
 			++this->n;
 			if((b & 0x80) == 0){
 				this->c = ting::u32(b);
@@ -145,14 +156,22 @@ public:
 			}
 			
 			this->c = (*this->n) & 0x3f;
+//			TRACE(<< "StrUTF8::Iterator::operator++(): initial c = " << std::hex << c << std::endl)
+					
 			++this->n;
 			
 			unsigned i = 2;
-			for(; ((b << i) >> 7); ++i, ++this->n){
-				this->c <<= (6 * i);
+			for(; (ting::u8(b << i) >> 7); ++i, ++this->n){
+//				TRACE(<< "StrUTF8::Iterator::operator++(): ting::u8(b << i) = " << std::hex << unsigned(ting::u8(b << i)) << std::endl)
+//				TRACE(<< "StrUTF8::Iterator::operator++(): ((b << i) >> 7) = " << std::hex << unsigned(ting::u8(b << i) >> 7) << std::endl)
+//				TRACE(<< "StrUTF8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
+				this->c <<= 6;
+//				TRACE(<< "StrUTF8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 				this->c |= (*this->n) & 0x3f;
+//				TRACE(<< "StrUTF8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 			}
-			this->c |= (ting::u32((b << (i + 1)) >> (i + 1)) << (6 * (i - 1)));
+			this->c |= (ting::u32(ting::u8(b << (i + 1)) >> (i + 1)) << (6 * (i - 1)));
+//			TRACE(<< "StrUTF8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 			
 			return *this;
 		}

@@ -88,6 +88,7 @@
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
     <Elem>../src</Elem>
+    <Elem>../tests</Elem>
   </sourceRootList>
   <projectmakefile>ting_nb_project-Makefile.mk</projectmakefile>
   <confs>
