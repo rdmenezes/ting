@@ -17,7 +17,7 @@ void Run(){
 	
 	ting::Array<ting::u8> buf = fi.LoadWholeFileIntoMemory();
 	
-	TRACE_ALWAYS(<< "buf.Size() = " << buf.Size() << std::endl)
+//	TRACE_ALWAYS(<< "buf.Size() = " << buf.Size() << std::endl)
 	
 	ting::Array<ting::u8> str(buf.Size() + 1);
 	memcpy(str.Begin(), buf.Begin(), buf.Size());

@@ -70,14 +70,14 @@ public:
 	//if ++ end iterator then undefined behavior
 	Iterator& operator++()throw(){
 		ting::u8 b = *this->n;
-		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
+//		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
 		++this->n;
 		if((b & 0x80) == 0){
 			this->c = ting::u32(b);
 			return *this;
 		}
 
-		TRACE(<< "utf8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
+//		TRACE(<< "utf8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
 		
 		this->c = (*this->n) & 0x3f;
 //		TRACE(<< "utf8::Iterator::operator++(): initial c = " << std::hex << c << std::endl)
@@ -88,7 +88,7 @@ public:
 		for(; (ting::u8(b << i) >> 7); ++i, ++this->n){
 //			TRACE(<< "utf8::Iterator::operator++(): ting::u8(b << i) = " << std::hex << unsigned(ting::u8(b << i)) << std::endl)
 //			TRACE(<< "utf8::Iterator::operator++(): ((b << i) >> 7) = " << std::hex << unsigned(ting::u8(b << i) >> 7) << std::endl)
-			TRACE(<< "utf8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
+//			TRACE(<< "utf8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
 			this->c <<= 6;
 //			TRACE(<< "utf8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 			this->c |= (*this->n) & 0x3f;
