@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 /**
  * @author Ivan Gagis <igagis@gmail.com>
- * @brief UTF8 string class.
+ * @brief utf8 utilities.
  */
 
 #pragma once
