@@ -63,8 +63,6 @@
         <in>Ref.hpp</in>
         <in>Signal.hpp</in>
         <in>Singleton.hpp</in>
-        <in>StrUTF8.cpp</in>
-        <in>StrUTF8.hpp</in>
         <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
         <in>atomic.hpp</in>
@@ -75,6 +73,7 @@
         <in>timer.cpp</in>
         <in>timer.hpp</in>
         <in>types.hpp</in>
+        <in>utf8.hpp</in>
         <in>util.hpp</in>
       </df>
     </df>

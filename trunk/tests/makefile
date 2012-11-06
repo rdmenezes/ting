@@ -11,10 +11,10 @@ subdirs += Ptr
 subdirs += Ref
 subdirs += RefOverSharedLibrary
 subdirs += Signal
-subdirs += StrUTF8
 subdirs += Thread
 subdirs += timer
 subdirs += types
+subdirs += utf8
 subdirs += util
 subdirs += WaitSet
 

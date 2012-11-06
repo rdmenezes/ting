@@ -52,7 +52,6 @@ srcs += ting/net/TCPServerSocket.cpp
 srcs += ting/net/TCPSocket.cpp
 srcs += ting/net/UDPSocket.cpp
 srcs += ting/Ref.cpp
-srcs += ting/StrUTF8.cpp
 srcs += ting/timer.cpp
 srcs += ting/WaitSet.cpp
 
