@@ -31,4 +31,5 @@ LOCAL_SRC_FILES += ting/WaitSet.cpp
 
 LOCAL_LDLIBS    := -llog
 
-include $(BUILD_SHARED_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
