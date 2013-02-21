@@ -1,5 +1,7 @@
 = ting project history =
 
+2013-02-21: libting-2.0.0 released. Some API changes.
+
 2012-03-13: libting-1.0.0 released. Now, since the major version is released, the API may not brake in all further 1.x.x, ABI may brake.
   * directory structure refactoring
     * ting/Socket.hpp moved to and split to several files ting/net/`*`
