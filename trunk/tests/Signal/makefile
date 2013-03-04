@@ -10,15 +10,12 @@ default: $(binary_name)
 
 ifeq ($(platform),win32)
     libs := ../../src/libting.a
-    remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
     libs := 
-    remove := rm -rf
 endif
 ifeq ($(platform),linux)
     libs := ../../src/libting.so
-    remove := rm -rf
 endif
 
 
@@ -53,7 +50,7 @@ $(binary_name): main.cpp tests.cpp $(libting)
 
 
 clean:
-	@$(remove) $(binary_name)
+	@rm -rf $(binary_name)
 
 include ../../targets.mk
 

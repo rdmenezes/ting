@@ -17,10 +17,8 @@ endif
 
 ifeq ($(platform),win32)
     libs := ../../src/libting.dll -mwindows
-    remove := del /Q /F
 else
     libs := ../../src/libting.so
-    remove := rm -rf
 endif
 
 #external compiler flags (to be passed to make from command line)
@@ -38,7 +36,7 @@ default: $(binary_name)
 test: $(binary_name)
 	@echo running $^...
 ifeq ($(platform),win32)
-	@copy /Y ..\..\src\libting.dll .
+	@cp ../../src/libting.dll .
 	@$^
 else
 	@LD_LIBRARY_PATH=../../src:. ./$^
@@ -65,7 +63,7 @@ $(binary_name): Ref_test.cpp lib$(lib_name).$(lib_ext)
 
 
 clean:
-	@$(remove) $(binary_name)
-	@$(remove) lib$(lib_name).$(lib_ext)
+	@rm -rf $(binary_name)
+	@rm -rf lib$(lib_name).$(lib_ext)
 
 include ../../targets.mk

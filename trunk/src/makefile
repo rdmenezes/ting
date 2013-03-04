@@ -142,20 +142,11 @@ endif
 
 
 
-remove_on_clean:=
-
-
 
 #                     __
 #                    /  \__/  end of configuration part
 #==============================================================================
 
-#remove program
-ifeq ($(platform),win32)
-    remove := del /Q /F
-else
-    remove := rm -f
-endif
 
 obj_dir := obj/1/2
 compiler := g++
@@ -170,11 +161,7 @@ compiler := g++
 default: create-obj-dir $(name)
 
 create-obj-dir:
-ifeq ($(platform), win32)
-	@if not exist $(obj_dir) mkdir $(subst /,\,$(obj_dir))
-else
 	@mkdir -p $(obj_dir)
-endif
 
 
 
@@ -195,11 +182,7 @@ endif
 #=compile .cpp sources=
 $(obj_dir)/%.o:%.cpp
 	@echo Compiling $<...
-ifeq ($(platform), win32)
-	@if not exist $(dir $@) mkdir $(subst /,\,$(dir $@))
-else
 	@mkdir -p $(dir $@)
-endif
 # -MF option specifies dependency output file name
 	@$(compiler) -c -MF "$(patsubst %.o,%.d,$@)" -MD -o "$@" $(compiler_flags) $(defines) $(include_dirs) $<
 #workaround for gcc 4.2 compiler (it behaves differently than gcc 4.1 for some reason)
@@ -228,14 +211,14 @@ test:
 .PHONY: clean
 clean:
 ifeq ($(platform),win32)
-	@$(remove) $(name)
-	@rmdir /S /Q obj
+	@rm -f $(name)
+	@rm -f $(patsubst %.dll,%.a,$(name))
+	@rm -rf $(dir $(obj_dir))
 else
-	@$(remove) $(name)
-	@$(remove) $(patsubst %.so,%.a,$(name))
-	@$(remove) $(name).$(so_name)
-	@$(remove) -rf $(dir $(obj_dir))
-	@$(remove) -rf $(remove_on_clean)
+	@rm -f $(name)
+	@rm -f $(patsubst %.so,%.a,$(name))
+	@rm -f $(name).$(so_name)
+	@rm -rf $(dir $(obj_dir))
 endif
 
 include ../targets.mk

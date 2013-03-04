@@ -17,10 +17,8 @@ endif
 
 ifeq ($(platform),win32)
     libs := -mwindows
-    remove := del /Q /F
 else
-    libs := 
-    remove := rm -rf
+    libs :=
 endif
 
 #external compiler flags (to be passed to make from command line)
@@ -60,8 +58,8 @@ $(binary_name): Singleton_test.cpp lib$(lib_name).$(lib_ext)
 
 
 clean:
-	@$(remove) $(binary_name)
-	@$(remove) lib$(lib_name).$(lib_ext)
+	@rm -rf $(binary_name)
+	@rm -rf lib$(lib_name).$(lib_ext)
 
 include ../../targets.mk
 

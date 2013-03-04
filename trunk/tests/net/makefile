@@ -10,15 +10,12 @@ default: $(binary_name)
 
 ifeq ($(platform),win32)
     libs := -lws2_32
-    remove := del /Q /F
 endif
 ifeq ($(platform),darwin)
     libs := 
-    remove := rm -rf
 endif
 ifeq ($(platform),linux)
     libs :=
-    remove := rm -rf
 endif
 
 
@@ -53,7 +50,7 @@ $(binary_name): socket.o dns.o main.o $(libting)
 
 
 clean:
-	@$(remove) $(binary_name)
-	@$(remove) *.o
+	@rm -rf $(binary_name)
+	@rm -rf *.o
 
 include ../../targets.mk
