@@ -22,3 +22,5 @@ $(subdirs):
 	@$(MAKE) -C $@ $(target)
 
 
+install:
+	@./msys_install.sh
