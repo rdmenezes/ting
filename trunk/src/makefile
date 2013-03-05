@@ -6,13 +6,18 @@
 #                        Project configuration part
 #             change these strings to configure project building
 
-#default platform. It may be overriden by specifying platform=xxx in command line when running make
 #Known platforms are:
 #    linux
 #    maemo_linux
 #    win32
 #    win32cross
 platform := linux
+
+operating_system := $(shell uname -o)
+ifeq ($(operating_system), Msys)
+    platform := win32
+endif
+
 
 #build configuration:
 #    debug

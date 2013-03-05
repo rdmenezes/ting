@@ -1,5 +1,10 @@
 platform := linux
 
+operating_system := $(shell uname -o)
+ifeq ($(operating_system), Msys)
+    platform := win32
+endif
+
 binary_name := tests
 
 ifeq ($(platform),win32)
