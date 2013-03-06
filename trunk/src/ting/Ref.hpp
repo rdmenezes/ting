@@ -794,7 +794,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			DEBUG_CODE(ting::u32 res =) this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
