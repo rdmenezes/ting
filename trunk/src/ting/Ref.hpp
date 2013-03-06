@@ -195,10 +195,10 @@ protected:
 #ifdef DEBUG
 		//since RefCounted is being destroyed, that means that there are no strong ref's left
 		ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
-{
-		ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(0);
-		ASSERT_INFO(res >= 1, "res = " << res)
-}
+		{
+			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(0);
+			ASSERT_INFO(res >= 1, "res = " << res)
+		}
 #endif
 
 		if(this->counter->numWeakRefs.FetchAndSubtract(1) == 1){//if there was only 1 weak ref
@@ -762,7 +762,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(1);
+			DEBUG_CODE(ting::u32 res =) this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT_INFO(res >= 1, "res = " << res)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
