@@ -77,6 +77,126 @@
         <in>util.hpp</in>
       </df>
     </df>
+    <df name="tests" root="../tests">
+      <df name="Array">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="atomic">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Buffer">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="debug">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="FSFile">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="math">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="net">
+        <in>dns.cpp</in>
+        <in>dns.hpp</in>
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>socket.cpp</in>
+        <in>socket.hpp</in>
+      </df>
+      <df name="PoolStored">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Ptr">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="Ref">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="RefOverSharedLibrary">
+        <in>Ref_test.cpp</in>
+        <in>TestClass.hpp</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="Signal">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="SingletonOverSharedLibrary">
+        <in>Singleton_test.cpp</in>
+        <in>TestSingleton.hpp</in>
+        <in>testso.cpp</in>
+        <in>testso.hpp</in>
+      </df>
+      <df name="StrUTF8">
+      </df>
+      <df name="Thread">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="timer">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="types">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="utf8">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="util">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+      <df name="WaitSet">
+        <in>main.cpp</in>
+        <in>main.hpp</in>
+        <in>tests.cpp</in>
+        <in>tests.hpp</in>
+      </df>
+    </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"

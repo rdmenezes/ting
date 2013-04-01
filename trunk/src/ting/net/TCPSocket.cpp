@@ -67,8 +67,8 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	sockaddr_in sockAddr;
 	memset(&sockAddr, 0, sizeof(sockAddr));
 	sockAddr.sin_family = AF_INET;
-	sockAddr.sin_addr.s_addr = htonl(ip.host);
-	sockAddr.sin_port = htons(ip.port);
+	sockAddr.sin_addr.s_addr = htonl(ip.IPv4Host());
+	sockAddr.sin_port = htons(ip.Port());
 
 	// Connect to the remote host
 	if(connect(

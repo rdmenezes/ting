@@ -270,7 +270,7 @@ public:
 		ASSERT(buf.Begin() <= p && p <= buf.End());
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
-		TRACE(<< "sending DNS request to " << (r->dns.host) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
+		TRACE(<< "sending DNS request to " << (r->dns.IPv4Host()) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
 		ting::Buffer<const ting::u8> bufToSend(buf.Begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
@@ -687,7 +687,7 @@ private:
 		
 		this->InitDNS();
 		
-		TRACE(<< "this->dns.host = " << this->dns.host << std::endl)
+		TRACE(<< "this->dns.IPv4Host() = " << this->dns.IPv4Host() << std::endl)
 
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);
@@ -753,11 +753,11 @@ private:
 					try{
 						while(this->sendList.size() != 0){
 							dns::Resolver* r = this->sendList.front();
-							if(r->dns.host == 0){
+							if(r->dns.IPv4Host() == 0){
 								r->dns = this->dns;
 							}
 
-							if(r->dns.host != 0){
+							if(r->dns.IPv4Host() != 0){
 								if(!this->SendRequestToDNS(r)){
 									TRACE(<< "request not sent" << std::endl)
 									break;//socket is not ready for sending, go out of requests sending loop.

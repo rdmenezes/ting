@@ -84,16 +84,15 @@ ting::u32 ParseIPAddressString(const char*& p){
 
 
 
-IPAddress::IPAddress(const char* ip, u16 p) :
-		host(ParseIPAddressString(ip)),
-		port(p)
-{}
+IPAddress::IPAddress(const char* ip, u16 p){
+	this->InitIPv4(ParseIPAddressString(ip), p);
+}
 
 
 
-IPAddress::IPAddress(const char* ip) :
-		host(ParseIPAddressString(ip))
-{
+IPAddress::IPAddress(const char* ip){
+	this->InitIPv4(ParseIPAddressString(ip), 0);
+	
 	if(*ip != ':'){
 //		TRACE(<< "no colon, *ip = " << (*ip) << std::endl)
 		throw ting::net::IPAddress::BadIPAddressFormatExc();

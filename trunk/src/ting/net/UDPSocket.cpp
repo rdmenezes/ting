@@ -110,8 +110,8 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	sockaddr_in sockAddr;
 	int sockLen = sizeof(sockAddr);
 
-	sockAddr.sin_addr.s_addr = htonl(destinationIP.host);
-	sockAddr.sin_port = htons(destinationIP.port);
+	sockAddr.sin_addr.s_addr = htonl(destinationIP.IPv4Host());
+	sockAddr.sin_port = htons(destinationIP.Port());
 	sockAddr.sin_family = AF_INET;
 
 
@@ -235,8 +235,10 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
 	ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
 
-	out_SenderIP.host = ntohl(sockAddr.sin_addr.s_addr);
-	out_SenderIP.port = ntohs(sockAddr.sin_port);
+	out_SenderIP = IPAddress(
+			ntohl(sockAddr.sin_addr.s_addr),
+			ntohs(sockAddr.sin_port)
+		);
 	
 	ASSERT(len >= 0)
 	return size_t(len);
