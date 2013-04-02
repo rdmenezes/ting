@@ -46,7 +46,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(AF_INET, SOCK_STREAM, 0);
+	this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
@@ -94,7 +94,7 @@ TCPSocket TCPServerSocket::Accept(){
 
 	this->ClearCanReadFlag();
 
-	sockaddr_in sockAddr;
+	sockaddr_storage sockAddr;
 
 #if M_OS == M_OS_WINDOWS
 	int sock_alen = sizeof(sockAddr);

@@ -45,7 +45,7 @@ void UDPSocket::Open(u16 port){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(AF_INET, SOCK_DGRAM, 0);
+	this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
