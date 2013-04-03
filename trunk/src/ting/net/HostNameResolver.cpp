@@ -270,7 +270,7 @@ public:
 		ASSERT(buf.Begin() <= p && p <= buf.End());
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
-		TRACE(<< "sending DNS request to " << (r->dns.IPv4Host()) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
+		TRACE(<< "sending DNS request to " << (r->dns.host.IPv4Host()) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
 		ting::Buffer<const ting::u8> bufToSend(buf.Begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
@@ -687,7 +687,7 @@ private:
 		
 		this->InitDNS();
 		
-		TRACE(<< "this->dns.IPv4Host() = " << this->dns.IPv4Host() << std::endl)
+		TRACE(<< "this->dns.IPv4Host() = " << this->dns.host.IPv4Host() << std::endl)
 
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);

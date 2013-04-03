@@ -1,5 +1,7 @@
 #include "Mutex.hpp"
 
+#include <cerrno>
+
 #include "../Exc.hpp"
 
 

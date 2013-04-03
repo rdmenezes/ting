@@ -680,6 +680,15 @@ void Run(){
 	}catch(...){
 		ASSERT_ALWAYS(false)
 	}
+	
+	//Test IPv6
+	
+	try{
+		ting::net::IPAddress ip("1002:3004:5006::7008:900a");
+		TRACE(<< std::hex << ip.host.IPv4Host() << std::endl)
+	}catch(...){
+		ASSERT_ALWAYS(false)
+	}
 }
 
 }//~namespace

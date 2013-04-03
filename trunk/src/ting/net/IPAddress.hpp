@@ -58,11 +58,37 @@ public:
 	class Host{
 		u32 host[4];///< IPv6 address
 		
-		inline void InitIPv4(u32 h)throw(){
-			this->host[0] = h;
-			this->host[1] = 0xffff;
-			this->host[2] = 0;
-			this->host[3] = 0;
+		inline void Init(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
+			this->host[0] = a0;
+			this->host[1] = a1;
+			this->host[2] = a2;
+			this->host[3] = a3;
+		}
+		
+		inline void Init(u32 h)throw(){
+			this->Init(0, 0, 0xffff, h);
+		}
+		
+		inline void Init(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
+			this->Init(
+					(u32(a0) << 16) | u32(a1),
+					(u32(a2) << 16) | u32(a3),
+					(u32(a4) << 16) | u32(a5),
+					(u32(a6) << 16) | u32(a7)
+				);
+		}
+		
+		inline void Init(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
+			this->Init(
+					(u16(a0) << 8) | u16(a1),
+					(u16(a2) << 8) | u16(a3),
+					(u16(a4) << 8) | u16(a5),
+					(u16(a6) << 8) | u16(a7),
+					(u16(a8) << 8) | u16(a9),
+					(u16(a10) << 8) | u16(a11),
+					(u16(a12) << 8) | u16(a13),
+					(u16(a14) << 8) | u16(a15)
+				);
 		}
 	public:
 	
@@ -76,7 +102,17 @@ public:
 		
 		//TODO: doxygen
 		Host(u32 h)throw(){
-			this->InitIPv4(h);
+			this->Init(h);
+		}
+		
+		//TODO: doxygen
+		inline Host(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
+			this->Init(a0, a1, a2, a3, a4, a5, a6, a7);
+		}
+		
+		//TODO: doxygen
+		inline Host(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
+			this->Init(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
 		}
 		
 		//TODO: doxygen
@@ -90,13 +126,13 @@ public:
 		
 		//TODO: doxygen
 		inline bool IsIPv4()const throw(){
-			return this->host[1] == 0xffff && this->host[2] == 0 && this->host[3] == 0;
+			return this->host[2] == 0xffff && this->host[1] == 0 && this->host[0] == 0;
 		}
 		
 		//TODO: doxygen
 		inline u32 IPv4Host()const throw(){
-			ASSERT(this->IsIPv4())
-			return this->host[0];
+			//ASSERT_INFO(this->IsIPv4(), "IPv4Host(): this is IPv6 address")
+			return this->host[3];
 		}
 		
 		//TODO: doxygen

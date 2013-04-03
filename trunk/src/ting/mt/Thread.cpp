@@ -206,7 +206,7 @@ void Thread::Join() throw(){
 
 	ASSERT(this->state == RUNNING || this->state == STOPPED)
 	
-	ASSERT_INFO(T_ThreadID(this->th) != ting::Thread::GetCurrentThreadID(), "tried to call Join() on the current thread")
+	ASSERT_INFO(T_ThreadID(this->th) != ting::mt::Thread::GetCurrentThreadID(), "tried to call Join() on the current thread")
 
 #if M_OS == M_OS_WINDOWS
 	WaitForSingleObject(this->th, INFINITE);

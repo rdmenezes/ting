@@ -117,7 +117,24 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 		throw BadIPHostFormatExc();
 	}
 	
-	return Host();//TODO:
+	return Host(
+			a.sin6_addr.__in6_u.__u6_addr8[0],
+			a.sin6_addr.__in6_u.__u6_addr8[1],
+			a.sin6_addr.__in6_u.__u6_addr8[2],
+			a.sin6_addr.__in6_u.__u6_addr8[3],
+			a.sin6_addr.__in6_u.__u6_addr8[4],
+			a.sin6_addr.__in6_u.__u6_addr8[5],
+			a.sin6_addr.__in6_u.__u6_addr8[6],
+			a.sin6_addr.__in6_u.__u6_addr8[7],
+			a.sin6_addr.__in6_u.__u6_addr8[8],
+			a.sin6_addr.__in6_u.__u6_addr8[9],
+			a.sin6_addr.__in6_u.__u6_addr8[10],
+			a.sin6_addr.__in6_u.__u6_addr8[11],
+			a.sin6_addr.__in6_u.__u6_addr8[12],
+			a.sin6_addr.__in6_u.__u6_addr8[13],
+			a.sin6_addr.__in6_u.__u6_addr8[14],
+			a.sin6_addr.__in6_u.__u6_addr8[15]
+		);
 }
 
 
