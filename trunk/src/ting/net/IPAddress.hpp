@@ -48,7 +48,12 @@ namespace net{
  */
 class IPAddress{
 public:
-
+	//TODO: doxygen
+	class BadIPAddressFormatExc : public ting::net::Exc{
+	public:
+		BadIPAddressFormatExc(){}
+	};
+	
 	//TODO: doxygen
 	class Host{
 		u32 host[4];///< IPv6 address
@@ -63,9 +68,7 @@ public:
 	
 		class BadIPHostFormatExc : public BadIPAddressFormatExc{
 		public:
-			BadIPHostFormatExc() :
-					ting::net::Exc("Failed parsing IP-host from string, bad address format")
-			{}
+			BadIPHostFormatExc(){}
 		};
 		
 		//TODO: doxygen
@@ -77,7 +80,13 @@ public:
 		}
 		
 		//TODO: doxygen
-		Host(const char* ip);
+		static Host Parse(const char* ip);
+		
+		//TODO: doxygen
+		static Host ParseIPv4(const char* ip);
+		
+		//TODO: doxygen
+		static Host ParseIPv6(const char* ip);
 		
 		//TODO: doxygen
 		inline bool IsIPv4()const throw(){
@@ -102,14 +111,6 @@ public:
 	
 	Host host;///< IPv6 address
 	u16 port;///< IP port number
-	
-	//TODO: doxygen
-	class BadIPAddressFormatExc : public ting::net::Exc{
-	public:
-		BadIPAddressFormatExc() :
-				ting::net::Exc("Failed parsing IP-address from string, bad address format")
-		{}
-	};
 	
 	//TODO: doxygen
 	inline IPAddress()throw(){}

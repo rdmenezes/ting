@@ -41,6 +41,9 @@ namespace net{
  */
 class Exc : public ting::Exc{
 public:
+	//TODO: doxygen
+	inline Exc()throw(){}
+	
 	/**
 	 * @brief Exception constructor.
 	 * @param message - human friendly error description.

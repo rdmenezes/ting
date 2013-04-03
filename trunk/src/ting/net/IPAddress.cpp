@@ -24,12 +24,15 @@ THE SOFTWARE. */
 
 
 
-#include <ting/config.hpp>
-
 #include "IPAddress.hpp"
+
+#include "../config.hpp"
+#include "../Buffer.hpp"
 
 #if M_OS == M_OS_LINUX
 #	include <arpa/inet.h>
+#elif M_OS == M_OS_WINDOWS
+#	include <Ws2tcpip.h>
 #else
 #	error "Unknown OS"
 #endif
@@ -41,55 +44,6 @@ using namespace ting::net;
 
 
 namespace{
-
-	//TODO: remove
-//This function modifies the pointer passed as argument (reference to a pointer).
-//After successful completion of the function the pointer passed as argument
-//points to the character which goes right after the IP address.
-ting::u32 ParseIPAddressString(const char*& p){
-	ting::u32 h = 0;//parsed host
-
-	for(unsigned t = 0; t < 4; ++t){
-		unsigned digits[3];
-		unsigned numDgts;
-		for(numDgts = 0; numDgts < 3; ++numDgts, ++p){
-			if(*p < '0' || '9' < *p){
-				if(numDgts == 0){
-					throw ting::net::IPAddress::BadIPAddressFormatExc();
-				}
-				break;
-			}
-			digits[numDgts] = unsigned(*p) - unsigned('0');
-		}
-
-		if(t < 3){
-			if(*p != '.'){//unexpected non-delimiter character
-				throw ting::net::IPAddress::BadIPAddressFormatExc();
-			}
-			++p;
-		}else{
-			ASSERT(t == 3)
-		}
-
-		unsigned xxx = 0;
-		for(unsigned i = 0; i < numDgts; ++i){
-			unsigned ord = 1;
-			for(unsigned j = 1; j < numDgts - i; ++j){
-			   ord *= 10;
-			}
-			xxx += digits[i] * ord;
-		}
-		if(xxx > 0xff){
-			throw ting::net::IPAddress::BadIPAddressFormatExc();
-		}
-
-		h |= (xxx << (8 * (3 - t)));
-	}
-	
-	return h;
-}
-
-
 
 bool IsIPv4String(const char* ip){
 	for(const char* p = ip; *p != 0; ++p){
@@ -103,41 +57,140 @@ bool IsIPv4String(const char* ip){
 	return false;
 }
 
-
-
 }//~namespace
 
 
 
-IPAddress::Host::Host(const char* ip){
-	sockaddr_storage a;
-	
-	int res;
-	if(IsIPv4String()){
-		res = inet_pton(AF_INET, ip, &reinterpret_cast<sockaddr_in*>(&a)->sin_addr);
+//static
+IPAddress::Host IPAddress::Host::Parse(const char* ip){
+	if(IsIPv4String(ip)){
+		return Host::ParseIPv4(ip);
 	}else{
-		res = inet_pton(AF_INET6, ip, &reinterpret_cast<sockaddr_in6*>(&a)->sin6_addr);
-	}
-	if(res != 1){
-		throw BadIPHostFormatExc();
+		return Host::ParseIPv6(ip);
 	}
 }
 
 
 
+//static
+IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
+	sockaddr_in a;
+	
+#if M_OS == M_OS_LINUX
+	int res = inet_pton(
+#elif M_OS == M_OS_WINDOWS
+	int res = InetPton(
+#else
+#	error "Unknown OS"
+#endif
+			AF_INET,
+			ip,
+			&a.sin_addr
+		);
+	
+	if(res != 1){
+		throw BadIPHostFormatExc();
+	}
+	
+	return Host(ntohl(a.sin_addr.s_addr));
+}
+
+
+
+//static
+IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
+	sockaddr_in6 a;
+		
+#if M_OS == M_OS_LINUX
+	int res = inet_pton(
+#elif M_OS == M_OS_WINDOWS
+	int res = InetPton(
+#else
+#	error "Unknown OS"
+#endif
+			AF_INET6,
+			ip,
+			&a.sin6_addr
+		);
+	
+	if(res != 1){
+		throw BadIPHostFormatExc();
+	}
+	
+	return Host();//TODO:
+}
+
+
+
 IPAddress::IPAddress(const char* ip, u16 p) :
-		host(ParseIPAddressString(ip)),
+		host(Host::Parse(ip)),
 		port(p)
 {}
 
 
 
-IPAddress::IPAddress(const char* ip) :
-		host(ParseIPAddressString(ip))
-{	
+IPAddress::IPAddress(const char* ip){
+	if(*ip == 0){//if zero length string
+		throw BadIPAddressFormatExc();
+	}
+	
+	if(*ip == '['){//IPv6 with port
+		ting::StaticBuffer<char, (4 * 6 + 6 + (3 * 4 + 3) + 1)> buf;
+		
+		++ip;
+		
+		char* dst;
+		for(dst = buf.Begin(); *ip != ']'; ++dst, ++ip){
+			if(*ip == 0 || !buf.Overlaps(dst + 1)){
+				throw BadIPAddressFormatExc();
+			}
+			
+			*dst = *ip;
+		}
+		
+		ASSERT(buf.Overlaps(dst))
+		*dst = 0;//null-terminate
+				
+		this->host = Host::ParseIPv6(buf.Begin());
+		
+		++ip;//move to port ':' separator
+	}else{
+		//IPv4 or IPv6 without port
+		
+		if(IsIPv4String(ip)){
+			ting::StaticBuffer<char, (3 * 4 + 3 + 1)> buf;
+			
+			char* dst;
+			for(dst = buf.Begin(); *ip != ':' && *ip != 0; ++dst, ++ip){
+				if(!buf.Overlaps(dst + 1)){
+					throw BadIPAddressFormatExc();
+				}
+
+				*dst = *ip;
+			}
+
+			ASSERT(buf.Overlaps(dst))
+			*dst = 0;//null-terminate
+
+			this->host = Host::ParseIPv4(buf.Begin());
+		}else{
+			//IPv6 without port
+			this->host = Host::ParseIPv6(ip);
+			this->port = 0;
+			return;
+		}
+	}
+	
+	//parse port
+	
 	if(*ip != ':'){
-//		TRACE(<< "no colon, *ip = " << (*ip) << std::endl)
-		throw ting::net::IPAddress::BadIPAddressFormatExc();
+		if(*ip == 0){
+			this->port = 0;
+			return;
+		}else{
+	//		TRACE(<< "no colon, *ip = " << (*ip) << std::endl)
+			throw ting::net::IPAddress::BadIPAddressFormatExc();
+		}
 	}
 	
 	++ip;

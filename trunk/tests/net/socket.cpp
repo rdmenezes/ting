@@ -561,14 +561,14 @@ void Run(){
 			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
 			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
-			ASSERT_ALWAYS(false)
+			ASSERT_ALWAYS(true)
 		}
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.2555:23ddqwd", 80);
 			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f0000ff)
 			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
-			ASSERT_ALWAYS(false)
+			ASSERT_ALWAYS(true)
 		}
 		
 		try{//test incorrect string
