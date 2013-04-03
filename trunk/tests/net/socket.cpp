@@ -67,8 +67,8 @@ public:
 
 			ASSERT_ALWAYS(sock.IsValid())
 
-			ASSERT_ALWAYS(sock.GetLocalAddress().IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(sock.GetRemoteAddress().IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
 			ting::StaticBuffer<ting::u8, 4> data;
 			data[0] = '0';
@@ -100,8 +100,8 @@ void Run(){
 
 		ASSERT_ALWAYS(sock.IsValid())
 
-		ASSERT_ALWAYS(sock.GetLocalAddress().IPv4Host() == 0x7f000001)
-		ASSERT_ALWAYS(sock.GetRemoteAddress().IPv4Host() == 0x7f000001)
+		ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
+		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
 		ting::StaticBuffer<ting::u8, 4> data;
 		unsigned bytesReceived = 0;
@@ -163,8 +163,8 @@ void Run(){
 		ting::net::IPAddress addrR = sockR.GetRemoteAddress();
 //		TRACE(<< "SendDataContinuously::Run(): addrS = " << std::hex << addrS.host << ":" << addrS.port << std::dec << std::endl)
 //		TRACE(<< "SendDataContinuously::Run(): addrR = " << std::hex << addrR.host << ":" << addrR.port << std::dec << std::endl)
-		ASSERT_ALWAYS(addrS.IPv4Host() == 0x7f000001) //check that IP is 127.0.0.1
-		ASSERT_ALWAYS(addrR.IPv4Host() == 0x7f000001) //check that IP is 127.0.0.1
+		ASSERT_ALWAYS(addrS.host.IPv4Host() == 0x7f000001) //check that IP is 127.0.0.1
+		ASSERT_ALWAYS(addrR.host.IPv4Host() == 0x7f000001) //check that IP is 127.0.0.1
 	}
 
 	ting::WaitSet ws(2);
@@ -401,8 +401,8 @@ void Run(){
 	{
 		try{
 			ting::net::IPAddress a("123.124.125.126", 5);
-			ASSERT_ALWAYS(a.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
-			ASSERT_ALWAYS(a.Port() == 5)
+			ASSERT_ALWAYS(a.host.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
+			ASSERT_ALWAYS(a.port == 5)
 		}catch(std::exception& e){
 			ASSERT_INFO_ALWAYS(false, e.what())
 		}
@@ -410,24 +410,24 @@ void Run(){
 
 	{
 		ting::net::IPAddress a(123, 124, 125, 126, 5);
-		ASSERT_ALWAYS(a.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
-		ASSERT_ALWAYS(a.Port() == 5)
+		ASSERT_ALWAYS(a.host.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
+		ASSERT_ALWAYS(a.port == 5)
 	}
 
 	//test copy constructor and operator=()
 	{
 		ting::net::IPAddress a(123, 124, 125, 126, 5);
-		ASSERT_ALWAYS(a.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
-		ASSERT_ALWAYS(a.Port() == 5)
+		ASSERT_ALWAYS(a.host.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
+		ASSERT_ALWAYS(a.port == 5)
 
 		ting::net::IPAddress a1(a);
-		ASSERT_ALWAYS(a1.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
-		ASSERT_ALWAYS(a1.Port() == 5)
+		ASSERT_ALWAYS(a1.host.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
+		ASSERT_ALWAYS(a1.port == 5)
 
 		ting::net::IPAddress a2;
 		a2 = a1;
-		ASSERT_ALWAYS(a2.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
-		ASSERT_ALWAYS(a2.Port() == 5)
+		ASSERT_ALWAYS(a2.host.IPv4Host() == (123 << 24) + (124 << 16) + (125 << 8) + 126)
+		ASSERT_ALWAYS(a2.port == 5)
 
 		ASSERT_ALWAYS(a == a1)
 		ASSERT_ALWAYS(a == a2)
@@ -465,7 +465,7 @@ void Run(){
 		unsigned bytesSent = 0;
 
 		ting::net::IPAddress addr("127.0.0.1", 13666);
-		ASSERT_ALWAYS(addr.IPv4Host() == 0x7f000001)
+		ASSERT_ALWAYS(addr.host.IPv4Host() == 0x7f000001)
 
 		for(unsigned i = 0; i < 10; ++i){
 			bytesSent = sendSock.Send(data, addr);
@@ -489,7 +489,7 @@ void Run(){
 			bytesReceived = recvSock.Recv(buf, ip);
 			ASSERT_ALWAYS(bytesReceived == 0 || bytesReceived == 4)//all or nothing
 			if(bytesReceived == 4){
-				ASSERT_INFO_ALWAYS(ip.IPv4Host() == 0x7f000001, "ip.IPv4Host() = " << std::hex << ip.IPv4Host() << std::dec)
+				ASSERT_INFO_ALWAYS(ip.host.IPv4Host() == 0x7f000001, "ip.host.IPv4Host() = " << std::hex << ip.host.IPv4Host() << std::dec)
 				break;
 			}
 			
@@ -550,23 +550,23 @@ void Run(){
 	try{//test IP-address without port string parsing
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1", 80);
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 80)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
 		
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:23ddqwd", 80);
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 80)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.2555:23ddqwd", 80);
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f0000ff)
-			ASSERT_ALWAYS(ip.Port() == 80)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f0000ff)
+			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
@@ -595,8 +595,8 @@ void Run(){
 	try{//test IP-address with port string parsing
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:80");
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 80)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 80)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
@@ -648,32 +648,32 @@ void Run(){
 		
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:65535");
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 0xffff)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 0xffff)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
 		
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:0");
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 0)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 0)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
 		
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:6535 ");
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 6535)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 6535)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}
 		
 		try{//test correct string
 			ting::net::IPAddress ip("127.0.0.1:6535dwqd 345");
-			ASSERT_ALWAYS(ip.IPv4Host() == 0x7f000001)
-			ASSERT_ALWAYS(ip.Port() == 6535)
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+			ASSERT_ALWAYS(ip.port == 6535)
 		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
 			ASSERT_ALWAYS(false)
 		}

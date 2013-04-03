@@ -47,18 +47,49 @@ namespace net{
  * @brief a structure which holds IP address
  */
 class IPAddress{
-	u32 host[4];///< IPv6 address
-	u16 port;///< IP port number
-	
-	inline void InitIPv4(u32 h, u16 p)throw(){
-		this->host[0] = h;
-		this->host[1] = 0xffff;
-		this->host[2] = 0;
-		this->host[3] = 0;
-		
-		this->port = p;
-	}
 public:
+
+	//TODO: doxygen
+	class Host{
+		u32 host[4];///< IPv6 address
+		
+		inline void InitIPv4(u32 h)throw(){
+			this->host[0] = h;
+			this->host[1] = 0xffff;
+			this->host[2] = 0;
+			this->host[3] = 0;
+		}
+	public:
+	
+		Host()throw(){}
+		
+		Host(u32 h)throw(){
+			this->InitIPv4(h);
+		}
+		
+		//TODO: doxygen
+		inline bool IsIPv4()const throw(){
+			return this->host[1] == 0xffff && this->host[2] == 0 && this->host[3] == 0;
+		}
+		
+		//TODO: doxygen
+		inline u32 IPv4Host()const throw(){
+			ASSERT(this->IsIPv4())
+			return this->host[0];
+		}
+		
+		//TODO: doxygen
+		inline bool operator==(const Host& h){
+			return (this->host[0] == h.host[0])
+					&& (this->host[1] == h.host[1])
+					&& (this->host[2] == h.host[2])
+					&& (this->host[3] == h.host[3])
+				;
+		}
+	};
+	
+	Host host;///< IPv6 address
+	u16 port;///< IP port number
 	
 	//TODO: doxygen
 	class BadIPAddressFormatExc : public ting::net::Exc{
@@ -69,22 +100,6 @@ public:
 	};
 	
 	//TODO: doxygen
-	inline bool IsIPv4()const throw(){
-		return this->host[1] == 0xffff && this->host[2] == 0 && this->host[3] == 0;
-	}
-	
-	//TODO: doxygen
-	inline u32 IPv4Host()const throw(){
-		ASSERT(this->IsIPv4())
-		return this->host[0];
-	}
-	
-	//TODO: doxygen
-	inline u16 Port()const throw(){
-		return this->port;
-	}
-	
-	//TODO: doxygen
 	inline IPAddress()throw(){}
 
 	/**
@@ -92,9 +107,10 @@ public:
 	 * @param h - IPv4 address. For example, 0x7f000001 represents "127.0.0.1" IP address value.
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(u32 h, u16 p)throw(){
-		this->InitIPv4(h, p);
-	}
+	inline IPAddress(u32 h, u16 p)throw() :
+			host(h),
+			port(p)
+	{}
 
 	/**
 	 * @brief Create IPv4-address specifying exact IP-address as 4 bytes and port number.
@@ -108,9 +124,10 @@ public:
 	 * @param h4 - 4th triplet of IP address.
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(u8 h1, u8 h2, u8 h3, u8 h4, u16 p)throw(){
-		this->InitIPv4((u32(h1) << 24) + (u32(h2) << 16) + (u32(h3) << 8) + u32(h4), p);
-	}
+	inline IPAddress(u8 h1, u8 h2, u8 h3, u8 h4, u16 p)throw() :
+			host((u32(h1) << 24) + (u32(h2) << 16) + (u32(h3) << 8) + u32(h4)),
+			port(p)
+	{}
 
 	//TODO: IPv6
 	/**
@@ -143,12 +160,7 @@ public:
 	 * @return false otherwise.
 	 */
 	inline bool operator==(const IPAddress& ip){
-		return (this->host[0] == ip.host[0])
-				&& (this->host[1] == ip.host[1])
-				&& (this->host[2] == ip.host[2])
-				&& (this->host[3] == ip.host[3])
-				&& (this->port == ip.port)
-			;
+		return (this->host == ip.host) && (this->port == ip.port);
 	}
 };//~class IPAddress
 

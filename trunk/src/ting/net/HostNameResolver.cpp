@@ -753,11 +753,11 @@ private:
 					try{
 						while(this->sendList.size() != 0){
 							dns::Resolver* r = this->sendList.front();
-							if(r->dns.IPv4Host() == 0){
+							if(r->dns.host.IPv4Host() == 0){
 								r->dns = this->dns;
 							}
 
-							if(r->dns.IPv4Host() != 0){
+							if(r->dns.host.IPv4Host() != 0){
 								if(!this->SendRequestToDNS(r)){
 									TRACE(<< "request not sent" << std::endl)
 									break;//socket is not ready for sending, go out of requests sending loop.
