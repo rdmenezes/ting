@@ -61,11 +61,23 @@ public:
 		}
 	public:
 	
+		class BadIPHostFormatExc : public BadIPAddressFormatExc{
+		public:
+			BadIPHostFormatExc() :
+					ting::net::Exc("Failed parsing IP-host from string, bad address format")
+			{}
+		};
+		
+		//TODO: doxygen
 		Host()throw(){}
 		
+		//TODO: doxygen
 		Host(u32 h)throw(){
 			this->InitIPv4(h);
 		}
+		
+		//TODO: doxygen
+		Host(const char* ip);
 		
 		//TODO: doxygen
 		inline bool IsIPv4()const throw(){

@@ -24,7 +24,15 @@ THE SOFTWARE. */
 
 
 
+#include <ting/config.hpp>
+
 #include "IPAddress.hpp"
+
+#if M_OS == M_OS_LINUX
+#	include <arpa/inet.h>
+#else
+#	error "Unknown OS"
+#endif
 
 
 
@@ -34,6 +42,7 @@ using namespace ting::net;
 
 namespace{
 
+	//TODO: remove
 //This function modifies the pointer passed as argument (reference to a pointer).
 //After successful completion of the function the pointer passed as argument
 //points to the character which goes right after the IP address.
@@ -80,7 +89,39 @@ ting::u32 ParseIPAddressString(const char*& p){
 	return h;
 }
 
+
+
+bool IsIPv4String(const char* ip){
+	for(const char* p = ip; *p != 0; ++p){
+		if(*p == '.'){
+			return true;
+		}
+		if(*p == ':'){
+			return false;
+		}
+	}
+	return false;
+}
+
+
+
 }//~namespace
+
+
+
+IPAddress::Host::Host(const char* ip){
+	sockaddr_storage a;
+	
+	int res;
+	if(IsIPv4String()){
+		res = inet_pton(AF_INET, ip, &reinterpret_cast<sockaddr_in*>(&a)->sin_addr);
+	}else{
+		res = inet_pton(AF_INET6, ip, &reinterpret_cast<sockaddr_in6*>(&a)->sin6_addr);
+	}
+	if(res != 1){
+		throw BadIPHostFormatExc();
+	}
+}
 
 
 
