@@ -56,8 +56,12 @@ public:
 	
 	//TODO: doxygen
 	class Host{
+	public:
+		
+		//TODO: doxygen
 		u32 host[4];///< IPv6 address
 		
+		//TODO: doxygen
 		inline void Init(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
 			this->host[0] = a0;
 			this->host[1] = a1;
@@ -65,10 +69,12 @@ public:
 			this->host[3] = a3;
 		}
 		
+		//TODO: doxygen
 		inline void Init(u32 h)throw(){
 			this->Init(0, 0, 0xffff, h);
 		}
 		
+		//TODO: doxygen
 		inline void Init(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
 			this->Init(
 					(u32(a0) << 16) | u32(a1),
@@ -78,6 +84,7 @@ public:
 				);
 		}
 		
+		//TODO: doxygen
 		inline void Init(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
 			this->Init(
 					(u16(a0) << 8) | u16(a1),
@@ -90,8 +97,8 @@ public:
 					(u16(a14) << 8) | u16(a15)
 				);
 		}
-	public:
 	
+		//TODO: doxygen
 		class BadIPHostFormatExc : public BadIPAddressFormatExc{
 		public:
 			BadIPHostFormatExc(){}
@@ -131,7 +138,6 @@ public:
 		
 		//TODO: doxygen
 		inline u32 IPv4Host()const throw(){
-			//ASSERT_INFO(this->IsIPv4(), "IPv4Host(): this is IPv6 address")
 			return this->host[3];
 		}
 		
@@ -178,6 +184,12 @@ public:
 			port(p)
 	{}
 
+	//TODO: doxygen
+	inline IPAddress(Host h, u16 p)throw() :
+			host(h),
+			port(p)
+	{}
+	
 	//TODO: IPv6
 	/**
 	 * @brief Create IP-address specifying IP-address as string and port number.
