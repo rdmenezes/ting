@@ -56,10 +56,28 @@ public:
 	
 	//TODO: doxygen
 	class Host{
+		u32 host[4];//IPv6 address
 	public:
 		
 		//TODO: doxygen
-		u32 host[4];///< IPv6 address
+		inline u32 Quad0()const throw(){
+			return this->host[0];
+		}
+		
+		//TODO: doxygen
+		inline u32 Quad1()const throw(){
+			return this->host[1];
+		}
+		
+		//TODO: doxygen
+		inline u32 Quad2()const throw(){
+			return this->host[2];
+		}
+		
+		//TODO: doxygen
+		inline u32 Quad3()const throw(){
+			return this->host[3];
+		}
 		
 		//TODO: doxygen
 		inline void Init(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
@@ -190,7 +208,7 @@ public:
 			port(p)
 	{}
 	
-	//TODO: IPv6
+	//TODO: IPv6 doxygen
 	/**
 	 * @brief Create IP-address specifying IP-address as string and port number.
 	 * The string passed as argument should contain properly formatted IP address at its beginning.
@@ -203,7 +221,7 @@ public:
 	 */
 	IPAddress(const char* ip, u16 p);
 	
-	//TODO: IPv6
+	//TODO: IPv6 doxygen
 	/**
 	 * @brief Create IP-address specifying IP-address as string and port number.
 	 * The string passed for parsing should contain the IP-address with the port number.

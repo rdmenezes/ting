@@ -685,7 +685,31 @@ void Run(){
 	
 	try{
 		ting::net::IPAddress ip("1002:3004:5006::7008:900a");
-		TRACE(<< std::hex << ip.host.IPv4Host() << std::endl)
+		ASSERT_ALWAYS(ip.port == 0)
+		ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
+		ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
+		ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
+		ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
+	}catch(...){
+		ASSERT_ALWAYS(false)
+	}
+	
+	try{
+		ting::net::IPAddress ip("[1002:3004:5006::7008:900a]:134");
+		ASSERT_ALWAYS(ip.port == 134)
+		ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
+		ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
+		ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
+		ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
+	}catch(...){
+		ASSERT_ALWAYS(false)
+	}
+	
+	try{
+		ting::net::IPAddress ip("[::ffff:127.0.0.1]:45");
+		ASSERT_ALWAYS(ip.port == 45)
+		ASSERT_ALWAYS(ip.host.IsIPv4())
+		ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
 	}catch(...){
 		ASSERT_ALWAYS(false)
 	}
