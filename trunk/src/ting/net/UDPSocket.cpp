@@ -45,7 +45,7 @@ void UDPSocket::Open(u16 port){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
+	this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
@@ -53,13 +53,19 @@ void UDPSocket::Open(u16 port){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
+	//turn off IPv6 only mode to allow also accepting IPv4
+	{
+		int no = 0;     
+		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
+	}
+	
 	//Bind locally, if appropriate
 	if(port != 0){
-		struct sockaddr_in sockAddr;
+		sockaddr_in6 sockAddr;
 		memset(&sockAddr, 0, sizeof(sockAddr));
-		sockAddr.sin_family = AF_INET;
-		sockAddr.sin_addr.s_addr = INADDR_ANY;
-		sockAddr.sin_port = htons(port);
+		sockAddr.sin6_family = AF_INET6;
+		sockAddr.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
+		sockAddr.sin6_port = htons(port);
 
 		// Bind the socket for listening
 		if(::bind(
@@ -69,7 +75,27 @@ void UDPSocket::Open(u16 port){
 			) == DSocketError())
 		{
 			this->Close();
-			throw net::Exc("UDPSocket::Open(): could not bind to local port");
+			
+#if M_OS == M_OS_WINDOWS
+			int errorCode = WSAGetLastError();
+#else
+			int errorCode = errno;
+#endif
+			
+				std::stringstream ss;
+				ss << "UDPSocket::Open(): could not bind to local port, error code = " << errorCode << ": ";
+#if M_COMPILER == M_COMPILER_MSVC
+				{
+					const size_t msgbufSize = 0xff;
+					char msgbuf[msgbufSize];
+					strerror_s(msgbuf, msgbufSize, errorCode);
+					msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+					ss << msgbuf;
+				}
+#else
+				ss << strerror(errorCode);
+#endif
+			throw net::Exc(ss.str());
 		}
 	}
 
@@ -92,7 +118,7 @@ void UDPSocket::Open(u16 port){
 		}
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	this->ClearAllReadinessFlags();
@@ -107,13 +133,23 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 
 	this->ClearCanWriteFlag();
 
-	sockaddr_in sockAddr;
+	sockaddr_storage sockAddr;
 	int sockLen = sizeof(sockAddr);
-
-	sockAddr.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
-	sockAddr.sin_port = htons(destinationIP.port);
-	sockAddr.sin_family = AF_INET;
-
+	
+	if(destinationIP.host.IsIPv4()){
+		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+		a.sin_family = AF_INET;
+		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
+		a.sin_port = htons(destinationIP.port);
+	}else{
+		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		a.sin6_family = AF_INET6;
+		a.sin6_addr.__in6_u.__u6_addr32[0] = htonl(destinationIP.host.Quad0());
+		a.sin6_addr.__in6_u.__u6_addr32[1] = htonl(destinationIP.host.Quad1());
+		a.sin6_addr.__in6_u.__u6_addr32[2] = htonl(destinationIP.host.Quad2());
+		a.sin6_addr.__in6_u.__u6_addr32[3] = htonl(destinationIP.host.Quad3());
+		a.sin6_port = htons(destinationIP.port);
+	}
 
 	ssize_t len;
 
@@ -179,7 +215,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 	//So, do it at the beginning of the function.
 	this->ClearCanReadFlag();
 
-	sockaddr_in sockAddr;
+	sockaddr_storage sockAddr;
 
 #if M_OS == M_OS_WINDOWS
 	int sockLen = sizeof(sockAddr);
@@ -235,10 +271,25 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
 	ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
 
-	out_SenderIP = IPAddress(
-			ntohl(sockAddr.sin_addr.s_addr),
-			ntohs(sockAddr.sin_port)
-		);
+	if(sockAddr.ss_family == AF_INET){
+		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+		out_SenderIP = IPAddress(
+				ntohl(a.sin_addr.s_addr),
+				ting::u16(ntohs(a.sin_port))
+			);
+	}else{
+		ASSERT(sockAddr.ss_family == AF_INET6)
+		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		out_SenderIP = IPAddress(
+				IPAddress::Host(
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+					),
+				ting::u16(ntohs(a.sin6_port))
+			);
+	}
 	
 	ASSERT(len >= 0)
 	return size_t(len);
