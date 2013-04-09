@@ -217,7 +217,7 @@ private:
 	//override
 	int GetHandle();
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 };//~class Socket
 

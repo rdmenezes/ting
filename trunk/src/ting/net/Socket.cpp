@@ -78,7 +78,7 @@ void Socket::Close()throw(){
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 		close(this->socket);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 	}
 	this->ClearAllReadinessFlags();
@@ -123,7 +123,7 @@ void Socket::DisableNaggle(){
 		setsockopt(this->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(yes));
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
@@ -153,7 +153,7 @@ void Socket::SetNonBlockingMode(){
 		}
 	}
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 }
 
@@ -171,7 +171,7 @@ ting::u16 Socket::GetLocalPort(){
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 	socklen_t len = sizeof(addr);
 #else
-	#error "Unsupported OS"
+#	error "Unsupported OS"
 #endif
 
 	if(getsockname(
@@ -295,5 +295,5 @@ int Socket::GetHandle(){
 }
 
 #else
-	#error "unsupported OS"
+#	error "unsupported OS"
 #endif
