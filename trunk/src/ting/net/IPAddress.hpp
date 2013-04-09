@@ -131,6 +131,11 @@ public:
 		}
 		
 		//TODO: doxygen
+		inline Host(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
+			this->Init(a0, a1, a2, a3);
+		}
+		
+		//TODO: doxygen
 		inline Host(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
 			this->Init(a0, a1, a2, a3, a4, a5, a6, a7);
 		}

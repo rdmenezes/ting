@@ -32,26 +32,26 @@ THE SOFTWARE. */
 #pragma once
 
 #if defined(__SYMBIAN32__)
-#include <e32std.h>
+#	include <e32std.h>
 
 #elif defined(__ANDROID__)
-	#undef NDEBUG // we want assertions to work, if we don't undef NDEBUG the assertions will be translated to nothing
-	#include <cassert>
+#	undef NDEBUG // we want assertions to work, if we don't undef NDEBUG the assertions will be translated to nothing
+#	include <cassert>
 
-	#include <sstream>
-	#include <android/log.h>
+#	include <sstream>
+#	include <android/log.h>
 
 #else //assume more or less standard system
-#include <sstream>
-#include <iostream>
-#include <fstream>
-#include <typeinfo>
-#include <cassert>
+#	include <sstream>
+#	include <iostream>
+#	include <fstream>
+#	include <typeinfo>
+#	include <cassert>
 
 #endif
 
 #if defined(_DEBUG) && !defined(DEBUG)
-#define DEBUG
+#	define DEBUG
 #endif
 
 //
@@ -63,9 +63,9 @@ THE SOFTWARE. */
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
-#if defined(__SYMBIAN32__)
-#elif defined(__ANDROID__)
-#else
+#	if defined(__SYMBIAN32__)
+#	elif defined(__ANDROID__)
+#	else
 inline std::ofstream& DebugLogger(){
 	//this allows to make debug output even if main() is not called yet and even if
 	//standard std::cout object is not created since static global variables initialization
@@ -73,7 +73,7 @@ inline std::ofstream& DebugLogger(){
 	static std::ofstream* logger = new std::ofstream("output.log");
 	return *logger;
 }
-#endif
+#	endif
 }//~namespace ting_debug
 }//~namespace ting
 #endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
@@ -81,21 +81,21 @@ inline std::ofstream& DebugLogger(){
 
 
 #if defined(__SYMBIAN32__)
-#define LOG_ALWAYS(x)
-#define TRACE_ALWAYS(x)
+#	define LOG_ALWAYS(x)
+#	define TRACE_ALWAYS(x)
 
 #elif defined(__ANDROID__)
-#define TRACE_ALWAYS(x) \
-	{ \
-		std::stringstream ss; \
-		ss x; \
-		__android_log_print(ANDROID_LOG_INFO, "ting_debug", ss.str().c_str()); \
-	}
-#define LOG_ALWAYS(x) //logging is not supported on Android, yet.
+#	define TRACE_ALWAYS(x) \
+		{ \
+			std::stringstream ss; \
+			ss x; \
+			__android_log_print(ANDROID_LOG_INFO, "ting_debug", ss.str().c_str()); \
+		}
+#	define LOG_ALWAYS(x) //logging is not supported on Android, yet.
 
 #else
-#define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
-#define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
+#	define LOG_ALWAYS(x) ting::ting_debug::DebugLogger() x; ting::ting_debug::DebugLogger().flush();
+#	define TRACE_ALWAYS(x) std::cout x; std::cout.flush();
 
 #endif
 
@@ -105,21 +105,21 @@ inline std::ofstream& DebugLogger(){
 
 #ifdef DEBUG
 
-#define LOG(x) LOG_ALWAYS(x)
-#define TRACE(x) TRACE_ALWAYS(x)
-#define TRACE_AND_LOG(x) TRACE_AND_LOG_ALWAYS(x)
+#	define LOG(x) LOG_ALWAYS(x)
+#	define TRACE(x) TRACE_ALWAYS(x)
+#	define TRACE_AND_LOG(x) TRACE_AND_LOG_ALWAYS(x)
 
-#define LOG_IF_TRUE(x, y) if(x){ LOG(y) }
+#	define LOG_IF_TRUE(x, y) if(x){ LOG(y) }
 
-#define DEBUG_CODE(x) x
+#	define DEBUG_CODE(x) x
 
 #else//#ifdef DEBUG
 
-#define LOG(x)
-#define TRACE(x)
-#define TRACE_AND_LOG(x)
-#define LOG_IF_TRUE(x, y)
-#define DEBUG_CODE(x)
+#	define LOG(x)
+#	define TRACE(x)
+#	define TRACE_AND_LOG(x)
+#	define LOG_IF_TRUE(x, y)
+#	define DEBUG_CODE(x)
 
 #endif//~#ifdef DEBUG
 
@@ -138,11 +138,11 @@ inline void LogAssert(const char* msg, const char* file, int line){
 }
 }
 #if defined(__SYMBIAN32__)
-#define ASSERT_INFO_ALWAYS(x, y) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
+#	define ASSERT_INFO_ALWAYS(x, y) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 
 #else //Assume system supporting standard assert() (including Android)
 
-#define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
+#	define ASSERT_INFO_ALWAYS(x, y) if(!(x)){ \
 						std::stringstream ss; \
 						ss << y; \
 						ting::ting_debug::LogAssert(ss.str().c_str(), __FILE__, __LINE__); \
@@ -156,24 +156,24 @@ inline void LogAssert(const char* msg, const char* file, int line){
 
 
 #ifdef DEBUG
-#define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
-#define ASSERT(x) ASSERT_ALWAYS(x)
+#	define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
+#	define ASSERT(x) ASSERT_ALWAYS(x)
 
-#if defined(__SYMBIAN32__)
-#define ASS(x) (x)
-#define ASSCOND(x, cond) (x)
+#	if defined(__SYMBIAN32__)
+#		define ASS(x) (x)
+#		define ASSCOND(x, cond) (x)
 
-#else //Assume system supporting standard assert() (including Android)
-#define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
-#define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
+#	else //Assume system supporting standard assert() (including Android)
+#		define ASS(x) ( (x) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
+#		define ASSCOND(x, cond) ( ((x) cond) ? (x) : (ting::ting_debug::LogAssert("ASS() assertion macro", __FILE__, __LINE__), (assert(false)), (x)) )
 
-#endif
+#	endif
 
 #else //No DEBUG macro defined
-#define ASSERT_INFO(x, y)
-#define ASSERT(x)
-#define ASS(x) (x)
-#define ASSCOND(x, cond) (x)
+#	define ASSERT_INFO(x, y)
+#	define ASSERT(x)
+#	define ASS(x) (x)
+#	define ASSCOND(x, cond) (x)
 
 #endif//~#ifdef DEBUG
 
@@ -190,15 +190,15 @@ template <bool b> struct C_StaticAssert{
 template <> struct C_StaticAssert<true>{};
 }//~namespace ting_debug
 }//~namespace ting
-#define M_STATIC_ASSERT_II(x, l, c) struct C_StaticAssertInst_##l##_##c{ \
-	ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
-};
-#define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
+#	define M_STATIC_ASSERT_II(x, l, c) struct C_StaticAssertInst_##l##_##c{ \
+			ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
+		};
+#	define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
 #endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
 
 #if defined(__GNUG__) || (_MSC_VER >= 7100) //__COUNTER__ macro is only supported in these compilers
-#define STATIC_ASSERT(x) M_STATIC_ASSERT_I(x, __LINE__, __COUNTER__)
+#	define STATIC_ASSERT(x) M_STATIC_ASSERT_I(x, __LINE__, __COUNTER__)
 #else
-#define STATIC_ASSERT(x)
+#	define STATIC_ASSERT(x)
 #endif
 

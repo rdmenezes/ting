@@ -25,6 +25,7 @@ THE SOFTWARE. */
 
 
 #include "TCPSocket.hpp"
+#include "../util.hpp"
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
@@ -46,7 +47,11 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
+	this->socket = ::socket(
+			ip.host.IsIPv4() ? PF_INET : PF_INET6,
+			SOCK_STREAM,
+			0
+		);
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
@@ -64,11 +69,24 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	this->ClearAllReadinessFlags();
 
 	//Connecting to remote host
-	sockaddr_in sockAddr;
-	memset(&sockAddr, 0, sizeof(sockAddr));
-	sockAddr.sin_family = AF_INET;
-	sockAddr.sin_addr.s_addr = htonl(ip.host.IPv4Host());
-	sockAddr.sin_port = htons(ip.port);
+	sockaddr_storage sockAddr;
+	
+	if(ip.host.IsIPv4()){
+		sockaddr_in &sa = reinterpret_cast<sockaddr_in&>(sockAddr);
+		memset(&sa, 0, sizeof(sa));
+		sa.sin_family = AF_INET;
+		sa.sin_addr.s_addr = htonl(ip.host.IPv4Host());
+		sa.sin_port = htons(ip.port);
+	}else{
+		sockaddr_in6 &sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		memset(&sa, 0, sizeof(sa));
+		sa.sin6_family = AF_INET6;
+		sa.sin6_addr.__in6_u.__u6_addr32[0] = htonl(ip.host.Quad0());
+		sa.sin6_addr.__in6_u.__u6_addr32[1] = htonl(ip.host.Quad1());
+		sa.sin6_addr.__in6_u.__u6_addr32[2] = htonl(ip.host.Quad2());
+		sa.sin6_addr.__in6_u.__u6_addr32[3] = htonl(ip.host.Quad3());
+		sa.sin6_port = htons(ip.port);
+	}
 
 	// Connect to the remote host
 	if(connect(
@@ -118,12 +136,12 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 	this->ClearCanWriteFlag();
 
 	ASSERT_INFO((
-			(buf.Begin() + offset) <= (buf.End() - 1)) ||
-			((buf.Size() == 0) && (offset == 0))
-		,
+			(buf.Begin() + offset) <= (buf.End() - 1))
+					|| ((buf.Size() == 0) && (offset == 0))
+				,
 			"buf.Begin() = " << reinterpret_cast<const void*>(buf.Begin())
-			<< " offset = " << offset
-			<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
+					<< " offset = " << offset
+					<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
 		)
 
 	ssize_t len;
@@ -179,16 +197,16 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 	this->ClearCanReadFlag();
 
 	if(!this->IsValid()){
-		throw net::Exc("TCPSocket::Send(): socket is not opened");
+		throw net::Exc("TCPSocket::Recv(): socket is not opened");
 	}
 
 	ASSERT_INFO(
-			((buf.Begin() + offset) <= (buf.End() - 1)) ||
-			((buf.Size() == 0) && (offset == 0))
-		,
+			((buf.Begin() + offset) <= (buf.End() - 1))
+					|| ((buf.Size() == 0) && (offset == 0))
+				,
 			"buf.Begin() = " << reinterpret_cast<void*>(buf.Begin())
-			<< " offset = " << offset
-			<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
+					<< " offset = " << offset
+					<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
 		)
 
 	ssize_t len;
@@ -238,12 +256,10 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 
 
 
-IPAddress TCPSocket::GetLocalAddress(){
-	if(!this->IsValid()){
-		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
-	}
+namespace{
 
-	sockaddr_in addr;
+template <bool localAddress> IPAddress GetSockAddress(int sckt){
+	sockaddr_storage addr;
 
 #if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
@@ -251,19 +267,51 @@ IPAddress TCPSocket::GetLocalAddress(){
 	socklen_t len = sizeof(addr);
 #endif
 
-	if(getsockname(
-			this->socket,
-			reinterpret_cast<sockaddr*>(&addr),
-			&len
-		) < 0)
-	{
-		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
+	if(localAddress){
+		if(getsockname(sckt, reinterpret_cast<sockaddr*>(&addr), &len) < 0){
+			throw ting::net::Exc("Socket::GetLocalAddress(): getsockname() failed");
+		}
+	}else{
+		if(getpeername(sckt, reinterpret_cast<sockaddr*>(&addr), &len) < 0){
+			throw ting::net::Exc("Socket::GetRemoteAddress(): getpeername() failed");
+		}
+	}
+	
+
+	
+	if(addr.ss_family == AF_INET){
+		sockaddr_in &a = reinterpret_cast<sockaddr_in&>(addr);
+		return IPAddress(
+			ting::u32(ntohl(a.sin_addr.s_addr)),
+			ting::u16(ntohs(a.sin_port))
+		);
+	}else{
+		ASSERT(addr.ss_family == AF_INET6)
+		
+		sockaddr_in6 &a = reinterpret_cast<sockaddr_in6&>(addr);
+		
+		return IPAddress(
+				IPAddress::Host(
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
+						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+					),
+				ting::u16(ntohs(a.sin6_port))
+			);
+	}
+}
+
+}//~namespace
+
+
+
+IPAddress TCPSocket::GetLocalAddress(){
+	if(!this->IsValid()){
+		throw net::Exc("Socket::GetLocalAddress(): socket is not valid");
 	}
 
-	return IPAddress(
-			u32(ntohl(addr.sin_addr.s_addr)),
-			u16(ntohs(addr.sin_port))
-		);
+	return GetSockAddress<true>(this->socket);
 }
 
 
@@ -273,27 +321,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 		throw net::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
 	}
 
-	sockaddr_in addr;
-
-#if M_OS == M_OS_WINDOWS
-	int len = sizeof(addr);
-#else
-	socklen_t len = sizeof(addr);
-#endif
-
-	if(getpeername(
-			this->socket,
-			reinterpret_cast<sockaddr*>(&addr),
-			&len
-		) < 0)
-	{
-		throw net::Exc("TCPSocket::GetRemoteAddress(): getpeername() failed");
-	}
-
-	return IPAddress(
-			u32(ntohl(addr.sin_addr.s_addr)),
-			u16(ntohs(addr.sin_port))
-		);
+	return GetSockAddress<false>(this->socket);
 }
 
 
