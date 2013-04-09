@@ -46,7 +46,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
+	this->socket = ::socket(PF_INET6, SOCK_STREAM, 0);
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
@@ -54,17 +54,23 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
 	}
 
-	sockaddr_in sockAddr;
-	memset(&sockAddr, 0, sizeof(sockAddr));
-	sockAddr.sin_family = AF_INET;
-	sockAddr.sin_addr.s_addr = INADDR_ANY;
-	sockAddr.sin_port = htons(port);
-
 	// allow local address reuse
 	{
 		int yes = 1;
 		setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof(yes));
 	}
+	
+	//turn off IPv6 only mode to allow also accepting IPv4 connections
+	{
+		int no = 0;     
+		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
+	}
+	
+	sockaddr_in6 sockAddr;
+	memset(&sockAddr, 0, sizeof(sockAddr));
+	sockAddr.sin6_family = AF_INET6;
+	sockAddr.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
+	sockAddr.sin6_port = htons(port);
 
 	// Bind the socket for listening
 	if(bind(
