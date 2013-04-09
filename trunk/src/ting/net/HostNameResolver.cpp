@@ -652,7 +652,7 @@ private:
 				
 				size_t ipStart = nsStart + ns.size();
 				
-				size_t ipEnd = line.find_first_not_of(".0123456789", ipStart);
+				size_t ipEnd = line.find_first_not_of(":.0123456789", ipStart);//IPv6 address may contain ':'
 				
 				std::string ipstr = line.substr(ipStart, ipEnd - ipStart);
 				
