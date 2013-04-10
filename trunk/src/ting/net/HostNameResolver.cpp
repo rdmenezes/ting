@@ -259,7 +259,7 @@ public:
 		*p = 0; //terminate labels sequence
 		++p;
 		
-		//Question type (1 means A query)
+		//Question type (1 = A query, 28 = AAAA query)
 		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
@@ -270,7 +270,7 @@ public:
 		ASSERT(buf.Begin() <= p && p <= buf.End());
 		ASSERT(size_t(p - buf.Begin()) == packetSize);
 		
-		TRACE(<< "sending DNS request to " << (r->dns.host.IPv4Host()) << " for " << r->hostName << ", reqID = " << r->id << std::endl)
+		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
 		ting::Buffer<const ting::u8> bufToSend(buf.Begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
@@ -477,7 +477,7 @@ public:
 				
 				ting::u32 address = ting::util::Deserialize32BE(p);
 				this->CallCallback(r, ting::net::HostNameResolver::OK, address);
-				TRACE(<< "host resolved: " << r->hostName << " = " << address << std::endl)
+				TRACE(<< "host resolved: " << r->hostName << " = " << std::hex << address << std::dec << std::endl)
 				return;
 			}
 			p += dataLen;
@@ -687,7 +687,7 @@ private:
 		
 		this->InitDNS();
 		
-		TRACE(<< "this->dns.IPv4Host() = " << this->dns.host.IPv4Host() << std::endl)
+		TRACE(<< "this->dns.IPv4Host() = " << std::hex << this->dns.host.IPv4Host() << std::dec << std::endl)
 
 		this->waitSet.Add(&this->queue, ting::Waitable::READ);
 		this->waitSet.Add(&this->socket, ting::Waitable::READ);

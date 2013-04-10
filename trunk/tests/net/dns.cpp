@@ -47,7 +47,7 @@ void Run(){
 
 		Resolver r(sema);
 
-		r.Resolve_ts("ya.ru", 10000);
+		r.Resolve_ts("google.com", 10000);
 
 		if(!sema.Wait(11000)){
 			ASSERT_ALWAYS(false)
@@ -58,7 +58,7 @@ void Run(){
 //		ASSERT_INFO_ALWAYS(r.ip == 0x4D581503 || r.ip == 0x57FAFB03, "r.ip = " << r.ip)
 		ASSERT_ALWAYS(r.ip != 0)
 
-	//	TRACE(<< "ip = " << ip.host << std::endl)
+		TRACE(<< "ip = " << std::hex << r.ip << std::dec << std::endl)
 	}
 	
 	{//test several resolves at a time
