@@ -112,7 +112,7 @@ public:
 	void Resolve_ts(
 			const std::string& hostName,
 			ting::u32 timeoutMillis = 20000,
-			const ting::net::IPAddress& dnsIP = ting::net::IPAddress(ting::u32(0), 0)
+			const ting::net::IPAddress& dnsIP = ting::net::IPAddress(ting::net::IPAddress::Host(0), 0)
 		);
 	
 	/**
@@ -170,7 +170,7 @@ public:
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::IPAddress object.
 	 */
-	virtual void OnCompleted_ts(E_Result result, ting::u32 ip)throw() = 0;
+	virtual void OnCompleted_ts(E_Result result, IPAddress::Host ip)throw() = 0;
 	
 private:
 	friend class ting::net::Lib;

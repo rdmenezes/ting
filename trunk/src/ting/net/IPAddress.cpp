@@ -23,6 +23,7 @@ THE SOFTWARE. */
 // Home page: http://ting.googlecode.com
 
 
+#include <sstream>
 
 #include "IPAddress.hpp"
 
@@ -241,4 +242,31 @@ IPAddress::IPAddress(const char* ip){
 	}
 	
 	this->port = ting::u16(port);
+}
+
+
+
+std::string IPAddress::Host::ToString()const{
+	std::stringstream ss;
+	if(this->IsIPv4()){
+		for(unsigned i = 4;;){
+			--i;
+			ss << (((this->IPv4Host()) >> (8 * i)) & 0xff);
+			if(i == 0){
+				break;
+			}
+			ss << '.';
+		}
+	}else{
+		ss << std::hex;
+		for(unsigned i = 8;;){
+			--i;
+			ss << ((this->host[(i * 2) / 4] >> (16 * (i % 2))) & 0xffff);
+			if(i == 0){
+				break;
+			}
+			ss << ':';
+		}
+	}
+	return ss.str();
 }

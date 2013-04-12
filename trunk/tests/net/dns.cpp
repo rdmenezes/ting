@@ -18,7 +18,7 @@ public:
 			hostName(hostName)
 	{}
 	
-	ting::u32 ip;
+	ting::net::IPAddress::Host ip;
 	
 	ting::mt::Semaphore& sema;
 	
@@ -31,7 +31,7 @@ public:
 	}
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
 //		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
 		this->result = result;
 		
@@ -56,9 +56,9 @@ void Run(){
 		ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
 
 //		ASSERT_INFO_ALWAYS(r.ip == 0x4D581503 || r.ip == 0x57FAFB03, "r.ip = " << r.ip)
-		ASSERT_ALWAYS(r.ip != 0)
+		ASSERT_ALWAYS(r.ip.IsValid())
 
-		TRACE(<< "ip = " << std::hex << r.ip << std::dec << std::endl)
+		TRACE(<< "ip = " << r.ip.ToString() << std::endl)
 	}
 	
 	{//test several resolves at a time
@@ -87,9 +87,9 @@ void Run(){
 //		TRACE(<< "resolutions done" << std::endl)
 		
 		for(T_ResolverIter i = r.begin(); i != r.end(); ++i){
-			ASSERT_INFO_ALWAYS((*i)->result == ting::net::HostNameResolver::OK, "result = " << (*i)->result)
+			ASSERT_INFO_ALWAYS((*i)->result == ting::net::HostNameResolver::OK, "result = " << (*i)->result << " host to resolve = " << (*i)->hostName)
 //			ASSERT_INFO_ALWAYS((*i)->ip == 0x4D581503 || (*i)->ip == 0x57FAFB03, "(*i)->ip = " << (*i)->ip)
-			ASSERT_ALWAYS((*i)->ip != 0)
+			ASSERT_ALWAYS((*i)->ip.IsValid())
 		}
 	}
 }
@@ -110,19 +110,19 @@ public:
 	
 	std::string host;
 	
-	ting::u32 ip;
+	ting::net::IPAddress::Host ip;
 	
 	ting::mt::Semaphore& sema;
 	
 	E_Result result;
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
 //		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
 		
 		if(this->host.size() == 0){
 			ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::NO_SUCH_HOST, "result = " << result)
-			ASSERT_ALWAYS(ip == 0)
+			ASSERT_ALWAYS(!ip.IsValid())
 			
 			this->host = "ya.ru";
 			this->Resolve_ts(this->host, 5000);
@@ -149,7 +149,7 @@ void Run(){
 	ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
 
 //	ASSERT_INFO_ALWAYS(r.ip == 0x4D581503 || r.ip == 0x57FAFB03, "r.ip = " << r.ip)
-	ASSERT_ALWAYS(r.ip != 0)
+	ASSERT_ALWAYS(r.ip.IsValid())
 }
 }
 
@@ -165,7 +165,7 @@ public:
 	ting::Inited<volatile bool, false> called;
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::u32 ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
 		this->called = true;
 	}
 };

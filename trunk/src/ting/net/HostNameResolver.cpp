@@ -48,6 +48,13 @@ using namespace ting::net;
 
 
 namespace{
+
+
+
+const ting::u16 D_DNSRecordA = 1;
+const ting::u16 D_DNSRecordAAAA = 28;
+
+
 namespace dns{
 
 //forward declaration
@@ -112,6 +119,8 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	HostNameResolver* hnr;
 	
 	std::string hostName; //host name to resolve
+	
+	ting::u16 recordType; //type of DNS record to get
 	
 	T_ResolversTimeMap* timeMap;
 	T_ResolversTimeIter timeMapIter;
@@ -259,8 +268,7 @@ public:
 		*p = 0; //terminate labels sequence
 		++p;
 		
-		//Question type (1 = A query, 28 = AAAA query)
-		ting::util::Serialize16BE(1, p);
+		ting::util::Serialize16BE(r->recordType, p);
 		p += 2;
 		
 		//Question class (1 means inet)
@@ -288,7 +296,7 @@ public:
 	
 	
 	//NOTE: call to this function should be protected by mutex
-	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, ting::u32 ip = 0)throw(){
+	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, IPAddress::Host ip = IPAddress::Host(0, 0, 0, 0))throw(){
 		this->completedMutex.Lock();
 		this->mutex.Unlock();
 		r->hnr->OnCompleted_ts(result, ip);
@@ -301,12 +309,12 @@ public:
 	//NOTE: call to this function should be protected by mutex
 	//This function will call the Resolver callback.
 	void ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
-//		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
-//#ifdef DEBUG
-//		for(unsigned i = 0; i < buf.Size(); ++i){
-//			TRACE(<< int(buf[i]) << std::endl)
-//		}
-//#endif
+		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
+#ifdef DEBUG
+		for(unsigned i = 0; i < buf.Size(); ++i){
+			TRACE(<< std::hex << int(buf[i]) << std::dec << std::endl)
+		}
+#endif
 		
 		if(buf.Size() <
 				2 + //ID
@@ -394,7 +402,7 @@ public:
 			ting::u16 type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
-			if(type != 1){
+			if(type != r->recordType){
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong question type
 				return;
 			}
@@ -469,15 +477,39 @@ public:
 				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				return;
 			}
-			if(type == 1){//'A' type answer
-				if(dataLen < 4){
-					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
+			if(type == r->recordType){
+				IPAddress::Host h;
+				
+				switch(type){
+					case D_DNSRecordA: //'A' type answer
+						if(dataLen < 4){
+							this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+							return;
+						}
+
+						h = IPAddress::Host(ting::util::Deserialize32BE(p));
+						break;
+					case D_DNSRecordAAAA: //'AAAA' type answer
+						if(dataLen < 2 * 8){
+							this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
+							return;
+						}
+
+						h = IPAddress::Host(
+								ting::util::Deserialize32BE(p),
+								ting::util::Deserialize32BE(p + 4),
+								ting::util::Deserialize32BE(p + 8),
+								ting::util::Deserialize32BE(p + 12)
+							);
+						break;
+					default:
+						//we should not get here since if type is not the record type which we know then 'if(type == r->recordType)' condition will not trigger.
+						ASSERT(false)
+						break;
 				}
 				
-				ting::u32 address = ting::util::Deserialize32BE(p);
-				this->CallCallback(r, ting::net::HostNameResolver::OK, address);
-				TRACE(<< "host resolved: " << r->hostName << " = " << std::hex << address << std::dec << std::endl)
+				this->CallCallback(r, ting::net::HostNameResolver::OK, h);
+				TRACE(<< "host resolved: " << r->hostName << " = " << h.ToString() << std::endl)
 				return;
 			}
 			p += dataLen;
@@ -953,6 +985,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	r->hnr = this;
 	r->hostName = hostName;
 	r->dns = dnsIP;
+	r->recordType = D_DNSRecordAAAA;//start with IPv6 first
 	
 	ting::mt::Mutex::Guard mutexGuard2(dns::thread->mutex);
 	

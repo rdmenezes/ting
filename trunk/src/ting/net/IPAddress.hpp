@@ -31,6 +31,7 @@ THE SOFTWARE. */
 #pragma once
 
 
+#include <string>
 
 #include "Exc.hpp"
 
@@ -165,6 +166,15 @@ public:
 		}
 		
 		//TODO: doxygen
+		inline u32 IsValid()const throw(){
+			if(this->IsIPv4()){
+				return this->IPv4Host() != 0;
+			}
+			
+			return this->host[3] != 0 || this->host[2] != 0 || this->host[1] != 0 || this->host[0] != 0;
+		}
+		
+		//TODO: doxygen
 		inline bool operator==(const Host& h){
 			return (this->host[0] == h.host[0])
 					&& (this->host[1] == h.host[1])
@@ -172,6 +182,8 @@ public:
 					&& (this->host[3] == h.host[3])
 				;
 		}
+		
+		std::string ToString()const;
 	};
 	
 	Host host;///< IPv6 address
