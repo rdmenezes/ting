@@ -170,6 +170,10 @@ public:
 	
 	ting::net::IPAddress dns;
 	
+	void StartSending(){
+		this->waitSet.Change(&this->socket, ting::Waitable::READ_AND_WRITE);
+	}
+	
 	//NOTE: call to this function should be protected by mutex.
 	//throws HostNameResolver::TooMuchRequestsExc if all IDs are occupied.
 	ting::u16 FindFreeId(){
@@ -304,11 +308,19 @@ public:
 		this->mutex.Lock();
 	}
 	
-	
+	struct ParseResult{
+		ting::net::HostNameResolver::E_Result result;
+		ting::net::IPAddress::Host host;
+		
+		ParseResult(ting::net::HostNameResolver::E_Result result, ting::net::IPAddress::Host host = ting::net::IPAddress::Host()) :
+				result(result),
+				host(host)
+		{}
+	};
 	
 	//NOTE: call to this function should be protected by mutex
 	//This function will call the Resolver callback.
-	void ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
+	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
 		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
 #ifdef DEBUG
 		for(unsigned i = 0; i < buf.Size(); ++i){
@@ -325,8 +337,7 @@ public:
 				2   //Number of other records
 			)
 		{
-			this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
-			return;
+			return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 		}
 		
 		const ting::u8* p = buf.Begin();
@@ -338,19 +349,16 @@ public:
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
 				TRACE(<< "ParseReplyFromDNS(): (flags & 0x8000) = " << (flags & 0x8000) << std::endl)
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 			}
 			
 			//Check response code
 			if((flags & 0xf) != 0){//0 means no error condition
 				if((flags & 0xf) == 3){//name does not exist
-					this->CallCallback(r, ting::net::HostNameResolver::NO_SUCH_HOST);
-					return;
+					return ParseResult(ting::net::HostNameResolver::NO_SUCH_HOST);
 				}else{
 					TRACE(<< "ParseReplyFromDNS(): (flags & 0xf) = " << (flags & 0xf) << std::endl)
-					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
-					return;
+					return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 				}
 			}
 		}
@@ -360,8 +368,7 @@ public:
 			p += 2;
 			
 			if(numQuestions != 1){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 			}
 		}
 		
@@ -371,8 +378,7 @@ public:
 		ASSERT(p <= (buf.End() - 1) || p == buf.End())
 		
 		if(numAnswers == 0){
-			this->CallCallback(r, ting::net::HostNameResolver::NO_SUCH_HOST);
-			return;
+			return ParseResult(ting::net::HostNameResolver::NO_SUCH_HOST);
 		}
 		
 		{
@@ -392,8 +398,7 @@ public:
 			
 			if(r->hostName != host){
 //				TRACE(<< "this->hostName = " << this->hostName << std::endl)
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//wrong host name for ID.
 			}
 		}
 		
@@ -403,8 +408,7 @@ public:
 			p += 2;
 			
 			if(type != r->recordType){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong question type
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//wrong question type
 			}
 		}
 		
@@ -414,8 +418,7 @@ public:
 			p += 2;
 			
 			if(cls != 1){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//wrong question class
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//wrong question class
 			}
 		}
 		
@@ -424,8 +427,7 @@ public:
 		//loop through the answers
 		for(ting::u16 n = 0; n != numAnswers; ++n){
 			if(p == buf.End()){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			
 			//check if there is a domain name or a reference to the domain name
@@ -435,8 +437,7 @@ public:
 					ASSERT(buf.Overlaps(p))
 				}
 				if(p == buf.End()){
-					this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-					return;
+					return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				}
 				++p;
 			}else{
@@ -446,36 +447,31 @@ public:
 			}
 			
 			if(buf.End() - p < 2){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			ting::u16 type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < 2){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 //			ting::u16 cls = ting::util::Deserialize16(p);
 			p += 2;
 			
 			if(buf.End() - p < 4){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 //			ting::u32 ttl = ting::util::Deserialize32(p);//time till the returned value can be cached.
 			p += 4;
 			
 			if(buf.End() - p < 2){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			ting::u16 dataLen = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.End() - p < dataLen){
-				this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-				return;
+				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			if(type == r->recordType){
 				IPAddress::Host h;
@@ -483,16 +479,14 @@ public:
 				switch(type){
 					case D_DNSRecordA: //'A' type answer
 						if(dataLen < 4){
-							this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-							return;
+							return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 						}
 
 						h = IPAddress::Host(ting::util::Deserialize32BE(p));
 						break;
 					case D_DNSRecordAAAA: //'AAAA' type answer
 						if(dataLen < 2 * 8){
-							this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
-							return;
+							return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 						}
 
 						h = IPAddress::Host(
@@ -508,14 +502,13 @@ public:
 						break;
 				}
 				
-				this->CallCallback(r, ting::net::HostNameResolver::OK, h);
 				TRACE(<< "host resolved: " << r->hostName << " = " << h.ToString() << std::endl)
-				return;
+				return ParseResult(ting::net::HostNameResolver::OK, h);
 			}
 			p += dataLen;
 		}
 		
-		this->CallCallback(r, ting::net::HostNameResolver::DNS_ERROR);//no answer found
+		return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//no answer found
 	}
 	
 	
@@ -757,7 +750,17 @@ private:
 								
 								if(host == i->second->hostName){
 									ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
-									this->ParseReplyFromDNS(r.operator->(), ting::Buffer<ting::u8>(buf.Begin(), ret));//this function will call the callback
+									ParseResult res = this->ParseReplyFromDNS(r.operator->(), ting::Buffer<ting::u8>(buf.Begin(), ret));
+									
+									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && r->recordType == D_DNSRecordAAAA){
+										//try getting record type A
+										TRACE(<< "no record AAAA found, trying to get record type A" << std::endl)
+										//TODO:
+										this->CallCallback(r.operator->(), res.result, res.host);
+									}else{
+										//call callback
+										this->CallCallback(r.operator->(), res.result, res.host);
+									}
 								}
 							}
 						}
@@ -906,7 +909,7 @@ public:
 		
 		//override
 		void Handle(){
-			this->thr->waitSet.Change(&this->thr->socket, ting::Waitable::READ_AND_WRITE);
+			this->thr->StartSending();
 			TRACE(<< "socket wait mode changed to read and write" << std::endl)
 		}
 	};
