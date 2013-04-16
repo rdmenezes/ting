@@ -312,7 +312,7 @@ public:
 		ting::net::HostNameResolver::E_Result result;
 		ting::net::IPAddress::Host host;
 		
-		ParseResult(ting::net::HostNameResolver::E_Result result, ting::net::IPAddress::Host host = ting::net::IPAddress::Host()) :
+		ParseResult(ting::net::HostNameResolver::E_Result result, ting::net::IPAddress::Host host = ting::net::IPAddress::Host(0, 0, 0, 0)) :
 				result(result),
 				host(host)
 		{}
@@ -749,15 +749,29 @@ private:
 								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
 								
 								if(host == i->second->hostName){
-									ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
-									ParseResult res = this->ParseReplyFromDNS(r.operator->(), ting::Buffer<ting::u8>(buf.Begin(), ret));
+									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<ting::u8>(buf.Begin(), ret));
 									
-									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && r->recordType == D_DNSRecordAAAA){
+									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && i->second->recordType == D_DNSRecordAAAA){
 										//try getting record type A
 										TRACE(<< "no record AAAA found, trying to get record type A" << std::endl)
-										//TODO:
-										this->CallCallback(r.operator->(), res.result, res.host);
+										
+										i->second->recordType = D_DNSRecordA;
+										
+										//add to send list
+										ASSERT(i->second->sendIter == this->sendList.end())
+										try{
+											this->sendList.push_back(i->second);
+											i->second->sendIter = --this->sendList.end();
+											if(this->sendList.size() == 1){//if need to switch to wait for writing mode
+												this->StartSending();
+											}
+										}catch(...){
+											//failed adding to sending list, report error
+											ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
+											this->CallCallback(r.operator->(), ting::net::HostNameResolver::ERROR);
+										}										
 									}else{
+										ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
 										//call callback
 										this->CallCallback(r.operator->(), res.result, res.host);
 									}
