@@ -49,51 +49,100 @@ namespace net{
  */
 class IPAddress{
 public:
-	//TODO: doxygen
+	/**
+	 * @brief Bad IP address format error.
+	 * This exception is thrown when trying to parse and IP address from string and
+	 * that string does not contain a valid IP address.
+	 */
 	class BadIPAddressFormatExc : public ting::net::Exc{
 	public:
 		BadIPAddressFormatExc(){}
 	};
 	
-	//TODO: doxygen
+	/**
+	 * @brief IP host address.
+	 * This class encapsulates an IP address.
+	 * The address is IPv6. IPv4 addresses are represented as IPv4 mapped to IPv6 addresses.
+	 */
 	class Host{
 		u32 host[4];//IPv6 address
 	public:
 		
-		//TODO: doxygen
+		/**
+		 * @brief 0th quad of IPv6 address.
+		 * For example, if address is 1234:5678:9345:4243::2342, then
+		 * The return value will be 0x12345678.
+         * @return 32 bit value, zeroth quad of IPv6 address.
+         */
 		inline u32 Quad0()const throw(){
 			return this->host[0];
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief 1st quad of IPv6 address.
+		 * For example, if address is 1234:5678:9345:4243::2342, then
+		 * The return value will be 0x93454243.
+         * @return 32 bit value, first quad of IPv6 address.
+         */
 		inline u32 Quad1()const throw(){
 			return this->host[1];
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief 2nd quad of IPv6 address.
+		 * For example, if address is 1234:5678:9345:4243:2222:3333:1111:2342, then
+		 * The return value will be 0x22223333.
+         * @return 32 bit value, second quad of IPv6 address.
+         */
 		inline u32 Quad2()const throw(){
 			return this->host[2];
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief 3rd quad of IPv6 address.
+		 * For example, if address is 1234:5678:9345:4243:2222:3333:1111:2342, then
+		 * The return value will be 0x11112342.
+         * @return 32 bit value, third quad of IPv6 address.
+         */
 		inline u32 Quad3()const throw(){
 			return this->host[3];
 		}
 		
-		//TODO: doxygen
-		inline void Init(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
-			this->host[0] = a0;
-			this->host[1] = a1;
-			this->host[2] = a2;
-			this->host[3] = a3;
+		/**
+		 * @brief Initialize to given quads.
+		 * Initialize this Host object using given quads.
+         * @param q0 - zeroth quad.
+         * @param q1 - first quad.
+         * @param q2 - second quad.
+         * @param q3 - third quad.
+         */
+		inline void Init(u32 q0, u32 q1, u32 q2, u32 q3)throw(){
+			this->host[0] = q0;
+			this->host[1] = q1;
+			this->host[2] = q2;
+			this->host[3] = q3;
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Initialize to given IPv4 address.
+		 * Initializes this Host object to a IPv6 mapped IPv4 address.
+         * @param h - IPv4 host address.
+         */
 		inline void Init(u32 h)throw(){
 			this->Init(0, 0, 0xffff, h);
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Initialize to given IPv6 numbers.
+         * @param a0 - zeroth number.
+         * @param a1 - first number.
+         * @param a2 - second number.
+         * @param a3 - third number.
+         * @param a4 - fourth number.
+         * @param a5 - fifth number.
+         * @param a6 - sixth number.
+         * @param a7 - sevens number.
+         */
 		inline void Init(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
 			this->Init(
 					(u32(a0) << 16) | u32(a1),
@@ -103,7 +152,9 @@ public:
 				);
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Initialize to given bytes.
+         */
 		inline void Init(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
 			this->Init(
 					(u16(a0) << 8) | u16(a1),
@@ -117,50 +168,91 @@ public:
 				);
 		}
 	
-		//TODO: doxygen
+		/**
+		 * @brief Bad IP host address format error.
+		 * This exception is thrown when trying to parse and IP host address from string and
+		 * that string does not contain a valid IP address.
+		 */
 		class BadIPHostFormatExc : public BadIPAddressFormatExc{
 		public:
 			BadIPHostFormatExc(){}
 		};
 		
-		//TODO: doxygen
+		/**
+		 * @brief Creates an undefined Host object.
+         */
 		Host()throw(){}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Creates a host object initialized to IPv6 mapped IPv4 using given IPv4.
+         * @param h - IPv4 host to use for initialization.
+         */
 		Host(u32 h)throw(){
 			this->Init(h);
 		}
 		
-		//TODO: doxygen
-		inline Host(u32 a0, u32 a1, u32 a2, u32 a3)throw(){
-			this->Init(a0, a1, a2, a3);
+		/**
+		 * @brief Creates a Host object using given IPv6 quads.
+         */
+		inline Host(u32 q0, u32 q1, u32 q2, u32 q3)throw(){
+			this->Init(q0, q1, q2, q3);
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Creates a Host object using given IPv6 numbers.
+         */
 		inline Host(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
 			this->Init(a0, a1, a2, a3, a4, a5, a6, a7);
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Creates a Host object using IPv6 bytes.
+         */
 		inline Host(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
 			this->Init(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Parse host from string.
+		 * String may contain either IPv4 or IPv6 address.
+         * @param ip - string containing IP host address.
+         * @return Host object initialized to a parsed address.
+		 * @throw BadIPHostFormatExc if string does not contain well formed IPv4 or IPv6 host address.
+         */
 		static Host Parse(const char* ip);
 		
-		//TODO: doxygen
+		/**
+		 * @brief Parse IPv4 from string.
+		 * String may contain only IPv4 address.
+         * @param ip - string containing IPv4 host address.
+         * @return Host object initialized to a parsed address.
+		 * @throw BadIPHostFormatExc if string does not contain well formed IPv4 host address.
+         */
 		static Host ParseIPv4(const char* ip);
 		
-		//TODO: doxygen
+		/**
+		 * @brief Parse IPv6 from string.
+		 * String may contain only IPv6 address.
+         * @param ip - string containing IPv6 host address.
+         * @return Host object initialized to a parsed address.
+		 * @throw BadIPHostFormatExc if string does not contain well formed IPv6 host address.
+         */
 		static Host ParseIPv6(const char* ip);
 		
-		//TODO: doxygen
+		/**
+		 * @brief Check if it is a IPv4 mapped to IPv6.
+         * @return true if this Host object holds IPv4 address mapped to IPv6.
+		 * @return false otherwise.
+         */
 		inline bool IsIPv4()const throw(){
 			return this->host[2] == 0xffff && this->host[1] == 0 && this->host[0] == 0;
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Get IPv4 address.
+         * @return IPv4 host if this is a IPv4 mapped to IPv6.
+		 * @retrun undefined value otherwise.
+         */
 		inline u32 IPv4Host()const throw(){
 			return this->host[3];
 		}

@@ -168,7 +168,7 @@ public:
 	 * Note, that the method has to be thread-safe.
 	 * @param result - the result of DNS lookup operation.
 	 * @param ip - resolved IP-address. This value can later be used to create the
-	 *             ting::IPAddress object.
+	 *             ting::net::IPAddress object.
 	 */
 	virtual void OnCompleted_ts(E_Result result, IPAddress::Host ip)throw() = 0;
 	
