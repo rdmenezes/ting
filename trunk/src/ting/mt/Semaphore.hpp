@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,9 +50,6 @@ THE SOFTWARE. */
 #	else
 #		include <windows.h>
 #	endif
-
-//TODO:
-//#	include <process.h>
 
 #elif M_OS == M_OS_SYMBIAN
 #	include <string.h>

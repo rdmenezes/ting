@@ -45,7 +45,8 @@ namespace net{
 
 
 /**
- * @brief a structure which holds IP address
+ * @brief a structure which holds IP address.
+ * IP address consists of IP host address and an IP port.
  */
 class IPAddress{
 public:
@@ -251,14 +252,19 @@ public:
 		/**
 		 * @brief Get IPv4 address.
          * @return IPv4 host if this is a IPv4 mapped to IPv6.
-		 * @retrun undefined value otherwise.
+		 * @return undefined value otherwise.
          */
 		inline u32 IPv4Host()const throw(){
 			return this->host[3];
 		}
 		
-		//TODO: doxygen
-		inline u32 IsValid()const throw(){
+		/**
+		 * @brief Check if the IP host address is valid.
+		 * Checks if this IP address is not an invalid address, which is all zeroes.
+         * @return true if this IP address is not a zero address.
+		 * @return false if this IP address is all zeroes.
+         */
+		inline bool IsValid()const throw(){
 			if(this->IsIPv4()){
 				return this->IPv4Host() != 0;
 			}
@@ -266,7 +272,12 @@ public:
 			return this->host[3] != 0 || this->host[2] != 0 || this->host[1] != 0 || this->host[0] != 0;
 		}
 		
-		//TODO: doxygen
+		/**
+		 * @brief Compare two IP host addresses.
+         * @param h - IP host address to compare this IP host address to.
+         * @return true if two IP addresses are identical.
+		 * @return false otherwise.
+         */
 		inline bool operator==(const Host& h){
 			return (this->host[0] == h.host[0])
 					&& (this->host[1] == h.host[1])
@@ -275,13 +286,19 @@ public:
 				;
 		}
 		
+		/**
+		 * @brief Convert this IP host address to string.
+         * @return String representing an IP host address.
+         */
 		std::string ToString()const;
 	};
 	
 	Host host;///< IPv6 address
 	u16 port;///< IP port number
 	
-	//TODO: doxygen
+	/**
+	 * @brief Construct IP address with undefined host and port.
+     */
 	inline IPAddress()throw(){}
 
 	/**
@@ -298,12 +315,12 @@ public:
 	 * @brief Create IPv4-address specifying exact IP-address as 4 bytes and port number.
 	 * The IPv4-address can be specified as 4 separate byte values, for example:
 	 * @code
-	 * ting::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
+	 * ting::net::IPAddress ip(127, 0, 0, 1, 80); //"127.0.0.1" port 80
 	 * @endcode
-	 * @param h1 - 1st triplet of IP address.
-	 * @param h2 - 2nd triplet of IP address.
-	 * @param h3 - 3rd triplet of IP address.
-	 * @param h4 - 4th triplet of IP address.
+	 * @param h1 - 1st triplet of IPv4 address.
+	 * @param h2 - 2nd triplet of IPv4 address.
+	 * @param h3 - 3rd triplet of IPv4 address.
+	 * @param h4 - 4th triplet of IPv4 address.
 	 * @param p - IP port number.
 	 */
 	inline IPAddress(u8 h1, u8 h2, u8 h3, u8 h4, u16 p)throw() :
@@ -311,32 +328,31 @@ public:
 			port(p)
 	{}
 
-	//TODO: doxygen
+	/**
+	 * @brief Construct IP address from given host and port.
+     * @param h - host to use for construction.
+     * @param p - port to use for construction.
+     */
 	inline IPAddress(Host h, u16 p)throw() :
 			host(h),
 			port(p)
 	{}
 	
-	//TODO: IPv6 doxygen
 	/**
-	 * @brief Create IP-address specifying IP-address as string and port number.
-	 * The string passed as argument should contain properly formatted IP address at its beginning.
-	 * It is OK if string contains something else after the IP-address.
-	 * Only IP address is parsed, even if port number is specified after the IP-address it will not be parsed,
-	 * instead the port number will be taken from the corresponding argument of the constructor.
-	 * @param ip - IP-address null-terminated string. Example: "127.0.0.1".
-	 * @param p - IP-port number.
-	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IP-address.
+	 * @brief Create IP address specifying IP host address as string and port number.
+	 * The string passed as argument should contain properly formatted IPv4 or IPv6 host address.
+	 * @param ip - IPv4 or IPv6 host address null-terminated string. Example: "127.0.0.1".
+	 * @param p - IP port number.
+	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IP address.
 	 */
 	IPAddress(const char* ip, u16 p);
 	
-	//TODO: IPv6 doxygen
 	/**
-	 * @brief Create IP-address specifying IP-address as string and port number.
-	 * The string passed for parsing should contain the IP-address with the port number.
+	 * @brief Create IP address specifying IP host address and IP port as string.
+	 * The string passed for parsing should contain the IP host address with the port number.
 	 * If there is no port number specified after the IP-address the format of the IP-address
 	 * is regarded as invalid and corresponding exception is thrown.
-     * @param ip - null-terminated string representing IP-address with port number, e.g. "127.0.0.1:80".
+     * @param ip - null-terminated string representing IP address with port number, e.g. "127.0.0.1:80" or "[42f4:234a::23]:432".
 	 * @throw BadIPAddressFormatExc - when passed string does not contain properly formatted IP-address.
      */
 	IPAddress(const char* ip);

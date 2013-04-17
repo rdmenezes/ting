@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2012-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -40,16 +40,25 @@ namespace utf8{
 
 
 
-//TODO: doxygen
+/**
+ * @brief Iterator to iterate through utf-8 encoded unicode characters.
+ */
 class Iterator{
 	ting::u32 c;
 	const ting::u8* n;
 
 public:
+	/**
+	 * @brief Create undefined iterator.
+     */
 	Iterator() :
 			c(0)
 	{}
 
+	/**
+	 * @brief Create iterator pointing to the begin of the given utf-8 encoded string.
+     * @param begin - pointer to the first byte of the null-terminated utf-8 encoded string.
+     */
 	Iterator(const char* begin) :
 			n(reinterpret_cast<const ting::u8*>(begin))
 	{
@@ -60,14 +69,22 @@ public:
 		}
 	}
 
+	/**
+	 * @brief Get current unicode character.
+     * @return unicode value of the character this interator is currently pointing to.
+     */
 	inline ting::u32 Char()const throw(){
 		return this->c;
 	}
 
 	//no operator*() because it usually returns reference, don't want to break this contract.
 	
-	//prefix ++
-	//if ++ end iterator then undefined behavior
+	/**
+	 * @brief Prefix increment.
+	 * Move iterator to the next character in the string.
+	 * If iterator points to the end of the string before this operation then the result of this operation is undefined.
+     * @return reference to this iterator object.
+     */
 	Iterator& operator++()throw(){
 		ting::u8 b = *this->n;
 //		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
@@ -102,10 +119,20 @@ public:
 
 	//no postfix ++ operator, there is no need in it.
 
+	/**
+	 * @brief Check if iterator points to the end of the string.
+     * @return true if iterator points to the end of the string.
+	 * @return false otherwise.
+     */
 	inline bool IsEnd()const throw(){
 		return this->c == 0;
 	}
 
+	/**
+	 * @brief Check if iterator points to the end of the string.
+     * @return false if iterator points to the end of the string.
+	 * @return true otherwise.
+     */
 	inline bool IsNotEnd()const throw(){
 		return !this->IsEnd();
 	}

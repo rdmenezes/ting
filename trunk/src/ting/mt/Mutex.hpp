@@ -49,9 +49,6 @@ THE SOFTWARE. */
 #		include <windows.h>
 #	endif
 
-//TODO:
-//#	include <process.h>
-
 #elif M_OS == M_OS_SYMBIAN
 #	include <string.h>
 #	include <e32std.h>
