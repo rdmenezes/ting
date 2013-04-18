@@ -81,10 +81,18 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 		sockaddr_in6 &sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&sa, 0, sizeof(sa));
 		sa.sin6_family = AF_INET6;
+#if M_OS == M_OS_MACOSX
+//TODO:
+		sa.sin6_addr.s6_addr32[0] = htonl(ip.host.Quad0());
+		sa.sin6_addr.s6_addr32[1] = htonl(ip.host.Quad1());
+		sa.sin6_addr.s6_addr32[2] = htonl(ip.host.Quad2());
+		sa.sin6_addr.s6_addr32[3] = htonl(ip.host.Quad3());
+#else
 		sa.sin6_addr.__in6_u.__u6_addr32[0] = htonl(ip.host.Quad0());
 		sa.sin6_addr.__in6_u.__u6_addr32[1] = htonl(ip.host.Quad1());
 		sa.sin6_addr.__in6_u.__u6_addr32[2] = htonl(ip.host.Quad2());
 		sa.sin6_addr.__in6_u.__u6_addr32[3] = htonl(ip.host.Quad3());
+#endif
 		sa.sin6_port = htons(ip.port);
 	}
 

@@ -30,7 +30,7 @@ THE SOFTWARE. */
 #include "../config.hpp"
 #include "../Buffer.hpp"
 
-#if M_OS == M_OS_LINUX
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 #	include <arpa/inet.h>
 #elif M_OS == M_OS_WINDOWS
 #	include <Ws2tcpip.h>
@@ -77,7 +77,7 @@ IPAddress::Host IPAddress::Host::Parse(const char* ip){
 IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 	sockaddr_in a;
 	
-#if M_OS == M_OS_LINUX
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
 #elif M_OS == M_OS_WINDOWS
 	int res = InetPton(
@@ -102,7 +102,7 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 	sockaddr_in6 a;
 		
-#if M_OS == M_OS_LINUX
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
 #elif M_OS == M_OS_WINDOWS
 	int res = InetPton(
@@ -117,7 +117,27 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 	if(res != 1){
 		throw BadIPHostFormatExc();
 	}
-	
+
+#if M_OS == M_OS_MACOSX
+	return Host(
+			a.sin6_addr.s6_addr[0],
+			a.sin6_addr.s6_addr[1],
+			a.sin6_addr.s6_addr[2],
+			a.sin6_addr.s6_addr[3],
+			a.sin6_addr.s6_addr[4],
+			a.sin6_addr.s6_addr[5],
+			a.sin6_addr.s6_addr[6],
+			a.sin6_addr.s6_addr[7],
+			a.sin6_addr.s6_addr[8],
+			a.sin6_addr.s6_addr[9],
+			a.sin6_addr.s6_addr[10],
+			a.sin6_addr.s6_addr[11],
+			a.sin6_addr.s6_addr[12],
+			a.sin6_addr.s6_addr[13],
+			a.sin6_addr.s6_addr[14],
+			a.sin6_addr.s6_addr[15]
+		);
+#else
 	return Host(
 			a.sin6_addr.__in6_u.__u6_addr8[0],
 			a.sin6_addr.__in6_u.__u6_addr8[1],
@@ -136,6 +156,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 			a.sin6_addr.__in6_u.__u6_addr8[14],
 			a.sin6_addr.__in6_u.__u6_addr8[15]
 		);
+#endif
 }
 
 

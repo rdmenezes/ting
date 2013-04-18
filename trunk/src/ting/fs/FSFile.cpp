@@ -27,7 +27,7 @@ THE SOFTWARE. */
 #if M_OS == M_OS_WINDOWS
 #	include <windows.h>
 
-#elif M_OS == M_OS_LINUX
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 #	include <dirent.h>
 #	include <sys/stat.h>
 #	include <cerrno>
@@ -273,9 +273,9 @@ void FSFile::MakeDir(){
 std::string FSFile::GetHomeDir(){
 	std::string ret;
 	
-#if M_OS == M_OS_LINUX || M_OS == M_OS_WINDOWS
+#if M_OS == M_OS_LINUX || M_OS == M_OS_WINDOWS || M_OS == M_OS_MACOSX
 	
-#	if M_OS == M_OS_LINUX
+#	if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	char * home = getenv("HOME");
 #	elif M_OS == M_OS_WINDOWS
 	char * home = getenv("USERPROFILE");
@@ -355,7 +355,7 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 				throw File::Exc("ListDirContents(): find next file failed");
 		}
 	}
-#elif M_OS == M_OS_LINUX
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	{
 		DIR *pdir = opendir(this->TruePath().c_str());
 
@@ -413,9 +413,6 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 			throw File::Exc(ss.str());
 		}
 	}
-#elif M_OS == M_OS_MACOSX
-
-#	error "FSFile::ListDirContents(): MacOSx version is not implemented yet"
 
 #else
 
@@ -425,8 +422,9 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 	
 	ting::Array<std::string> filesArray(files.size());
 	
-	for(size_t i = 0; i < files.size(); ++i)
+	for(size_t i = 0; i < files.size(); ++i){
 		filesArray[i] = files[i];
+	}
 
 	return filesArray;
 }//~ListDirContents()
