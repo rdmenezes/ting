@@ -1,6 +1,6 @@
 platform := linux
 
-operating_system := $(shell uname -o)
+operating_system := $(shell uname)
 ifeq ($(operating_system), Msys)
     platform := win32
 endif

@@ -82,11 +82,23 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 		memset(&sa, 0, sizeof(sa));
 		sa.sin6_family = AF_INET6;
 #if M_OS == M_OS_MACOSX
-//TODO:
-		sa.sin6_addr.s6_addr32[0] = htonl(ip.host.Quad0());
-		sa.sin6_addr.s6_addr32[1] = htonl(ip.host.Quad1());
-		sa.sin6_addr.s6_addr32[2] = htonl(ip.host.Quad2());
-		sa.sin6_addr.s6_addr32[3] = htonl(ip.host.Quad3());
+		sa.sin6_addr.s6_addr[0] = ip.host.Quad0() >> 24;
+		sa.sin6_addr.s6_addr[1] = (ip.host.Quad0() >> 16) & 0xff;
+		sa.sin6_addr.s6_addr[2] = (ip.host.Quad0() >> 8) & 0xff;
+		sa.sin6_addr.s6_addr[3] = ip.host.Quad0() & 0xff;
+		sa.sin6_addr.s6_addr[4] = ip.host.Quad1() >> 24;
+		sa.sin6_addr.s6_addr[5] = (ip.host.Quad1() >> 16) & 0xff;
+		sa.sin6_addr.s6_addr[6] = (ip.host.Quad1() >> 8) & 0xff;
+		sa.sin6_addr.s6_addr[7] = ip.host.Quad1() & 0xff;
+		sa.sin6_addr.s6_addr[8] = ip.host.Quad2() >> 24;
+		sa.sin6_addr.s6_addr[9] = (ip.host.Quad2() >> 16) & 0xff;
+		sa.sin6_addr.s6_addr[10] = (ip.host.Quad2() >> 8) & 0xff;
+		sa.sin6_addr.s6_addr[11] = ip.host.Quad2() & 0xff;
+		sa.sin6_addr.s6_addr[12] = ip.host.Quad3() >> 24;
+		sa.sin6_addr.s6_addr[13] = (ip.host.Quad3() >> 16) & 0xff;
+		sa.sin6_addr.s6_addr[14] = (ip.host.Quad3() >> 8) & 0xff;
+		sa.sin6_addr.s6_addr[15] = ip.host.Quad3() & 0xff;
+
 #else
 		sa.sin6_addr.__in6_u.__u6_addr32[0] = htonl(ip.host.Quad0());
 		sa.sin6_addr.__in6_u.__u6_addr32[1] = htonl(ip.host.Quad1());
@@ -300,10 +312,17 @@ template <bool localAddress> IPAddress GetSockAddress(int sckt){
 		
 		return IPAddress(
 				IPAddress::Host(
+#if M_OS == M_OS_MACOSX
+						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
+						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
+						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),
+						(ting::u32(a.sin6_addr.s6_addr[12]) << 24) | (ting::u32(a.sin6_addr.s6_addr[13]) << 16) | (ting::u32(a.sin6_addr.s6_addr[14]) << 8) | ting::u32(a.sin6_addr.s6_addr[15])
+#else
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+#endif
 					),
 				ting::u16(ntohs(a.sin6_port))
 			);

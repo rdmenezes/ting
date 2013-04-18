@@ -11,13 +11,16 @@
 #    maemo_linux
 #    win32
 #    win32cross
+#    macosx
 platform := linux
 
 operating_system := $(shell uname)
 ifeq ($(operating_system), Msys)
     platform := win32
 endif
-
+ifeq ($(operating_system), Darwin)
+    platform := macosx
+endif
 
 #build configuration:
 #    debug
@@ -29,6 +32,9 @@ name := libting
 so_name := 1
 
 ifeq ($(platform), linux)
+    name := $(name).so
+endif
+ifeq ($(platform), macosx)
     name := $(name).so
 endif
 ifeq ($(platform), win32)

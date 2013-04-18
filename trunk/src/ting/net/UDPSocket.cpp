@@ -144,10 +144,29 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		a.sin6_family = AF_INET6;
+#if M_OS == M_OS_MACOSX
+		a.sin6_addr.s6_addr[0] = destinationIP.host.Quad0() >> 24;
+		a.sin6_addr.s6_addr[1] = (destinationIP.host.Quad0() >> 16) & 0xff;
+		a.sin6_addr.s6_addr[2] = (destinationIP.host.Quad0() >> 8) & 0xff;
+		a.sin6_addr.s6_addr[3] = destinationIP.host.Quad0() & 0xff;
+		a.sin6_addr.s6_addr[4] = destinationIP.host.Quad1() >> 24;
+		a.sin6_addr.s6_addr[5] = (destinationIP.host.Quad1() >> 16) & 0xff;
+		a.sin6_addr.s6_addr[6] = (destinationIP.host.Quad1() >> 8) & 0xff;
+		a.sin6_addr.s6_addr[7] = destinationIP.host.Quad1() & 0xff;
+		a.sin6_addr.s6_addr[8] = destinationIP.host.Quad2() >> 24;
+		a.sin6_addr.s6_addr[9] = (destinationIP.host.Quad2() >> 16) & 0xff;
+		a.sin6_addr.s6_addr[10] = (destinationIP.host.Quad2() >> 8) & 0xff;
+		a.sin6_addr.s6_addr[11] = destinationIP.host.Quad2() & 0xff;
+		a.sin6_addr.s6_addr[12] = destinationIP.host.Quad3() >> 24;
+		a.sin6_addr.s6_addr[13] = (destinationIP.host.Quad3() >> 16) & 0xff;
+		a.sin6_addr.s6_addr[14] = (destinationIP.host.Quad3() >> 8) & 0xff;
+		a.sin6_addr.s6_addr[15] = destinationIP.host.Quad3() & 0xff;
+#else
 		a.sin6_addr.__in6_u.__u6_addr32[0] = htonl(destinationIP.host.Quad0());
 		a.sin6_addr.__in6_u.__u6_addr32[1] = htonl(destinationIP.host.Quad1());
 		a.sin6_addr.__in6_u.__u6_addr32[2] = htonl(destinationIP.host.Quad2());
 		a.sin6_addr.__in6_u.__u6_addr32[3] = htonl(destinationIP.host.Quad3());
+#endif
 		a.sin6_port = htons(destinationIP.port);
 	}
 
@@ -282,10 +301,17 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		out_SenderIP = IPAddress(
 				IPAddress::Host(
+#if M_OS == M_OS_MACOSX
+						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
+						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
+						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),
+						(ting::u32(a.sin6_addr.s6_addr[12]) << 24) | (ting::u32(a.sin6_addr.s6_addr[13]) << 16) | (ting::u32(a.sin6_addr.s6_addr[14]) << 8) | ting::u32(a.sin6_addr.s6_addr[15])
+#else
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
 						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+#endif
 					),
 				ting::u16(ntohs(a.sin6_port))
 			);
