@@ -115,7 +115,8 @@ size_t File::Read(
 	}
 
 	ASSERT(actualNumBytesToRead + offset <= buf.Size())
-	return this->ReadInternal(ting::Buffer<ting::u8>(buf.Begin() + offset, actualNumBytesToRead));
+	ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
+	return this->ReadInternal(b);
 }
 
 
