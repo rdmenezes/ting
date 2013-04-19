@@ -56,7 +56,7 @@ void Run(){
 		ASSERT_INFO_ALWAYS(r.result == ting::net::HostNameResolver::OK, "r.result = " << r.result)
 
 //		ASSERT_INFO_ALWAYS(r.ip == 0x4D581503 || r.ip == 0x57FAFB03, "r.ip = " << r.ip)
-		ASSERT_ALWAYS(r.ip.IsValid())
+		ASSERT_INFO_ALWAYS(r.ip.IsValid(), "ip = " << r.ip.ToString())
 
 		TRACE(<< "ip = " << r.ip.ToString() << std::endl)
 	}
