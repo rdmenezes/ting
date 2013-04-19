@@ -1,10 +1,10 @@
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 
-libting := ../../src/libting.a
+    libting := ../../src/libting.a
 
 else
 
-libting := ../../src/libting.so
+    libting := ../../src/libting.so
 
 endif
 

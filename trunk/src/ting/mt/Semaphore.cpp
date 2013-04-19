@@ -1,5 +1,9 @@
 #include "Semaphore.hpp"
 
+#if M_OS == M_OS_MACOSX
+#	include <sstream>
+#	include "../atomic.hpp"
+#endif
 
 
 using namespace ting::mt;
@@ -13,21 +17,18 @@ Semaphore::Semaphore(unsigned initialValue){
 	if(this->s.CreateLocal(initialValue) != KErrNone)
 #elif M_OS == M_OS_MACOSX
 	// Darwin/BSD/... semaphores are named semaphores, we need to create a 
-	// different name for new semaphores.
-	char name[256];
-	// this n_name is shared among all semaphores, maybe it will be worth protect it
-	// by a mutex or a CAS operation;
-	static unsigned int n_name = 0;
-	unsigned char p = 0;
-	// fill the name
-	for(unsigned char n = ++n_name, p = 0; n > 0;){
-		unsigned char idx = n%('Z'-'A'+1);
-		name[++p] = 'A'+idx;
-		n -= idx;
-	}
-	// end it with null and create the semaphore
-	name[p] = '\0';
-	this->s = sem_open(name, O_CREAT, SEM_VALUE_MAX, initialValue);
+	// different name for new semaphore.
+	std::stringstream name;
+	name << "/Semaphore_";
+
+	//NOTE: static variable
+	static ting::atomic::U32 n(0);
+
+	ting::u32 curNum = n.FetchAndAdd(1);
+
+	name << curNum;
+
+	this->s = sem_open(name.str().c_str(), O_CREAT, SEM_VALUE_MAX, initialValue);
 	if (this->s == SEM_FAILED)
 #elif M_OS == M_OS_LINUX
 	if(sem_init(&this->s, 0, initialValue) < 0)
