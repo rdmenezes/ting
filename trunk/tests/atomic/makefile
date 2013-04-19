@@ -12,7 +12,7 @@ default: $(binary_name)
 ifeq ($(platform),windows)
     libs :=
 endif
-ifeq ($(platform),darwin)
+ifeq ($(platform),macosx)
     libs := 
 endif
 ifeq ($(platform),linux)

@@ -1,22 +1,17 @@
-platform := linux
-
-operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
-    platform := win32
-endif
+include ../../platform.mk
 
 binary_name := tests
 
-ifeq ($(platform),win32)
-binary_name := $(binary_name).exe
+ifeq ($(platform),windows)
+    binary_name := $(binary_name).exe
 endif
 
 default: $(binary_name)
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
     libs := -lws2_32
 endif
-ifeq ($(platform),darwin)
+ifeq ($(platform),macosx)
     libs := 
 endif
 ifeq ($(platform),linux)
@@ -33,13 +28,7 @@ cf += -Wall
 cf += -g
 
 
-test: $(binary_name)
-	@echo running $^...
-ifeq ($(platform),win32)
-	@./$^
-else
-	@LD_LIBRARY_PATH=../../src ./$^
-endif
+include ../test_target.mk
 
 
 %.o:%.cpp
