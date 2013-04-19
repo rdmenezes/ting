@@ -19,7 +19,7 @@ Semaphore::Semaphore(unsigned initialValue){
 	// Darwin/BSD/... semaphores are named semaphores, we need to create a 
 	// different name for new semaphore.
 	std::stringstream name;
-	name << "/Semaphore_";
+	name << "/Semaphore_";//NOTE: on some systems semaphore will not work if its name does not start with slash
 
 	//NOTE: static variable
 	static ting::atomic::U32 n(0);
