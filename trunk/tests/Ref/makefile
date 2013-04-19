@@ -1,9 +1,4 @@
-platform := linux
-
-operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
-    platform := win32
-endif
+include ../../platform.mk
 
 binary_name := tests
 
@@ -33,6 +28,10 @@ cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
+compiler := g++
+ifeq ($(platform),macosx)
+    compiler := clang++
+endif
 
 
 test: $(binary_name)
@@ -47,7 +46,7 @@ include ../libting.mk
 
 $(binary_name): main.cpp tests.cpp $(libting)
 	@echo Building $@...
-	@g++ -o $@ $(cf) $^ $(libs)
+	@$(compiler) -o $@ $(cf) $^ $(libs)
 
 
 

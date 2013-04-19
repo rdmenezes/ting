@@ -1,14 +1,9 @@
-platform := linux
+include ../../platform.mk
 
-operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
-    platform := win32
-endif
-
-binary_name := Singleton_test
+binary_name := tests
 lib_name := testso
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 
 binary_name := $(binary_name).exe
 lib_ext := dll
@@ -20,7 +15,7 @@ lib_ext := so
 endif
 
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
     libs := -mwindows
 else
     libs :=
@@ -40,7 +35,7 @@ default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 	@./$^
 else
 	@LD_LIBRARY_PATH=. ./$^

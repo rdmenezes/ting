@@ -10,17 +10,8 @@
 #    linux
 #    maemo_linux
 #    win32
-#    win32cross
 #    macosx
-platform := linux
-
-operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
-    platform := win32
-endif
-ifeq ($(operating_system), Darwin)
-    platform := macosx
-endif
+include ../platform.mk
 
 #build configuration:
 #    debug
@@ -37,10 +28,7 @@ endif
 ifeq ($(platform), macosx)
     name := $(name).so
 endif
-ifeq ($(platform), win32)
-    name := $(name).dll
-endif
-ifeq ($(platform), win32cross)
+ifeq ($(platform), windows)
     name := $(name).dll
 endif
 
@@ -108,11 +96,8 @@ linker_flags := -shared
 ifeq ($(platform), linux)
     linker_flags += -Wl,-soname,$(name).$(so_name)
 endif
-ifeq ($(platform), win32)
+ifeq ($(platform), windows)
     linker_flags += -s
-endif
-ifeq ($(platform), win32cross)
-    linker_flags +=
 endif
 
 
@@ -126,10 +111,7 @@ endif
 ifeq ($(platform), linux)
     include_dirs :=
 endif
-ifeq ($(platform), win32)
-    include_dirs :=
-endif
-ifeq ($(platform), win32cross)
+ifeq ($(platform), windows)
     include_dirs :=
 endif
 
@@ -144,13 +126,9 @@ endif
 ifeq ($(platform), linux)
     libs := -lpthread -lrt
 endif
-ifeq ($(platform), win32)
+ifeq ($(platform), windows)
     libs := -lws2_32
 endif
-ifeq ($(platform), win32cross)
-    libs :=
-endif
-
 
 
 
@@ -179,7 +157,7 @@ create-obj-dir:
 #find all .cpp files and get an .o file name for it to get dependancies for this target
 $(name): $(addprefix $(obj_dir)/,$(patsubst %.cpp,%.o,$(srcs)))
 	@echo Linking $@...
-ifeq ($(platform), win32)
+ifeq ($(platform), windows)
 	@ar cr $(patsubst %.dll,%.a,$@) $^
 	@$(compiler) $^ -o "$@" $(libs) $(linker_flags)
 else
@@ -221,7 +199,7 @@ test:
 #it is an abstract target (not a file), declare as .PHONY
 .PHONY: clean
 clean:
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 	@rm -f $(name)
 	@rm -f $(patsubst %.dll,%.a,$(name))
 	@rm -rf $(dir $(obj_dir))

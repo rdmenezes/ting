@@ -1,14 +1,9 @@
-platform := linux
+include ../../platform.mk
 
-operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
-    platform := win32
-endif
-
-binary_name := Ref_test
+binary_name := tests
 lib_name := testso
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 
 binary_name := $(binary_name).exe
 lib_ext := dll
@@ -20,7 +15,7 @@ lib_ext := so
 endif
 
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
     libs := ../../src/libting.dll -mwindows
 else
     libs := ../../src/libting.so
@@ -40,7 +35,7 @@ default: $(binary_name)
 
 test: $(binary_name)
 	@echo running $^...
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 	@cp ../../src/libting.dll .
 	@$^
 else
@@ -51,7 +46,7 @@ endif
 
 
 lib$(lib_name).$(lib_ext): testso.cpp
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 	@g++ $< -shared -o lib$(lib_name).$(lib_ext) $(cf)
 else
 #use -fPIC (position-independent code) for shared libraries.
