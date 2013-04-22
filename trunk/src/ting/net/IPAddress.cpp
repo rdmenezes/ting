@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -79,11 +79,6 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 	
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
-#elif M_OS == M_OS_WINDOWS
-	int res = InetPton(
-#else
-#	error "Unknown OS"
-#endif
 			AF_INET,
 			ip,
 			&a.sin_addr
@@ -92,6 +87,22 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 	if(res != 1){
 		throw BadIPHostFormatExc();
 	}
+
+#elif M_OS == M_OS_WINDOWS
+	INT len = sizeof(a);
+	INT res = WSAStringToAddress(
+			const_cast<char*>(ip),
+			AF_INET,
+			NULL,
+			reinterpret_cast<sockaddr*>(&a),
+			&len
+		);
+	if(res != 0){
+		throw BadIPHostFormatExc();
+	}
+#else
+#	error "Unknown OS"
+#endif
 	
 	return Host(ntohl(a.sin_addr.s_addr));
 }
@@ -104,21 +115,32 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 		
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
-#elif M_OS == M_OS_WINDOWS
-	int res = InetPton(
-#else
-#	error "Unknown OS"
-#endif
 			AF_INET6,
 			ip,
-			&a.sin6_addr
+			&a.sin_addr
 		);
 	
 	if(res != 1){
 		throw BadIPHostFormatExc();
 	}
 
-#if M_OS == M_OS_MACOSX
+#elif M_OS == M_OS_WINDOWS
+	INT len = sizeof(a);
+	INT res = WSAStringToAddress(
+			const_cast<char*>(ip),
+			AF_INET6,
+			NULL,
+			reinterpret_cast<sockaddr*>(&a),
+			&len
+		);
+	if(res != 0){
+		throw BadIPHostFormatExc();
+	}
+#else
+#	error "Unknown OS"
+#endif
+
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS
 	return Host(
 			a.sin6_addr.s6_addr[0],
 			a.sin6_addr.s6_addr[1],
