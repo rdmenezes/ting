@@ -1,6 +1,6 @@
 platform := linux
 operating_system := $(shell uname)
-ifeq ($(operating_system), Msys)
+ifeq ($(patsubst MINGW%,MINGW,$(operating_system)), MINGW)
     platform := windows
 endif
 ifeq ($(operating_system), Darwin)
