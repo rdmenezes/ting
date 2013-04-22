@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
+#elif M_OS == M_OS_WINDOWS
+#	include <ws2tcpip.h>
 #endif
 
 
@@ -59,12 +61,14 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 		int yes = 1;
 		setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof(yes));
 	}
-	
+
+#if M_OS != M_OS_WINDOWS //TODO: what for Win?
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
 	{
 		int no = 0;     
 		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 	}
+#endif
 	
 	sockaddr_in6 sockAddr;
 	memset(&sockAddr, 0, sizeof(sockAddr));

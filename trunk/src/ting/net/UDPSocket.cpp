@@ -28,6 +28,8 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
+#elif M_OS == M_OS_WINDOWS
+#	include <ws2tcpip.h>
 #endif
 
 
@@ -53,11 +55,13 @@ void UDPSocket::Open(u16 port){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
+#if M_OS != M_OS_WINDOWS //TODO: what for Win?
 	//turn off IPv6 only mode to allow also accepting IPv4
 	{
 		int no = 0;     
 		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 	}
+#endif
 	
 	//Bind locally, if appropriate
 	if(port != 0){
@@ -144,7 +148,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		a.sin6_family = AF_INET6;
-#if M_OS == M_OS_MACOSX
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS
 		a.sin6_addr.s6_addr[0] = destinationIP.host.Quad0() >> 24;
 		a.sin6_addr.s6_addr[1] = (destinationIP.host.Quad0() >> 16) & 0xff;
 		a.sin6_addr.s6_addr[2] = (destinationIP.host.Quad0() >> 8) & 0xff;
@@ -301,7 +305,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		out_SenderIP = IPAddress(
 				IPAddress::Host(
-#if M_OS == M_OS_MACOSX
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS
 						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
 						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
 						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),

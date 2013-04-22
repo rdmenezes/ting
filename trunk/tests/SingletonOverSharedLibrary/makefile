@@ -4,14 +4,10 @@ binary_name := tests
 lib_name := testso
 
 ifeq ($(platform),windows)
-
-binary_name := $(binary_name).exe
-lib_ext := dll
-
+    binary_name := $(binary_name).exe
+    lib_ext := dll
 else
-
-lib_ext := so
-
+    lib_ext := so
 endif
 
 
@@ -33,15 +29,7 @@ cf += -fstrict-aliasing #strict aliasing!!!
 
 default: $(binary_name)
 
-test: $(binary_name)
-	@echo running $^...
-ifeq ($(platform),windows)
-	@./$^
-else
-	@LD_LIBRARY_PATH=. ./$^
-endif
-
-
+include ../test_target.mk
 
 
 lib$(lib_name).$(lib_ext): testso.cpp
