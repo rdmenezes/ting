@@ -134,6 +134,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 			&len
 		);
 	if(res != 0){
+//		TRACE(<< "IPAddress::Host::ParseIPv6(): WSAStringToAddress() failed, error = " <<  WSAGetLastError()<< std::endl)
 		throw BadIPHostFormatExc();
 	}
 #else
