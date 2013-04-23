@@ -29,7 +29,14 @@ cf += -fstrict-aliasing #strict aliasing!!!
 
 default: $(binary_name)
 
-include ../test_target.mk
+
+test: $(binary_name)
+	@echo running $^...
+ifeq ($(platform),windows)
+	@./$^
+else
+	@LD_LIBRARY_PATH=. ./$^
+endif
 
 
 lib$(lib_name).$(lib_ext): testso.cpp

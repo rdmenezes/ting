@@ -117,7 +117,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 	int res = inet_pton(
 			AF_INET6,
 			ip,
-			&a.sin_addr
+			&a.sin6_addr
 		);
 	
 	if(res != 1){
