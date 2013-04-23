@@ -134,7 +134,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 			&len
 		);
 	if(res != 0){
-//		TRACE(<< "IPAddress::Host::ParseIPv6(): WSAStringToAddress() failed, error = " <<  WSAGetLastError()<< std::endl)
+		TRACE(<< "IPAddress::Host::ParseIPv6(): WSAStringToAddress() failed, error = " <<  WSAGetLastError()<< ". Maybe IPv6 protocol is not installed in the Windows system, WSAStringToAddress() only supports IPv6 if it is installed." << std::endl)
 		throw BadIPHostFormatExc();
 	}
 #else

@@ -73,8 +73,8 @@ public:
 		 * @brief 0th quad of IPv6 address.
 		 * For example, if address is 1234:5678:9345:4243::2342, then
 		 * The return value will be 0x12345678.
-         * @return 32 bit value, zeroth quad of IPv6 address.
-         */
+		 * @return 32 bit value, zeroth quad of IPv6 address.
+		 */
 		inline u32 Quad0()const throw(){
 			return this->host[0];
 		}
@@ -83,8 +83,8 @@ public:
 		 * @brief 1st quad of IPv6 address.
 		 * For example, if address is 1234:5678:9345:4243::2342, then
 		 * The return value will be 0x93454243.
-         * @return 32 bit value, first quad of IPv6 address.
-         */
+		 * @return 32 bit value, first quad of IPv6 address.
+		 */
 		inline u32 Quad1()const throw(){
 			return this->host[1];
 		}
@@ -93,8 +93,8 @@ public:
 		 * @brief 2nd quad of IPv6 address.
 		 * For example, if address is 1234:5678:9345:4243:2222:3333:1111:2342, then
 		 * The return value will be 0x22223333.
-         * @return 32 bit value, second quad of IPv6 address.
-         */
+		 * @return 32 bit value, second quad of IPv6 address.
+		 */
 		inline u32 Quad2()const throw(){
 			return this->host[2];
 		}
@@ -103,8 +103,8 @@ public:
 		 * @brief 3rd quad of IPv6 address.
 		 * For example, if address is 1234:5678:9345:4243:2222:3333:1111:2342, then
 		 * The return value will be 0x11112342.
-         * @return 32 bit value, third quad of IPv6 address.
-         */
+		 * @return 32 bit value, third quad of IPv6 address.
+		 */
 		inline u32 Quad3()const throw(){
 			return this->host[3];
 		}
@@ -112,11 +112,11 @@ public:
 		/**
 		 * @brief Initialize to given quads.
 		 * Initialize this Host object using given quads.
-         * @param q0 - zeroth quad.
-         * @param q1 - first quad.
-         * @param q2 - second quad.
-         * @param q3 - third quad.
-         */
+		 * @param q0 - zeroth quad.
+		 * @param q1 - first quad.
+		 * @param q2 - second quad.
+		 * @param q3 - third quad.
+		 */
 		inline void Init(u32 q0, u32 q1, u32 q2, u32 q3)throw(){
 			this->host[0] = q0;
 			this->host[1] = q1;
@@ -127,23 +127,23 @@ public:
 		/**
 		 * @brief Initialize to given IPv4 address.
 		 * Initializes this Host object to a IPv6 mapped IPv4 address.
-         * @param h - IPv4 host address.
-         */
+		 * @param h - IPv4 host address.
+		 */
 		inline void Init(u32 h)throw(){
 			this->Init(0, 0, 0xffff, h);
 		}
 		
 		/**
 		 * @brief Initialize to given IPv6 numbers.
-         * @param a0 - zeroth number.
-         * @param a1 - first number.
-         * @param a2 - second number.
-         * @param a3 - third number.
-         * @param a4 - fourth number.
-         * @param a5 - fifth number.
-         * @param a6 - sixth number.
-         * @param a7 - sevens number.
-         */
+		 * @param a0 - zeroth number.
+		 * @param a1 - first number.
+		 * @param a2 - second number.
+		 * @param a3 - third number.
+		 * @param a4 - fourth number.
+		 * @param a5 - fifth number.
+		 * @param a6 - sixth number.
+		 * @param a7 - sevens number.
+		 */
 		inline void Init(u16 a0, u16 a1, u16 a2, u16 a3, u16 a4, u16 a5, u16 a6, u16 a7)throw(){
 			this->Init(
 					(u32(a0) << 16) | u32(a1),
@@ -155,7 +155,7 @@ public:
 		
 		/**
 		 * @brief Initialize to given bytes.
-         */
+		 */
 		inline void Init(u8 a0, u8 a1, u8 a2, u8 a3, u8 a4, u8 a5, u8 a6, u8 a7, u8 a8, u8 a9, u8 a10, u8 a11, u8 a12, u8 a13, u8 a14, u8 a15)throw(){
 			this->Init(
 					(u16(a0) << 8) | u16(a1),
@@ -181,20 +181,20 @@ public:
 		
 		/**
 		 * @brief Creates an undefined Host object.
-         */
+		 */
 		Host()throw(){}
 		
 		/**
 		 * @brief Creates a host object initialized to IPv6 mapped IPv4 using given IPv4.
-         * @param h - IPv4 host to use for initialization.
-         */
+		 * @param h - IPv4 host to use for initialization.
+		 */
 		Host(u32 h)throw(){
 			this->Init(h);
 		}
 		
 		/**
 		 * @brief Creates a Host object using given IPv6 quads.
-         */
+		 */
 		inline Host(u32 q0, u32 q1, u32 q2, u32 q3)throw(){
 			this->Init(q0, q1, q2, q3);
 		}
