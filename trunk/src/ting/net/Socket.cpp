@@ -32,6 +32,8 @@ THE SOFTWARE. */
 #	include <netinet/in.h>
 #	include <netinet/tcp.h>
 #	include <fcntl.h>
+#elif M_OS == M_OS_WINDOWS
+#	include <ws2tcpip.h>
 #endif
 
 
@@ -164,7 +166,7 @@ ting::u16 Socket::GetLocalPort(){
 		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
 	}
 
-	sockaddr_in addr;
+	sockaddr_in6 addr;
 
 #if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
@@ -183,7 +185,7 @@ ting::u16 Socket::GetLocalPort(){
 		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
 	}
 
-	return ting::u16(ntohs(addr.sin_port));
+	return ting::u16(ntohs(addr.sin6_port));
 }
 
 

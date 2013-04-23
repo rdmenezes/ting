@@ -823,6 +823,7 @@ private:
 							}
 						}
 					}catch(ting::net::Exc& e){
+						TRACE(<< "writing to a socket failed" << std::endl)
 						this->isExiting = true;
 						this->RemoveAllResolvers();
 						break;//exit thread

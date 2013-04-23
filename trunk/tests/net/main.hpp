@@ -10,16 +10,16 @@ inline void TestTingSocket(){
 	
 	BasicIPAddressTest::Run();
 	TestIPAddress::Run();
-
-	TestSimpleDNSLookup::Run();
-	TestRequestFromCallback::Run();
-	TestCancelDNSLookup::Run();
 		
 	BasicClientServerTest::Run();
 	BasicUDPSocketsTest::Run();
 	TestUDPSocketWaitForWriting::Run();
 	SendDataContinuouslyWithWaitSet::Run();
 	SendDataContinuously::Run();
+
+	TestSimpleDNSLookup::Run();
+	TestRequestFromCallback::Run();
+	TestCancelDNSLookup::Run();
 
 	TRACE_ALWAYS(<< "[PASSED]: Socket test" << std::endl)
 }

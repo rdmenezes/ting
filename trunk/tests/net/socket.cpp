@@ -100,7 +100,7 @@ void Run(){
 
 		ASSERT_ALWAYS(sock.IsValid())
 
-		ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
+		ASSERT_INFO_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001, "host = " << std::hex << sock.GetLocalAddress().host.IPv4Host())
 		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
 		ting::StaticBuffer<ting::u8, 4> data;
