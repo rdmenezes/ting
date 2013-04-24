@@ -26,6 +26,11 @@ cf += -Wall
 cf += -DDEBUG
 cf += -fstrict-aliasing #strict aliasing!!!
 
+ifeq ($(platform),windows)
+else
+    cf += -fPIC
+endif
+
 
 default: $(binary_name)
 
