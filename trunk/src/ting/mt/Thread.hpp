@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -219,7 +219,11 @@ public:
 	 * Thread ID type is used to identify a thread.
 	 * The type supports operator==() and operator!=() operators.
 	 */
+#if M_OS == M_OS_WINDOWS
+	typedef ting::u32 T_ThreadID;
+#else
 	typedef unsigned long int T_ThreadID;
+#endif
 
 
 
