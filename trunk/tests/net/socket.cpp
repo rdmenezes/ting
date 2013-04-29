@@ -109,8 +109,9 @@ void Run(){
 			ASSERT_ALWAYS(bytesReceived < 4)
 			bytesReceived += sock.Recv(data, bytesReceived);
 			ASSERT_ALWAYS(bytesReceived <= 4)
-			if(bytesReceived == 4)
+			if(bytesReceived == 4){
 				break;
+			}
 
 			ting::mt::Thread::Sleep(100);
 		}
