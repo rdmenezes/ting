@@ -69,12 +69,25 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	if(u32(flagsToWaitFor) & Waitable::READ){
-		AddEvent(w, EVENT_READ);
-	}
+	ASSERT(revents.Size() < this->NumWaitables())
+	
+	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_READ : 0)
+			| (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_WRITE : 0);
+	
+	kevent e;
 
-	if(u32(flagsToWaitFor) & Waitable::WRITE){
-		AddEvent(w, EVENT_WRITE);
+	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
+
+	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
+
+	//now try to add this event to the kqueue
+	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
+	if(res < 0){
+		throw ting::Exc("WaitSet::Add(): kevent() failed");
+	}
+	
+	if((e.flags & EV_ERROR) != 0){
+		throw ting::Exc("WaitSet::Add(): kevent() failed to add filter");
 	}
 #else
 #	error "Unsupported OS"
@@ -129,12 +142,24 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	if(u32(flagsToWaitFor) & Waitable::READ){
-		AddEvent(w, EVENT_READ);
-	}
+	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_READ : 0)
+			| (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_WRITE : 0);
+	
+	kevent e;
 
-	if(u32(flagsToWaitFor) & Waitable::WRITE){
-		AddEvent(w, EVENT_WRITE);
+	//NOTE: EV_ADD will also modify existing event
+	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
+
+	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
+
+	//now try to add this event to the kqueue
+	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
+	if(res < 0){
+		throw ting::Exc("WaitSet::Change(): kevent() failed");
+	}
+	
+	if((e.flags & EV_ERROR) != 0){
+		throw ting::Exc("WaitSet::Change(): kevent() failed to change filter");
 	}
 #else
 #	error "Unsupported OS"
@@ -147,6 +172,8 @@ void WaitSet::Remove(Waitable* w)throw(){
 	ASSERT(w)
 
 	ASSERT(w->isAdded)
+	
+	ASSERT(this->NumWaitables() != 0)
 
 #if M_OS == M_OS_WINDOWS
 	//remove object from array
@@ -181,9 +208,22 @@ void WaitSet::Remove(Waitable* w)throw(){
 	if(res < 0){
 		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
 	}
-#elif M_OS == M_OS_MACOSX
-		RemoveEvent(w, EVENT_READ);
-		RemoveEvent(w, EVENT_WRITE);
+#elif M_OS == M_OS_MACOSX	
+	kevent e;
+
+	EV_SET(&e, w->GetHandle(), 0, EV_DELETE | EV_RECEIPT, 0, 0, 0);
+
+	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
+
+	//now try to add this event to the kqueue
+	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
+	if(res < 0){
+		throw ting::Exc("WaitSet::Remove(): kevent() failed");
+	}
+	
+	if((e.flags & EV_ERROR) != 0){
+		throw ting::Exc("WaitSet::Remove(): kevent() failed to remove filter");
+	}
 #else
 #	error "Unsupported OS"
 #endif
@@ -317,42 +357,51 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	ASSERT(res >= 0)//NOTE: 'res' can be zero, if no events happened in the specified timeout
 	return unsigned(res);
 #elif M_OS == M_OS_MACOSX
-	struct timespec tmout = {
+	struct timespec ts = {
 		timeout / 1000, //seconds
 		(timeout % 1000) * 1000000 //nanoseconds
 	};
 
 	//loop forever
 	for(;;){
-		int nev = kevent(
-				kq_queue,
+		int res = kevent(
+				this->queue,
 				0,
 				0,
-				&kq_output[0],
-				kq_output.Size(),
-				(waitInfinitly) ? 0 : &tmout
+				this->revents.Begin(),
+				this->revents.Size(),
+				(waitInfinitly) ? 0 : &ts
 			);
 
-		if(nev == -1 && errno != EINTR){
-			throw ting::Exc("Error on kevent");
-		}else if(nev == 0){
+		if(res < 0){
+			if(errno == EINTR){
+				continue;
+			}
+			
+			std::stringstream ss;
+			ss << "WaitSet::Wait(): kevent() failed, error code = " << errno << ": " << strerror(errno);
+			throw ting::Exc(ss.str().c_str());
+		}else if(res == 0){
 			return 0; // timeout
-		}else if(nev > 0){
-			for(int i = 0; i < nev; ++i){
-				struct kevent &evt = kq_output[i];
-				Waitable *w = reinterpret_cast<Waitable*>(evt.udata);
-				if(evt.filter & EVFILT_WRITE){
+		}else if(res > 0){
+			for(unsigned i = 0; i < res; ++i){
+				kevent &e = this->revents[i];
+				Waitable *w = reinterpret_cast<Waitable*>(e.udata);
+				if((e.filter & EVFILT_WRITE) != 0){
 					w->SetCanWriteFlag();
 				}
-				if(evt.filter & EVENT_READ){
+				if((e.filter & EVENT_READ) != 0){
 					w->SetCanReadFlag();
 				}
-				//TODO: check for error condition?
+				if((e.flags & EV_ERROR) != 0){
+					w->SetErrorFlag();
+				}
+				
 				if(out_events){
 					out_events->operator[](i) = w;
 				}
 			}
-			return nev;
+			return unsigned(res);
 		}
 	}
 #else

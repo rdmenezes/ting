@@ -4,11 +4,14 @@
     <df name="src" root="../src">
       <df name="obj">
         <df name="1">
+        </df>
+        <df name="1">
           <df name="2">
             <df name="ting">
               <df name="fs">
               </df>
               <df name="mt">
+                <in>Mutex.d</in>
               </df>
               <df name="net">
               </df>
@@ -158,8 +161,6 @@
         <in>testso.cpp</in>
         <in>testso.hpp</in>
       </df>
-      <df name="StrUTF8">
-      </df>
       <df name="Thread">
         <in>main.cpp</in>
         <in>main.hpp</in>
@@ -223,7 +224,7 @@
           <buildCommandWorkingDir>../src</buildCommandWorkingDir>
           <buildCommand>${MAKE} -f makefile</buildCommand>
           <cleanCommand>${MAKE} -f makefile clean</cleanCommand>
-          <executablePath></executablePath>
+          <executablePath>/home/igagis/prj/ting/tests/net/tests</executablePath>
           <ccTool>
             <incDir>
               <pElem>../src</pElem>

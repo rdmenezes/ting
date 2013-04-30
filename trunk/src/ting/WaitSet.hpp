@@ -292,44 +292,9 @@ class WaitSet{
 
 	Array<epoll_event> revents;//used for getting the result from epoll_wait()
 #elif M_OS == M_OS_MACOSX
-	int kq_queue; // kqueue, file descriptor
-	Array<struct kevent> kq_output; // events (size*2)
-
-	//TODO: move to .cpp?
-	void SetEvent(Waitable *w, bool read_write, bool add_remove){
-		int16_t filter = (read_write) ? EVFILT_READ : EVFILT_WRITE;
-		uint16_t flags = (add_remove) ? EV_ADD : EV_DELETE;
-		struct kevent input, output;
-		static const struct timespec tmout = {0, 0};//TODO: why static???
-
-		//add a new event
-		EV_SET(&input, w->GetHandle(), filter, flags | EV_RECEIPT, 0, 0, (void*)w);
-
-		//now try to add this event to the kqueue
-		int result = kevent(kq_queue, &input, 1, &output, 1, &tmout);
-		if(result == -1){
-			//TODO: ???
-			//std::cout << "ERROR on Set " << errno << "!" << std::endl;
-		}
-
-		if(result == -1 && errno == ENOENT){
-			//TODO: ???
-			//std::cout << "blah" << std::endl;
-		}
-
-		//TODO: add assertion on result???
-	}
-
-	static const bool EVENT_READ  = true;
-	static const bool EVENT_WRITE = false;
-
-	void AddEvent(Waitable *w, bool rw){
-		SetEvent(w, rw, true);
-	}
-
-	void RemoveEvent(Waitable *w, bool rw){
-		SetEvent(w, rw, false);
-	}
+	int queue; // kqueue
+	
+	Array<kevent> revents;//used for getting the result
 #else
 #	error "Unsupported OS"
 #endif
@@ -362,10 +327,10 @@ public:
 		}
 	}
 #elif M_OS == M_OS_MACOSX
-			,kq_output(maxSize * 2)
+			,revents(maxSize)
 	{
-		this->kq_queue = kqueue();
-		if(this->kq_queue == -1){
+		this->queue = kqueue();
+		if(this->queue == -1){
 			throw ting::Exc("WaitSet::WaitSet(): kqueue creation failed");
 		}
 	}
@@ -390,7 +355,7 @@ public:
 #elif M_OS == M_OS_LINUX
 		close(this->epollSet);
 #elif M_OS == M_OS_MACOSX
-		close(this->kq_queue);
+		close(this->queue);
 #else
 #	error "Unsupported OS"
 #endif
