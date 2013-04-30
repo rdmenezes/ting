@@ -79,7 +79,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_READ : 0)
 			| (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_WRITE : 0);
 	
-	kevent e;
+	struct kevent e;
 
 	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
 
@@ -150,7 +150,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_READ : 0)
 			| (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_WRITE : 0);
 	
-	kevent e;
+	struct kevent e;
 
 	//NOTE: EV_ADD will also modify existing event
 	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
@@ -214,7 +214,7 @@ void WaitSet::Remove(Waitable* w)throw(){
 		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
 	}
 #elif M_OS == M_OS_MACOSX	
-	kevent e;
+	struct kevent e;
 
 	EV_SET(&e, w->GetHandle(), 0, EV_DELETE | EV_RECEIPT, 0, 0, 0);
 
@@ -390,7 +390,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 			return 0; // timeout
 		}else if(res > 0){
 			for(unsigned i = 0; i < res; ++i){
-				kevent &e = this->revents[i];
+				struct kevent &e = this->revents[i];
 				Waitable *w = reinterpret_cast<Waitable*>(e.udata);
 				if((e.filter & EVFILT_WRITE) != 0){
 					w->SetCanWriteFlag();
