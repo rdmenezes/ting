@@ -473,8 +473,9 @@ void Run(){
 		for(unsigned i = 0; i < 10; ++i){
 			bytesSent = sendSock.Send(data, addr);
 			ASSERT_ALWAYS(bytesSent == 4 || bytesSent == 0)
-			if(bytesSent == 4)
+			if(bytesSent == 4){
 				break;
+			}
 			
 			ting::mt::Thread::Sleep(100);
 		}
