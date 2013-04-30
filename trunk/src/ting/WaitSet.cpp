@@ -27,6 +27,11 @@ THE SOFTWARE. */
 #include "WaitSet.hpp"
 
 
+#if M_OS == M_OS_MACOSX
+#	include <sys/time.h>
+#endif
+
+
 
 using namespace ting;
 
