@@ -100,6 +100,8 @@ void Run(){
 
 		ASSERT_ALWAYS(sock.IsValid())
 
+		ting::mt::Thread::Sleep(1000);//give some time for socket to connect
+		
 		ASSERT_INFO_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001, "host = " << std::hex << sock.GetLocalAddress().host.IPv4Host())
 		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
