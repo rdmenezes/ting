@@ -389,7 +389,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}else if(res == 0){
 			return 0; // timeout
 		}else if(res > 0){
-			for(unsigned i = 0; i < res; ++i){
+			for(unsigned i = 0; i != unsigned(res); ++i){
 				struct kevent &e = this->revents[i];
 				Waitable *w = reinterpret_cast<Waitable*>(e.udata);
 				if((e.filter & EVFILT_WRITE) != 0){
