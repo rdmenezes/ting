@@ -293,7 +293,7 @@ class WaitSet{
 #elif M_OS == M_OS_MACOSX
 	int queue; // kqueue
 	
-	Array<kevent> revents;//used for getting the result
+	Array<struct kevent> revents;//used for getting the result
 #else
 #	error "Unsupported OS"
 #endif
