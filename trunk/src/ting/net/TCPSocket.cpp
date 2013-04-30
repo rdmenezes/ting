@@ -295,7 +295,20 @@ template <bool localAddress> IPAddress GetSockAddress(int sckt){
 		}
 	}else{
 		if(getpeername(sckt, reinterpret_cast<sockaddr*>(&addr), &len) < 0){
-			throw ting::net::Exc("Socket::GetRemoteAddress(): getpeername() failed");
+			std::stringstream ss;
+			ss << "Socket::GetRemoteAddress(): getpeername() failed: ";
+#if M_COMPILER == M_COMPILER_MSVC
+			{
+				const size_t msgbufSize = 0xff;
+				char msgbuf[msgbufSize];
+				strerror_s(msgbuf, msgbufSize, WSAGetLastError());
+				msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+				ss << msgbuf;
+			}
+#else
+			ss << strerror(errno);
+#endif
+			throw ting::net::Exc(ss.str());
 		}
 	}
 	
