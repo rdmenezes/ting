@@ -395,7 +395,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 				if((e.filter & EVFILT_WRITE) != 0){
 					w->SetCanWriteFlag();
 				}
-				if((e.filter & EVENT_READ) != 0){
+				if((e.filter & EVFILT_READ) != 0){
 					w->SetCanReadFlag();
 				}
 				if((e.flags & EV_ERROR) != 0){
