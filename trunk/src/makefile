@@ -13,10 +13,7 @@
 #    macosx
 include ../platform.mk
 
-#build configuration:
-#    debug
-#    release
-build_config := release
+debug := false
 
 name := libting
 
@@ -58,7 +55,7 @@ srcs += ting/WaitSet.cpp
 
 defines :=
 
-ifeq ($(build_config), debug)
+ifeq ($(debug), true)
     defines += -DDEBUG
 endif
 
