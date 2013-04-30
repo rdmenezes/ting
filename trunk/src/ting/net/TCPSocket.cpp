@@ -114,7 +114,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	if(connect(
 			this->socket,
 			reinterpret_cast<sockaddr *>(&sockAddr),
-			ip.host.IsIPv4() ? sizeof(sockaddr_in) : sizeof(sockaddr_in6) //on Mac OS for some reason the size should be exactly according to AF_INET/AF_INET6
+			ip.host.IsIPv4() ? sizeof(sockaddr_in) : sizeof(sockaddr_in6) //NOTE: on Mac OS for some reason the size should be exactly according to AF_INET/AF_INET6
 		) == DSocketError())
 	{
 #if M_OS == M_OS_WINDOWS

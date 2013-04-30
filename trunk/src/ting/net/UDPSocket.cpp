@@ -138,7 +138,6 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	this->ClearCanWriteFlag();
 
 	sockaddr_storage sockAddr;
-	int sockLen = sizeof(sockAddr);
 	
 	if(destinationIP.host.IsIPv4()){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
@@ -183,7 +182,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 				buf.Size(),
 				0,
 				reinterpret_cast<struct sockaddr*>(&sockAddr),
-				sockLen
+				destinationIP.host.IsIPv4() ? sizeof(sockaddr_in) : sizeof(sockaddr_in6) //NOTE: on Mac OS for some reason the size should be exactly according to AF_INET/AF_INET6
 			);
 
 		if(len == DSocketError()){
