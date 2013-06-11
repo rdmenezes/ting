@@ -139,7 +139,7 @@ namespace SendDataContinuouslyWithWaitSet{
 void Run(){
 	ting::net::TCPServerSocket serverSock;
 
-	serverSock.Open(13666);
+	serverSock.Open(13666, false, 50, true);
 
 
 	ting::net::TCPSocket sockS;

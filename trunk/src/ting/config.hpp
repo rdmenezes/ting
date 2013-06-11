@@ -148,14 +148,20 @@ THE SOFTWARE. */
 
 #if defined(__linux__)
 #	define M_OS M_OS_LINUX
+#	define M_OS_VERSION 0
 #elif defined(WIN32) // WIN32 macro is defined for both win32 and win64
 #	define M_OS M_OS_WINDOWS
+#	define M_OS_VERSION 0
 #elif defined(__APPLE__)
 #	define M_OS M_OS_MACOSX
+#	define M_OS_VERSION 0
 #elif defined(sun) || defined(__sun)
 #	define M_OS M_OS_SOLARIS
+#	define M_OS_VERSION 0
 #elif defined(__SYMBIAN32__)
 #	define M_OS M_OS_SYMBIAN
+#	define M_OS_VERSION 0
 #else
 #	define M_OS M_OS_UNKNOWN
+#	define M_OS_VERSION 0
 #endif

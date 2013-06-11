@@ -95,8 +95,10 @@ public:
 	 * @param port - IP port number to listen on.
 	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
 	 * @param queueLength - the maximum length of the queue of pending connections.
+	 * @param protocolIPv4 - if true, the socket is opened for IPv4 protocol,
+	 *                       otherwise it is opened for IPv6 or dual stack where supported.
 	 */
-	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50);
+	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50, bool protocolIPv4 = false);
 	
 	
 	

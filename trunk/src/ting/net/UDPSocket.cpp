@@ -38,7 +38,7 @@ using namespace ting::net;
 
 
 
-void UDPSocket::Open(u16 port){
+void UDPSocket::Open(u16 port, bool protocolIPv4){
 	if(this->IsValid()){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
@@ -47,7 +47,12 @@ void UDPSocket::Open(u16 port){
 	this->CreateEventForWaitable();
 #endif
 
-	this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
+	if(protocolIPv4){
+		this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
+	}else{
+		this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
+	}
+	
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
 		this->CloseEventForWaitable();
@@ -55,7 +60,7 @@ void UDPSocket::Open(u16 port){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
-#if M_OS != M_OS_WINDOWS //TODO: what for Win?
+#if M_OS != M_OS_WINDOWS //WinXP does not support dualstack
 	//turn off IPv6 only mode to allow also accepting IPv4
 	{
 		int no = 0;     
@@ -65,11 +70,21 @@ void UDPSocket::Open(u16 port){
 	
 	//Bind locally, if appropriate
 	if(port != 0){
-		sockaddr_in6 sockAddr;
-		memset(&sockAddr, 0, sizeof(sockAddr));
-		sockAddr.sin6_family = AF_INET6;
-		sockAddr.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
-		sockAddr.sin6_port = htons(port);
+		sockaddr_storage sockAddr;
+		
+		if(protocolIPv4){
+			sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
+			memset(&sa, 0, sizeof(sa));
+			sa.sin_family = AF_INET;
+			sa.sin_addr.s_addr = INADDR_ANY;
+			sa.sin_port = htons(port);
+		}else{
+			sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
+			memset(&sa, 0, sizeof(sa));
+			sa.sin6_family = AF_INET6;
+			sa.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
+			sa.sin6_port = htons(port);
+		}
 
 		// Bind the socket for listening
 		if(::bind(

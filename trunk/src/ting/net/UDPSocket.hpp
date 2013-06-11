@@ -88,9 +88,11 @@ public:
 	 * @param port - IP port number on which the socket will listen for incoming datagrams.
 	 *               If 0 is passed then system will assign some free port if any. If there
 	 *               are no free ports, then it is an error and an exception will be thrown.
-	 * This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
+	 *               This is useful for server-side sockets, for client-side sockets use UDPSocket::Open().
+	 * @param protocolIPv4 - if true, the socket is opened for IPv4 protocol,
+	 *                       otherwise it is opened for IPv6 or dual stack where supported.
 	 */
-	void Open(u16 port = 0);
+	void Open(u16 port = 0, bool protocolIPv4 = false);
 
 
 
