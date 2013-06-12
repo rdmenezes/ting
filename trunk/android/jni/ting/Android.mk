@@ -8,24 +8,26 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := ting
 
+SRC_BASE_DIR := ../../../src/
+
 LOCAL_SRC_FILES :=
-LOCAL_SRC_FILES += ting/fs/File.cpp
-LOCAL_SRC_FILES += ting/fs/FSFile.cpp
-LOCAL_SRC_FILES += ting/mt/MsgThread.cpp
-LOCAL_SRC_FILES += ting/mt/Mutex.cpp
-LOCAL_SRC_FILES += ting/mt/Queue.cpp
-LOCAL_SRC_FILES += ting/mt/Semaphore.cpp
-LOCAL_SRC_FILES += ting/mt/Thread.cpp
-LOCAL_SRC_FILES += ting/net/HostNameResolver.cpp
-LOCAL_SRC_FILES += ting/net/IPAddress.cpp
-LOCAL_SRC_FILES += ting/net/Lib.cpp
-LOCAL_SRC_FILES += ting/net/Socket.cpp
-LOCAL_SRC_FILES += ting/net/TCPServerSocket.cpp
-LOCAL_SRC_FILES += ting/net/TCPSocket.cpp
-LOCAL_SRC_FILES += ting/net/UDPSocket.cpp
-LOCAL_SRC_FILES += ting/Ref.cpp
-LOCAL_SRC_FILES += ting/timer.cpp
-LOCAL_SRC_FILES += ting/WaitSet.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/File.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/FSFile.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/MsgThread.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Mutex.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Queue.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Semaphore.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Thread.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/HostNameResolver.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/IPAddress.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/Lib.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/Socket.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/TCPServerSocket.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/TCPSocket.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/UDPSocket.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/Ref.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/timer.cpp
+LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/WaitSet.cpp
 
 #LOCAL_CFLAGS := -DDEBUG
 

@@ -12,7 +12,7 @@ LOCAL_SRC_FILES := main.cpp
 
 LOCAL_CFLAGS := -DDEBUG
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/../ting
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../src
 
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
 
