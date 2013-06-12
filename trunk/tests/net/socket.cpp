@@ -448,7 +448,7 @@ void Run(){
 	ting::net::UDPSocket recvSock;
 
 	try{
-		recvSock.Open(13666);
+		recvSock.Open(13666, true);
 	}catch(ting::net::Exc &e){
 		ASSERT_INFO_ALWAYS(false, e.What())
 	}
@@ -458,7 +458,7 @@ void Run(){
 	ting::net::UDPSocket sendSock;
 
 	try{
-		sendSock.Open();
+		sendSock.Open(0, true);
 
 		ting::StaticBuffer<ting::u8, 4> data;
 		data[0] = '0';
