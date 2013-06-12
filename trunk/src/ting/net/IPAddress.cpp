@@ -111,13 +111,13 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 
 //static
 IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
-	sockaddr_in6 a;
+	in6_addr a;
 		
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
 			AF_INET6,
 			ip,
-			&a.sin6_addr
+			&a
 		);
 	
 	if(res != 1){
@@ -143,41 +143,41 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 
 #if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
 	return Host(
-			a.sin6_addr.s6_addr[0],
-			a.sin6_addr.s6_addr[1],
-			a.sin6_addr.s6_addr[2],
-			a.sin6_addr.s6_addr[3],
-			a.sin6_addr.s6_addr[4],
-			a.sin6_addr.s6_addr[5],
-			a.sin6_addr.s6_addr[6],
-			a.sin6_addr.s6_addr[7],
-			a.sin6_addr.s6_addr[8],
-			a.sin6_addr.s6_addr[9],
-			a.sin6_addr.s6_addr[10],
-			a.sin6_addr.s6_addr[11],
-			a.sin6_addr.s6_addr[12],
-			a.sin6_addr.s6_addr[13],
-			a.sin6_addr.s6_addr[14],
-			a.sin6_addr.s6_addr[15]
+			a.s6_addr[0],
+			a.s6_addr[1],
+			a.s6_addr[2],
+			a.s6_addr[3],
+			a.s6_addr[4],
+			a.s6_addr[5],
+			a.s6_addr[6],
+			a.s6_addr[7],
+			a.s6_addr[8],
+			a.s6_addr[9],
+			a.s6_addr[10],
+			a.s6_addr[11],
+			a.s6_addr[12],
+			a.s6_addr[13],
+			a.s6_addr[14],
+			a.s6_addr[15]
 		);
 #else
 	return Host(
-			a.sin6_addr.__in6_u.__u6_addr8[0],
-			a.sin6_addr.__in6_u.__u6_addr8[1],
-			a.sin6_addr.__in6_u.__u6_addr8[2],
-			a.sin6_addr.__in6_u.__u6_addr8[3],
-			a.sin6_addr.__in6_u.__u6_addr8[4],
-			a.sin6_addr.__in6_u.__u6_addr8[5],
-			a.sin6_addr.__in6_u.__u6_addr8[6],
-			a.sin6_addr.__in6_u.__u6_addr8[7],
-			a.sin6_addr.__in6_u.__u6_addr8[8],
-			a.sin6_addr.__in6_u.__u6_addr8[9],
-			a.sin6_addr.__in6_u.__u6_addr8[10],
-			a.sin6_addr.__in6_u.__u6_addr8[11],
-			a.sin6_addr.__in6_u.__u6_addr8[12],
-			a.sin6_addr.__in6_u.__u6_addr8[13],
-			a.sin6_addr.__in6_u.__u6_addr8[14],
-			a.sin6_addr.__in6_u.__u6_addr8[15]
+			a.__in6_u.__u6_addr8[0],
+			a.__in6_u.__u6_addr8[1],
+			a.__in6_u.__u6_addr8[2],
+			a.__in6_u.__u6_addr8[3],
+			a.__in6_u.__u6_addr8[4],
+			a.__in6_u.__u6_addr8[5],
+			a.__in6_u.__u6_addr8[6],
+			a.__in6_u.__u6_addr8[7],
+			a.__in6_u.__u6_addr8[8],
+			a.__in6_u.__u6_addr8[9],
+			a.__in6_u.__u6_addr8[10],
+			a.__in6_u.__u6_addr8[11],
+			a.__in6_u.__u6_addr8[12],
+			a.__in6_u.__u6_addr8[13],
+			a.__in6_u.__u6_addr8[14],
+			a.__in6_u.__u6_addr8[15]
 		);
 #endif
 }
