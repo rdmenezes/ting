@@ -156,12 +156,14 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	this->ClearCanWriteFlag();
 
 	sockaddr_storage sockAddr;
+	socklen_t sockAddrLen;
 	
 	if(destinationIP.host.IsIPv4()){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
 		a.sin_family = AF_INET;
 		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
 		a.sin_port = htons(destinationIP.port);
+		sockAddrLen = sizeof(sockaddr_in);
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		a.sin6_family = AF_INET6;
@@ -189,6 +191,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		a.sin6_addr.__in6_u.__u6_addr32[3] = htonl(destinationIP.host.Quad3());
 #endif
 		a.sin6_port = htons(destinationIP.port);
+		sockAddrLen = sizeof(sockaddr_in6);
 	}
 
 	ssize_t len;
@@ -200,7 +203,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 				buf.Size(),
 				0,
 				reinterpret_cast<struct sockaddr*>(&sockAddr),
-				destinationIP.host.IsIPv4() ? sizeof(sockaddr_in) : sizeof(sockaddr_in6) //NOTE: on Mac OS for some reason the size should be exactly according to AF_INET/AF_INET6
+				sockAddrLen
 			);
 
 		if(len == DSocketError()){
