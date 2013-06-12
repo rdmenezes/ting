@@ -76,8 +76,8 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 #elif M_OS == M_OS_MACOSX
 	ASSERT(revents.Size() < this->NumWaitables())
 	
-	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_READ : 0)
-			| (u32(flagsToWaitFor) & Waitable::READ ? EVFILT_WRITE : 0);
+	int16_t filter = (u32(flagsToWaitFor) & Waitable::READ != 0 ? EVFILT_READ : 0)
+			| (u32(flagsToWaitFor) & Waitable::READ != 0 ? EVFILT_WRITE : 0);
 	
 	struct kevent e;
 
