@@ -516,29 +516,33 @@ namespace TestUDPSocketWaitForWriting{
 
 void Run(){
 
-	ting::net::UDPSocket sendSock;
-
 	try{
-		sendSock.Open();
+		ting::net::UDPSocket sendSock;
 
-		ting::WaitSet ws(1);
-		
-		ws.Add(&sendSock, ting::Waitable::READ_AND_WRITE);
-		
-		if(ws.WaitWithTimeout(3000, 0) == 0){
-			//if timeout was hit
+		try{
+			sendSock.Open();
+
+			ting::WaitSet ws(1);
+
+			ws.Add(&sendSock, ting::Waitable::READ_AND_WRITE);
+
+			if(ws.WaitWithTimeout(3000, 0) == 0){
+				//if timeout was hit
 //NOTE: for some reason waiting for writing to UDP socket does not work on Win32 (aaarrrggghh).
 #if M_OS != M_OS_WINDOWS
-			ASSERT_ALWAYS(false)
+				ASSERT_ALWAYS(false)
 #endif
-		}else{
-			ASSERT_ALWAYS(sendSock.CanWrite())
-			ASSERT_ALWAYS(!sendSock.CanRead())
+			}else{
+				ASSERT_ALWAYS(sendSock.CanWrite())
+				ASSERT_ALWAYS(!sendSock.CanRead())
+			}
+
+			ws.Remove(&sendSock);
+		}catch(ting::net::Exc &e){
+			ASSERT_INFO_ALWAYS(false, e.What())
 		}
-		
-		ws.Remove(&sendSock);
-	}catch(ting::net::Exc &e){
-		ASSERT_INFO_ALWAYS(false, e.What())
+	}catch(std::exception& e){
+		TRACE_ALWAYS(<< "global exception caught: " << e.what() << std::endl)
 	}
 
 }
