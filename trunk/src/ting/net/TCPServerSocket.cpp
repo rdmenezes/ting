@@ -76,6 +76,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 #endif
 	
 	sockaddr_storage sockAddr;
+	socklen_t sockAddrLen;
 	
 	if(protocolIPv4){
 		sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
@@ -83,19 +84,21 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 		sa.sin_family = AF_INET;
 		sa.sin_addr.s_addr = INADDR_ANY;
 		sa.sin_port = htons(port);
+		sockAddrLen = sizeof(sockaddr_in);
 	}else{
 		sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&sa, 0, sizeof(sa));
 		sa.sin6_family = AF_INET6;
 		sa.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
 		sa.sin6_port = htons(port);
+		sockAddrLen = sizeof(sockaddr_in6);
 	}
 
 	// Bind the socket for listening
 	if(bind(
 			this->socket,
 			reinterpret_cast<sockaddr*>(&sockAddr),
-			sizeof(sockAddr)
+			sockAddrLen
 		) == DSocketError())
 	{
 #if M_OS == M_OS_WINDOWS
