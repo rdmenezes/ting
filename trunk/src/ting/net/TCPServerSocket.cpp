@@ -98,8 +98,29 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 			sizeof(sockAddr)
 		) == DSocketError())
 	{
+#if M_OS == M_OS_WINDOWS
+		int errorCode = WSAGetLastError();
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+		int errorCode = errno;
+#else
+#	error "Unsupported OS"
+#endif
+		
+		std::stringstream ss;
+		ss << "TCPServerSocket::Open(): bind() failed, error code = " << errorCode << ": ";
+#if M_COMPILER == M_COMPILER_MSVC
+		{
+			const size_t msgbufSize = 0xff;
+			char msgbuf[msgbufSize];
+			strerror_s(msgbuf, msgbufSize, errorCode);
+			msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+			ss << msgbuf;
+		}
+#else
+		ss << strerror(errorCode);
+#endif
 		this->Close();
-		throw net::Exc("TCPServerSocket::Open(): Couldn't bind to local port");
+		throw net::Exc(ss.str());
 	}
 
 	if(listen(this->socket, int(queueLength)) == DSocketError()){
