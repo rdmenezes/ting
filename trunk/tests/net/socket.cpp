@@ -542,7 +542,7 @@ void Run(){
 			ASSERT_INFO_ALWAYS(false, e.What())
 		}
 	}catch(std::exception& e){
-		TRACE_ALWAYS(<< "global exception caught: " << e.what() << std::endl)
+		ASSERT_INFO_ALWAYS(false, e.what())
 	}
 
 }
