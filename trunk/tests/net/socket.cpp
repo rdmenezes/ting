@@ -529,8 +529,8 @@ void Run(){
 			if(ws.WaitWithTimeout(3000, 0) == 0){
 				//if timeout was hit
 //NOTE: for some reason waiting for writing to UDP socket does not work on Win32 (aaarrrggghh).
-#if M_OS != M_OS_WINDOWS
-				ASSERT_ALWAYS(false)
+#if M_OS == M_OS_WINDOWS
+#	warning "Waiting for writing to UDP socket does not work on Win32"
 #endif
 			}else{
 				ASSERT_ALWAYS(sendSock.CanWrite())
