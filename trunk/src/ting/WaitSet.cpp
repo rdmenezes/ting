@@ -91,7 +91,8 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw ting::Exc("WaitSet::Add(): kevent() failed");
 	}
 	
-	if((e.flags & EV_ERROR) != 0){
+	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+	if(e.data != 0){//data should be 0 if added successfully
 		throw ting::Exc("WaitSet::Add(): kevent() failed to add filter");
 	}
 #else
@@ -163,7 +164,8 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw ting::Exc("WaitSet::Change(): kevent() failed");
 	}
 	
-	if((e.flags & EV_ERROR) != 0){
+	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+	if(e.data != 0){//data should be 0 if added successfully
 		throw ting::Exc("WaitSet::Change(): kevent() failed to change filter");
 	}
 #else
@@ -226,7 +228,8 @@ void WaitSet::Remove(Waitable* w)throw(){
 		throw ting::Exc("WaitSet::Remove(): kevent() failed");
 	}
 	
-	if((e.flags & EV_ERROR) != 0){
+	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+	if(e.data != 0){//data should be 0 if successful
 		throw ting::Exc("WaitSet::Remove(): kevent() failed to remove filter");
 	}
 #else
