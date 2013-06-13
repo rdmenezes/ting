@@ -93,6 +93,7 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	
 	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
 	if(e.data != 0){//data should be 0 if added successfully
+		TRACE(<< "WaitSet::Add(): e.data = " << e.data << std::endl)
 		throw ting::Exc("WaitSet::Add(): kevent() failed to add filter");
 	}
 #else
