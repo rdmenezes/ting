@@ -7,10 +7,17 @@
           <df name="2">
             <df name="ting">
               <df name="fs">
+                <in>FSFile.d</in>
+                <in>File.d</in>
               </df>
               <df name="mt">
+                <in>MsgThread.d</in>
+                <in>Mutex.d</in>
               </df>
               <df name="net">
+              </df>
+              <df name="net">
+                <in>HostNameResolver.d</in>
               </df>
             </df>
           </df>
@@ -21,7 +28,6 @@
               <df name="fs">
               </df>
               <df name="mt">
-                <in>Mutex.d</in>
               </df>
               <df name="net">
               </df>
