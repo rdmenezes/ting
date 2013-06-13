@@ -229,9 +229,6 @@ void WaitSet::Remove(Waitable* w)throw(){
 	}
 	
 	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
-	if(e.data != 0){//data should be 0 if successful
-		throw ting::Exc("WaitSet::Remove(): kevent() failed to remove filter");
-	}
 #else
 #	error "Unsupported OS"
 #endif
