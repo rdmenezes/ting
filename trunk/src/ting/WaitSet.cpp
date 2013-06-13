@@ -401,7 +401,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 				if(((e.filter) & EVFILT_READ) != 0){
 					w->SetCanReadFlag();
 				}else{
-					w->ClearCanReadflag();
+					w->ClearCanReadFlag();
 				}
 				if((e.flags & EV_ERROR) != 0){
 					w->SetErrorFlag();
