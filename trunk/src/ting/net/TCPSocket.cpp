@@ -280,42 +280,9 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 
 namespace{
 
-template <bool localAddress> IPAddress GetSockAddress(int sckt){
-	sockaddr_storage addr;
-
-#if M_OS == M_OS_WINDOWS
-	int len = sizeof(addr);
-#else
-	socklen_t len = sizeof(addr);
-#endif
-
-	if(localAddress){
-		if(getsockname(sckt, reinterpret_cast<sockaddr*>(&addr), &len) < 0){
-			throw ting::net::Exc("Socket::GetLocalAddress(): getsockname() failed");
-		}
-	}else{
-		if(getpeername(sckt, reinterpret_cast<sockaddr*>(&addr), &len) < 0){
-			std::stringstream ss;
-			ss << "Socket::GetRemoteAddress(): getpeername() failed: ";
-#if M_COMPILER == M_COMPILER_MSVC
-			{
-				const size_t msgbufSize = 0xff;
-				char msgbuf[msgbufSize];
-				strerror_s(msgbuf, msgbufSize, WSAGetLastError());
-				msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
-				ss << msgbuf;
-			}
-#else
-			ss << strerror(errno);
-#endif
-			throw ting::net::Exc(ss.str());
-		}
-	}
-	
-
-	
+IPAddress CreateIPAddressFromSockaddrStorage(const sockaddr_storage& addr){
 	if(addr.ss_family == AF_INET){
-		sockaddr_in &a = reinterpret_cast<sockaddr_in&>(addr);
+		const sockaddr_in &a = reinterpret_cast<const sockaddr_in&>(addr);
 		return IPAddress(
 			ting::u32(ntohl(a.sin_addr.s_addr)),
 			ting::u16(ntohs(a.sin_port))
@@ -323,7 +290,7 @@ template <bool localAddress> IPAddress GetSockAddress(int sckt){
 	}else{
 		ASSERT(addr.ss_family == AF_INET6)
 		
-		sockaddr_in6 &a = reinterpret_cast<sockaddr_in6&>(addr);
+		const sockaddr_in6 &a = reinterpret_cast<const sockaddr_in6&>(addr);
 		
 		return IPAddress(
 				IPAddress::Host(
@@ -353,7 +320,19 @@ IPAddress TCPSocket::GetLocalAddress(){
 		throw net::Exc("Socket::GetLocalAddress(): socket is not valid");
 	}
 
-	return GetSockAddress<true>(this->socket);
+	sockaddr_storage addr;
+
+#if M_OS == M_OS_WINDOWS
+	int len = sizeof(addr);
+#else
+	socklen_t len = sizeof(addr);
+#endif
+
+	if(getsockname(this->socket, reinterpret_cast<sockaddr*>(&addr), &len)  == DSocketError()){
+		throw ting::net::Exc("Socket::GetLocalAddress(): getsockname() failed");
+	}	
+
+	return CreateIPAddressFromSockaddrStorage(addr);
 }
 
 
@@ -363,7 +342,32 @@ IPAddress TCPSocket::GetRemoteAddress(){
 		throw net::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
 	}
 
-	return GetSockAddress<false>(this->socket);
+	sockaddr_storage addr;
+
+#if M_OS == M_OS_WINDOWS
+	int len = sizeof(addr);
+#else
+	socklen_t len = sizeof(addr);
+#endif
+
+	if(getpeername(this->socket, reinterpret_cast<sockaddr*>(&addr), &len) == DSocketError()){
+		std::stringstream ss;
+		ss << "Socket::GetRemoteAddress(): getpeername() failed: ";
+#if M_COMPILER == M_COMPILER_MSVC
+		{
+			const size_t msgbufSize = 0xff;
+			char msgbuf[msgbufSize];
+			strerror_s(msgbuf, msgbufSize, WSAGetLastError());
+			msgbuf[msgbufSize - 1] = 0;//make sure the string is null-terminated
+			ss << msgbuf;
+		}
+#else
+		ss << strerror(errno);
+#endif
+		throw ting::net::Exc(ss.str());
+	}
+
+	return CreateIPAddressFromSockaddrStorage(addr);
 }
 
 
