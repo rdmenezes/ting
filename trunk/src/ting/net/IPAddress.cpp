@@ -111,7 +111,12 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 
 //static
 IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
+#if M_OS == M_OS_WINDOWS
+	sockaddr_in6 aa;
+	in6_addr& a = aa.sin6_addr;
+#else
 	in6_addr a;
+#endif	
 		
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	int res = inet_pton(
@@ -125,12 +130,12 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 	}
 
 #elif M_OS == M_OS_WINDOWS
-	INT len = sizeof(a);
+	INT len = sizeof(aa);
 	INT res = WSAStringToAddress(
 			const_cast<char*>(ip),
 			AF_INET6,
 			NULL,
-			reinterpret_cast<sockaddr*>(&a),
+			reinterpret_cast<sockaddr*>(&aa),
 			&len
 		);
 	if(res != 0){
