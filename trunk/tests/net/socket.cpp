@@ -102,7 +102,6 @@ void Run(){
 
 		ting::mt::Thread::Sleep(1000);//give some time for socket to connect
 		
-		ASSERT_INFO_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001, "host = " << std::hex << sock.GetLocalAddress().host.IPv4Host())
 		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
 		ting::StaticBuffer<ting::u8, 4> data;
@@ -697,6 +696,10 @@ void Run(){
 		ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
 		ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
 		ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
+	}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+		ASSERT_ALWAYS(false)
+	}catch(ting::Exc& e){
+		ASSERT_INFO_ALWAYS(false, "exception caught: " << e.What())
 	}catch(...){
 		ASSERT_ALWAYS(false)
 	}
