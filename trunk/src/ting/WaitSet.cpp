@@ -96,10 +96,10 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	//NOTE: Setting wait flags may throw an exception, so do that before
 	//adding object to the array and incrementing number of added objects.
-	w->SetWaitingEvents(flagsToWaitFor);
+	w.SetWaitingEvents(flagsToWaitFor);
 
-	this->handles[this->numWaitables] = w->GetHandle();
-	this->waitables[this->numWaitables] = w;
+	this->handles[this->numWaitables] = w.GetHandle();
+	this->waitables[this->numWaitables] = &w;
 
 #elif M_OS == M_OS_LINUX
 	epoll_event e;
@@ -149,7 +149,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	{
 		unsigned i;
 		for(i = 0; i < this->numWaitables; ++i){
-			if(this->waitables[i] == w){
+			if(this->waitables[i] == &w){
 				break;
 			}
 		}
@@ -160,7 +160,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	}
 
 	//set new wait flags
-	w->SetWaitingEvents(flagsToWaitFor);
+	w.SetWaitingEvents(flagsToWaitFor);
 
 #elif M_OS == M_OS_LINUX
 	epoll_event e;
@@ -200,7 +200,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 void WaitSet::Remove(Waitable& w)throw(){
 	ASSERT(w)
 
-	ASSERT(w->isAdded)
+	ASSERT(w.isAdded)
 	
 	ASSERT(this->NumWaitables() != 0)
 
@@ -209,7 +209,7 @@ void WaitSet::Remove(Waitable& w)throw(){
 	{
 		unsigned i;
 		for(i = 0; i < this->numWaitables; ++i){
-			if(this->waitables[i] == w){
+			if(this->waitables[i] == &w){
 				break;
 			}
 		}
@@ -225,7 +225,7 @@ void WaitSet::Remove(Waitable& w)throw(){
 	}
 
 	//clear wait flags (disassociate socket and Windows event)
-	w->SetWaitingEvents(0);
+	w.SetWaitingEvents(0);
 
 #elif M_OS == M_OS_LINUX
 	int res = epoll_ctl(
