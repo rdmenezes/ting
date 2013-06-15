@@ -37,11 +37,56 @@ using namespace ting;
 
 
 
-void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
+#if M_OS == M_OS_MACOSX
+namespace{
+
+void AddFilter(int queue, Waitable& w, int16_t filter){
+	struct kevent e;
+
+	EV_SET(&e, w.GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)&w);
+
+	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
+
+	int res = kevent(queue, &e, 1, &e, 1, &timeout);
+	if(res < 0){
+		throw ting::Exc("WaitSet::Add(): AddFilter(): kevent() failed");
+	}
+	
+	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+	if(e.data != 0){//data should be 0 if added successfully
+		TRACE(<< "WaitSet::Add(): e.data = " << e.data << std::endl)
+		throw ting::Exc("WaitSet::Add(): AddFilter(): kevent() failed to add filter");
+	}
+}
+
+
+
+void RemoveFilter(int queue, Waitable& w, int16_t filter){
+	struct kevent e;
+
+	EV_SET(&e, w.GetHandle(), filter, EV_DELETE | EV_RECEIPT, 0, 0, 0);
+
+	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
+
+	int res = kevent(queue, &e, 1, &e, 1, &timeout);
+	if(res < 0){
+		ASSERT(false)//TODO: ignore?
+		TRACE(<< "WaitSet::Remove(): RemoveFilter(): kevent() failed" << std::endl);
+	}
+	
+	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+}
+
+}//~namespace
+#endif
+
+
+
+void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 //		TRACE(<< "WaitSet::Add(): enter" << std::endl)
 	ASSERT(w)
 
-	ASSERT(!w->isAdded)
+	ASSERT(!w.isAdded)
 
 #if M_OS == M_OS_WINDOWS
 	ASSERT(this->numWaitables <= this->handles.Size())
@@ -58,8 +103,8 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 #elif M_OS == M_OS_LINUX
 	epoll_event e;
-	e.data.fd = w->GetHandle();
-	e.data.ptr = w;
+	e.data.fd = w.GetHandle();
+	e.data.ptr = &w;
 	e.events =
 			(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
 			| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
@@ -67,35 +112,20 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	int res = epoll_ctl(
 			this->epollSet,
 			EPOLL_CTL_ADD,
-			w->GetHandle(),
+			w.GetHandle(),
 			&e
 		);
 	if(res < 0){
 		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	ASSERT(revents.Size() < this->NumWaitables())
+	ASSERT(this->NumWaitables() <= revents.Size() / 2)
 	
-	int16_t filter = 0;
-	filter |= (u32(flagsToWaitFor) & Waitable::READ) != 0 ? EVFILT_READ : 0;
-	filter |= (u32(flagsToWaitFor) & Waitable::WRITE) != 0 ? EVFILT_WRITE : 0;
-	
-	struct kevent e;
-
-	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
-
-	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
-
-	//now try to add this event to the kqueue
-	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
-	if(res < 0){
-		throw ting::Exc("WaitSet::Add(): kevent() failed");
+	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
+		AddFilter(this->queue, w, EVFILT_READ);
 	}
-	
-	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
-	if(e.data != 0){//data should be 0 if added successfully
-		TRACE(<< "WaitSet::Add(): e.data = " << e.data << std::endl)
-		throw ting::Exc("WaitSet::Add(): kevent() failed to add filter");
+	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
+		AddFilter(this->queue, w, EVFILT_WRITE);
 	}
 #else
 #	error "Unsupported OS"
@@ -103,13 +133,13 @@ void WaitSet::Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 	++this->numWaitables;
 
-	w->isAdded = true;
+	w.isAdded = true;
 //		TRACE(<< "WaitSet::Add(): exit" << std::endl)
 }
 
 
 
-void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
+void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	ASSERT(w)
 
 	ASSERT(w->isAdded)
@@ -134,8 +164,8 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 #elif M_OS == M_OS_LINUX
 	epoll_event e;
-	e.data.fd = w->GetHandle();
-	e.data.ptr = w;
+	e.data.fd = w.GetHandle();
+	e.data.ptr = &w;
 	e.events =
 			(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
 			| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
@@ -143,33 +173,22 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 	int res = epoll_ctl(
 			this->epollSet,
 			EPOLL_CTL_MOD,
-			w->GetHandle(),
+			w.GetHandle(),
 			&e
 		);
 	if(res < 0){
 		throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	int16_t filter = 0;
-	filter |= (u32(flagsToWaitFor) & Waitable::READ) != 0 ? EVFILT_READ : 0;
-	filter |= (u32(flagsToWaitFor) & Waitable::WRITE) != 0 ? EVFILT_WRITE : 0;
-	
-	struct kevent e;
-
-	//NOTE: EV_ADD will also modify existing event
-	EV_SET(&e, w->GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)w);
-
-	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
-
-	//now try to add this event to the kqueue
-	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
-	if(res < 0){
-		throw ting::Exc("WaitSet::Change(): kevent() failed");
+	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
+		AddFilter(this->queue, w, EVFILT_READ);
+	}else{
+		RemoveFilter(this->queue, w, EVFILT_READ);
 	}
-	
-	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
-	if(e.data != 0){//data should be 0 if added successfully
-		throw ting::Exc("WaitSet::Change(): kevent() failed to change filter");
+	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
+		AddFilter(this->queue, w, EVFILT_WRITE);
+	}else{
+		RemoveFilter(this->queue, w, EVFILT_WRITE);
 	}
 #else
 #	error "Unsupported OS"
@@ -178,7 +197,7 @@ void WaitSet::Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor){
 
 
 
-void WaitSet::Remove(Waitable* w)throw(){
+void WaitSet::Remove(Waitable& w)throw(){
 	ASSERT(w)
 
 	ASSERT(w->isAdded)
@@ -212,33 +231,22 @@ void WaitSet::Remove(Waitable* w)throw(){
 	int res = epoll_ctl(
 			this->epollSet,
 			EPOLL_CTL_DEL,
-			w->GetHandle(),
+			w.GetHandle(),
 			0
 		);
 	if(res < 0){
 		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
 	}
 #elif M_OS == M_OS_MACOSX	
-	struct kevent e;
-
-	EV_SET(&e, w->GetHandle(), 0, EV_DELETE | EV_RECEIPT, 0, 0, 0);
-
-	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
-
-	//now try to add this event to the kqueue
-	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
-	if(res < 0){
-		throw ting::Exc("WaitSet::Remove(): kevent() failed");
-	}
-	
-	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
+	RemoveFilter(this->queue, w, EVFILT_READ);
+	RemoveFilter(this->queue, w, EVFILT_WRITE);
 #else
 #	error "Unsupported OS"
 #endif
 
 	--this->numWaitables;
 
-	w->isAdded = false;
+	w.isAdded = false;
 //		TRACE(<< "WaitSet::Remove(): completed successfuly" << std::endl)
 }
 
@@ -392,23 +400,33 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}else if(res == 0){
 			return 0; // timeout
 		}else if(res > 0){
+			unsigned out_i = 0;// index to out_events
 			for(unsigned i = 0; i != unsigned(res); ++i){
 				struct kevent &e = this->revents[i];
 				Waitable *w = reinterpret_cast<Waitable*>(e.udata);
-				if((e.filter & EVFILT_WRITE) != 0){
+				if(e.filter == EVFILT_WRITE){
 					w->SetCanWriteFlag();
-				}
-				if(((e.filter) & EVFILT_READ) != 0){
+				}else if(e.filter == EVFILT_READ){
 					w->SetCanReadFlag();
-				}else{
-					w->ClearCanReadFlag();
 				}
+				
 				if((e.flags & EV_ERROR) != 0){
 					w->SetErrorFlag();
 				}
 				
 				if(out_events){
-					out_events->operator[](i) = w;
+					//check if Waitable is already added
+					unsigned k = 0;
+					for(; k != out_i; ++k){
+						if(out_events->operator[](k) == w){
+							break;
+						}
+					}
+					if(k == out_i){
+						ASSERT(out_i < out_events->Size())
+						out_events->operator[](out_i) = w;
+						++out_i;
+					}
 				}
 			}
 			return unsigned(res);

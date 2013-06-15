@@ -171,8 +171,8 @@ void Run(){
 	}
 
 	ting::WaitSet ws(2);
-	ws.Add(&sockR, ting::Waitable::READ);
-	ws.Add(&sockS, ting::Waitable::WRITE);
+	ws.Add(sockR, ting::Waitable::READ);
+	ws.Add(sockS, ting::Waitable::WRITE);
 
 
 	ting::u32 scnt = 0;
@@ -307,8 +307,8 @@ void Run(){
 		}//~for(triggered)
 	}//~while
 
-	ws.Remove(&sockS);
-	ws.Remove(&sockR);
+	ws.Remove(sockS);
+	ws.Remove(sockR);
 }
 
 }//~namespace
@@ -524,7 +524,7 @@ void Run(){
 
 			ting::WaitSet ws(1);
 
-			ws.Add(&sendSock, ting::Waitable::READ_AND_WRITE);
+			ws.Add(sendSock, ting::Waitable::READ_AND_WRITE);
 
 			if(ws.WaitWithTimeout(3000, 0) == 0){
 				//if timeout was hit
@@ -537,7 +537,7 @@ void Run(){
 				ASSERT_ALWAYS(!sendSock.CanRead())
 			}
 
-			ws.Remove(&sendSock);
+			ws.Remove(sendSock);
 		}catch(ting::net::Exc &e){
 			ASSERT_INFO_ALWAYS(false, e.What())
 		}

@@ -177,6 +177,8 @@
         <in>testso.cpp</in>
         <in>testso.hpp</in>
       </df>
+      <df name="StrUTF8">
+      </df>
       <df name="Thread">
         <in>main.cpp</in>
         <in>main.hpp</in>

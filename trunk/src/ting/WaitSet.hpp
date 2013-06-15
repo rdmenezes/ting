@@ -300,6 +300,8 @@ class WaitSet{
 
 public:
 
+	//TODO: make exception class
+	
 	/**
 	 * @brief Constructor.
 	 * @param maxSize - maximum number of Waitable objects can be added to this wait set.
@@ -326,7 +328,7 @@ public:
 		}
 	}
 #elif M_OS == M_OS_MACOSX
-			,revents(maxSize)
+			,revents(maxSize * 2)
 	{
 		this->queue = kqueue();
 		if(this->queue == -1){
@@ -381,33 +383,33 @@ public:
 
 	/**
 	 * @brief Add Waitable object to the wait set.
-	 * @param w - pointer to the Waitable object.
+	 * @param w - Waitable object to add to the WaitSet.
 	 * @param flagsToWaitFor - determine events waiting for which we are interested.
 	 * @throw ting::Exc - in case the wait set is full or other error occurs.
 	 */
-	void Add(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor);
+	void Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor);
 
 
 
 	/**
 	 * @brief Change wait flags for a given Waitable.
-	 * Changes wait flags for a given waitable, which is in this waitset.
-	 * @param w - pointer to Waitable for which the changing of wait flags is needed.
+	 * Changes wait flags for a given waitable, which is in this WaitSet.
+	 * @param w - Waitable for which the changing of wait flags is needed.
 	 * @param flagsToWaitFor - new wait flags to be set for the given Waitable.
 	 * @throw ting::Exc - in case the given Waitable object is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	void Change(Waitable* w, Waitable::EReadinessFlags flagsToWaitFor);
+	void Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor);
 
 
 
 	/**
 	 * @brief Remove Waitable from wait set.
-	 * @param w - pointer to Waitable object to be removed from the wait set.
+	 * @param w - Waitable object to be removed from the WaitSet.
 	 * @throw ting::Exc - in case the given Waitable is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	void Remove(Waitable* w)throw();
+	void Remove(Waitable& w)throw();
 
 
 

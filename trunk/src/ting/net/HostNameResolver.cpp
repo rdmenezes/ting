@@ -171,7 +171,7 @@ public:
 	ting::net::IPAddress dns;
 	
 	void StartSending(){
-		this->waitSet.Change(&this->socket, ting::Waitable::READ_AND_WRITE);
+		this->waitSet.Change(this->socket, ting::Waitable::READ_AND_WRITE);
 	}
 	
 	//NOTE: call to this function should be protected by mutex.
@@ -714,8 +714,8 @@ private:
 		
 		TRACE(<< "this->dns.IPv4Host() = " << std::hex << this->dns.host.IPv4Host() << std::dec << std::endl)
 
-		this->waitSet.Add(&this->queue, ting::Waitable::READ);
-		this->waitSet.Add(&this->socket, ting::Waitable::READ);
+		this->waitSet.Add(this->queue, ting::Waitable::READ);
+		this->waitSet.Add(this->socket, ting::Waitable::READ);
 		
 		while(!this->quitFlag){
 			ting::u32 timeout;
@@ -831,7 +831,7 @@ private:
 					
 					if(this->sendList.size() == 0){
 						//move socket to waiting for READ condition only
-						this->waitSet.Change(&this->socket, ting::Waitable::READ);
+						this->waitSet.Change(this->socket, ting::Waitable::READ);
 						TRACE(<< "socket wait mode changed to read only" << std::endl)
 					}
 				}
@@ -909,8 +909,8 @@ private:
 			}			
 		}//~while(!this->quitFlag)
 		
-		this->waitSet.Remove(&this->socket);
-		this->waitSet.Remove(&this->queue);
+		this->waitSet.Remove(this->socket);
+		this->waitSet.Remove(this->queue);
 		TRACE(<< "DNS lookup thread stopped" << std::endl)
 	}
 	

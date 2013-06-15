@@ -16,13 +16,13 @@ public:
 	void Run(){
 		ting::WaitSet ws(1);
 
-		ws.Add(&this->queue, ting::Waitable::READ);
+		ws.Add(this->queue, ting::Waitable::READ);
 
 		unsigned res = ws.WaitWithTimeout(3000, 0);
 
 		ASSERT_ALWAYS(res == 1)
 
-		ws.Remove(&this->queue);
+		ws.Remove(this->queue);
 	}
 };
 
@@ -47,8 +47,8 @@ void Run(){
 
 	ting::mt::Queue q1, q2;
 
-	ws.Add(&q1, ting::Waitable::READ);
-	ws.Add(&q2, ting::Waitable::READ);
+	ws.Add(q1, ting::Waitable::READ);
+	ws.Add(q2, ting::Waitable::READ);
 
 	ting::StaticBuffer<ting::Waitable*, 4> buf;
 
@@ -107,7 +107,7 @@ void Run(){
 
 
 
-	ws.Remove(&q1);
-	ws.Remove(&q2);
+	ws.Remove(q1);
+	ws.Remove(q2);
 }
 }//~namespace
