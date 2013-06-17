@@ -82,8 +82,6 @@ void WaitSet::RemoveFilter(Waitable& w, int16_t filter){
 
 void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 //		TRACE(<< "WaitSet::Add(): enter" << std::endl)
-	ASSERT(w)
-
 	ASSERT(!w.isAdded)
 
 #if M_OS == M_OS_WINDOWS
@@ -114,6 +112,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 			&e
 		);
 	if(res < 0){
+		TRACE(<< "WaitSet::Add(): epoll_ctl() failed. If you are adding socket, please check that is is opened before adding to WaitSet." << std::endl)
 		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
@@ -138,9 +137,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 
 
 void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
-	ASSERT(w)
-
-	ASSERT(w->isAdded)
+	ASSERT(w.isAdded)
 
 #if M_OS == M_OS_WINDOWS
 	//check if the Waitable object is added to this wait set
@@ -196,8 +193,6 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 
 
 void WaitSet::Remove(Waitable& w)throw(){
-	ASSERT(w)
-
 	ASSERT(w.isAdded)
 	
 	ASSERT(this->NumWaitables() != 0)

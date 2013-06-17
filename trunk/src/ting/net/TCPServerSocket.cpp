@@ -69,7 +69,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 
 #if M_OS != M_OS_WINDOWS //WinXP does not support dual stack
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
-	{
+	if(!protocolIPv4){
 		int no = 0;     
 		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 	}

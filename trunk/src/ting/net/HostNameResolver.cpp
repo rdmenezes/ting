@@ -709,9 +709,6 @@ private:
 		this->InitDNS();
 		
 		TRACE(<< "this->dns.host = " << this->dns.host.ToString() << std::endl)
-
-		this->waitSet.Add(this->queue, ting::Waitable::READ);
-		this->waitSet.Add(this->socket, ting::Waitable::READ);
 		
 		{
 			ting::mt::Mutex::Guard mutexGuard(dns::mutex);//mutex is needed because socket opening may fail and we will have to set isExiting flag which should be protected by mutex
@@ -728,6 +725,9 @@ private:
 				return;
 			}
 		}
+		
+		this->waitSet.Add(this->queue, ting::Waitable::READ);
+		this->waitSet.Add(this->socket, ting::Waitable::READ);
 		
 		while(!this->quitFlag){
 			ting::u32 timeout;

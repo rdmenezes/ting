@@ -62,7 +62,7 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 
 #if M_OS != M_OS_WINDOWS //WinXP does not support dualstack
 	//turn off IPv6 only mode to allow also accepting IPv4
-	{
+	if(!protocolIPv4){
 		int no = 0;     
 		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 	}
