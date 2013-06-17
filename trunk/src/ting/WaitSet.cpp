@@ -39,7 +39,7 @@ using namespace ting;
 
 #if M_OS == M_OS_MACOSX
 
-void WaitSet::AddFilter(qWaitable& w, int16_t filter){
+void WaitSet::AddFilter(Waitable& w, int16_t filter){
 	struct kevent e;
 
 	EV_SET(&e, w.GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)&w);
