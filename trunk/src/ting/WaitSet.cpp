@@ -38,16 +38,15 @@ using namespace ting;
 
 
 #if M_OS == M_OS_MACOSX
-namespace{
 
-void AddFilter(int queue, Waitable& w, int16_t filter){
+void WaitSet::AddFilter(qWaitable& w, int16_t filter){
 	struct kevent e;
 
 	EV_SET(&e, w.GetHandle(), filter, EV_ADD | EV_RECEIPT, 0, 0, (void*)&w);
 
 	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
 
-	int res = kevent(queue, &e, 1, &e, 1, &timeout);
+	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
 	if(res < 0){
 		throw ting::Exc("WaitSet::Add(): AddFilter(): kevent() failed");
 	}
@@ -61,14 +60,14 @@ void AddFilter(int queue, Waitable& w, int16_t filter){
 
 
 
-void RemoveFilter(int queue, Waitable& w, int16_t filter){
+void WaitSet::RemoveFilter(Waitable& w, int16_t filter){
 	struct kevent e;
 
 	EV_SET(&e, w.GetHandle(), filter, EV_DELETE | EV_RECEIPT, 0, 0, 0);
 
 	const timespec timeout = {0, 0}; //0 to make effect of polling, because passing NULL will cause to wait indefinitely.
 
-	int res = kevent(queue, &e, 1, &e, 1, &timeout);
+	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
 	if(res < 0){
 		ASSERT(false)//TODO: ignore?
 		TRACE(<< "WaitSet::Remove(): RemoveFilter(): kevent() failed" << std::endl);
@@ -77,7 +76,6 @@ void RemoveFilter(int queue, Waitable& w, int16_t filter){
 	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
 }
 
-}//~namespace
 #endif
 
 
@@ -122,10 +120,10 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	ASSERT(this->NumWaitables() <= revents.Size() / 2)
 	
 	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
-		AddFilter(this->queue, w, EVFILT_READ);
+		this->AddFilter(w, EVFILT_READ);
 	}
 	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
-		AddFilter(this->queue, w, EVFILT_WRITE);
+		this->AddFilter(w, EVFILT_WRITE);
 	}
 #else
 #	error "Unsupported OS"
@@ -181,14 +179,14 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	}
 #elif M_OS == M_OS_MACOSX
 	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
-		AddFilter(this->queue, w, EVFILT_READ);
+		this->AddFilter(w, EVFILT_READ);
 	}else{
-		RemoveFilter(this->queue, w, EVFILT_READ);
+		this->RemoveFilter(w, EVFILT_READ);
 	}
 	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
-		AddFilter(this->queue, w, EVFILT_WRITE);
+		this->AddFilter(w, EVFILT_WRITE);
 	}else{
-		RemoveFilter(this->queue, w, EVFILT_WRITE);
+		this->RemoveFilter(w, EVFILT_WRITE);
 	}
 #else
 #	error "Unsupported OS"
@@ -238,8 +236,8 @@ void WaitSet::Remove(Waitable& w)throw(){
 		ASSERT_INFO(false, "WaitSet::Remove(): epoll_ctl failed, probably the Waitable was not added to the wait set")
 	}
 #elif M_OS == M_OS_MACOSX	
-	RemoveFilter(this->queue, w, EVFILT_READ);
-	RemoveFilter(this->queue, w, EVFILT_WRITE);
+	this->RemoveFilter(w, EVFILT_READ);
+	this->RemoveFilter(w, EVFILT_WRITE);
 #else
 #	error "Unsupported OS"
 #endif

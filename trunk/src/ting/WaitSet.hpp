@@ -263,7 +263,10 @@ protected:
 protected:
 	virtual int GetHandle() = 0;
 
-
+#	if M_OS == M_OS_MACOSX
+	void AddFilter(Waitable& w, int16_t filter);
+	void RemoveFilter(Waitable& w, int16_t filter)
+#	endif
 
 #else
 #	error "Unsupported OS"
