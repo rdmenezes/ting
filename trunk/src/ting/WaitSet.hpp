@@ -263,11 +263,6 @@ protected:
 protected:
 	virtual int GetHandle() = 0;
 
-#	if M_OS == M_OS_MACOSX
-	void AddFilter(Waitable& w, int16_t filter);
-	void RemoveFilter(Waitable& w, int16_t filter);
-#	endif
-
 #else
 #	error "Unsupported OS"
 #endif
@@ -461,6 +456,13 @@ public:
 
 private:
 	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events);
+	
+	
+#if M_OS == M_OS_MACOSX
+	void AddFilter(Waitable& w, int16_t filter);
+	void RemoveFilter(Waitable& w, int16_t filter);
+#endif
+
 };//~class WaitSet
 
 
