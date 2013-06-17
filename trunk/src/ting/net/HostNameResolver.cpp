@@ -520,10 +520,6 @@ private:
 			timeMap2(&resolversByTime2)
 	{
 		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
-		
-		//Open socket in constructor instead of Run() to catch any possible error
-		//with opening the socket before starting the thread.
-		this->socket.Open();
 	}
 public:
 	~LookupThread()throw(){
@@ -573,7 +569,7 @@ private:
 #	undef ERROR
 #endif
 
-			//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
+			//OnCompleted_ts() does not throw any exceptions, so no worries about that.
 			this->CallCallback(r.operator->(), HostNameResolver::ERROR);
 		}
 	}
@@ -712,10 +708,26 @@ private:
 		
 		this->InitDNS();
 		
-		TRACE(<< "this->dns.IPv4Host() = " << std::hex << this->dns.host.IPv4Host() << std::dec << std::endl)
+		TRACE(<< "this->dns.host = " << this->dns.host.ToString() << std::endl)
 
 		this->waitSet.Add(this->queue, ting::Waitable::READ);
 		this->waitSet.Add(this->socket, ting::Waitable::READ);
+		
+		{
+			ting::mt::Mutex::Guard mutexGuard(dns::mutex);//mutex is needed because socket opening may fail and we will have to set isExiting flag which should be protected by mutex
+			
+			try{
+				if(this->dns.host.IPv4Host()){
+					this->socket.Open(0, true);
+				}else{
+					this->socket.Open();
+				}
+			}catch(...){
+				this->isExiting = true;
+				this->RemoveAllResolvers();
+				return;
+			}
+		}
 		
 		while(!this->quitFlag){
 			ting::u32 timeout;
@@ -806,7 +818,7 @@ private:
 								r->dns = this->dns;
 							}
 
-							if(r->dns.host.IPv4Host() != 0){
+							if(r->dns.host.IsValid()){
 								if(!this->SendRequestToDNS(r)){
 									TRACE(<< "request not sent" << std::endl)
 									break;//socket is not ready for sending, go out of requests sending loop.
