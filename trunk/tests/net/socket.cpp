@@ -51,7 +51,7 @@ public:
 		try{
 			ting::net::TCPServerSocket listenSock;
 
-			listenSock.Open(13666);//start listening
+			listenSock.Open(13666, false, 50, true);//start listening
 
 			ASSERT_ALWAYS(listenSock.GetLocalPort() == 13666)
 

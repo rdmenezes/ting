@@ -352,7 +352,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 
 	if(getpeername(this->socket, reinterpret_cast<sockaddr*>(&addr), &len) == DSocketError()){
 		std::stringstream ss;
-		ss << "Socket::GetRemoteAddress(): getpeername() failed: ";
+		ss << "TCPSocket::GetRemoteAddress(): getpeername() failed: ";
 #if M_COMPILER == M_COMPILER_MSVC
 		{
 			const size_t msgbufSize = 0xff;
