@@ -321,7 +321,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 				ting::u16(ntohs(a.sin_port))
 			);
 	}else{
-		ASSERT_INFO(sockAddr.ss_family == AF_INET6, "sockAddr.ss_family = " << unsigned(sockAddr.ss_family))
+		ASSERT_INFO(sockAddr.ss_family == AF_INET6, "sockAddr.ss_family = " << unsigned(sockAddr.ss_family) << " AF_INET = " << AF_INET << " AF_INET6 = " << AF_INET6)
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		out_SenderIP = IPAddress(
 				IPAddress::Host(

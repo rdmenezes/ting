@@ -15,9 +15,15 @@
                 <in>Mutex.d</in>
               </df>
               <df name="net">
+                <in>HostNameResolver.d</in>
+                <in>IPAddress.d</in>
+                <in>Lib.d</in>
+                <in>Socket.d</in>
+                <in>TCPServerSocket.d</in>
+                <in>TCPSocket.d</in>
+                <in>UDPSocket.d</in>
               </df>
               <df name="net">
-                <in>HostNameResolver.d</in>
               </df>
             </df>
           </df>
@@ -176,8 +182,6 @@
         <in>TestSingleton.hpp</in>
         <in>testso.cpp</in>
         <in>testso.hpp</in>
-      </df>
-      <df name="StrUTF8">
       </df>
       <df name="Thread">
         <in>main.cpp</in>
