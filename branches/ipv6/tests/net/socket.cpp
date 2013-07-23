@@ -476,7 +476,7 @@ void Run(){
 			}
 			
 			ting::mt::Thread::Sleep(100);
-		}
+		}		
 		ASSERT_ALWAYS(bytesSent == 4)
 	}catch(ting::net::Exc &e){
 		ASSERT_INFO_ALWAYS(false, e.What())
