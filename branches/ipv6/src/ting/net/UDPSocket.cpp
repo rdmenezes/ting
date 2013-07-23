@@ -230,6 +230,10 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		if(len == DSocketError()){
 #if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
+			
+			if(errorCode == WSAEAFNOSUPPORT){
+				throw net::Exc("Address family is not supported by protocol family. Note, that libting on WinXP does not support IPv6.");
+			}
 #else
 			int errorCode = errno;
 #endif
