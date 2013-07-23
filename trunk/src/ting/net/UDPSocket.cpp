@@ -60,13 +60,13 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
+#if M_OS != M_OS_WINDOWS //WinXP does not support dualstack
 	//turn off IPv6 only mode to allow also accepting IPv4
 	if(!protocolIPv4){
 		int no = 0;     
-		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no)) != 0){
-			throw ting::net::Exc("Dual stack not supported");
-		}
+		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
 	}
+#endif
 	
 	//Bind locally, if appropriate
 	if(port != 0){
