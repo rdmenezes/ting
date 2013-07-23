@@ -56,8 +56,14 @@ void UDPSocket::Open(u16 port){
 
 	//turn off IPv6 only mode to allow also accepting IPv4
 	{
+#if M_OS == M_OS_WINDOWS
+		char no = 0;
+		const char* noPtr = &no;
+#else
 		int no = 0;
-		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no)) != 0){
+		void* noPtr = &no;
+#endif
+		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, noPtr, sizeof(no)) != 0){
 			//TODO: dual stack is not supported, how to handle?
 			ASSERT(false)
 		}
