@@ -55,12 +55,8 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
 	}
 
-	// allow local address reuse
-	{
-		int yes = 1;
-		setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof(yes));
-	}
-
+	bool ipv4 = false;
+	
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
 	{
 #if M_OS == M_OS_WINDOWS
@@ -71,22 +67,59 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 		void* noPtr = &no;
 #endif
 		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, noPtr, sizeof(no)) != 0){
-			//TODO: dual stack is not supporeted
-			ASSERT(false)
+			//Dual stack is not supported, proceed with IPv4 only.
+			
+			this->Close();//close IPv6 socket
+			
+			//create IPv4 socket
+			
+#if M_OS == M_OS_WINDOWS
+			this->CreateEventForWaitable();
+#endif			
+			
+			this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
+	
+			if(this->socket == DInvalidSocket()){
+#if M_OS == M_OS_WINDOWS
+				this->CloseEventForWaitable();
+#endif
+				throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
+			}
+			
+			ipv4 = true;
 		}
 	}
+	
+	// allow local address reuse
+	{
+		int yes = 1;
+		setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof(yes));
+	}
 
-	sockaddr_in6 sa;
-	memset(&sa, 0, sizeof(sa));
-	sa.sin6_family = AF_INET6;
-	sa.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
-	sa.sin6_port = htons(port);
+	sockaddr_storage sockAddr;
+	socklen_t sockAddrLen;
+	
+	if(ipv4){
+		sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
+		memset(&sa, 0, sizeof(sa));
+		sa.sin_family = AF_INET;
+		sa.sin_addr.s_addr = INADDR_ANY;
+		sa.sin_port = htons(port);
+		sockAddrLen = sizeof(sa);
+	}else{
+		sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		memset(&sa, 0, sizeof(sa));
+		sa.sin6_family = AF_INET6;
+		sa.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
+		sa.sin6_port = htons(port);
+		sockAddrLen = sizeof(sa);
+	}
 
 	// Bind the socket for listening
 	if(bind(
 			this->socket,
-			reinterpret_cast<sockaddr*>(&sa),
-			sizeof(sa)
+			reinterpret_cast<sockaddr*>(&sockAddr),
+			sockAddrLen
 		) == DSocketError())
 	{
 #if M_OS == M_OS_WINDOWS
