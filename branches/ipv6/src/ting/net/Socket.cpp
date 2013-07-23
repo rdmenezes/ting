@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -166,7 +166,7 @@ ting::u16 Socket::GetLocalPort(){
 		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
 	}
 
-	sockaddr_in6 addr;
+	sockaddr_storage addr;
 
 #if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
@@ -185,9 +185,14 @@ ting::u16 Socket::GetLocalPort(){
 		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
 	}
 	
-	ASSERT(addr.sin6_family == AF_INET6)
-
-	return ting::u16(ntohs(addr.sin6_port));
+	if(addr.ss_family == AF_INET){
+		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(addr);
+		return ting::u16(ntohs(a.sin_port));
+	}else{
+		ASSERT(addr.ss_family == AF_INET6)
+		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(addr);
+		return ting::u16(ntohs(a.sin6_port));
+	}
 }
 
 
