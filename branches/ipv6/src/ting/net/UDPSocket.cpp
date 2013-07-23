@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ using namespace ting::net;
 
 
 
-void UDPSocket::Open(u16 port, bool protocolIPv4){
+void UDPSocket::Open(u16 port){
 	if(this->IsValid()){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
@@ -47,11 +47,7 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 	this->CreateEventForWaitable();
 #endif
 
-	if(protocolIPv4){
-		this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
-	}else{
-		this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
-	}
+	this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
 	
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
@@ -60,40 +56,28 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
-#if M_OS != M_OS_WINDOWS //WinXP does not support dualstack
 	//turn off IPv6 only mode to allow also accepting IPv4
-	if(!protocolIPv4){
-		int no = 0;     
-		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
+	{
+		int no = 0;
+		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no)) != 0){
+			//TODO: dual stack is not supported, how to handle?
+			ASSERT(false)
+		}
 	}
-#endif
 	
 	//Bind locally, if appropriate
 	if(port != 0){
-		sockaddr_storage sockAddr;
-		socklen_t sockAddrLen;
-		
-		if(protocolIPv4){
-			sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
-			memset(&sa, 0, sizeof(sa));
-			sa.sin_family = AF_INET;
-			sa.sin_addr.s_addr = INADDR_ANY;
-			sa.sin_port = htons(port);
-			sockAddrLen = sizeof(sockaddr_in);
-		}else{
-			sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
-			memset(&sa, 0, sizeof(sa));
-			sa.sin6_family = AF_INET6;
-			sa.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
-			sa.sin6_port = htons(port);
-			sockAddrLen = sizeof(sockaddr_in6);
-		}
+		sockaddr_in6 sa;
+		memset(&sa, 0, sizeof(sa));
+		sa.sin6_family = AF_INET6;
+		sa.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
+		sa.sin6_port = htons(port);
 
 		// Bind the socket for listening
 		if(::bind(
 				this->socket,
-				reinterpret_cast<struct sockaddr*>(&sockAddr),
-				sockAddrLen
+				reinterpret_cast<struct sockaddr*>(&sa),
+				sizeof(sa)
 			) == DSocketError())
 		{
 			this->Close();

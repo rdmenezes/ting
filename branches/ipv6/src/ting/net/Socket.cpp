@@ -184,6 +184,8 @@ ting::u16 Socket::GetLocalPort(){
 	{
 		throw net::Exc("Socket::GetLocalPort(): getsockname() failed");
 	}
+	
+	ASSERT(addr.sin6_family == AF_INET6)
 
 	return ting::u16(ntohs(addr.sin6_port));
 }
