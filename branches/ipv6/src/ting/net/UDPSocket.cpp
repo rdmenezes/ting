@@ -28,8 +28,6 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
-#elif M_OS == M_OS_WINDOWS
-#	include <ws2tcpip.h>
 #endif
 
 
