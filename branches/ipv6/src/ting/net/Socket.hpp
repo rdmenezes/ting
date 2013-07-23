@@ -42,6 +42,7 @@ THE SOFTWARE. */
 #	include <windows.h>
 #	include <ws2tcpip.h>
 
+//On older windows SDKs IPV6_V6ONLY is not defined, let's define it here if necessary.
 #	ifndef IPV6_V6ONLY
 #		define IPV6_V6ONLY 27
 #	endif
