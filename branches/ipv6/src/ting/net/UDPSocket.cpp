@@ -181,12 +181,14 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	
 	if(destinationIP.host.IsIPv4()){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+		memset(&a, 0, sizeof(a));
 		a.sin_family = AF_INET;
 		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
 		a.sin_port = htons(destinationIP.port);
 		sockAddrLen = sizeof(sockaddr_in);
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		memset(&a, 0, sizeof(a));
 		a.sin6_family = AF_INET6;
 #if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
 		a.sin6_addr.s6_addr[0] = destinationIP.host.Quad0() >> 24;
