@@ -69,7 +69,7 @@ void WaitSet::RemoveFilter(Waitable& w, int16_t filter){
 
 	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
 	if(res < 0){
-		ASSERT(false)//TODO: ignore?
+		//ignore the failure
 		TRACE(<< "WaitSet::Remove(): RemoveFilter(): kevent() failed" << std::endl);
 	}
 	
