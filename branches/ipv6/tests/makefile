@@ -21,7 +21,7 @@ subdirs += WaitSet
 
 #Looks like static variables are not shared between dll boundaries on win32,
 #so exclude these tests
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 
 else
 
