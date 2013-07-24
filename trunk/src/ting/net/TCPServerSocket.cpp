@@ -28,8 +28,6 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
-#elif M_OS == M_OS_WINDOWS
-#	include <ws2tcpip.h>
 #endif
 
 
@@ -37,7 +35,7 @@ using namespace ting::net;
 
 
 
-void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool protocolIPv4){
+void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	if(this->IsValid()){
 		throw net::Exc("TCPServerSocket::Open(): socket already opened");
 	}
@@ -48,11 +46,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 	this->CreateEventForWaitable();
 #endif
 
-	if(protocolIPv4){
-		this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
-	}else{
-		this->socket = ::socket(PF_INET6, SOCK_STREAM, 0);
-	}
+	this->socket = ::socket(PF_INET6, SOCK_STREAM, 0);
 	
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
@@ -61,37 +55,64 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength, bool p
 		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
 	}
 
+	bool ipv4 = false;
+	
+	//turn off IPv6 only mode to allow also accepting IPv4 connections
+	{
+#if M_OS == M_OS_WINDOWS
+		char no = 0;
+		const char* noPtr = &no;
+#else
+		int no = 0;
+		void* noPtr = &no;
+#endif
+		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, noPtr, sizeof(no)) != 0){
+			//Dual stack is not supported, proceed with IPv4 only.
+			
+			this->Close();//close IPv6 socket
+			
+			//create IPv4 socket
+			
+#if M_OS == M_OS_WINDOWS
+			this->CreateEventForWaitable();
+#endif			
+			
+			this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
+	
+			if(this->socket == DInvalidSocket()){
+#if M_OS == M_OS_WINDOWS
+				this->CloseEventForWaitable();
+#endif
+				throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
+			}
+			
+			ipv4 = true;
+		}
+	}
+	
 	// allow local address reuse
 	{
 		int yes = 1;
 		setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof(yes));
 	}
 
-#if M_OS != M_OS_WINDOWS //WinXP does not support dual stack
-	//turn off IPv6 only mode to allow also accepting IPv4 connections
-	if(!protocolIPv4){
-		int no = 0;     
-		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
-	}
-#endif
-	
 	sockaddr_storage sockAddr;
 	socklen_t sockAddrLen;
 	
-	if(protocolIPv4){
+	if(ipv4){
 		sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
 		memset(&sa, 0, sizeof(sa));
 		sa.sin_family = AF_INET;
 		sa.sin_addr.s_addr = INADDR_ANY;
 		sa.sin_port = htons(port);
-		sockAddrLen = sizeof(sockaddr_in);
+		sockAddrLen = sizeof(sa);
 	}else{
 		sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&sa, 0, sizeof(sa));
 		sa.sin6_family = AF_INET6;
 		sa.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
 		sa.sin6_port = htons(port);
-		sockAddrLen = sizeof(sockaddr_in6);
+		sockAddrLen = sizeof(sa);
 	}
 
 	// Bind the socket for listening

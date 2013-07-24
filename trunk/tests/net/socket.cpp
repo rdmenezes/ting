@@ -51,7 +51,7 @@ public:
 		try{
 			ting::net::TCPServerSocket listenSock;
 
-			listenSock.Open(13666, false, 50, true);//start listening
+			listenSock.Open(13666);//start listening
 
 			ASSERT_ALWAYS(listenSock.GetLocalPort() == 13666)
 
@@ -138,7 +138,7 @@ namespace SendDataContinuouslyWithWaitSet{
 void Run(){
 	ting::net::TCPServerSocket serverSock;
 
-	serverSock.Open(13666, false, 50, true);
+	serverSock.Open(13666);
 
 
 	ting::net::TCPSocket sockS;

@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,6 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <netinet/in.h>
-#elif M_OS == M_OS_WINDOWS
-#	include <ws2tcpip.h>
 #endif
 
 
@@ -38,7 +36,7 @@ using namespace ting::net;
 
 
 
-void UDPSocket::Open(u16 port, bool protocolIPv4){
+void UDPSocket::Open(u16 port){
 	if(this->IsValid()){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
@@ -47,11 +45,7 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 	this->CreateEventForWaitable();
 #endif
 
-	if(protocolIPv4){
-		this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
-	}else{
-		this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
-	}
+	this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
 	
 	if(this->socket == DInvalidSocket()){
 #if M_OS == M_OS_WINDOWS
@@ -60,33 +54,60 @@ void UDPSocket::Open(u16 port, bool protocolIPv4){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
-#if M_OS != M_OS_WINDOWS //WinXP does not support dualstack
-	//turn off IPv6 only mode to allow also accepting IPv4
-	if(!protocolIPv4){
-		int no = 0;     
-		setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&no, sizeof(no));
-	}
+	this->ipv4 = false;
+	
+	//turn off IPv6 only mode to allow also accepting IPv4 connections
+	{
+#if M_OS == M_OS_WINDOWS
+		char no = 0;
+		const char* noPtr = &no;
+#else
+		int no = 0;
+		void* noPtr = &no;
 #endif
+		if(setsockopt(this->socket, IPPROTO_IPV6, IPV6_V6ONLY, noPtr, sizeof(no)) != 0){
+			//Dual stack is not supported, proceed with IPv4 only.
+			
+			this->Close();//close IPv6 socket
+			
+			//create IPv4 socket
+			
+#if M_OS == M_OS_WINDOWS
+			this->CreateEventForWaitable();
+#endif			
+			
+			this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
+	
+			if(this->socket == DInvalidSocket()){
+#if M_OS == M_OS_WINDOWS
+				this->CloseEventForWaitable();
+#endif
+				throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
+			}
+			
+			this->ipv4 = true;
+		}
+	}
 	
 	//Bind locally, if appropriate
 	if(port != 0){
 		sockaddr_storage sockAddr;
 		socklen_t sockAddrLen;
-		
-		if(protocolIPv4){
+
+		if(this->ipv4){
 			sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
 			memset(&sa, 0, sizeof(sa));
 			sa.sin_family = AF_INET;
 			sa.sin_addr.s_addr = INADDR_ANY;
 			sa.sin_port = htons(port);
-			sockAddrLen = sizeof(sockaddr_in);
+			sockAddrLen = sizeof(sa);
 		}else{
 			sockaddr_in6& sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
 			memset(&sa, 0, sizeof(sa));
 			sa.sin6_family = AF_INET6;
-			sa.sin6_addr = in6addr_any;//'in6addr_any' allows both IPv4 and IPv6
+			sa.sin6_addr = in6addr_any;//'in6addr_any' allows accepting both IPv4 and IPv6 connections!!!
 			sa.sin6_port = htons(port);
-			sockAddrLen = sizeof(sockaddr_in6);
+			sockAddrLen = sizeof(sa);
 		}
 
 		// Bind the socket for listening
@@ -158,14 +179,23 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	sockaddr_storage sockAddr;
 	socklen_t sockAddrLen;
 	
-	if(destinationIP.host.IsIPv4()){
+	
+	if(
+#if M_OS == M_OS_WINDOWS
+			this->ipv4 &&
+#endif
+			destinationIP.host.IsIPv4()
+		)
+	{
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+		memset(&a, 0, sizeof(a));
 		a.sin_family = AF_INET;
 		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
 		a.sin_port = htons(destinationIP.port);
-		sockAddrLen = sizeof(sockaddr_in);
+		sockAddrLen = sizeof(a);
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
+		memset(&a, 0, sizeof(a));
 		a.sin6_family = AF_INET6;
 #if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
 		a.sin6_addr.s6_addr[0] = destinationIP.host.Quad0() >> 24;
@@ -191,7 +221,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		a.sin6_addr.__in6_u.__u6_addr32[3] = htonl(destinationIP.host.Quad3());
 #endif
 		a.sin6_port = htons(destinationIP.port);
-		sockAddrLen = sizeof(sockaddr_in6);
+		sockAddrLen = sizeof(a);
 	}
 
 	ssize_t len;
@@ -209,6 +239,10 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		if(len == DSocketError()){
 #if M_OS == M_OS_WINDOWS
 			int errorCode = WSAGetLastError();
+			
+			if(errorCode == WSAEAFNOSUPPORT){
+				throw net::Exc("Address family is not supported by protocol family. Note, that libting on WinXP does not support IPv6.");
+			}
 #else
 			int errorCode = errno;
 #endif

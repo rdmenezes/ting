@@ -714,11 +714,7 @@ private:
 			ting::mt::Mutex::Guard mutexGuard(dns::mutex);//mutex is needed because socket opening may fail and we will have to set isExiting flag which should be protected by mutex
 			
 			try{
-				if(this->dns.host.IPv4Host()){
-					this->socket.Open(0, true);
-				}else{
-					this->socket.Open();
-				}
+				this->socket.Open();
 			}catch(...){
 				this->isExiting = true;
 				this->RemoveAllResolvers();

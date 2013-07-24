@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,12 @@ THE SOFTWARE. */
 #if M_OS == M_OS_WINDOWS
 #	include <winsock2.h>
 #	include <windows.h>
+#	include <ws2tcpip.h>
+
+//On older windows SDKs IPV6_V6ONLY is not defined, let's define it here if necessary.
+#	ifndef IPV6_V6ONLY
+#		define IPV6_V6ONLY 27
+#	endif
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
 #	include <sys/socket.h>
