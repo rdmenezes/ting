@@ -45,19 +45,26 @@ void UDPSocket::Open(u16 port){
 	this->CreateEventForWaitable();
 #endif
 
+	this->ipv4 = false;
+	
 	this->socket = ::socket(PF_INET6, SOCK_DGRAM, 0);
 	
 	if(this->socket == DInvalidSocket()){
-#if M_OS == M_OS_WINDOWS
-		this->CloseEventForWaitable();
-#endif
-		throw net::Exc("UDPSocket::Open(): ::socket() failed");
-	}
+		//maybe IPv6 is not supported by OS, try to proceed with IPv4 socket then
+		this->socket = ::socket(PF_INET, SOCK_DGRAM, 0);
 
-	this->ipv4 = false;
+		if(this->socket == DInvalidSocket()){
+#if M_OS == M_OS_WINDOWS
+			this->CloseEventForWaitable();
+#endif
+			throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
+		}
+
+		this->ipv4 = true;
+	}
 	
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
-	{
+	if(!this->ipv4){
 #if M_OS == M_OS_WINDOWS
 		char no = 0;
 		const char* noPtr = &no;
