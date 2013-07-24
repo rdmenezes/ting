@@ -48,13 +48,13 @@ void WaitSet::AddFilter(Waitable& w, int16_t filter){
 
 	int res = kevent(this->queue, &e, 1, &e, 1, &timeout);
 	if(res < 0){
-		throw ting::Exc("WaitSet::Add(): AddFilter(): kevent() failed");
+		throw Exc("WaitSet::Add(): AddFilter(): kevent() failed");
 	}
 	
 	ASSERT((e.flags & EV_ERROR) != 0) //EV_ERROR is always returned because of EV_RECEIPT, according to kevent() documentation.
 	if(e.data != 0){//data should be 0 if added successfully
 		TRACE(<< "WaitSet::Add(): e.data = " << e.data << std::endl)
-		throw ting::Exc("WaitSet::Add(): AddFilter(): kevent() failed to add filter");
+		throw Exc("WaitSet::Add(): AddFilter(): kevent() failed to add filter");
 	}
 }
 
@@ -87,7 +87,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 #if M_OS == M_OS_WINDOWS
 	ASSERT(this->numWaitables <= this->handles.Size())
 	if(this->numWaitables == this->handles.Size()){
-		throw ting::Exc("WaitSet::Add(): wait set is full");
+		throw Exc("WaitSet::Add(): wait set is full");
 	}
 
 	//NOTE: Setting wait flags may throw an exception, so do that before
@@ -113,7 +113,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 		);
 	if(res < 0){
 		TRACE(<< "WaitSet::Add(): epoll_ctl() failed. If you are adding socket, please check that is is opened before adding to WaitSet." << std::endl)
-		throw ting::Exc("WaitSet::Add(): epoll_ctl() failed");
+		throw Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
 	ASSERT(this->NumWaitables() <= revents.Size() / 2)
@@ -150,7 +150,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 		}
 		ASSERT(i <= this->numWaitables)
 		if(i == this->numWaitables){
-			throw ting::Exc("WaitSet::Change(): the Waitable is not added to this wait set");
+			throw Exc("WaitSet::Change(): the Waitable is not added to this wait set");
 		}
 	}
 
@@ -172,7 +172,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 			&e
 		);
 	if(res < 0){
-		throw ting::Exc("WaitSet::Change(): epoll_ctl() failed");
+		throw Exc("WaitSet::Change(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
 	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
@@ -247,12 +247,12 @@ void WaitSet::Remove(Waitable& w)throw(){
 
 unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
 	if(this->numWaitables == 0){
-		throw ting::Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
+		throw Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
 	}
 
 	if(out_events){
 		if(out_events->Size() < this->numWaitables){
-			throw ting::Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
+			throw Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
 		}
 	}
 
@@ -273,7 +273,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	ASSERT(res < WAIT_ABANDONED_0 || (WAIT_ABANDONED_0 + this->numWaitables) <= res)
 
 	if(res == WAIT_FAILED){
-		throw ting::Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");
+		throw Exc("WaitSet::Wait(): WaitForMultipleObjectsEx() failed");
 	}
 
 	if(res == WAIT_TIMEOUT){
@@ -330,7 +330,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 
 			std::stringstream ss;
 			ss << "WaitSet::Wait(): epoll_wait() failed, error code = " << errno << ": " << strerror(errno);
-			throw ting::Exc(ss.str().c_str());
+			throw Exc(ss.str().c_str());
 		}
 		break;
 	};
@@ -389,7 +389,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 			
 			std::stringstream ss;
 			ss << "WaitSet::Wait(): kevent() failed, error code = " << errno << ": " << strerror(errno);
-			throw ting::Exc(ss.str().c_str());
+			throw Exc(ss.str().c_str());
 		}else if(res == 0){
 			return 0; // timeout
 		}else if(res > 0){

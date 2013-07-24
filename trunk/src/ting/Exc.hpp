@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -42,41 +42,18 @@ namespace ting{
 /**
  * @brief Basic exception class
  */
-#ifdef __SYMBIAN32__ // we have symbian which does not have std c++ library
-class Exc
-#else
-class Exc : public std::exception
-#endif
-{
-	char *msg;
+class Exc : public std::exception{
+	std::string message;
 public:
-	/**
-	 * @brief Exception constructor.
-	 * @param message - Pointer to the exception message null-terminated string.
-	 *                  Constructor will copy the string into objects internal memory buffer.
-	 *                  It is legal to supply 0.
-	 */
-	inline Exc(const char* message = 0){
-		this->Construct(message);
-	}
-	
-	
-	
 	/**
 	 * @brief Constructor.
      * @param message - human friendly error description.
      */
-	inline Exc(const std::string& message){
-		this->Construct(message.c_str());
-	}
+	inline Exc(const std::string& message = std::string()) :
+			message(message)
+	{}
 
-
-
-	virtual ~Exc()throw(){
-		delete[] this->msg;
-	}
-
-
+	virtual ~Exc()throw(){}
 
 	/**
 	 * @brief Returns a pointer to exception message.
@@ -92,31 +69,9 @@ public:
 
 
 private:
-	void Construct(const char* message){
-		if(!message){
-			message = "no exception info";
-		}
-
-		size_t len = strlen(message);
-
-	#ifdef __SYMBIAN32__
-		//if I'm right in symbian simple new operator does not throw or leave, it will return 0 in case of error
-		this->msg = new char[len+1];
-	#else
-		//we do not want another exception, use std::nothrow
-		this->msg = new(std::nothrow) char[len+1];
-	#endif
-		if(!this->msg){
-			return;
-		}
-
-		memcpy(this->msg, message, len);
-		this->msg[len] = 0;//null-terminate
-	}
-	
 	//override from std::exception
 	const char *what()const throw(){
-		return this->msg;//this->msg is never 0 (see Exc constructor for more info).
+		return this->message.c_str();
 	}
 };
 

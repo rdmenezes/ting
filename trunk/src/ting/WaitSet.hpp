@@ -122,19 +122,7 @@ protected:
 	 * Use this copy constructor only if you really know what you are doing.
 	 * @param w - Waitable object to copy.
 	 */
-	inline Waitable(const Waitable& w) :
-			isAdded(false),
-			userData(w.userData),
-			readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
-	{
-		//cannot copy from waitable which is added to WaitSet
-		if(w.isAdded){
-			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
-		}
-
-		const_cast<Waitable&>(w).ClearAllReadinessFlags();
-		const_cast<Waitable&>(w).userData = 0;
-	}
+	inline Waitable(const Waitable& w);
 
 
 
@@ -145,28 +133,7 @@ protected:
 	 * Use this copy constructor only if you really know what you are doing.
 	 * @param w - Waitable object to assign to this object.
 	 */
-	inline Waitable& operator=(const Waitable& w){
-		//cannot copy because this Waitable is added to WaitSet
-		if(this->isAdded){
-			throw ting::Exc("Waitable::Waitable(copy): cannot copy while this Waitable is added to WaitSet");
-		}
-
-		//cannot copy from waitable which is adde to WaitSet
-		if(w.isAdded){
-			throw ting::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
-		}
-
-		ASSERT(!this->isAdded)
-
-		//Clear readiness flags on copying.
-		//Will need to wait for readiness again, using the WaitSet.
-		this->ClearAllReadinessFlags();
-		const_cast<Waitable&>(w).ClearAllReadinessFlags();
-
-		this->userData = w.userData;
-		const_cast<Waitable&>(w).userData = 0;
-		return *this;
-	}
+	inline Waitable& operator=(const Waitable& w);
 
 
 
@@ -298,7 +265,15 @@ class WaitSet{
 
 public:
 
-	//TODO: make exception class
+	/**
+	 * @brief WaitSet related exception class.
+	 */
+	class Exc : public ting::Exc{
+	public:
+		inline Exc(const std::string& message = std::string()) :
+				ting::Exc(message)
+		{}
+	};
 	
 	/**
 	 * @brief Constructor.
@@ -312,7 +287,7 @@ public:
 	{
 		ASSERT_INFO(maxSize <= MAXIMUM_WAIT_OBJECTS, "maxSize should be less than " << MAXIMUM_WAIT_OBJECTS)
 		if(maxSize > MAXIMUM_WAIT_OBJECTS){
-			throw ting::Exc("WaitSet::WaitSet(): requested WaitSet size is too big");
+			throw Exc("WaitSet::WaitSet(): requested WaitSet size is too big");
 		}
 	}
 
@@ -322,7 +297,7 @@ public:
 		ASSERT(int(maxSize) > 0)
 		this->epollSet = epoll_create(int(maxSize));
 		if(this->epollSet < 0){
-			throw ting::Exc("WaitSet::WaitSet(): epoll_create() failed");
+			throw Exc("WaitSet::WaitSet(): epoll_create() failed");
 		}
 	}
 #elif M_OS == M_OS_MACOSX
@@ -330,7 +305,7 @@ public:
 	{
 		this->queue = kqueue();
 		if(this->queue == -1){
-			throw ting::Exc("WaitSet::WaitSet(): kqueue creation failed");
+			throw Exc("WaitSet::WaitSet(): kqueue creation failed");
 		}
 	}
 #else
@@ -383,7 +358,7 @@ public:
 	 * @brief Add Waitable object to the wait set.
 	 * @param w - Waitable object to add to the WaitSet.
 	 * @param flagsToWaitFor - determine events waiting for which we are interested.
-	 * @throw ting::Exc - in case the wait set is full or other error occurs.
+	 * @throw ting::WaitSet::Exc - in case the wait set is full or other error occurs.
 	 */
 	void Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor);
 
@@ -394,7 +369,7 @@ public:
 	 * Changes wait flags for a given waitable, which is in this WaitSet.
 	 * @param w - Waitable for which the changing of wait flags is needed.
 	 * @param flagsToWaitFor - new wait flags to be set for the given Waitable.
-	 * @throw ting::Exc - in case the given Waitable object is not added to this wait set or
+	 * @throw ting::WaitSet::Exc - in case the given Waitable object is not added to this wait set or
 	 *                    other error occurs.
 	 */
 	void Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor);
@@ -404,7 +379,7 @@ public:
 	/**
 	 * @brief Remove Waitable from wait set.
 	 * @param w - Waitable object to be removed from the WaitSet.
-	 * @throw ting::Exc - in case the given Waitable is not added to this wait set or
+	 * @throw ting::WaitSet::Exc - in case the given Waitable is not added to this wait set or
 	 *                    other error occurs.
 	 */
 	void Remove(Waitable& w)throw();
@@ -425,7 +400,7 @@ public:
 	 *                     It is valid to pass 0 pointer, in that case this argument will not be used.
 	 * @return number of objects triggered.
 	 *         NOTE: for some reason, on Windows it can return 0 objects triggered.
-	 * @throw ting::Exc - in case of errors.
+	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
 	inline unsigned Wait(Buffer<Waitable*>* out_events = 0){
 		return this->Wait(true, 0, out_events);
@@ -446,7 +421,7 @@ public:
 	 *                     This pointer can be 0, if you are not interested in list of triggered waitables.
 	 * @return number of objects triggered. If 0 then timeout was hit.
 	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
-	 * @throw ting::Exc - in case of errors.
+	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
 	inline unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
@@ -464,6 +439,47 @@ private:
 #endif
 
 };//~class WaitSet
+
+
+
+inline Waitable::Waitable(const Waitable& w) :
+		isAdded(false),
+		userData(w.userData),
+		readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
+{
+	//cannot copy from waitable which is added to WaitSet
+	if(w.isAdded){
+		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+	}
+
+	const_cast<Waitable&>(w).ClearAllReadinessFlags();
+	const_cast<Waitable&>(w).userData = 0;
+}
+
+
+
+inline Waitable& Waitable::operator=(const Waitable& w){
+	//cannot copy because this Waitable is added to WaitSet
+	if(this->isAdded){
+		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy while this Waitable is added to WaitSet");
+	}
+
+	//cannot copy from waitable which is adde to WaitSet
+	if(w.isAdded){
+		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+	}
+
+	ASSERT(!this->isAdded)
+
+	//Clear readiness flags on copying.
+	//Will need to wait for readiness again, using the WaitSet.
+	this->ClearAllReadinessFlags();
+	const_cast<Waitable&>(w).ClearAllReadinessFlags();
+
+	this->userData = w.userData;
+	const_cast<Waitable&>(w).userData = 0;
+	return *this;
+}
 
 
 

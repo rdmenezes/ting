@@ -71,10 +71,10 @@ public:
 
 
 /*
- * @mainpage ting::Socket library
+ * @mainpage ting::net library
  *
  * @section sec_about About
- * <b>tin::Socket</b> is a simple cross platform C++ wrapper above sockets networking API designed for games.
+ * <b>ting::net</b> is a simple cross platform C++ wrapper above sockets networking API.
  *
  * @section sec_getting_started Getting started
  * @ref page_usage_tutorial "library usage tutorial" - quick start tutorial
