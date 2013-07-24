@@ -466,7 +466,7 @@ void Run(){
 		data[3] = '4';
 		unsigned bytesSent = 0;
 
-		ting::net::IPAddress addr("127.0.0.1", 13666);
+		ting::net::IPAddress addr("::1", 13666);
 
 		for(unsigned i = 0; i < 10; ++i){
 			bytesSent = sendSock.Send(data, addr);
