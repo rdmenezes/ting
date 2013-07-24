@@ -713,7 +713,7 @@ void Run(){
 	}
 	
 	//Test IPv6
-	if(IsIPv6SupportedByOS){
+	if(IsIPv6SupportedByOS()){
 		try{
 			ting::net::IPAddress ip("1002:3004:5006::7008:900a");
 			ASSERT_ALWAYS(ip.port == 0)
