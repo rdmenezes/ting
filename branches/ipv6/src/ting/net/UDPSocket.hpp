@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,7 @@ namespace net{
  *       On other operating systems it works OK.
  */
 class UDPSocket : public Socket{
+	bool ipv4;
 public:
 	UDPSocket(){}
 
@@ -73,6 +74,7 @@ public:
 	 */
 	UDPSocket& operator=(const UDPSocket& s){
 		this->Socket::operator=(s);
+		this->ipv4 = s.ipv4;
 		return *this;
 	}
 

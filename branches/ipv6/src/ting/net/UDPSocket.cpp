@@ -54,7 +54,7 @@ void UDPSocket::Open(u16 port){
 		throw net::Exc("UDPSocket::Open(): ::socket() failed");
 	}
 
-	bool ipv4 = false;
+	this->ipv4 = false;
 	
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
 	{
@@ -85,7 +85,7 @@ void UDPSocket::Open(u16 port){
 				throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
 			}
 			
-			ipv4 = true;
+			this->ipv4 = true;
 		}
 	}
 	
@@ -94,7 +94,7 @@ void UDPSocket::Open(u16 port){
 		sockaddr_storage sockAddr;
 		socklen_t sockAddrLen;
 
-		if(ipv4){
+		if(this->ipv4){
 			sockaddr_in& sa = reinterpret_cast<sockaddr_in&>(sockAddr);
 			memset(&sa, 0, sizeof(sa));
 			sa.sin_family = AF_INET;
@@ -179,15 +179,21 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	sockaddr_storage sockAddr;
 	socklen_t sockAddrLen;
 	
-//	if(destinationIP.host.IsIPv4()){
-//		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
-//		memset(&a, 0, sizeof(a));
-//		a.sin_family = AF_INET;
-//		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
-//		a.sin_port = htons(destinationIP.port);
-//		sockAddrLen = sizeof(a);
-//	}else
+	
+	if(
+#if M_OS == M_OS_WINDOWS
+			this->ipv4 &&
+#endif
+			destinationIP.host.IsIPv4()
+		)
 	{
+		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+		memset(&a, 0, sizeof(a));
+		a.sin_family = AF_INET;
+		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
+		a.sin_port = htons(destinationIP.port);
+		sockAddrLen = sizeof(a);
+	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&a, 0, sizeof(a));
 		a.sin6_family = AF_INET6;
