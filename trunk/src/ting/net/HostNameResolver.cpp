@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1011,7 +1011,25 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	r->hnr = this;
 	r->hostName = hostName;
 	r->dns = dnsIP;
+	
+#if M_OS == M_OS_WINDOWS
+	//check OS version, if WinXP then start from record A, since ting does not support IPv6 on WinXP
+	{
+		OSVERSIONINFO osvi;
+		memset(&osvi, 0, sizeof(osvi));
+		osvi.dwOSVersionInfoSize = sizeof(osvi);
+
+		GetVersionEx(&osvi);
+
+		if(osvi.dwMajorVersion > 5){
+			r->recordType = D_DNSRecordAAAA;//start with IPv6 first
+		}else{
+			r->recordType = D_DNSRecordA;
+		}
+	}
+#else
 	r->recordType = D_DNSRecordAAAA;//start with IPv6 first
+#endif
 	
 	ting::mt::Mutex::Guard mutexGuard2(dns::thread->mutex);
 	
