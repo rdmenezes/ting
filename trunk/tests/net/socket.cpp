@@ -522,7 +522,7 @@ void Run(){
 				if(IsIPv6SupportedByOS()){
 					ASSERT_INFO_ALWAYS(ip.host.Quad3() == 1, "ip.host.Quad3() = " << std::hex << ip.host.Quad3() << std::dec)
 				}else{
-					ASSERT_INFO_ALWAYS(ip.host.IPv4Host() == 7f000001, "ip.host.IPv4Host() = " << std::hex << ip.host.IPv4Host() << std::dec)
+					ASSERT_INFO_ALWAYS(ip.host.IPv4Host() == 0x7f000001, "ip.host.IPv4Host() = " << std::hex << ip.host.IPv4Host() << std::dec)
 				}
 				break;
 			}
