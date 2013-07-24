@@ -491,7 +491,10 @@ void Run(){
 		data[3] = '4';
 		unsigned bytesSent = 0;
 
-		ting::net::IPAddress addr("::1", 13666);
+		ting::net::IPAddress addr(
+				IsIPv6SupportedByOS() ? "::1" : "127.0.0.1",
+				13666
+			);
 
 		for(unsigned i = 0; i < 10; ++i){
 			bytesSent = sendSock.Send(data, addr);
@@ -516,7 +519,11 @@ void Run(){
 			bytesReceived = recvSock.Recv(buf, ip);
 			ASSERT_ALWAYS(bytesReceived == 0 || bytesReceived == 4)//all or nothing
 			if(bytesReceived == 4){
-				ASSERT_INFO_ALWAYS(ip.host.Quad3() == 1, "ip.host.IPv4Host() = " << std::hex << ip.host.Quad3() << std::dec)
+				if(IsIPv6SupportedByOS()){
+					ASSERT_INFO_ALWAYS(ip.host.Quad3() == 1, "ip.host.Quad3() = " << std::hex << ip.host.Quad3() << std::dec)
+				}else{
+					ASSERT_INFO_ALWAYS(ip.host.IPv4Host() == 7f000001, "ip.host.IPv4Host() = " << std::hex << ip.host.IPv4Host() << std::dec)
+				}
 				break;
 			}
 			
