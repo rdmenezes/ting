@@ -46,19 +46,27 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	this->CreateEventForWaitable();
 #endif
 
+	bool ipv4 = false;
+	
 	this->socket = ::socket(PF_INET6, SOCK_STREAM, 0);
 	
 	if(this->socket == DInvalidSocket()){
-#if M_OS == M_OS_WINDOWS
-		this->CloseEventForWaitable();
-#endif
-		throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
-	}
+		//maybe IPv6 is not supported by OS, try creating IPv4 socket
+		
+		this->socket = ::socket(PF_INET, SOCK_STREAM, 0);
 
-	bool ipv4 = false;
+		if(this->socket == DInvalidSocket()){
+#if M_OS == M_OS_WINDOWS
+			this->CloseEventForWaitable();
+#endif
+			throw net::Exc("TCPServerSocket::Open(): Couldn't create IPv4 socket");
+		}
+		
+		ipv4 = true;
+	}
 	
 	//turn off IPv6 only mode to allow also accepting IPv4 connections
-	{
+	if(!ipv4){
 #if M_OS == M_OS_WINDOWS
 		char no = 0;
 		const char* noPtr = &no;
@@ -83,7 +91,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 #if M_OS == M_OS_WINDOWS
 				this->CloseEventForWaitable();
 #endif
-				throw net::Exc("TCPServerSocket::Open(): Couldn't create socket");
+				throw net::Exc("TCPServerSocket::Open(): Couldn't create IPv4 socket");
 			}
 			
 			ipv4 = true;
