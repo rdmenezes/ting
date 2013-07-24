@@ -185,7 +185,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		a.sin_family = AF_INET;
 		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
 		a.sin_port = htons(destinationIP.port);
-		sockAddrLen = sizeof(sockaddr_in);
+		sockAddrLen = sizeof(a);
 	}else{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&a, 0, sizeof(a));
@@ -214,7 +214,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		a.sin6_addr.__in6_u.__u6_addr32[3] = htonl(destinationIP.host.Quad3());
 #endif
 		a.sin6_port = htons(destinationIP.port);
-		sockAddrLen = sizeof(sockaddr_in6);
+		sockAddrLen = sizeof(a);
 	}
 
 	ssize_t len;
