@@ -1,3 +1,5 @@
+include ../platform.mk
+
 subdirs :=
 subdirs += Array
 subdirs += atomic
