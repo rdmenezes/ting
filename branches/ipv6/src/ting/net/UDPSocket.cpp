@@ -179,14 +179,15 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	sockaddr_storage sockAddr;
 	socklen_t sockAddrLen;
 	
-	if(destinationIP.host.IsIPv4()){
-		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
-		memset(&a, 0, sizeof(a));
-		a.sin_family = AF_INET;
-		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
-		a.sin_port = htons(destinationIP.port);
-		sockAddrLen = sizeof(a);
-	}else{
+//	if(destinationIP.host.IsIPv4()){
+//		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
+//		memset(&a, 0, sizeof(a));
+//		a.sin_family = AF_INET;
+//		a.sin_addr.s_addr = htonl(destinationIP.host.IPv4Host());
+//		a.sin_port = htons(destinationIP.port);
+//		sockAddrLen = sizeof(a);
+//	}else
+	{
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&a, 0, sizeof(a));
 		a.sin6_family = AF_INET6;
