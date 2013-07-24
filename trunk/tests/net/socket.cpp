@@ -16,6 +16,31 @@
 
 
 
+namespace{
+
+bool IsIPv6SupportedByOS(){
+#if M_OS == M_OS_WINDOWS
+	{
+		OSVERSIONINFO osvi;
+		memset(&osvi, 0, sizeof(osvi));
+		osvi.dwOSVersionInfoSize = sizeof(osvi);
+
+		GetVersionEx(&osvi);
+
+		if(osvi.dwMajorVersion > 5){
+			return true;
+		}else{
+			return false;
+		}
+	}
+#else
+	return true;
+#endif
+}
+
+}
+
+
 namespace BasicClientServerTest{
 
 void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
@@ -688,40 +713,41 @@ void Run(){
 	}
 	
 	//Test IPv6
-	
-	try{
-		ting::net::IPAddress ip("1002:3004:5006::7008:900a");
-		ASSERT_ALWAYS(ip.port == 0)
-		ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
-		ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
-		ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
-		ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
-	}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
-		ASSERT_ALWAYS(false)
-	}catch(ting::Exc& e){
-		ASSERT_INFO_ALWAYS(false, "exception caught: " << e.What())
-	}catch(...){
-		ASSERT_ALWAYS(false)
-	}
-	
-	try{
-		ting::net::IPAddress ip("[1002:3004:5006::7008:900a]:134");
-		ASSERT_ALWAYS(ip.port == 134)
-		ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
-		ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
-		ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
-		ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
-	}catch(...){
-		ASSERT_ALWAYS(false)
-	}
-	
-	try{
-		ting::net::IPAddress ip("[::ffff:127.0.0.1]:45");
-		ASSERT_ALWAYS(ip.port == 45)
-		ASSERT_ALWAYS(ip.host.IsIPv4())
-		ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
-	}catch(...){
-		ASSERT_ALWAYS(false)
+	if(IsIPv6SupportedByOS){
+		try{
+			ting::net::IPAddress ip("1002:3004:5006::7008:900a");
+			ASSERT_ALWAYS(ip.port == 0)
+			ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
+			ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
+			ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
+			ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
+		}catch(ting::net::IPAddress::BadIPAddressFormatExc& e){
+			ASSERT_ALWAYS(false)
+		}catch(ting::Exc& e){
+			ASSERT_INFO_ALWAYS(false, "exception caught: " << e.What())
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+
+		try{
+			ting::net::IPAddress ip("[1002:3004:5006::7008:900a]:134");
+			ASSERT_ALWAYS(ip.port == 134)
+			ASSERT_ALWAYS(ip.host.Quad0() == 0x10023004)
+			ASSERT_ALWAYS(ip.host.Quad1() == 0x50060000)
+			ASSERT_ALWAYS(ip.host.Quad2() == 0x00000000)
+			ASSERT_ALWAYS(ip.host.Quad3() == 0x7008900a)
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
+
+		try{
+			ting::net::IPAddress ip("[::ffff:127.0.0.1]:45");
+			ASSERT_ALWAYS(ip.port == 45)
+			ASSERT_ALWAYS(ip.host.IsIPv4())
+			ASSERT_ALWAYS(ip.host.IPv4Host() == 0x7f000001)
+		}catch(...){
+			ASSERT_ALWAYS(false)
+		}
 	}
 }
 
