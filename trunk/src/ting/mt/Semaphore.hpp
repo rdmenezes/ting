@@ -88,7 +88,7 @@ class Semaphore{
 #elif M_OS == M_OS_SYMBIAN
 	RSemaphore s;
 #elif M_OS == M_OS_MACOSX
-	//TODO: consider using the MPCreateSemaphore
+	//TODO: implement unnamed semaphore using mutex and condition var like here: http://lists.freebsoft.org/pipermail/speechd/2012q3/004370.html
 	sem_t *s;
 #elif M_OS == M_OS_LINUX
 	sem_t s;
