@@ -188,7 +188,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	
 	
 	if(
-#if M_OS == M_OS_WINDOWS
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS
 			this->ipv4 &&
 #endif
 			destinationIP.host.IsIPv4()
