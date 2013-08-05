@@ -16,27 +16,20 @@ Semaphore::Semaphore(unsigned initialValue){
 #elif M_OS == M_OS_SYMBIAN
 	if(this->s.CreateLocal(initialValue) != KErrNone)
 #elif M_OS == M_OS_MACOSX
-	// Darwin/BSD/... semaphores are named semaphores, we need to create a 
-	// different name for new semaphore.
-	std::stringstream name;
-	name << "/Semaphore_";//NOTE: on some systems semaphore will not work if its name does not start with slash
-
-	//NOTE: static variable
-	static ting::atomic::U32 n(0);
-
-	ting::u32 curNum = n.FetchAndAdd(1);
-
-	name << curNum;
-
-	this->s = sem_open(name.str().c_str(), O_CREAT, SEM_VALUE_MAX, initialValue);
-	if (this->s == SEM_FAILED)
+	if(pthread_mutex_init(&this->m, 0) == 0){
+		if(pthread_cond_init(&this->c, 0) == 0){
+			this->v = initialValue;
+			return;
+		}
+		pthread_mutex_destroy(&this->m);
+	}
 #elif M_OS == M_OS_LINUX
 	if(sem_init(&this->s, 0, initialValue) < 0)
 #else
 #	error "unknown OS"
 #endif
 	{
-		LOG(<< "Semaphore::Semaphore(): failed" << std::endl)
+		TRACE(<< "Semaphore::Semaphore(): failed" << std::endl)
 		throw ting::Exc("Semaphore::Semaphore(): creating semaphore failed");
 	}
 }
@@ -49,7 +42,8 @@ Semaphore::~Semaphore()throw(){
 #elif M_OS == M_OS_SYMBIAN
 	this->s.Close();
 #elif M_OS == M_OS_MACOSX
-	sem_close(this->s);
+	pthread_cond_destroy(&this->c);
+	pthread_mutex_destroy(&this->m);
 #elif M_OS == M_OS_LINUX
 	sem_destroy(&this->s);
 #else
@@ -72,38 +66,38 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			break;
 	}
 #elif M_OS == M_OS_MACOSX
-	int retVal = 0;
+	struct timespec ts;
 
-	// simulate the behavior of wait
-	do{
-		retVal = sem_trywait(this->s);
-		if(retVal == 0){
-			break; // OK leave the loop
-		}else{
-			if(errno == EAGAIN){ // the semaphore was blocked
-				struct timespec amount;
-				struct timespec result;
-				int resultsleep;
-				amount.tv_sec = timeoutMillis / 1000;
-				amount.tv_nsec = (timeoutMillis % 1000) * 1000000;
-				resultsleep = nanosleep(&amount, &result);
-				// update timeoutMillis based on the output of the sleep call
-				// if nanosleep() returns -1 the sleep was interrupted and result
-				// struct is updated with the remaining un-slept time.
-				if(resultsleep == 0){
-					timeoutMillis = 0;
-				}else{
-					timeoutMillis = result.tv_sec * 1000 + result.tv_nsec / 1000000;
-				}
-			}else if(errno != EINTR){
-				throw ting::Exc("Semaphore::Wait(): wait failed");
+	if(clock_gettime(CLOCK_REALTIME, &ts) != 0){
+		throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
+	}
+
+	ts.tv_sec += timeoutMillis / 1000;
+	ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
+	ts.tv_sec += ts.tv_nsec / (1000 * 1000 * 1000);
+	ts.tv_nsec = ts.tv_nsec % (1000 * 1000 * 1000);
+	
+	if(pthread_mutex_lock(&this->m) != 0){
+		throw ting::Exc("Semaphore::Wait(): failed to lock the mutex");
+	}
+
+	if(this->v == 0){
+		if(pthread_cond_timedwait(&this->c, &this->m, &ts) != 0){
+			if(pthread_mutex_unlock(&this->m) != 0){
+				ASSERT(false)
+			}
+			if(errno == ETIMEDOUT){
+				return false;
+			}else{
+				throw ting::Exc("Semaphore::Wait(): pthread_cond_wait() failed");
 			}
 		}
-	}while(timeoutMillis > 0);
+	}
 
-	// no time left means we reached the timeout
-	if(timeoutMillis == 0){
-		return false;
+	--this->v;
+
+	if(pthread_mutex_unlock(&this->m) != 0){
+		ASSERT(false)
 	}
 #elif M_OS == M_OS_LINUX
 	//if timeoutMillis is 0 then use sem_trywait() to avoid unnecessary time calculation for sem_timedwait()
@@ -118,8 +112,9 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 	}else{
 		timespec ts;
 
-		if(clock_gettime(CLOCK_REALTIME, &ts) == -1)
+		if(clock_gettime(CLOCK_REALTIME, &ts) == -1){
 			throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
+		}
 
 		ts.tv_sec += timeoutMillis / 1000;
 		ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;

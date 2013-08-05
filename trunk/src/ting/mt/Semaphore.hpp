@@ -56,9 +56,12 @@ THE SOFTWARE. */
 #	include <e32std.h>
 #	include <hal.h>
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS
 #	include <semaphore.h>
 #	include <errno.h>
+
+#elif M_OS == M_OS_MACOSX
+
 
 #else
 #	error "Unsupported OS"
@@ -88,8 +91,10 @@ class Semaphore{
 #elif M_OS == M_OS_SYMBIAN
 	RSemaphore s;
 #elif M_OS == M_OS_MACOSX
-	//TODO: implement unnamed semaphore using mutex and condition var like here: http://lists.freebsoft.org/pipermail/speechd/2012q3/004370.html
-	sem_t *s;
+	//emulate semaphore using mutex and condition variable
+	pthread_mutex_t m;
+	pthread_cond_t c;
+	unsigned v; //current semaphore value
 #elif M_OS == M_OS_LINUX
 	sem_t s;
 #else
@@ -132,14 +137,23 @@ public:
 #elif M_OS == M_OS_SYMBIAN
 		this->s.Wait();
 #elif M_OS == M_OS_MACOSX
-		int retVal = 0;
-
-		do{
-			retVal = sem_wait(this->s);
-		}while(retVal == -1 && errno == EINTR);
-
-		if(retVal < 0){
-			throw ting::Exc("Semaphore::Wait(): wait failed");
+		if(pthread_mutex_lock(&this->m) != 0){
+			throw ting::Exc("Semaphore::Wait(): failed to lock the mutex");
+		}
+		
+		if(this->v == 0){
+			if(pthread_cond_wait(&this->c, &this->m) != 0){
+				if(pthread_mutex_unlock(&this->m) != 0){
+					ASSERT(false)
+				}
+				throw ting::Exc("Semaphore::Wait(): pthread_cond_wait() failed");
+			}
+		}
+		
+		--this->v;
+		
+		if(pthread_mutex_unlock(&this->m) != 0){
+			ASSERT(false)
 		}
 #elif M_OS == M_OS_LINUX
 		int retVal;
@@ -191,7 +205,23 @@ public:
 #elif M_OS == M_OS_SYMBIAN
 		this->s.Signal();
 #elif M_OS == M_OS_MACOSX
-		if(sem_post(this->s) < 0){
+		if(pthread_mutex_lock(&this->m) != 0){
+			ASSERT(false)
+			return;
+		}
+		
+		if(this->v < ting::u32(-1)){
+			++this->v;
+		}else{
+			ASSERT(false)
+		}
+		
+		if(this->v - 1 == 0){
+			//someone is waiting on the semaphore
+			pthread_cond_signal(&this->c);
+		}
+		
+		if(pthread_mutex_unlock(&this->m) != 0){
 			ASSERT(false)
 		}
 #elif M_OS == M_OS_LINUX
