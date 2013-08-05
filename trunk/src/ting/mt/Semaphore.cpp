@@ -66,11 +66,16 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			break;
 	}
 #elif M_OS == M_OS_MACOSX
+	mach_timebase_info_data_t timeBase;
+	mach_timebase_info(&timeBase);
+	
+	uint64_t curTime = mach_absolute_time();
+	curTime = curTime * timeBase.numer / timeBase.denom;
+	
 	struct timespec ts;
-
-	if(clock_gettime(CLOCK_REALTIME, &ts) != 0){
-		throw ting::Exc("Semaphore::Wait(): clock_gettime() returned error");
-	}
+	
+	ts.tv_sec = curTime / (1000 * 1000 * 1000);
+	ts.tv_nsec = curTime % (1000 * 1000 * 1000);
 
 	ts.tv_sec += timeoutMillis / 1000;
 	ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
