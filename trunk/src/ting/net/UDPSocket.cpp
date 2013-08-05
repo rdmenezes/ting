@@ -330,8 +330,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 			if(errorCode == DEIntr()){
 				continue;
 			}else if(errorCode == DEAgain()){
-				//no data available, return 0 bytes received
-				len = 0;
+				return 0; //no data available, return 0 bytes received
 			}else{
 				std::stringstream ss;
 				ss << "UDPSocket::Recv(): recvfrom() failed, error code = " << errorCode << ": ";
