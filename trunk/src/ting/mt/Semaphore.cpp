@@ -88,14 +88,14 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 	}
 
 	if(this->v == 0){
-		if(pthread_cond_timedwait(&this->c, &this->m, &ts) != 0){
+		if(int err = pthread_cond_timedwait(&this->c, &this->m, &ts)){
 			if(pthread_mutex_unlock(&this->m) != 0){
 				ASSERT(false)
 			}
-			if(errno == ETIMEDOUT){
+			if(err == ETIMEDOUT){
 				return false;
 			}else{
-				TRACE(<< "Semaphore::Wait(): pthread_cond_wait() failed, errno = " << errno << std::endl)
+				TRACE(<< "Semaphore::Wait(): pthread_cond_wait() failed, error code = " << err << std::endl)
 				throw ting::Exc("Semaphore::Wait(): pthread_cond_wait() failed");
 			}
 		}
