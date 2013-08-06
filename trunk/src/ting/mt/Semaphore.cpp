@@ -3,6 +3,7 @@
 #if M_OS == M_OS_MACOSX
 #	include <sstream>
 #	include <mach/mach_time.h>
+#	include <cerrno>
 #endif
 
 
