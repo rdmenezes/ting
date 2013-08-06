@@ -3,6 +3,7 @@
 #include "../../src/ting/mt/MsgThread.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/types.hpp"
+#include "../../src/ting/config.hpp"
 
 #include "tests.hpp"
 
@@ -74,7 +75,14 @@ public:
 
 void Run(){
 	//TODO: read ulimit
-	ting::StaticBuffer<TestThread1, 500> thr;
+	ting::StaticBuffer<
+			TestThread1,
+#if M_OS == M_OS_MACOSX
+			50
+#else
+			500
+#endif
+		> thr;
 
 	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
 		i->Start();
