@@ -32,6 +32,8 @@ public:
 	
 	//override
 	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
+		TRACE(<< "OnCompleted_ts(): result = " << result << " ip = " << ip.ToString() << std::endl)
+		
 //		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
 		this->result = result;
 		
