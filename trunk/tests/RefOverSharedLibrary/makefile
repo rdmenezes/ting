@@ -39,7 +39,11 @@ ifeq ($(platform),windows)
 	@cp ../../src/libting.dll .
 	@$^
 else
+    ifeq ($(platform),macosx)
+	@DYLD_LIBRARY_PATH=../../src:. ./$^
+    else
 	@LD_LIBRARY_PATH=../../src:. ./$^
+    endif
 endif
 
 
