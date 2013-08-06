@@ -40,6 +40,7 @@ Queue::Queue(){
 		std::stringstream ss;
 		ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
 				<< " error code = " << errno << ": " << strerror(errno);
+		TRACE(<< ss.str() << std::endl)
 		throw ting::Exc(ss.str().c_str());
 	}
 #elif M_OS == M_OS_LINUX
