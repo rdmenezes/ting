@@ -1,8 +1,6 @@
 #include "Semaphore.hpp"
 
 #if M_OS == M_OS_MACOSX
-#	include <sstream>
-#	include <mach/mach_time.h>
 #	include <cerrno>
 #endif
 
@@ -67,16 +65,14 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			break;
 	}
 #elif M_OS == M_OS_MACOSX
-	mach_timebase_info_data_t timeBase;
-	mach_timebase_info(&timeBase);
+	struct timeval tv;
 	
-	uint64_t curTime = mach_absolute_time();
-	curTime = curTime * timeBase.numer / timeBase.denom;
+	gettimeofday(&tv, NULL);
 	
 	struct timespec ts;
 	
-	ts.tv_sec = curTime / (1000 * 1000 * 1000);
-	ts.tv_nsec = curTime % (1000 * 1000 * 1000);
+	ts.tv_sec = tv.tv_sec;
+	ts.tv_nsec = tv.tv_usec * 1000;
 
 	ts.tv_sec += timeoutMillis / 1000;
 	ts.tv_nsec += (timeoutMillis % 1000) * 1000 * 1000;
