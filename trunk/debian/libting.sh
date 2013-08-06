@@ -1,6 +1,6 @@
 #!/bin/sh
 
-soName=1
+soName=2
 
 packageName=libting$soName
 
