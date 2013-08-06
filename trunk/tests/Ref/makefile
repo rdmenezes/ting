@@ -2,16 +2,16 @@ include ../../platform.mk
 
 binary_name := tests
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
 binary_name := $(binary_name).exe
 endif
 
 default: $(binary_name)
 
-ifeq ($(platform),win32)
+ifeq ($(platform),windows)
     libs :=
 endif
-ifeq ($(platform),darwin)
+ifeq ($(platform),macosx)
     libs :=
 endif
 ifeq ($(platform),linux)
@@ -34,13 +34,7 @@ ifeq ($(platform),macosx)
 endif
 
 
-test: $(binary_name)
-	@echo running $^...
-ifeq ($(platform),win32)
-	@./$^
-else
-	@LD_LIBRARY_PATH=../../src ./$^
-endif
+include ../test_target.mk
 
 include ../libting.mk
 
