@@ -51,6 +51,8 @@ void Run(){
 
 		r.Resolve_ts("google.com", 10000);
 
+		TRACE(<< "TestSimpleDNSLookup::Run(): waiting on semaphore" << std::endl)
+		
 		if(!sema.Wait(11000)){
 			ASSERT_ALWAYS(false)
 		}
