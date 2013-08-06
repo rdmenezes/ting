@@ -2,7 +2,7 @@
 
 #if M_OS == M_OS_MACOSX
 #	include <sstream>
-#	include "../atomic.hpp"
+#	include <mach/mach_time.h>
 #endif
 
 
