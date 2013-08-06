@@ -95,6 +95,7 @@ bool Semaphore::Wait(ting::u32 timeoutMillis){
 			if(errno == ETIMEDOUT){
 				return false;
 			}else{
+				TRACE(<< "Semaphore::Wait(): pthread_cond_wait() failed, errno = " << errno << std::endl)
 				throw ting::Exc("Semaphore::Wait(): pthread_cond_wait() failed");
 			}
 		}
