@@ -698,13 +698,15 @@ private:
 		
 		//destroy previous thread if necessary
 		if(this->prevThread){
-			//NOTE, if the thread was not started due to some error during adding its
+			//NOTE: if the thread was not started due to some error during adding its
 			//first DNS lookup request it is OK to call Join() on such not
 			//started thread.
 			this->prevThread->Join();
 			this->prevThread.Reset();
 			TRACE(<< "Previous thread destroyed" << std::endl)
 		}
+		
+		TRACE(<< "calling this->InitDNS()" << std::endl)
 		
 		this->InitDNS();
 		
