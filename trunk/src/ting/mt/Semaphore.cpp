@@ -2,6 +2,7 @@
 
 #if M_OS == M_OS_MACOSX
 #	include <cerrno>
+#	include <sys/time.h>
 #endif
 
 
