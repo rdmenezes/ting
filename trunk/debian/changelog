@@ -4,14 +4,14 @@ libting (3.0.0-1) stable; urgency=low
   * stable MacOS X support
   * bug fixes
 
- -- Ivan Gagis <igagis@gmail.com>  Tue, 06 May 2013 12:52:00 +0200
+ -- Ivan Gagis <igagis@gmail.com>  Tue, 06 Aug 2013 12:52:00 +0200
  
 libting (2.0.0-1) stable; urgency=low
 
   * Acquire/Release semantics for atomic operations
   * atomic::U32 class
 
- -- Ivan Gagis <igagis@gmail.com>  Wed, 02 May 2012 16:48:00 +0200
+ -- Ivan Gagis <igagis@gmail.com>  Wed, 02 May 2013 16:48:00 +0200
 
 libting (1.0.0-1) stable; urgency=low
 
