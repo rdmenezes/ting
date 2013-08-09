@@ -44,7 +44,7 @@ Typical implementation of the _ting::mt::Thread::Run()_ method which handles mes
 {{{
 void MyThread::Run(){
     while(!this->quitFlag){
-        ting::Ptr<ting::Message> m = this->queue.GetMsg();
+        ting::Ptr<ting::mt::Message> m = this->queue.GetMsg();
         m->Handle();
     }
 };
