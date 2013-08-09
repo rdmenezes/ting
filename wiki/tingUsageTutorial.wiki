@@ -3,12 +3,12 @@
 =Creating a Thread=
 first of all we need to include *ting* header to use the library
 {{{
-#include <ting/Thread.hpp>
+#include <ting/mt/Thread.hpp>
 }}}
 
-After that we can start using the library. To create a thread one needs to derive a new class representing her thread from _ting::Thread_ base class and override its _ting::Thread::Run()_ method
+After that we can start using the library. To create a thread one needs to derive a new class representing her thread from _ting::mt::Thread_ base class and override its _ting::mt::Thread::Run()_ method
 {{{
-class MyThread : public ting::Thread{
+class MyThread : public ting::mt::Thread{
     //define some variables specific to your thread,
     //in this example we have two ints: a and b
     int a;
@@ -21,12 +21,12 @@ public:
     };
 };
 }}}
-After we have our thread class defined we can create an object of this class and start the thread execution by calling _ting::Thread::Start()_ method on it
+After we have our thread class defined we can create an object of this class and start the thread execution by calling _ting::mt::Thread::Start()_ method on it
 {{{
 MyThread thr; //create an object on the stack for simplicity
 thr.Start();//start thread execution
 }}}
-After starting the thread we can wait for it to finish its execution by calling _ting::Thread::Join()_ method on the thread object. After this call we can surely say that thread has finished its execution
+After starting the thread we can wait for it to finish its execution by calling _ting::mt::Thread::Join()_ method on the thread object. After this call we can surely say that thread has finished its execution
 {{{
 thr.Join();
 }}}
@@ -34,13 +34,13 @@ thr.Join();
 
 
 =Messages and Message Queues=
-To use Messages/Queues facility along with threads it is recommended to use _ting::!MsgThread_ class as a base class instead of simple _ting::Thread_. This is because _ting::!MsgThread_ class already contains a message queue object (_ting::Thread::queue_). Note, that _ting::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See below examples for usage hints.
+To use Messages/Queues facility along with threads it is recommended to use _ting::mt::!MsgThread_ class as a base class instead of simple _ting::mt::Thread_. This is because _ting::mt::!MsgThread_ class already contains a message queue object (_ting::mt::Thread::queue_). Note, that _ting::mt::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See examples below for usage hints.
 
-From now on we will assume that our sample _!MyThread_ class is derived from _ting::!MsgThread_.
+From now on we will assume that our sample _!MyThread_ class is derived from _ting::mt::!MsgThread_.
 
-Thus the thread can receive and handle messages from other threads. To make it possible, one needs to implement the message handling loop in the threads _ting::Thread::Run()_ method.
+Thus the thread can receive and handle messages from other threads. To make it possible, one needs to implement the message handling loop in the threads _ting::mt::Thread::Run()_ method.
 
-Typical implementation of the _ting::Thread::Run()_ method which handles messages looks as follows
+Typical implementation of the _ting::mt::Thread::Run()_ method which handles messages looks as follows
 {{{
 void MyThread::Run(){
     while(!this->quitFlag){
@@ -57,7 +57,7 @@ It is also possible to use _ting::Queue::!PeekMsg()_ which does not block execut
 void MyThread::Run(){
     while(!this->quitFlag){
         //handle all messages on the queue
-        while(ting::Ptr<ting::Message> m = this->queue.PeekMsg()){
+        while(ting::Ptr<ting::mt::Message> m = this->queue.PeekMsg()){
             m->Handle();
         }
         //do some actions to be done every cycle
@@ -68,15 +68,15 @@ void MyThread::Run(){
 
 Note that each thread object has a _quitFlag_ volatile member variable which serves as a convenient indicator to the thread showing when the thread should finish its execution.
 
-Note that _ting::!QuitMessage_ will set the _quitFlag_ when it is handled.
+Note that _ting::mt::!QuitMessage_ will set the _quitFlag_ when it is handled.
 
 ==Creating your own message==
 A _Message_ is a mean to ask some thread to execute some code fragment.
 To do this one needs to create his/her own message (implementing its handler, i.e define the code fragment we want other to execute) and send it to the threads queue.
 
-Let's define our own message class deriving it from _ting::Message _
+Let's define our own message class deriving it from _ting::mt::Message _
 {{{
-class MyMessage : public ting::Message{
+class MyMessage : public ting::mt::Message{
     MyThread *myThr;
 public:
     MyMessage(MyThread *mt) :
@@ -102,7 +102,7 @@ MyThread thread;
 thread.Start();
 
 //create the message
-ting::Ptr<ting::Message> msg( new MyMessage(&thread) );
+ting::Ptr<ting::mt::Message> msg( new MyMessage(&thread) );
 
 //send the message
 thread.PushMessage(msg);
