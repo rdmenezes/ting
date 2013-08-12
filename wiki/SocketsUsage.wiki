@@ -65,7 +65,7 @@ try{
     sock.Open(ip);
     
     ting::WaitSet waitSet(1);
-    waitSet.Add(&sock, ting::Waitable::WRITE);
+    waitSet.Add(sock, ting::Waitable::WRITE);
     waitSet.Wait(); //Wait for connection to complete.
 
     //receive data (expecting 4 bytes)
@@ -98,9 +98,9 @@ After creating the object one needs to add some sockets to the wait set:
 {{{
 ting::net::TCPSocket s1, s2, s3;
 
-waitSet.Add(&s1, ting::Waitable::READ);
-waitSet.Add(&s2, ting::Waitable::READ);
-waitSet.Add(&s3, ting::Waitable::READ);
+waitSet.Add(s1, ting::Waitable::READ);
+waitSet.Add(s2, ting::Waitable::READ);
+waitSet.Add(s3, ting::Waitable::READ);
 }}}
 
 Now we can check the sockets from socket set for read activity. To do this we use ting::!WaitSet::Wait() function. It will return true if there are some sockets with activity or false if there is no any activity on sockets from socket set.
@@ -148,7 +148,7 @@ try {
     ting::net::UDPSocket rcvSock;
     ting::net::IPAddress ip("127.0.0.1", 5060);
     rcvSock.Open(5060);
-    while(1){
+    while(true){
         ting::StaticBuffer<ting::u8, 1024> buf;
         rcvSock.Recv(buf, ip); 
     }
