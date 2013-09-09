@@ -22,7 +22,7 @@ LOCAL_STATIC_LIBRARIES := android_native_app_glue ting
 
 include $(BUILD_SHARED_LIBRARY)
 
-include $(LOCAL_PATH)/../../ting/jni/Android.mk
+include $(LOCAL_PATH)/../../ting/Android.mk
 
 $(call import-module,android/native_app_glue)
 
