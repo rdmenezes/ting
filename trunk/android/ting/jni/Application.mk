@@ -1,5 +1,7 @@
 APP_PLATFORM := android-9
 
+APP_MODULES := ting     #this is to make the ting static library build when running "ndk-build"
+
 #we want to use exceptions
 APP_CPPFLAGS += -fexceptions
 
