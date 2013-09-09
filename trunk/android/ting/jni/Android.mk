@@ -4,11 +4,11 @@ include $(CLEAR_VARS)
 
 #TARGET_BUILD_TYPE := debug
 
-#LOCAL_ARM_MODE   := arm #arm or thumb
+#LOCAL_ARM_MODE := arm #arm or thumb
 
-LOCAL_MODULE    := libting
+LOCAL_MODULE := ting
 
-SRC_BASE_DIR := ../../../src/
+SRC_BASE_DIR := 
 
 LOCAL_SRC_FILES :=
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/File.cpp
