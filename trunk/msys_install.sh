@@ -2,7 +2,6 @@
 
 cp src/libting.* /usr/lib
 
-
 #copy header files
 
 incDir=/usr/include/ting
@@ -17,4 +16,4 @@ mkdir -p $incDir/net
 cp src/ting/net/*.hpp $incDir/net
 
 mkdir -p $incDir/mt
-cp src/ting/mt/*.hpp $incDir/mt 
+cp src/ting/mt/*.hpp $incDir/mt
