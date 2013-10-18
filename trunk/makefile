@@ -23,4 +23,4 @@ $(subdirs):
 
 
 install:
-	@./msys_install.sh
+	@./install.sh
