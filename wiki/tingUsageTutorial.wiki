@@ -1,4 +1,4 @@
-#summary ting::Thread usage tutorial
+#summary ting::mt::Thread usage tutorial
 
 =Creating a Thread=
 first of all we need to include *ting* header to use the library
