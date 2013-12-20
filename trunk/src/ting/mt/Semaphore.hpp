@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 /**
  * @author Ivan Gagis <igagis@gmail.com>
- * @author Jose Luis Hidalgo <joseluis.hidalgo@gmail.com> - Mac OS X port
+ * @author Jose Luis Hidalgo <joseluis.hidalgo@gmail.com> - Mac OS X initial port
  */
 
 #pragma once
@@ -56,12 +56,12 @@ THE SOFTWARE. */
 #	include <e32std.h>
 #	include <hal.h>
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_UNIX
 #	include <semaphore.h>
 #	include <errno.h>
 
 #elif M_OS == M_OS_MACOSX
-
+	//TODO: include pthread stuff for mutex and condition variable???
 
 #else
 #	error "Unsupported OS"

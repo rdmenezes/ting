@@ -54,7 +54,7 @@ THE SOFTWARE. */
 #	include <e32std.h>
 #	include <hal.h>
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <pthread.h>
 
 #else

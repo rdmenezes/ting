@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2011-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2011-2013 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -139,29 +139,52 @@ THE SOFTWARE. */
 //            OS definitions            |
 //                                      |
 
+//OS family
 #define M_OS_UNKNOWN                    0
 #define M_OS_LINUX                      1
 #define M_OS_WINDOWS                    2
 #define M_OS_MACOSX                     3
-#define M_OS_SOLARIS                    4
+#define M_OS_UNIX                       4
 #define M_OS_SYMBIAN                    5
+
+//Concrete OS name
+#define M_OS_NAME_UNKNOWN               0
+#define M_OS_NAME_MACOSX                1
+#define M_OS_NAME_IOS                   2
+#define M_OS_NAME_ANDROID               3
+#define M_OS_NAME_SOLARIS               4
 
 #if defined(__linux__)
 #	define M_OS M_OS_LINUX
-#	define M_OS_VERSION 0
+#	if defined(__ANDROID__)
+#		define M_OS_NAME M_OS_NAME_ANDROID
+#	else
+#		define M_OS_NAME M_OS_NAME_UNKNOWN
+#	endif
+
 #elif defined(WIN32) // WIN32 macro is defined for both win32 and win64
 #	define M_OS M_OS_WINDOWS
-#	define M_OS_VERSION 0
+#	define M_OS_NAME M_OS_NAME_UNKNOWN
 #elif defined(__APPLE__)
 #	define M_OS M_OS_MACOSX
-#	define M_OS_VERSION 0
-#elif defined(sun) || defined(__sun)
-#	define M_OS M_OS_SOLARIS
-#	define M_OS_VERSION 0
+#	include <TargetConditionals.h>
+#	if TARGET_OS_IPHONE == 1 //iOS
+#		define M_OS_NAME M_OS_NAME_IOS
+#	else
+#		define M_OS_NAME M_OS_NAME_MACOSX
+#	endif
+
+#elif defined(__unix) || defined(__unix__) //check for UNIX should go after check for Linux, because on Linux the __unix macro is also defined
+#	define M_OS M_OS_UNIX
+#	if defined(sun) || defined(__sun)
+#		define M_OS_NAME M_OS_NAME_SOLARIS
+#	else
+#		define M_OS_NAME M_OS_NAME_UNKNOWN
+#	endif
 #elif defined(__SYMBIAN32__)
 #	define M_OS M_OS_SYMBIAN
-#	define M_OS_VERSION 0
+#	define M_OS_NAME M_OS_NAME_UNKNOWN
 #else
 #	define M_OS M_OS_UNKNOWN
-#	define M_OS_VERSION 0
+#	define M_OS_NAME M_OS_NAME_UNKNOWN
 #endif

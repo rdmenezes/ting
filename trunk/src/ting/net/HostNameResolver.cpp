@@ -34,7 +34,7 @@ THE SOFTWARE. */
 #include "../PoolStored.hpp"
 #include "../timer.hpp"
 
-#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include "../fs/FSFile.hpp"
 #endif
 
@@ -646,7 +646,7 @@ private:
 				RegCloseKey(hSub);
 			}
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 			ting::fs::FSFile f("/etc/resolv.conf");
 			
 			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max

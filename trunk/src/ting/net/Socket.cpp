@@ -28,7 +28,7 @@ THE SOFTWARE. */
 
 
 
-#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <netinet/in.h>
 #	include <netinet/tcp.h>
 #	include <fcntl.h>
@@ -77,7 +77,7 @@ void Socket::Close()throw(){
 		closesocket(this->socket);
 
 		this->CloseEventForWaitable();
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 		close(this->socket);
 #else
 #	error "Unsupported OS"
@@ -119,7 +119,7 @@ void Socket::DisableNaggle(){
 		throw net::Exc("Socket::DisableNaggle(): socket is not valid");
 	}
 
-#if M_OS == M_OS_WINDOWS || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_WINDOWS || M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 	{
 		int yes = 1;
 		setsockopt(this->socket, IPPROTO_TCP, TCP_NODELAY, (char*)&yes, sizeof(yes));
@@ -144,7 +144,7 @@ void Socket::SetNonBlockingMode(){
 		}
 	}
 	
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 	{
 		int flags = fcntl(this->socket, F_GETFL, 0);
 		if(flags == -1){
@@ -170,7 +170,7 @@ ting::u16 Socket::GetLocalPort(){
 
 #if M_OS == M_OS_WINDOWS
 	int len = sizeof(addr);
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 	socklen_t len = sizeof(addr);
 #else
 #	error "Unsupported OS"
@@ -296,7 +296,7 @@ void Socket::SetWaitingEventsForWindows(long flags){
 
 
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 
 //override
 int Socket::GetHandle(){

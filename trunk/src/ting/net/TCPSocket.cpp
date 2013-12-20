@@ -27,7 +27,7 @@ THE SOFTWARE. */
 #include "TCPSocket.hpp"
 #include "../util.hpp"
 
-#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <netinet/in.h>
 #endif
 
@@ -81,7 +81,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 		sockaddr_in6 &sa = reinterpret_cast<sockaddr_in6&>(sockAddr);
 		memset(&sa, 0, sizeof(sa));
 		sa.sin6_family = AF_INET6;
-#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && M_OS_NAME == M_OS_NAME_ANDROID)
 		sa.sin6_addr.s6_addr[0] = ip.host.Quad0() >> 24;
 		sa.sin6_addr.s6_addr[1] = (ip.host.Quad0() >> 16) & 0xff;
 		sa.sin6_addr.s6_addr[2] = (ip.host.Quad0() >> 8) & 0xff;
@@ -117,7 +117,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 	{
 #if M_OS == M_OS_WINDOWS
 		int errorCode = WSAGetLastError();
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 		int errorCode = errno;
 #else
 #	error "Unsupported OS"
@@ -292,7 +292,7 @@ IPAddress CreateIPAddressFromSockaddrStorage(const sockaddr_storage& addr){
 		
 		return IPAddress(
 				IPAddress::Host(
-#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && M_OS_NAME == M_OS_NAME_ANDROID)
 						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
 						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
 						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),

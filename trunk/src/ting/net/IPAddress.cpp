@@ -146,7 +146,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 #	error "Unknown OS"
 #endif
 
-#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && defined(__ANDROID__))
+#if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && M_OS_NAME == M_OS_NAME_ANDROID)
 	return Host(
 			a.s6_addr[0],
 			a.s6_addr[1],

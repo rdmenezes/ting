@@ -61,10 +61,10 @@ THE SOFTWARE. */
 #	include <e32std.h>
 #	include <hal.h>
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <pthread.h>
 
-#	if M_OS == M_OS_SOLARIS
+#	if M_OS_NAME == M_OS_NAME_SOLARIS
 #		include <sched.h> // for sched_yield();
 #	endif
 
@@ -195,9 +195,9 @@ public:
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif M_OS == M_OS_SYMBIAN
 		User::After(msec * 1000);
-#elif M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX
+#elif M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX
 		if(msec == 0){
-#	if M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX || defined(__ANDROID__)
+#	if M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID
 			sched_yield();
 #	elif M_OS == M_OS_LINUX
 			pthread_yield();

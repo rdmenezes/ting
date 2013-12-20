@@ -47,7 +47,7 @@ THE SOFTWARE. */
 #		define IPV6_V6ONLY 27
 #	endif
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <sys/socket.h>
 
 #else
@@ -100,7 +100,7 @@ protected:
 		return WSAEWOULDBLOCK;
 	}
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 	typedef int T_Socket;
 
 	inline static T_Socket DInvalidSocket(){
@@ -218,7 +218,7 @@ protected:
 
 
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 private:
 	//override
 	int GetHandle();

@@ -31,10 +31,12 @@ THE SOFTWARE. */
 
 #pragma once
 
-#if defined(__SYMBIAN32__)
+#include "config.hpp"
+
+#if M_OS == M_OS_SYMBIAN
 #	include <e32std.h>
 
-#elif defined(__ANDROID__)
+#elif M_OS_NAME == M_OS_NAME_ANDROID
 #	undef NDEBUG // we want assertions to work, if we don't undef NDEBUG the assertions will be translated to nothing
 #	include <cassert>
 
@@ -63,8 +65,8 @@ THE SOFTWARE. */
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
-#	if defined(__SYMBIAN32__)
-#	elif defined(__ANDROID__)
+#	if M_OS == M_OS_SYMBIAN
+#	elif M_OS_NAME == M_OS_NAME_ANDROID
 #	else
 inline std::ofstream& DebugLogger(){
 	//this allows to make debug output even if main() is not called yet and even if
@@ -80,11 +82,11 @@ inline std::ofstream& DebugLogger(){
 
 
 
-#if defined(__SYMBIAN32__)
+#if M_OS == M_OS_SYMBIAN
 #	define LOG_ALWAYS(x)
 #	define TRACE_ALWAYS(x)
 
-#elif defined(__ANDROID__)
+#elif M_OS_NAME == M_OS_NAME_ANDROID
 #	define TRACE_ALWAYS(x) \
 		{ \
 			std::stringstream ss; \
@@ -137,7 +139,7 @@ inline void LogAssert(const char* msg, const char* file, int line){
 }
 }
 }
-#if defined(__SYMBIAN32__)
+#if M_OS == M_OS_SYMBIAN
 #	define ASSERT_INFO_ALWAYS(x, y) __ASSERT_ALWAYS((x), User::Panic(_L("ASSERTION FAILED!"),3));
 
 #else //Assume system supporting standard assert() (including Android)
@@ -159,7 +161,7 @@ inline void LogAssert(const char* msg, const char* file, int line){
 #	define ASSERT_INFO(x, y) ASSERT_INFO_ALWAYS((x), y)
 #	define ASSERT(x) ASSERT_ALWAYS(x)
 
-#	if defined(__SYMBIAN32__)
+#	if M_OS == M_OS_SYMBIAN
 #		define ASS(x) (x)
 #		define ASSCOND(x, cond) (x)
 

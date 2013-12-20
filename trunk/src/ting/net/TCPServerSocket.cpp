@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 #include "TCPServerSocket.hpp"
 
-#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <netinet/in.h>
 #endif
 
@@ -132,7 +132,7 @@ void TCPServerSocket::Open(u16 port, bool disableNaggle, u16 queueLength){
 	{
 #if M_OS == M_OS_WINDOWS
 		int errorCode = WSAGetLastError();
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 		int errorCode = errno;
 #else
 #	error "Unsupported OS"
@@ -176,7 +176,7 @@ TCPSocket TCPServerSocket::Accept(){
 
 #if M_OS == M_OS_WINDOWS
 	int sock_alen = sizeof(sockAddr);
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_SOLARIS
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 	socklen_t sock_alen = sizeof(sockAddr);
 #else
 #	error "Unsupported OS"

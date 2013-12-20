@@ -35,7 +35,7 @@ THE SOFTWARE. */
 #	include <winsock2.h>
 #	include <windows.h>
 
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX
 #	include <signal.h>
 
 #else
@@ -59,7 +59,7 @@ Lib::Lib(){
 	if(WSAStartup(versionWanted, &wsaData) != 0 ){
 		throw net::Exc("SocketLib::SocketLib(): Winsock 2.2 initialization failed");
 	}
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX
 	// SIGPIPE is generated when a remote socket is closed
 	void (*handler)(int);
 	handler = signal(SIGPIPE, SIG_IGN);
@@ -85,7 +85,7 @@ Lib::~Lib()throw(){
 			WSACleanup();
 		}
 	}
-#elif M_OS == M_OS_LINUX || M_OS == M_OS_SOLARIS || M_OS == M_OS_MACOSX
+#elif M_OS == M_OS_LINUX || M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX
 	// Restore the SIGPIPE handler
 	void (*handler)(int);
 	handler = signal(SIGPIPE, SIG_DFL);

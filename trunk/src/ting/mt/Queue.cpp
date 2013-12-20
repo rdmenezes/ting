@@ -1,7 +1,7 @@
 #include "Queue.hpp"
 
 
-#if defined(__ANDROID__)
+#if M_OS_NAME == M_OS_NAME_ANDROID
 //TODO: revert to using sys/eventfd.h when it becomes available in Android NDK
 #elif M_OS == M_OS_LINUX
 #		include <sys/eventfd.h>
@@ -35,7 +35,7 @@ Queue::Queue(){
 	if(this->eventForWaitable == NULL){
 		throw ting::Exc("Queue::Queue(): could not create event (Win32) for implementing Waitable");
 	}
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	if(::pipe(&this->pipeEnds[0]) < 0){
 		std::stringstream ss;
 		ss << "Queue::Queue(): could not create pipe (*nix) for implementing Waitable,"
@@ -78,7 +78,7 @@ Queue::~Queue()throw(){
 	}
 #if M_OS == M_OS_WINDOWS
 	CloseHandle(this->eventForWaitable);
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 	close(this->pipeEnds[0]);
 	close(this->pipeEnds[1]);
 #elif M_OS == M_OS_LINUX
@@ -114,7 +114,7 @@ void Queue::PushMessage(Ptr<Message> msg)throw(){
 		if(SetEvent(this->eventForWaitable) == 0){
 			ASSERT(false)
 		}
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 		{
 			u8 oneByteBuf[1];
 			if(write(this->pipeEnds[1], oneByteBuf, 1) != 1){
@@ -155,7 +155,7 @@ ting::Ptr<Message> Queue::PeekMsg(){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 			{
 				u8 oneByteBuf[1];
 				if(read(this->pipeEnds[0], oneByteBuf, 1) != 1){
@@ -209,7 +209,7 @@ ting::Ptr<Message> Queue::GetMsg(){
 					ASSERT(false)
 					throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 				}
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 				{
 					u8 oneByteBuf[1];
 					read(this->pipeEnds[0], oneByteBuf, 1);
@@ -253,7 +253,7 @@ ting::Ptr<Message> Queue::GetMsg(){
 				ASSERT(false)
 				throw ting::Exc("Queue::Wait(): ResetEvent() failed");
 			}
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 			{
 				u8 oneByteBuf[1];
 				read(this->pipeEnds[0], oneByteBuf, 1);
@@ -345,7 +345,7 @@ bool Queue::CheckSignaled(){
 	return (this->readinessFlags & this->flagsMask) != 0;
 }
 
-#elif M_OS == M_OS_MACOSX || defined(__ANDROID__) //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
 //override
 int Queue::GetHandle(){
 	//return read end of pipe
