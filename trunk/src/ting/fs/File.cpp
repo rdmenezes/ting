@@ -74,7 +74,7 @@ std::string File::ExtractDirectory()const{
 
 bool File::IsDir()const throw(){
 	if(this->Path().size() == 0){
-		return true;
+		return false;
 	}
 
 	ASSERT(this->Path().size() > 0)
