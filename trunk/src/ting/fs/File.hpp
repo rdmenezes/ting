@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2013 Ivan Gagis
+Copyright (c) 2009-2014 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 // Home page: http://ting.googlecode.com
-
-
 
 /**
  * @file File abstract interface
@@ -92,7 +90,6 @@ public:
 
 protected:
 	E_Mode ioMode;//mode only matters when file is opened
-public:
 
 	/**
 	 * @brief Constructor.
@@ -169,13 +166,43 @@ public:
 	 * @param mode - file opening mode (reading/writing/create).
 	 * @throw IllegalStateExc - if file already opened.
 	 */
-	virtual void Open(E_Mode mode) = 0;
+	void Open(E_Mode mode){
+		if(this->IsOpened()){
+			throw IllegalStateExc();
+		}
+		this->OpenInternal(mode);
+		
+		//set open mode
+		if(mode == CREATE){
+			this->ioMode = WRITE;
+		}else{
+			this->ioMode = mode;
+		}
 
+		this->isOpened = true;
+	};
+	
+protected:
+	//TODO: doxygen
+	virtual void OpenInternal(E_Mode mode) = 0;
+	
+public:
 	/**
 	 * @brief Close file.
 	 */
-	virtual void Close()throw() = 0;
-
+	void Close()throw(){
+		if(!this->IsOpened()){
+			return;
+		}
+		this->CloseInternal();
+		this->isOpened = false;
+	}
+	
+protected:
+	//TODO: doxygen
+	virtual void CloseInternal()throw() = 0;
+	
+public:
 	/**
 	 * @brief Check if the file is opened.
 	 * @return true - if the file is opened.
@@ -236,7 +263,9 @@ protected:
      * @param buf - buffer to fill with read data.
      * @return number of bytes actually read.
      */
-	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf) = 0;
+	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf){
+		throw ting::Exc("WriteInternal(): unsupported");
+	}
 	
 public:
 	/**
@@ -251,7 +280,7 @@ public:
 	 * @return Number of bytes actually written. Normally, should always write all the passed data,
 	 *         the only reasonable case when less data is written is when there is no more free space
 	 *         in the file system.
-	 * @throw IllegalStateExc - if file is not opened.
+	 * @throw IllegalStateExc - if file is not opened or opened for reading only.
 	 */
 	size_t Write(
 			const ting::Buffer<const ting::u8>& buf,
@@ -268,7 +297,9 @@ protected:
      * @param buf - buffer containing the data to write.
      * @return number of bytes actually written.
      */
-	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) = 0;
+	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf){
+		throw ting::Exc("WriteInternal(): unsupported");
+	}
 	
 public:
 	/**
@@ -280,7 +311,18 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	virtual void SeekForward(size_t numBytesToSeek);
+	void SeekForward(size_t numBytesToSeek){
+		if(!this->IsOpened()){
+			throw File::IllegalStateExc("SeekForward(): file is not opened");
+		}
+		this->SeekForwardInternal(numBytesToSeek);
+	}
+	
+protected:
+	//TODO: doxygen
+	virtual void SeekForwardInternal(size_t numBytesToSeek);
+	
+public:
 
 	/**
 	 * @brief Seek backwards.
@@ -290,14 +332,35 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	virtual void SeekBackward(size_t numBytesToSeek);
+	void SeekBackward(size_t numBytesToSeek){
+		if(!this->IsOpened()){
+			throw File::IllegalStateExc("SeekForward(): file is not opened");
+		}
+		this->SeekBackwardInternal(numBytesToSeek);
+	}
+	
+protected:
+	//TODO: doxygen
+	virtual void SeekBackwardInternal(size_t numBytesToSeek){
+		throw ting::Exc("SeekBackward(): unsupported");
+	}
+	
+public:
 
 	/**
 	 * @brief Seek to the beginning of the file.
 	 * Not all file systems support rewinding.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	virtual void Rewind();
+	void Rewind();
+	
+protected:
+	//TODO: doxygen
+	virtual void RewindInternal(){
+		throw ting::Exc("Rewind(): unsupported");
+	}
+	
+public:
 
 	/**
 	 * @brief Create directory.

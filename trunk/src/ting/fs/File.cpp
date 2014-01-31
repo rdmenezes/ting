@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis
+Copyright (c) 2009-2014 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -135,8 +135,7 @@ size_t File::Write(
 		throw File::Exc("file is opened, but not in WRITE mode");
 	}
 
-	size_t actualNumBytesToWrite =
-			numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite;
+	size_t actualNumBytesToWrite = (numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite);
 
 	if(offset > buf.Size()){
 		throw File::Exc("offset is out of buffer bounds");
@@ -152,10 +151,7 @@ size_t File::Write(
 
 
 
-void File::SeekForward(size_t numBytesToSeek){
-	if(!this->IsOpened())
-		throw File::Exc("SeekForward(): file is not opened");
-	
+void File::SeekForwardInternal(size_t numBytesToSeek){
 	ting::StaticBuffer<ting::u8, 0xfff> buf;//4kb buffer
 	
 	for(size_t bytesRead = 0; bytesRead != numBytesToSeek;){
@@ -170,17 +166,6 @@ void File::SeekForward(size_t numBytesToSeek){
 		ASSERT(bytesRead <= numBytesToSeek - res)
 		bytesRead += res;
 	}
-}
-
-
-
-void File::SeekBackward(size_t numBytesToSeek){
-	throw ting::Exc("SeekBackward(): unsupported");
-}
-
-
-void File::Rewind(){
-	throw ting::Exc("Rewind(): unsupported");
 }
 
 

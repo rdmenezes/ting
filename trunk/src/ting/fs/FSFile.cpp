@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis
+Copyright (c) 2009-2014 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -62,11 +62,7 @@ void FSFile::SetRootDir(const std::string &dir){
 
 
 //override
-void FSFile::Open(E_Mode mode){
-	if(this->IsOpened()){
-		throw File::IllegalStateExc("cannot open, file is already opened.");
-	}
-
+void FSFile::OpenInternal(E_Mode mode){
 	if(this->IsDir()){
 		throw File::Exc("path refers to a directory, directories can't be opened");
 	}
@@ -74,13 +70,13 @@ void FSFile::Open(E_Mode mode){
 	const char* modeStr;
 	switch(mode){
 		case File::WRITE:
-			modeStr="r+b";
+			modeStr = "r+b";
 			break;
 		case File::CREATE:
-			modeStr="w+b";
+			modeStr = "w+b";
 			break;
 		case File::READ:
-			modeStr="rb";
+			modeStr = "rb";
 			break;
 		default:
 			throw File::Exc("unknown mode");
@@ -91,31 +87,16 @@ void FSFile::Open(E_Mode mode){
 		TRACE(<< "FSFile::Open(): TruePath() = " << this->TruePath().c_str() << std::endl)
 		throw File::Exc("fopen() failed");
 	}
-
-	//set open mode
-	if(mode == CREATE){
-		this->ioMode = WRITE;
-	}else{
-		this->ioMode = mode;
-	}
-
-	this->isOpened = true;//set "opened" flag
 }
 
 
 
 //override
-void FSFile::Close()throw(){
-	if(!this->IsOpened()){
-		return;
-	}
-
+void FSFile::CloseInternal()throw(){
 	ASSERT(this->handle)
 
 	fclose(this->handle);
 	this->handle = 0;
-
-	this->isOpened = false;
 }
 
 
@@ -189,21 +170,21 @@ void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 
 
 //override
-void FSFile::SeekForward(size_t numBytesToSeek){
+void FSFile::SeekForwardInternal(size_t numBytesToSeek){
 	this->Seek(numBytesToSeek, true);
 }
 
 
 
 //override
-void FSFile::SeekBackward(size_t numBytesToSeek){
+void FSFile::SeekBackwardInternal(size_t numBytesToSeek){
 	this->Seek(numBytesToSeek, false);
 }
 
 
 
 //override
-void FSFile::Rewind(){
+void FSFile::RewindInternal(){
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("cannot rewind, file is not opened");
 	}

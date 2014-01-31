@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis
+Copyright (c) 2009-2014 Ivan Gagis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
 // Home page: http://ting.googlecode.com
-
-
 
 /**
  * @file Ordinary file system File implementation
@@ -73,7 +71,7 @@ public:
 	 * @brief Destructor.
 	 * This destructor calls the Close() method.
 	 */
-	~FSFile()throw(){
+	virtual ~FSFile()throw(){
 		this->Close();
 	}
 
@@ -100,12 +98,12 @@ public:
 
 
 	//override
-	virtual void Open(E_Mode mode);
+	virtual void OpenInternal(E_Mode mode);
 
 
 
 	//override
-	virtual void Close()throw();
+	virtual void CloseInternal()throw();
 
 
 
@@ -120,12 +118,12 @@ public:
 
 
 	//override
-	virtual void SeekForward(size_t numBytesToSeek);
+	virtual void SeekForwardInternal(size_t numBytesToSeek);
 	
 	
 	
 	//override
-	virtual void SeekBackward(size_t numBytesToSeek);
+	virtual void SeekBackwardInternal(size_t numBytesToSeek);
 
 	
 	
@@ -139,7 +137,7 @@ public:
 	
 	
 	//override
-	virtual void Rewind();
+	virtual void RewindInternal();
 	
 
 

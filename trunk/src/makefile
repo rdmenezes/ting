@@ -35,6 +35,7 @@ endif
 srcs :=
 srcs += ting/fs/File.cpp
 srcs += ting/fs/FSFile.cpp
+srcs += ting/fs/MemoryFile.cpp
 srcs += ting/mt/Mutex.cpp
 srcs += ting/mt/MsgThread.cpp
 srcs += ting/mt/Queue.cpp
