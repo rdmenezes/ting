@@ -14,17 +14,18 @@ using namespace fs;
 
 //override
 void MemoryFile::OpenInternal(E_Mode mode){
-	this->ptr = this->data.Begin();
+	this->idx = 0;
 }
 
 
 
 //override
 size_t MemoryFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
-	ASSERT(this->data.End() - this->ptr >= 0)
-	size_t numBytesRead = std::min(buf.SizeInBytes(), size_t(this->data.End() - this->ptr));
-	memcpy(buf.Begin(), this->ptr, numBytesRead);
-	this->ptr += numBytesRead;
+	ASSERT(this->idx <= this->data.size())
+	size_t numBytesRead = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
+	memcpy(buf.Begin(), &this->data[idx], numBytesRead);
+	this->idx += numBytesRead;
+	ASSERT(this->idx <= this->data.size())
 	return numBytesRead;
 }
 
@@ -32,37 +33,44 @@ size_t MemoryFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 
 //override
 size_t MemoryFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
-	ASSERT(this->data.End() - this->ptr >= 0)
-	size_t numBytesWritten = std::min(buf.SizeInBytes(), size_t(this->data.End() - this->ptr));
-	memcpy(this->ptr, buf.Begin(), numBytesWritten);
-	this->ptr += numBytesWritten;
+	ASSERT(this->idx <= this->data.size())
+	
+	size_t numBytesTillEOF = this->data.size() - this->idx;
+	if(numBytesTillEOF < buf.SizeInBytes()){
+		size_t numBytesToGrow = buf.SizeInBytes() - numBytesTillEOF;
+		this->data.resize(this->data.size() + numBytesToGrow);
+	}
+	
+	size_t numBytesWritten = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
+	memcpy(&this->data[this->idx], buf.Begin(), numBytesWritten);
+	this->idx += numBytesWritten;
+	ASSERT(this->idx <= this->data.size())
 	return numBytesWritten;
 }
 
 
 
+//override
 void MemoryFile::SeekForwardInternal(size_t numBytesToSeek){
-	ASSERT(this->data.End() - this->ptr >= 0)
-	if(size_t(this->data.End() - this->ptr) <= numBytesToSeek){
-		this->ptr = this->data.End();
-	}else{
-		this->ptr += numBytesToSeek;
-	}
+	ASSERT(this->idx <= this->data.size())
+	numBytesToSeek = std::min(this->data.size() - this->idx, numBytesToSeek);
+	this->idx += numBytesToSeek;
+	ASSERT(this->idx <= this->data.size())
 }
 
 
 
+//override
 void MemoryFile::SeekBackwardInternal(size_t numBytesToSeek){
-	ASSERT(this->ptr - this->data.Begin() >= 0)
-	if(size_t(this->ptr - this->data.Begin()) <= numBytesToSeek){
-		this->ptr = this->data.Begin();
-	}else{
-		this->ptr -= numBytesToSeek;
-	}
+	ASSERT(this->idx <= this->data.size())
+	numBytesToSeek = std::min(this->idx, numBytesToSeek);
+	this->idx -= numBytesToSeek;
+	ASSERT(this->idx <= this->data.size())
 }
 
 
 
+//override
 void MemoryFile::RewindInternal(){
-	this->ptr = this->data.Begin();
+	this->idx = 0;
 }

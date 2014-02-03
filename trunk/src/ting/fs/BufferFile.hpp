@@ -30,33 +30,28 @@ THE SOFTWARE. */
 
 #include "File.hpp"
 
-#include <vector>
-
-
-
 namespace ting{
 namespace fs{
 
 //TODO: doxygen
-class MemoryFile : public File{
+class BufferFile : public File{
 	
 private:
-	MemoryFile(const MemoryFile&);
-	MemoryFile& operator=(const MemoryFile&);
+	BufferFile(const BufferFile&);
+	BufferFile& operator=(const BufferFile&);
 	
 private:
-	std::vector<ting::u8> data;
-	size_t idx;
+	const ting::Buffer<ting::u8> data;
+	ting::u8* ptr;
 	
 public:
-	MemoryFile(){}
+	//NOTE: ownership of the buffer is not taken, buffer must remain alive during this object's lifetime.
+	BufferFile(const ting::Buffer<ting::u8>& data) :
+			data(data.Begin(), data.Size())
+	{}
 	
-	virtual ~MemoryFile()throw(){}
+	virtual ~BufferFile()throw(){}
 
-	inline size_t Size(){
-		return this->data.size();
-	}
-	
 protected:
 	//override
 	void OpenInternal(E_Mode mode);

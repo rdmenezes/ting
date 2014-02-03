@@ -33,6 +33,7 @@ endif
 
 #Sources
 srcs :=
+srcs += ting/fs/BufferFile.cpp
 srcs += ting/fs/File.cpp
 srcs += ting/fs/FSFile.cpp
 srcs += ting/fs/MemoryFile.cpp
