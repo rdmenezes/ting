@@ -68,7 +68,7 @@ protected:
 	size_t ReadInternal(const ting::Buffer<ting::u8>& buf);
 	
 	//override
-	size_t WriteInternal(const ting::Buffer<ting::u8>& buf);
+	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf);
 	
 	//override
 	void SeekForwardInternal(size_t numBytesToSeek);

@@ -7,6 +7,7 @@ subdirs += Buffer
 subdirs += debug
 subdirs += FSFile
 subdirs += math
+subdirs += MemoryFile
 subdirs += net
 subdirs += PoolStored
 subdirs += Ptr

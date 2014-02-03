@@ -72,6 +72,7 @@ public:
 		{}
 	};
 
+	//TODO: doxygen
 	class IllegalStateExc : public Exc{
 	public:
 		IllegalStateExc(const std::string& descr = "Illegal opened/closed state") :

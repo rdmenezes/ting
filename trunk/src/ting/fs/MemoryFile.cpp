@@ -32,7 +32,7 @@ size_t MemoryFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 
 
 //override
-size_t MemoryFile::WriteInternal(const ting::Buffer<ting::u8>& buf){
+size_t MemoryFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 	ASSERT(this->idx <= this->data.size())
 	
 	size_t numBytesTillEOF = this->data.size() - this->idx;

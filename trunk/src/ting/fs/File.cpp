@@ -146,7 +146,8 @@ size_t File::Write(
 	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-	return this->WriteInternal(ting::Buffer<const ting::u8>(buf.Begin() + offset, actualNumBytesToWrite));
+	ting::Buffer<const ting::u8> b(buf.Begin() + offset, actualNumBytesToWrite);
+	return this->WriteInternal(b);
 }
 
 
