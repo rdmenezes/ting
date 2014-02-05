@@ -68,7 +68,7 @@ class Queue : public ting::Waitable{
 #if M_OS == M_OS_WINDOWS
 	//use Event to implement Waitable on Windows
 	HANDLE eventForWaitable;
-#elif M_OS == M_OS_MACOSX || M_OS_NAME == M_OS_NAME_ANDROID //TODO: for Android revert to using eventFD when it becomes available in Android NDK
+#elif M_OS == M_OS_MACOSX
 	//use pipe to implement Waitable in *nix systems
 	int pipeEnds[2];
 #elif M_OS == M_OS_LINUX
