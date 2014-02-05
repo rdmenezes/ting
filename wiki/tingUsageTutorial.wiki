@@ -36,7 +36,19 @@ thr.Join();
 =Messages and Message Queues=
 To use Messages/Queues facility along with threads it is recommended to use _ting::mt::!MsgThread_ class as a base class instead of simple _ting::mt::Thread_. This is because _ting::mt::!MsgThread_ class already contains a message queue object (_ting::mt::Thread::queue_). Note, that _ting::mt::!MsgThread_ also contains a _quitFlag_ boolean variable, just for convenience. See examples below for usage hints.
 
-From now on we will assume that our sample _!MyThread_ class is derived from _ting::mt::!MsgThread_.
+From now on we will assume that our sample _!MyThread_ class is derived from _ting::mt::!MsgThread_
+{{{
+class MyThread : public ting::mt::MsgThread{
+    int a;
+    int b;
+
+public:
+    //override
+    void Run(){
+        //do some thread actions
+    };
+};
+}}}
 
 Thus the thread can receive and handle messages from other threads. To make it possible, one needs to implement the message handling loop in the threads _ting::mt::Thread::Run()_ method.
 
