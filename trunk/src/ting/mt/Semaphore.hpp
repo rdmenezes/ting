@@ -61,7 +61,7 @@ THE SOFTWARE. */
 #	include <errno.h>
 
 #elif M_OS == M_OS_MACOSX
-	//TODO: include pthread stuff for mutex and condition variable???
+#	include <pthread.h>
 
 #else
 #	error "Unsupported OS"

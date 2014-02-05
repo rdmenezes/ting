@@ -37,7 +37,10 @@ THE SOFTWARE. */
 namespace ting{
 namespace fs{
 
-//TODO: doxygen
+/**
+ * @brief Memory file.
+ * Class representing a file stored in memory. Supports reading, writing, seeking backwards and forward, rewinding.
+ */
 class MemoryFile : public File{
 	
 private:
@@ -49,10 +52,18 @@ private:
 	size_t idx;
 	
 public:
+	/**
+	 * @brief Constructor.
+	 * Creates empty memory file.
+     */
 	MemoryFile(){}
 	
 	virtual ~MemoryFile()throw(){}
 
+	/**
+	 * @brief Current file size.
+     * @return current size of the file.
+     */
 	inline size_t Size(){
 		return this->data.size();
 	}

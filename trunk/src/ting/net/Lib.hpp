@@ -81,7 +81,7 @@ public:
  */
 
 /*
- * @page page_usage_tutorial ting::Socket usage tutorial
+ * @page page_usage_tutorial ting::net::Socket usage tutorial
  *
  * TODO: write usage tutorial
  */
