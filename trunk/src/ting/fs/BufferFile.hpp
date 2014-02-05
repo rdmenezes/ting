@@ -33,7 +33,13 @@ THE SOFTWARE. */
 namespace ting{
 namespace fs{
 
-//TODO: doxygen
+/**
+ * @brief Memory buffer file.
+ * A memory buffer represented as a File.
+ * It supports reading, writing, seeking forward and backwards, rewinding.
+ * The size of the file remains constant and is equal to the size of the memory
+ * buffer used for storing the file data.
+ */
 class BufferFile : public File{
 	
 private:
@@ -45,6 +51,12 @@ private:
 	ting::u8* ptr;
 	
 public:
+	/**
+	 * @brief Constructor.
+	 * @param data - reference to a memory buffer holding data of the file.
+	 *               The reference to the buffer is saved in the BufferFile object,
+	 *               but ownership of the buffer is not taken. Thus, the buffer should remain alive during lifetime of this BufferFile object.
+	 */
 	//NOTE: ownership of the buffer is not taken, buffer must remain alive during this object's lifetime.
 	BufferFile(const ting::Buffer<ting::u8>& data) :
 			data(data.Begin(), data.Size())
