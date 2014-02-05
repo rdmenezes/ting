@@ -72,9 +72,18 @@ public:
 		{}
 	};
 
-	//TODO: doxygen
+	/**
+	 * @brief Illegal state exception.
+	 * This exception is usually thrown when trying to perform some operation on the
+	 * object while the object is in inappropriate state for that operation. For example,
+	 * when trying to read from file while it is not opened.
+	 */
 	class IllegalStateExc : public Exc{
 	public:
+		/**
+		 * @brief Constructor.
+         * @param descr - human readable description of the error.
+         */
 		IllegalStateExc(const std::string& descr = "Illegal opened/closed state") :
 				Exc(descr)
 		{}
@@ -184,7 +193,11 @@ public:
 	};
 	
 protected:
-	//TODO: doxygen
+	/**
+	 * @brief Open file, internal implementation.
+	 * Derived class should override this function with its own implementation.
+     * @param mode - opening mode.
+     */
 	virtual void OpenInternal(E_Mode mode) = 0;
 	
 public:
@@ -200,7 +213,10 @@ public:
 	}
 	
 protected:
-	//TODO: doxygen
+	/**
+	 * @brief Close file, internal implementation.
+	 * Derived class should override this function with its own implementation.
+     */
 	virtual void CloseInternal()throw() = 0;
 	
 public:
@@ -320,7 +336,14 @@ public:
 	}
 	
 protected:
-	//TODO: doxygen
+	/**
+	 * @brief Seek forward, internal implementation.
+	 * This function is called by SeekForward() after it has done some safety checks.
+	 * Derived class may override this function with its own implementation.
+	 * Otherwise, there is a default implementation which just reads and wastes
+	 * necessary amount of bytes.
+     * @param numBytesToSeek - number of bytes to seek.
+     */
 	virtual void SeekForwardInternal(size_t numBytesToSeek);
 	
 public:
@@ -341,7 +364,12 @@ public:
 	}
 	
 protected:
-	//TODO: doxygen
+	/**
+	 * @brief Seek backwards, internal implementation.
+	 * This function is called by SeekBackward() after it has done some safety checks.
+	 * Derived class may override this function with its own implementation.
+     * @param numBytesToSeek - number of bytes to seek.
+     */
 	virtual void SeekBackwardInternal(size_t numBytesToSeek){
 		throw ting::Exc("SeekBackward(): unsupported");
 	}
@@ -353,10 +381,19 @@ public:
 	 * Not all file systems support rewinding.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	void Rewind();
+	void Rewind(){
+		if(!this->IsOpened()){
+			throw File::IllegalStateExc("SeekForward(): file is not opened");
+		}
+		this->RewindInternal();
+	}
 	
 protected:
-	//TODO: doxygen
+	/**
+	 * @brief Rewind, internal implementation.
+	 * This function is called by Rewind() after it has done some safety checks.
+	 * Derived class may override this function with its own implementation.
+     */
 	virtual void RewindInternal(){
 		throw ting::Exc("Rewind(): unsupported");
 	}
