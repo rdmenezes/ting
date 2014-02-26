@@ -164,7 +164,11 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 					<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
 		)
 
+#if M_OS == M_OS_WINDOWS
+	int len;
+#else
 	ssize_t len;
+#endif
 
 	while(true){
 		len = send(
@@ -229,7 +233,11 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 					<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
 		)
 
+#if M_OS == M_OS_WINDOWS
+	int len;
+#else
 	ssize_t len;
+#endif
 
 	while(true){
 		len = recv(
@@ -372,7 +380,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 
 #if M_OS == M_OS_WINDOWS
 //override
-void TCPSocket::SetWaitingEvents(u32 flagsToWaitFor){
+void TCPSocket::SetWaitingEvents(ting::u32 flagsToWaitFor){
 	long flags = FD_CLOSE;
 	if((flagsToWaitFor & Waitable::READ) != 0){
 		flags |= FD_READ;

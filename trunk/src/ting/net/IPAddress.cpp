@@ -189,7 +189,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 
 
 
-IPAddress::IPAddress(const char* ip, u16 p) :
+IPAddress::IPAddress(const char* ip, ting::u16 p) :
 		host(Host::Parse(ip)),
 		port(p)
 {}

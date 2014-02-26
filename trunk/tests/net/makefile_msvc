@@ -13,7 +13,7 @@ default: $(binary_name)
 	@echo running $^...
 	@./$^
 
-$(binary_name): main.cpp socket.cpp dns.cpp ../../src/ting/net/Lib.cpp
+$(binary_name): main.cpp socket.cpp dns.cpp ../../src/ting/net/IPAddress.cpp ../../src/ting/net/TCPSocket.cpp
 	@echo Building $@...
 	cl $(cf) ws2_32.lib $^
 
