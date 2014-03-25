@@ -15,7 +15,7 @@ ifeq ($(platform),macosx)
     libs := 
 endif
 ifeq ($(platform),linux)
-    libs :=
+    libs := -pthread
 endif
 
 #external compiler flags (to be passed to make from command line)

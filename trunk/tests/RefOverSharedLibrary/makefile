@@ -18,7 +18,7 @@ endif
 ifeq ($(platform),windows)
     libs := ../../src/libting.dll -mwindows
 else
-    libs := ../../src/libting.so
+    libs := ../../src/libting.so -pthread
 endif
 
 #external compiler flags (to be passed to make from command line)

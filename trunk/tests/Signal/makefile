@@ -15,7 +15,7 @@ ifeq ($(platform),macosx)
     libs := 
 endif
 ifeq ($(platform),linux)
-    libs := ../../src/libting.so
+    libs := ../../src/libting.so -pthread
 endif
 
 
