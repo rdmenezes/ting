@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -253,7 +253,7 @@ public:
 	 * @return reference to object of casted class.
 	 */
 	template <class TS> inline Ref<TS> StaticCast()const throw(){
-		return Ref<TS>(static_cast<TS*>(this->operator->()));
+		return Ref<TS>(static_cast<TS*>(this->p));
 	}
 
 
@@ -310,7 +310,6 @@ public:
 			p(rc)
 	{
 		M_REF_PRINT(<< "Ref::Ref(rc): invoked, p = " << (this->p) << std::endl)
-		ASSERT_INFO(this->p, "Ref::Ref(rc): rc is 0")
 
 		//NOTE: in order to make sure that passed object inherits RefCounted
 		//do static_cast() to RefCounted. Since the T type may be a const type
@@ -460,6 +459,8 @@ public:
 
 	/**
 	 * @brief tells if 2 references are equal.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare this reference to.
 	 * @return true if both references are pointing to the same object or both are invalid.
 	 * @return false otherwise.
@@ -472,6 +473,8 @@ public:
 
 	/**
 	 * @brief tells if 2 references are not equal.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare this reference to.
 	 * @return false if both references are pointing to the same object or both are invalid.
 	 * @return true otherwise.
@@ -485,6 +488,8 @@ public:
 	/**
 	 * @brief Compares two references.
 	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare to.
 	 * @return true if the address of this object is less than the address of object referred by 'r'.
 	 * @return false otherwise.
@@ -498,6 +503,8 @@ public:
 	/**
 	 * @brief Compares two references.
 	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare to.
 	 * @return true if the address of this object is less or equal to the address of object referred by 'r'.
 	 * @return false otherwise.
@@ -511,6 +518,8 @@ public:
 	/**
 	 * @brief Compares two references.
 	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare to.
 	 * @return true if the address of this object is greater than the address of object referred by 'r'.
 	 * @return false otherwise.
@@ -524,6 +533,8 @@ public:
 	/**
 	 * @brief Compares two references.
 	 * The comparison is done the same way as it would be done for ordinary pointers.
+	 * It is ok to compare references of different types as long as the operand type can
+	 * be static casted to this type.
 	 * @param r - reference to compare to.
 	 * @return true if the address of this object is greater or equal to the address of object referred by 'r'.
 	 * @return false otherwise.
