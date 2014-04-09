@@ -465,7 +465,7 @@ public:
 	 * @return false otherwise.
 	 */
 	template <class TS> inline bool operator==(const Ref<TS>& r)const throw(){
-		return this->p == static_cast<T*>(r.p);
+		return this->p == static_cast<const T*>(r.p);
 	}
 
 
@@ -490,7 +490,7 @@ public:
 	 * @return false otherwise.
 	 */
 	template <class TS> inline bool operator<(const Ref<TS>& r)const throw(){
-		return this->p < static_cast<T*>(r.p);
+		return this->p < static_cast<const T*>(r.p);
 	}
 
 
@@ -503,7 +503,7 @@ public:
 	 * @return false otherwise.
 	 */
 	template <class TS> inline bool operator<=(const Ref<TS>& r)const throw(){
-		return this->p <= static_cast<T*>(r.p);
+		return this->p <= static_cast<const T*>(r.p);
 	}
 
 
@@ -516,7 +516,7 @@ public:
 	 * @return false otherwise.
 	 */
 	template <class TS> inline bool operator>(const Ref<TS>& r)const throw(){
-		return this->p > static_cast<T*>(r.p);
+		return this->p > static_cast<const T*>(r.p);
 	}
 
 
@@ -529,7 +529,7 @@ public:
 	 * @return false otherwise.
 	 */
 	template <class TS> inline bool operator>=(const Ref<TS>& r)const throw(){
-		return this->p >= static_cast<T*>(r.p);
+		return this->p >= static_cast<const T*>(r.p);
 	}
 
 
