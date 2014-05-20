@@ -911,6 +911,28 @@ public:
 	}
 
 
+	
+	/**
+	 * @brief Const cast.
+	 * Automatic cast to const. 'WeakRef<T>' can automatically be cast to 'WeakRef<const T>'.
+	 * @return Reference to this WeakRef object.
+	 */
+	inline operator WeakRef<const T>&()throw(){
+		return reinterpret_cast<WeakRef<const T>&>(*this);
+	}
+
+
+
+	/**
+	 * @brief Const cast.
+	 * 'const WeakRef<T>' can automatically be cast to 'const WeakRef<const T>'.
+	 * @return Reference to this WeakRef object.
+	 */
+	inline operator const WeakRef<const T>&()const throw(){
+		return reinterpret_cast<const WeakRef<const T>&>(*this);
+	}
+	
+	
 
 	/**
 	 * @brief operator =.
