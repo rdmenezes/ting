@@ -32,27 +32,34 @@ THE SOFTWARE. */
 
 #pragma once
 
-//#ifdef _MSC_VER //If Microsoft C++ compiler
-//#pragma warning(disable:4290)
+//TODO: is it needed?
+//#if M_COMPILER == M_COMPILER_MSVC
+//#	pragma warning(disable:4290)
 //#endif
 
 #include <vector>
 
-#include "debug.hpp" //debugging facilities
+#include "debug.hpp"
 #include "types.hpp"
+#include "config.hpp"
+
+
 
 //define macro used to align structures in memory
-#ifdef _MSC_VER //If Microsoft C++ compiler
-#define M_DECLARE_ALIGNED(x)
-#define M_DECLARE_ALIGNED_MSVC(x) __declspec(align(x))
+#if M_COMPILER == M_COMPILER_MSVC
+#	define M_DECLARE_ALIGNED(x)
+#	define M_DECLARE_ALIGNED_MSVC(x) __declspec(align(x))
 
-#elif defined(__GNUG__)//GNU g++ compiler
-#define M_DECLARE_ALIGNED(x) __attribute__ ((aligned(x)))
-#define M_DECLARE_ALIGNED_MSVC(x)
+#elif M_COMPILER == M_COMPILER_GCC
+#	define M_DECLARE_ALIGNED(x) __attribute__ ((aligned(x)))
+#	define M_DECLARE_ALIGNED_MSVC(x)
 
 #else
-#error "unknown compiler"
+#	define M_DECLARE_ALIGNED(x)
+#	define M_DECLARE_ALIGNED_MSVC(x)
+
 #endif
+
 
 
 namespace ting{
