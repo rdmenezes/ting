@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,21 @@ THE SOFTWARE. */
 #else
 #	define M_DECLARE_ALIGNED(x)
 #	define M_DECLARE_ALIGNED_MSVC(x)
+
+#endif
+
+
+
+//define macros for some C++11 features
+#if __cplusplus > 199711L
+// C++'11 standard or higher
+#	define OVERRIDE override
+#	define FINAL final
+
+#else
+// C++'03 standard
+#	define OVERRIDE
+#	define FINAL
 
 #endif
 
