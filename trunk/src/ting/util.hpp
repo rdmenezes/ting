@@ -83,6 +83,21 @@ namespace util{
 
 
 /**
+ * @brief Get top-clamped value.
+ * @param v - value to get clamped for.
+ * @param top - top to clamp to.
+ * @return clamped value.
+ */
+template <class T> inline T ClampedTop(T v, const T top)throw(){
+	if(v > top){
+		return top;
+	}
+	return v;
+}
+
+
+
+/**
  * @brief Clamp value top.
  * This inline template function can be used to clamp the top of the value.
  * Example:
@@ -108,10 +123,25 @@ namespace util{
  * @param top - value to clamp the top to.
  */
 template <class T> inline void ClampTop(T& v, const T top)throw(){
-	if(v > top){
-		v = top;
-	}
+	v = ClampedTop(v, top);
 }
+
+
+
+/**
+ * @brief Get bottom-clamped value.
+ * @param v - value to get clamped for.
+ * @param bottom - bottom to clamp to.
+ * @return clamped value.
+ */
+template <class T> inline T ClampedBottom(T v, const T bottom)throw(){
+	if(v < bottom){
+		return bottom;
+	}
+	return v;
+}
+
+
 
 
 /**
@@ -121,9 +151,39 @@ template <class T> inline void ClampTop(T& v, const T top)throw(){
  * @param bottom - value to clamp the bottom to.
  */
 template <class T> inline void ClampBottom(T& v, const T bottom)throw(){
+	v = ClampedBottom(v, bottom);
+}
+
+
+
+/**
+ * @brief Get range-clamped value.
+ * @param v - value to get clamped for.
+ * @param bottom - value to clamp the bottom to.
+ * @param top - value to clamp the top to.
+ * @return clamped value.
+ */
+template <class T> inline T ClampedRange(T v, const T bottom, const T top)throw(){
 	if(v < bottom){
-		v = bottom;
+		return bottom;
 	}
+	if(v > top){
+		return top;
+	}
+	return v;
+}
+
+
+
+/**
+ * @brief Clamp value to range.
+ * Clamps given value to given range.
+ * @param v - reference to the value which is to be clamped.
+ * @param bottom - value to clamp the bottom to.
+ * @param top - value to clamp the top to.
+ */
+template <class T> inline void ClampRange(T& v, const T bottom, const T top)throw(){
+	v = ClampedRange(v, bottom, top);
 }
 
 
