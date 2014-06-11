@@ -40,7 +40,40 @@ namespace ting{
 
 
 /**
- * TODO: doxygen
+ * @brief class representing a set of flags.
+ * If you define an enumeration according to the following rules:
+ * - enumeration is defined inside of a struct/class namespace.
+ * - there is no direct assignment of values to enumeration items, i.e. values are in strict ascending order.
+ * - the very last item is ENUM_SIZE
+ * 
+ * For example:
+ * @code
+ * struct MyEnum{
+ *     enum Type{
+ *         MY_ZEROTH_ITEM,
+ *         MY_FIRST_ITEM,
+ *         MY_SECOND_ITEM,
+ *         MY_THIRD_ITEM,
+ *         ...
+ *         ENUM_SIZE
+ *     };
+ * };
+ * @endcode
+ * Then, the FlagSet can be used as follows:
+ * @code
+ * ting::FlagSet<MyEnum> fs;
+ * 
+ * fs.Set(MyEnum::MY_FIRST_ITEM, true).Set(MyEnum::MY_THIRD_ITEM, true);
+ * 
+ * if(fs.Get(MyEnum::MY_FIRST_ITEM)){
+ *     //MY_FIRST_ITEM flag is set
+ * }
+ * 
+ * if(fs.Get(MyEnum::MY_ZEROTH_ITEM)){
+ *     //Will not get here, since MY_ZEROTH_ITEM flag is not set
+ * }
+ * 
+ * @endcode
  */
 template <class T_Enum> class FlagSet{
 	ting::u8 flags[T_Enum::ENUM_SIZE / 8 + 1];
