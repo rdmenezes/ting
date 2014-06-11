@@ -26,6 +26,7 @@
           <in>UDPSocket.cpp</in>
         </df>
         <in>Ref.cpp</in>
+        <in>Uncopyable.hpp</in>
         <in>WaitSet.cpp</in>
         <in>timer.cpp</in>
       </df>
@@ -285,6 +286,8 @@
           </incDir>
         </ccTool>
       </folder>
+      <item path="src/ting/Uncopyable.hpp" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>
