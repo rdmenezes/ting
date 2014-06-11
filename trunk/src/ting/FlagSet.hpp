@@ -42,8 +42,9 @@ namespace ting{
 /**
  * @brief class representing a set of flags.
  * If you define an enumeration according to the following rules:
- * - enumeration is defined inside of a struct/class namespace.
- * - there is no direct assignment of values to enumeration items, i.e. values are in strict ascending order.
+ * - enumeration is defined inside of a struct/class namespace
+ * - enumeration name is 'Type'
+ * - there is no direct assignment of values to enumeration items, i.e. values are in strict ascending order
  * - the very last item is ENUM_SIZE
  * 
  * For example:
