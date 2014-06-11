@@ -5,6 +5,7 @@ subdirs += Array
 subdirs += atomic
 subdirs += Buffer
 subdirs += debug
+subdirs += FlagSet
 subdirs += FSFile
 subdirs += math
 subdirs += MemoryFile

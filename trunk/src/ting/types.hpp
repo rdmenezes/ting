@@ -199,6 +199,20 @@ public:
 
 
 
+template <size_t type_size> struct UnsignedTypeForSize{typedef ting::u64 Type;};
+template <> struct UnsignedTypeForSize<1>{typedef ting::u8 Type;};
+template <> struct UnsignedTypeForSize<2>{typedef ting::u16 Type;};
+template <> struct UnsignedTypeForSize<3>{typedef ting::u32 Type;};
+template <> struct UnsignedTypeForSize<4>{typedef ting::u32 Type;};
+
+template <size_t type_size> struct SignedTypeForSize{typedef ting::s64 Type;};
+template <> struct SignedTypeForSize<1>{typedef ting::s8 Type;};
+template <> struct SignedTypeForSize<2>{typedef ting::s16 Type;};
+template <> struct SignedTypeForSize<3>{typedef ting::s32 Type;};
+template <> struct SignedTypeForSize<4>{typedef ting::s32 Type;};
+
+
+
 }//~namespace ting
 
 
