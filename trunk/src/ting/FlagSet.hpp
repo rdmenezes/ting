@@ -151,6 +151,46 @@ public:
 		return this->Set(typename T_Enum::Type(i), value);
 	}
 	
+	/**
+	 * @brief Check if all flags are cleared.
+     * @return true if all flags are cleared.
+	 * @return false otherwise.
+     */
+	bool IsAllClear()const throw(){
+		ASSERT(sizeof(this->flags) > 0)
+		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
+			if(this->flags[i] != 0){
+				return false;
+			}
+		}
+		for(index_t i = (this->Size() / 8) * 8; i != this->Size(); ++i){
+			if(this->Get(i)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * @brief Check if all flags are set.
+     * @return true if all flags are set.
+	 * @return false otherwise.
+     */
+	bool IsAllSet()const throw(){
+		ASSERT(sizeof(this->flags) > 0)
+		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
+			if(this->flags[i] != ting::u8(-1)){
+				return false;
+			}
+		}
+		for(index_t i = (this->Size() / 8) * 8; i != this->Size(); ++i){
+			if(!this->Get(i)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const FlagSet& fs){
 		s << "(";

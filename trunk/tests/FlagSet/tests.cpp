@@ -65,9 +65,28 @@ void Run(){
 	ASSERT_ALWAYS(fs.Get(TestEnum::SECOND))
 	
 	
-	TRACE_ALWAYS(<< "ENUM_SIZE = " << TestEnum::ENUM_SIZE << " sizeof(fs) = " << sizeof(fs) << std::endl)
+	TRACE_ALWAYS(<< "ENUM_SIZE = " << TestEnum::ENUM_SIZE << " sizeof(fs) = " << sizeof(fs) << " sizeof(index_t) = " << sizeof(ting::FlagSet<TestEnum>::index_t) << std::endl)
 			
 	TRACE_ALWAYS(<< "fs = " << fs << std::endl)
+	
+	{
+		ting::FlagSet<TestEnum> fs;
+		ASSERT_ALWAYS(fs.IsAllClear())
+		ASSERT_ALWAYS(!fs.IsAllSet())
+		
+		fs.Set(fs.Size() - 1, true);
+		ASSERT_ALWAYS(!fs.IsAllClear())
+		ASSERT_ALWAYS(!fs.IsAllSet())
+	}
+	{
+		ting::FlagSet<TestEnum> fs(true);
+		ASSERT_ALWAYS(!fs.IsAllClear())
+		ASSERT_ALWAYS(fs.IsAllSet())
+		
+		fs.Set(fs.Size() - 1, false);
+		ASSERT_ALWAYS(!fs.IsAllClear())
+		ASSERT_ALWAYS(!fs.IsAllSet())
+	}
 }
 
 }//~namespace
