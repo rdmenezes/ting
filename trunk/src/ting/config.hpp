@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2011-2013 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2011-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -162,7 +162,7 @@ THE SOFTWARE. */
 #		define M_OS_NAME M_OS_NAME_UNKNOWN
 #	endif
 
-#elif defined(WIN32) // WIN32 macro is defined for both win32 and win64
+#elif defined(_WIN32) || defined(WIN32) // _WIN32 macro is defined for both win32 and win64. _WIN32 is the correct one, WIN32 not always defined.
 #	define M_OS M_OS_WINDOWS
 #	define M_OS_NAME M_OS_NAME_UNKNOWN
 #elif defined(__APPLE__)
