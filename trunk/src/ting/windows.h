@@ -43,9 +43,24 @@ THE SOFTWARE. */
 //inclusion of winsock.h from within the windows.h. Because it may later conflict with
 //winsock2.h if it is included later.
 #ifndef _WINSOCKAPI_
-#	define _WINSOCKAPI_
-#	include <windows.h>
-#	undef _WINSOCKAPI_
-#else
-#	include <windows.h>
+#	define _WINSOCKAPI_ 1234567890
+#endif
+
+#ifndef _WINSOCK_H
+#	define _WINSOCK_H 1234567890
+#endif
+
+#include <windows.h>
+
+
+#if (_WINSOCKAPI_ + 0) //if defined and is not empty
+#	if _WINSOCKAPI_ == 1234567890
+#		undef _WINSOCKAPI_
+#	endif
+#endif
+
+#if (_WINSOCK_H + 0) //if defined and is not empty
+#	if _WINSOCK_H == 1234567890
+#		undef _WINSOCK_H
+#	endif
 #endif
