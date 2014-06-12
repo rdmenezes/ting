@@ -82,7 +82,14 @@ void FSFile::OpenInternal(E_Mode mode){
 			throw File::Exc("unknown mode");
 			break;
 	}
+
+#if M_COMPILER == M_COMPILER_MSVC
+	if(fopen_s(&this->handle, this->TruePath().c_str(), modeStr) != 0){
+		this->handle = 0;
+	}
+#else
 	this->handle = fopen(this->TruePath().c_str(), modeStr);
+#endif
 	if(!this->handle){
 		TRACE(<< "FSFile::Open(): TruePath() = " << this->TruePath().c_str() << std::endl)
 		throw File::Exc("fopen() failed");
@@ -259,7 +266,7 @@ std::string FSFile::GetHomeDir(){
 #	if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	char * home = getenv("HOME");
 #	elif M_OS == M_OS_WINDOWS
-	char * home = getenv("USERPROFILE");
+	char * home = getenv("USERPROFILE"); //TODO: MS Viual Studio complains about unsafety, consider changing to _dupenv_s() for MSVC compiler
 #	else
 #		error "unsupported OS"
 #	endif

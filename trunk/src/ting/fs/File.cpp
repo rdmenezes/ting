@@ -269,7 +269,7 @@ bool File::Exists()const{
 	ASSERT(!this->IsOpened())
 	try{
 		File::Guard fileGuard(const_cast<File&>(*this), File::READ);
-	}catch(File::Exc &e){
+	}catch(File::Exc&){
 		return false;//file opening failed, assume the file does not exist
 	}
 	return true;//file open succeeded => file exists
