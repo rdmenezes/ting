@@ -76,6 +76,12 @@ class Flag{
 	friend class atomic::SpinLock;
 	friend class atomic::S32;
 
+#if M_OS == M_OS_WINDOWS
+#	if defined(MemoryBarrier)
+#		undef MemoryBarrier
+#	endif
+#endif
+
 	inline static void MemoryBarrier()throw(){
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		//do nothing
