@@ -78,56 +78,56 @@ namespace ting{
  */
 template <class T_Enum> class Flags{
 	ting::u8 flags[T_Enum::ENUM_SIZE / 8 + 1];
-	
+
 public:
 	typedef typename ting::UnsignedTypeForSize<sizeof(typename T_Enum::Type)>::Type index_t;
-	
+
 	/**
 	 * @brief Constructor.
 	 * Creates a Flags with all flags initialized to a given value.
-     * @param initialValueOfAllFlags - value to initialize all flags to.
-     */
+	 * @param initialValueOfAllFlags - value to initialize all flags to.
+	 */
 	Flags(bool initialValueOfAllFlags = false){
-		memset(this->flags, initialValueOfAllFlags ? ting::u8(-1) : 0, sizeof(this->flags));
+		this->SetAll(initialValueOfAllFlags);
 	}
-	
+
 	/**
 	 * @brief Size of the flag set.
-     * @return Number of flags in this flag set.
-     */
+	 * @return Number of flags in this flag set.
+	 */
 	index_t Size()const throw(){
 		return T_Enum::ENUM_SIZE;
 	}
-	
+
 	/**
 	 * @brief Get value of a given flag.
-     * @param flag - flag to get value of.
-     * @return true if the flag is set.
+	 * @param flag - flag to get value of.
+	 * @return true if the flag is set.
 	 * @return false otherwise.
-     */
+	 */
 	bool Get(enum T_Enum::Type flag)const throw(){
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		return (this->flags[flag / 8] & (1 << (flag % 8))) != 0;
 	}
-	
+
 	/**
 	 * @brief Get value for i'th flag.
 	 * Returns the value of the flag given by index.
 	 * Note, the index must be less than enumeration size,
 	 * otherwise the behavior is undefined.
-     * @param i - index of the flag to get value of.
-     * @return value of the flag given by index.
-     */
+	 * @param i - index of the flag to get value of.
+	 * @return value of the flag given by index.
+	 */
 	bool Get(index_t i)const throw(){
 		return this->Get(typename T_Enum::Type(i));
 	}
-	
+
 	/**
 	 * @brief Set value of a given flag.
-     * @param flag - flag to set value of.
-     * @param value - value to set.
-     * @return Reference to this Flags.
-     */
+	 * @param flag - flag to set value of.
+	 * @param value - value to set.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Set(enum T_Enum::Type flag, bool value)throw(){
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		if(value){
@@ -137,25 +137,35 @@ public:
 		}
 		return *this;
 	}
-	
+
 	/**
 	 * @brief Set value of an i'th flag.
 	 * Sets the value of the flag given by index.
 	 * Note, the index must be less than enumeration size,
 	 * otherwise the behavior is undefined.
-     * @param i - index of the flag to set value of.
-     * @param value - value to set.
-     * @return Reference to this Flags.
-     */
+	 * @param i - index of the flag to set value of.
+	 * @param value - value to set.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Set(index_t i, bool value)throw(){
 		return this->Set(typename T_Enum::Type(i), value);
 	}
-	
+
+	/**
+	 * @brief Set all flags to given value.
+	 * @param value - value to set all flags to.
+	 * @return Reference to this Flags.
+	 */
+	Flags& SetAll(bool value)throw(){
+		memset(this->flags, value ? ting::u8(-1) : 0, sizeof(this->flags));
+		return *this;
+	}
+
 	/**
 	 * @brief Check if all flags are cleared.
-     * @return true if all flags are cleared.
+	 * @return true if all flags are cleared.
 	 * @return false otherwise.
-     */
+	 */
 	bool IsAllClear()const throw(){
 		ASSERT(sizeof(this->flags) > 0)
 		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
@@ -170,12 +180,12 @@ public:
 		}
 		return true;
 	}
-	
+
 	/**
 	 * @brief Check if all flags are set.
-     * @return true if all flags are set.
+	 * @return true if all flags are set.
 	 * @return false otherwise.
-     */
+	 */
 	bool IsAllSet()const throw(){
 		ASSERT(sizeof(this->flags) > 0)
 		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
@@ -190,15 +200,15 @@ public:
 		}
 		return true;
 	}
-	
+
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Flags& fs){
 		s << "(";
-		
+
 		for(index_t i = 0; i != fs.Size(); ++i){
 			s << (fs.Get(i) ? "1" : "0");
 		}
-		
+
 		s << ")";
 		return s;
 	}

@@ -47,7 +47,7 @@
         <in>Array.hpp</in>
         <in>Buffer.hpp</in>
         <in>Exc.hpp</in>
-        <in>FlagSet.hpp</in>
+        <in>Flags.hpp</in>
         <in>PoolStored.hpp</in>
         <in>Ptr.hpp</in>
         <in>Ref.cpp</in>
@@ -88,12 +88,6 @@
         <in>tests.hpp</in>
       </df>
       <df name="debug">
-        <in>main.cpp</in>
-        <in>main.hpp</in>
-        <in>tests.cpp</in>
-        <in>tests.hpp</in>
-      </df>
-      <df name="FlagSet">
         <in>main.cpp</in>
         <in>main.hpp</in>
         <in>tests.cpp</in>
@@ -234,7 +228,7 @@
       </item>
       <item path="src/ting/Exc.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/ting/FlagSet.hpp" ex="false" tool="3" flavor2="0">
+      <item path="src/ting/Flags.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/PoolStored.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -365,14 +359,6 @@
       <item path="tests/FSFile/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/FSFile/tests.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/main.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/tests.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/MemoryFile/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -566,7 +552,7 @@
       </item>
       <item path="src/ting/Exc.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src/ting/FlagSet.hpp" ex="false" tool="3" flavor2="0">
+      <item path="src/ting/Flags.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/PoolStored.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -697,14 +683,6 @@
       <item path="tests/FSFile/tests.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/FSFile/tests.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/main.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/tests.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="tests/FlagSet/tests.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/MemoryFile/main.cpp" ex="false" tool="1" flavor2="0">
       </item>

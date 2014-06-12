@@ -77,6 +77,12 @@ void Run(){
 		fs.Set(fs.Size() - 1, true);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
+		
+		fs.SetAll(false);
+		
+		fs.Set(TestEnum::EIGHTH, true);
+		ASSERT_ALWAYS(!fs.IsAllClear())
+		ASSERT_ALWAYS(!fs.IsAllSet())
 	}
 	{
 		ting::Flags<TestEnum> fs(true);
@@ -84,6 +90,12 @@ void Run(){
 		ASSERT_ALWAYS(fs.IsAllSet())
 		
 		fs.Set(fs.Size() - 1, false);
+		ASSERT_ALWAYS(!fs.IsAllClear())
+		ASSERT_ALWAYS(!fs.IsAllSet())
+				
+		fs.SetAll(true);
+		
+		fs.Set(TestEnum::EIGHTH, false);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 	}
