@@ -88,7 +88,7 @@ public:
 	 * @param initialValueOfAllFlags - value to initialize all flags to.
 	 */
 	Flags(bool initialValueOfAllFlags = false){
-		this->SetAll(initialValueOfAllFlags);
+		this->SetAllTo(initialValueOfAllFlags);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public:
 	 * @param value - value to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Set(enum T_Enum::Type flag, bool value)throw(){
+	Flags& SetTo(enum T_Enum::Type flag, bool value)throw(){
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		if(value){
 			this->flags[flag / 8] |= (1 << (flag % 8));
@@ -139,6 +139,24 @@ public:
 	}
 
 	/**
+	 * @brief Set given flag.
+     * @param flag - flag to set.
+     * @return Reference to this Flags.
+     */
+	Flags& Set(enum T_Enum::Type flag)throw(){
+		return this->SetTo(flag, true);
+	}
+	
+	/**
+	 * @brief Clear given flag.
+     * @param flag - flag to clear.
+     * @return Reference to this Flags.
+     */
+	Flags& Clear(enum T_Enum::Type flag)throw(){
+		return this->SetTo(flag, false);
+	}
+	
+	/**
 	 * @brief Set value of an i'th flag.
 	 * Sets the value of the flag given by index.
 	 * Note, the index must be less than enumeration size,
@@ -147,16 +165,38 @@ public:
 	 * @param value - value to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Set(index_t i, bool value)throw(){
-		return this->Set(typename T_Enum::Type(i), value);
+	Flags& SetTo(index_t i, bool value)throw(){
+		return this->SetTo(typename T_Enum::Type(i), value);
 	}
 
+	/**
+	 * @brief Set flag given by index.
+	 * Note, the index must be less than enumeration size,
+	 * otherwise the behavior is undefined.
+     * @param i - index of the flag to set.
+     * @return Reference to this Flags.
+     */
+	Flags& Set(index_t i)throw(){
+		return this->SetTo(i, true);
+	}
+	
+	/**
+	 * @brief Clear flag given by index.
+	 * Note, the index must be less than enumeration size,
+	 * otherwise the behavior is undefined.
+     * @param i - index of the flag to clear.
+     * @return Reference to this Flags.
+     */
+	Flags& Clear(index_t i)throw(){
+		return this->SetTo(i, false);
+	}
+	
 	/**
 	 * @brief Set all flags to given value.
 	 * @param value - value to set all flags to.
 	 * @return Reference to this Flags.
 	 */
-	Flags& SetAll(bool value)throw(){
+	Flags& SetAllTo(bool value)throw(){
 		memset(this->flags, value ? ting::u8(-1) : 0, sizeof(this->flags));
 		return *this;
 	}

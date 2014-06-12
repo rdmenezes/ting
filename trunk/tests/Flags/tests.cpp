@@ -60,7 +60,7 @@ struct TestEnum{
 void Run(){
 	ting::Flags<TestEnum> fs;
 	
-	fs.Set(TestEnum::EIGHTH, true).Set(TestEnum::SECOND, true).Set(TestEnum::EIGHTH, false);
+	fs.SetTo(TestEnum::EIGHTH, true).SetTo(TestEnum::SECOND, true).SetTo(TestEnum::EIGHTH, false);
 	ASSERT_ALWAYS(!fs.Get(TestEnum::EIGHTH))
 	ASSERT_ALWAYS(fs.Get(TestEnum::SECOND))
 	
@@ -74,13 +74,13 @@ void Run(){
 		ASSERT_ALWAYS(fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 		
-		fs.Set(fs.Size() - 1, true);
+		fs.SetTo(fs.Size() - 1, true);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 		
-		fs.SetAll(false);
+		fs.SetAllTo(false);
 		
-		fs.Set(TestEnum::EIGHTH, true);
+		fs.SetTo(TestEnum::EIGHTH, true);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 	}
@@ -89,13 +89,13 @@ void Run(){
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(fs.IsAllSet())
 		
-		fs.Set(fs.Size() - 1, false);
+		fs.SetTo(fs.Size() - 1, false);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 				
-		fs.SetAll(true);
+		fs.SetAllTo(true);
 		
-		fs.Set(TestEnum::EIGHTH, false);
+		fs.SetTo(TestEnum::EIGHTH, false);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 	}
