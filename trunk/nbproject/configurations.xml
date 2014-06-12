@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="94">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="/home/ivan/prj/ting/src" name="0">
+    <df root="src" name="0">
       <df name="ting">
         <df name="fs">
           <in>BufferFile.cpp</in>
@@ -68,7 +68,7 @@
         <in>util.hpp</in>
       </df>
     </df>
-    <df root="/home/ivan/prj/ting/tests" name="1">
+    <df root="tests" name="1">
       <df name="Array">
         <in>main.cpp</in>
         <in>main.hpp</in>
@@ -202,13 +202,13 @@
                    displayName="Important Files"
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
-      <itemPath>/home/ivan/prj/ting/makefile</itemPath>
+      <itemPath>makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
-    <Elem>/home/ivan/prj/ting/src</Elem>
-    <Elem>/home/ivan/prj/ting/tests</Elem>
+    <Elem>src</Elem>
+    <Elem>tests</Elem>
   </sourceRootList>
   <projectmakefile>/home/ivan/prj/ting/makefile</projectmakefile>
   <confs>
@@ -222,236 +222,321 @@
       </codeAssistance>
       <makefileType>
         <makeTool>
-          <buildCommandWorkingDir>/home/ivan/prj/ting</buildCommandWorkingDir>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>${MAKE} -f makefile</buildCommand>
           <cleanCommand>${MAKE} -f makefile clean</cleanCommand>
           <executablePath></executablePath>
         </makeTool>
       </makefileType>
-      <item path="/home/ivan/prj/ting/src/ting/Ref.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
+      <item path="src/ting/Array.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/ivan/prj/ting/src/ting/WaitSet.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
+      <item path="src/ting/Buffer.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/BufferFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting/fs</pElem>
-            <pElem>src/ting</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
+      <item path="src/ting/Exc.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/FSFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/fs</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/File.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/fs</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/MemoryFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting/fs</pElem>
-            <pElem>src/ting</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/MsgThread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src/ting</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Mutex.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Queue.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Semaphore.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Thread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/HostNameResolver.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src/ting/fs</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/IPAddress.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Lib.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Socket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPServerSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/UDPSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/timer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/mt</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </ccTool>
-      </item>
-      <folder path="0/ting/net">
-        <ccTool>
-          <incDir>
-            <pElem>src/ting</pElem>
-            <pElem>src/ting/net</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
       <item path="src/ting/FlagSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/PoolStored.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Ptr.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/Ref.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Signal.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Singleton.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/WaitSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/atomic.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/codegen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/config.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/debug.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/BufferFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/BufferFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/Exc.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/FSFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/FSFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/File.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/MemoryFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/math.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Message.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/MsgThread.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Mutex.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Queue.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Semaphore.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Semaphore.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Thread.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Exc.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/HostNameResolver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/HostNameResolver.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/IPAddress.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/IPAddress.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Lib.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/Lib.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Socket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/Socket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPServerSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPServerSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/UDPSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/UDPSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/timer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/types.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/utf8.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/util.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Array/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Array/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Buffer/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Buffer/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/FSFile/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/FSFile/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/FSFile/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/FSFile/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/FlagSet/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/FlagSet/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/FlagSet/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/FlagSet/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/MemoryFile/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/MemoryFile/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/MemoryFile/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/MemoryFile/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/PoolStored/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/PoolStored/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/PoolStored/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Ptr/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Ptr/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Ref/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Ref/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/RefOverSharedLibrary/Ref_test.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/RefOverSharedLibrary/TestClass.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="tests/RefOverSharedLibrary/testso.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/RefOverSharedLibrary/testso.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Signal/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Signal/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/SingletonOverSharedLibrary/Singleton_test.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/SingletonOverSharedLibrary/TestSingleton.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="tests/SingletonOverSharedLibrary/testso.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="tests/SingletonOverSharedLibrary/testso.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="tests/Thread/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Thread/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/Thread/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/Thread/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/WaitSet/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/WaitSet/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/atomic/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/atomic/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/debug/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/debug/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/debug/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/math/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/math/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/math/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/math/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/net/dns.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/net/dns.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/net/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/net/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/net/socket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/net/socket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/timer/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/timer/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/timer/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/types/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/types/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/utf8/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/utf8/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/utf8/tests.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/util/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/util/main.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="tests/util/tests.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/util/tests.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Debug" type="0">
@@ -475,287 +560,119 @@
           </ccTool>
         </makeTool>
       </makefileType>
-      <item path="/home/ivan/prj/ting/src/ting/Array.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
+      <item path="src/ting/Array.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/ivan/prj/ting/src/ting/Buffer.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
+      <item path="src/ting/Buffer.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="/home/ivan/prj/ting/src/ting/Exc.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/PoolStored.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/Ptr.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/Ref.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/Ref.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/Signal.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/Singleton.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/WaitSet.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/WaitSet.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/atomic.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/codegen.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/config.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/debug.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/BufferFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/BufferFile.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/Exc.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/FSFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/FSFile.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/File.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/File.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/MemoryFile.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/fs/MemoryFile.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/math.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Message.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/MsgThread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/MsgThread.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Mutex.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Mutex.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Queue.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Queue.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Semaphore.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Semaphore.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Thread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/mt/Thread.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Exc.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/HostNameResolver.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/HostNameResolver.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/IPAddress.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/IPAddress.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Lib.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Lib.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Socket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/Socket.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPServerSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPServerSocket.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/TCPSocket.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/UDPSocket.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/net/UDPSocket.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/timer.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/timer.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/types.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/utf8.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="/home/ivan/prj/ting/src/ting/util.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
+      <item path="src/ting/Exc.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/FlagSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/PoolStored.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Ptr.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/Ref.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Signal.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Singleton.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/WaitSet.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/atomic.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/codegen.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/config.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/debug.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/BufferFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/BufferFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/Exc.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/FSFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/FSFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/File.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/File.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/fs/MemoryFile.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/math.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Message.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/MsgThread.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Mutex.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Queue.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Semaphore.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Semaphore.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/mt/Thread.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Exc.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/HostNameResolver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/HostNameResolver.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/IPAddress.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/IPAddress.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Lib.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/Lib.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/Socket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/Socket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPServerSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPServerSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/TCPSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/net/UDPSocket.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/net/UDPSocket.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ting/timer.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/types.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/utf8.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/util.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -60,9 +60,9 @@ namespace ting{
  *     };
  * };
  * @endcode
- * Then, the FlagSet can be used as follows:
+ * Then, the Flags can be used as follows:
  * @code
- * ting::FlagSet<MyEnum> fs;
+ * ting::Flags<MyEnum> fs;
  * 
  * fs.Set(MyEnum::MY_FIRST_ITEM, true).Set(MyEnum::MY_THIRD_ITEM, true);
  * 
@@ -76,7 +76,7 @@ namespace ting{
  * 
  * @endcode
  */
-template <class T_Enum> class FlagSet{
+template <class T_Enum> class Flags{
 	ting::u8 flags[T_Enum::ENUM_SIZE / 8 + 1];
 	
 public:
@@ -84,10 +84,10 @@ public:
 	
 	/**
 	 * @brief Constructor.
-	 * Creates a FlagSet with all flags initialized to a given value.
+	 * Creates a Flags with all flags initialized to a given value.
      * @param initialValueOfAllFlags - value to initialize all flags to.
      */
-	FlagSet(bool initialValueOfAllFlags = false){
+	Flags(bool initialValueOfAllFlags = false){
 		memset(this->flags, initialValueOfAllFlags ? ting::u8(-1) : 0, sizeof(this->flags));
 	}
 	
@@ -126,9 +126,9 @@ public:
 	 * @brief Set value of a given flag.
      * @param flag - flag to set value of.
      * @param value - value to set.
-     * @return Reference to this FlagSet.
+     * @return Reference to this Flags.
      */
-	FlagSet& Set(enum T_Enum::Type flag, bool value)throw(){
+	Flags& Set(enum T_Enum::Type flag, bool value)throw(){
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		if(value){
 			this->flags[flag / 8] |= (1 << (flag % 8));
@@ -145,9 +145,9 @@ public:
 	 * otherwise the behavior is undefined.
      * @param i - index of the flag to set value of.
      * @param value - value to set.
-     * @return Reference to this FlagSet.
+     * @return Reference to this Flags.
      */
-	FlagSet& Set(index_t i, bool value)throw(){
+	Flags& Set(index_t i, bool value)throw(){
 		return this->Set(typename T_Enum::Type(i), value);
 	}
 	
@@ -192,7 +192,7 @@ public:
 	}
 	
 #ifdef DEBUG
-	friend std::ostream& operator<<(std::ostream& s, const FlagSet& fs){
+	friend std::ostream& operator<<(std::ostream& s, const Flags& fs){
 		s << "(";
 		
 		for(index_t i = 0; i != fs.Size(); ++i){

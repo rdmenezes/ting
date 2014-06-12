@@ -3,7 +3,7 @@
 
 
 int main(int argc, char *argv[]){
-	TestTingFlagSet();
+	TestTingFlags();
 
 	return 0;
 }

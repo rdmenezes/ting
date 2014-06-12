@@ -1,5 +1,5 @@
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/FlagSet.hpp"
+#include "../../src/ting/Flags.hpp"
 
 #include "tests.hpp"
 
@@ -9,7 +9,7 @@ using namespace ting;
 
 
 
-namespace TestFlagSet{
+namespace TestFlags{
 
 struct TestEnum{
 	enum Type{
@@ -58,19 +58,19 @@ struct TestEnum{
 };
 
 void Run(){
-	ting::FlagSet<TestEnum> fs;
+	ting::Flags<TestEnum> fs;
 	
 	fs.Set(TestEnum::EIGHTH, true).Set(TestEnum::SECOND, true).Set(TestEnum::EIGHTH, false);
 	ASSERT_ALWAYS(!fs.Get(TestEnum::EIGHTH))
 	ASSERT_ALWAYS(fs.Get(TestEnum::SECOND))
 	
 	
-	TRACE_ALWAYS(<< "ENUM_SIZE = " << TestEnum::ENUM_SIZE << " sizeof(fs) = " << sizeof(fs) << " sizeof(index_t) = " << sizeof(ting::FlagSet<TestEnum>::index_t) << std::endl)
+	TRACE_ALWAYS(<< "ENUM_SIZE = " << TestEnum::ENUM_SIZE << " sizeof(fs) = " << sizeof(fs) << " sizeof(index_t) = " << sizeof(ting::Flags<TestEnum>::index_t) << std::endl)
 			
 	TRACE_ALWAYS(<< "fs = " << fs << std::endl)
 	
 	{
-		ting::FlagSet<TestEnum> fs;
+		ting::Flags<TestEnum> fs;
 		ASSERT_ALWAYS(fs.IsAllClear())
 		ASSERT_ALWAYS(!fs.IsAllSet())
 		
@@ -79,7 +79,7 @@ void Run(){
 		ASSERT_ALWAYS(!fs.IsAllSet())
 	}
 	{
-		ting::FlagSet<TestEnum> fs(true);
+		ting::Flags<TestEnum> fs(true);
 		ASSERT_ALWAYS(!fs.IsAllClear())
 		ASSERT_ALWAYS(fs.IsAllSet())
 		
