@@ -50,7 +50,7 @@ THE SOFTWARE. */
 
 
 #if M_OS == M_OS_WINDOWS
-#	include <windows.h>
+#	include "windows.h"
 
 #elif M_OS == M_OS_MACOSX
 #	include<sys/time.h>

@@ -39,8 +39,8 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_WINDOWS
 #	include <winsock2.h>
-#	include <ws2tcpip.h> //NOTE: this include should go before any windows.h include!!!
-#	include <windows.h>
+#	include <ws2tcpip.h>
+#	include "../windows.h"
 
 //On older windows SDKs IPV6_V6ONLY is not defined, let's define it here if necessary.
 #	ifndef IPV6_V6ONLY

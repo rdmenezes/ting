@@ -66,6 +66,7 @@
         <in>types.hpp</in>
         <in>utf8.hpp</in>
         <in>util.hpp</in>
+        <in>windows.h</in>
       </df>
     </df>
     <df root="tests" name="1">
@@ -335,6 +336,8 @@
       <item path="src/ting/utf8.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/util.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/windows.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -659,6 +662,8 @@
       <item path="src/ting/utf8.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/util.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/windows.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
