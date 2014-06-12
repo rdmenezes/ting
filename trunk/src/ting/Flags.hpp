@@ -140,22 +140,22 @@ public:
 
 	/**
 	 * @brief Set given flag.
-     * @param flag - flag to set.
-     * @return Reference to this Flags.
-     */
+	 * @param flag - flag to set.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Set(enum T_Enum::Type flag)throw(){
 		return this->SetTo(flag, true);
 	}
-	
+
 	/**
 	 * @brief Clear given flag.
-     * @param flag - flag to clear.
-     * @return Reference to this Flags.
-     */
+	 * @param flag - flag to clear.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Clear(enum T_Enum::Type flag)throw(){
 		return this->SetTo(flag, false);
 	}
-	
+
 	/**
 	 * @brief Set value of an i'th flag.
 	 * Sets the value of the flag given by index.
@@ -173,24 +173,24 @@ public:
 	 * @brief Set flag given by index.
 	 * Note, the index must be less than enumeration size,
 	 * otherwise the behavior is undefined.
-     * @param i - index of the flag to set.
-     * @return Reference to this Flags.
-     */
+	 * @param i - index of the flag to set.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Set(index_t i)throw(){
 		return this->SetTo(i, true);
 	}
-	
+
 	/**
 	 * @brief Clear flag given by index.
 	 * Note, the index must be less than enumeration size,
 	 * otherwise the behavior is undefined.
-     * @param i - index of the flag to clear.
-     * @return Reference to this Flags.
-     */
+	 * @param i - index of the flag to clear.
+	 * @return Reference to this Flags.
+	 */
 	Flags& Clear(index_t i)throw(){
 		return this->SetTo(i, false);
 	}
-	
+
 	/**
 	 * @brief Set all flags to given value.
 	 * @param value - value to set all flags to.
@@ -239,6 +239,25 @@ public:
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @brief Inverts all the flags.
+	 * @return Reference to this Flags.
+	 */
+	Flags& Invert()throw(){
+		for(size_t i = 0; i != sizeof(this->flags); ++i){
+			this->flags[i] = ~this->flags[i];
+		}
+		return *this;
+	}
+
+	/**
+	 * @brief Operator NOT.
+	 * @return Inverted instance of Flags.
+	 */
+	Flags operator~()const throw(){
+		return Flags(*this).Invert();
 	}
 
 #ifdef DEBUG
