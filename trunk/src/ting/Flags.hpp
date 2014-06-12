@@ -260,6 +260,69 @@ public:
 		return Flags(*this).Invert();
 	}
 
+	/**
+	 * @brief Operator assignment AND.
+     * @param f - flags to perform AND operation with.
+     * @return Reference to this Flags.
+     */
+	Flags& operator&=(const Flags& f)throw(){
+		for(size_t i = 0; i != sizeof(this->flags); ++i){
+			this->flags[i] &= f.flags[i];
+		}
+		return *this;
+	}
+	
+	/**
+	 * @brief Operator AND.
+     * @param f - flags to perform AND operation with.
+     * @return Instance of Flags resulting from AND operation.
+     */
+	Flags operator&(const Flags& f)const throw(){
+		return Flags(*this).operator&=(f);
+	}
+	
+	/**
+	 * @brief Operator assignment OR.
+     * @param f - flags to perform OR operation with.
+     * @return Reference to this Flags.
+     */
+	Flags& operator|=(const Flags& f)throw(){
+		for(size_t i = 0; i != sizeof(this->flags); ++i){
+			this->flags[i] |= f.flags[i];
+		}
+		return *this;
+	}
+	
+	/**
+	 * @brief Operator OR.
+     * @param f - flags to perform OR operation with.
+     * @return Instance of Flags resulting from OR operation.
+     */
+	Flags operator|(const Flags& f)const throw(){
+		return Flags(*this).operator|=(f);
+	}
+	
+	/**
+	 * @brief Operator assignment XOR.
+     * @param f - flags to perform XOR operation with.
+     * @return Reference to this Flags.
+     */
+	Flags& operator^=(const Flags& f)throw(){
+		for(size_t i = 0; i != sizeof(this->flags); ++i){
+			this->flags[i] ^= f.flags[i];
+		}
+		return *this;
+	}
+	
+	/**
+	 * @brief Operator OR.
+     * @param f - flags to perform OR operation with.
+     * @return Instance of Flags resulting from OR operation.
+     */
+	Flags operator^(const Flags& f)const throw(){
+		return Flags(*this).operator^=(f);
+	}
+	
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Flags& fs){
 		s << "(";
