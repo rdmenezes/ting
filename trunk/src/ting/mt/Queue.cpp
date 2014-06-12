@@ -88,7 +88,7 @@ Queue::~Queue()throw(){
 
 
 
-void Queue::PushMessage(Ptr<Message> msg)throw(){
+void Queue::PushMessage(ting::Ptr<ting::mt::Message> msg)throw(){
 	ASSERT(msg.IsValid())
 	atomic::SpinLock::GuardYield mutexGuard(this->mut);
 	if(this->first){
@@ -292,7 +292,7 @@ HANDLE Queue::GetHandle(){
 
 
 //override
-void Queue::SetWaitingEvents(u32 flagsToWaitFor){
+void Queue::SetWaitingEvents(ting::u32 flagsToWaitFor){
 	//It is not allowed to wait on queue for write,
 	//because it is always possible to push new message to queue.
 	//Error condition is not possible for Queue.

@@ -7,6 +7,9 @@
 
 #include "BufferFile.hpp"
 
+#include <algorithm>
+
+
 using namespace ting;
 using namespace fs;
 

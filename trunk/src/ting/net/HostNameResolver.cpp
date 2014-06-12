@@ -788,7 +788,7 @@ private:
 								}
 							}
 						}
-					}catch(ting::net::Exc& e){
+					}catch(ting::net::Exc&){
 						this->isExiting = true;
 						this->RemoveAllResolvers();
 						break;//exit thread
@@ -1021,7 +1021,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 		memset(&osvi, 0, sizeof(osvi));
 		osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-		GetVersionEx(&osvi);
+		GetVersionEx(&osvi); //TODO: GetVersionEx() is deprecated, replace with VerifyVersionInfo()
 
 		if(osvi.dwMajorVersion > 5){
 			r->recordType = D_DNSRecordAAAA;//start with IPv6 first

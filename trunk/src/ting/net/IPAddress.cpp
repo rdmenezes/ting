@@ -91,7 +91,7 @@ IPAddress::Host IPAddress::Host::ParseIPv4(const char* ip){
 #elif M_OS == M_OS_WINDOWS
 	INT len = sizeof(a);
 	INT res = WSAStringToAddress(
-			const_cast<char*>(ip),
+			const_cast<char*>(ip), //NOTE: when compiling in MS Visual Studio, set "Use multi-byte character set" in project properties to avoid usage of wchar_t
 			AF_INET,
 			NULL,
 			reinterpret_cast<sockaddr*>(&a),
