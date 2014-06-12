@@ -1,29 +1,3 @@
-/* The MIT License:
-
-Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE. */
-
-// Home page: http://ting.googlecode.com
-
-
-
 #include "UDPSocket.hpp"
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
@@ -36,7 +10,7 @@ using namespace ting::net;
 
 
 
-void UDPSocket::Open(u16 port){
+void UDPSocket::Open(ting::u16 port){
 	if(this->IsValid()){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
@@ -231,7 +205,11 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		sockAddrLen = sizeof(a);
 	}
 
+#if M_OS == M_OS_WINDOWS
+	int len;
+#else
 	ssize_t len;
+#endif
 
 	while(true){
 		len = ::sendto(
@@ -309,7 +287,11 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 #	error "Unsupported OS"
 #endif
 
+#if M_OS == M_OS_WINDOWS
+	int len;
+#else
 	ssize_t len;
+#endif
 
 	while(true){
 		len = ::recvfrom(
@@ -389,7 +371,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 
 #if M_OS == M_OS_WINDOWS
 //override
-void UDPSocket::SetWaitingEvents(u32 flagsToWaitFor){
+void UDPSocket::SetWaitingEvents(ting::u32 flagsToWaitFor){
 	long flags = FD_CLOSE;
 	if((flagsToWaitFor & Waitable::READ) != 0){
 		flags |= FD_READ;
