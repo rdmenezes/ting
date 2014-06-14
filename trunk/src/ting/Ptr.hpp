@@ -228,7 +228,7 @@ private:
 
 	void* operator new(size_t);
 
-	void operator delete(void*);
+	void operator delete(void*){} //When compiling by MSVC compiler sometimes linker complains about unresolved external reference to this delete operator, so we define its body {} to make MSVC happy.
 };
 
 }//~namespace ting
