@@ -1,4 +1,4 @@
-#include <vector>
+#include <deque>
 
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/PoolStored.hpp"
@@ -14,6 +14,11 @@ class TestClass : public ting::PoolStored<TestClass, 13>{
 public:
 	int a;
 	int b;
+	
+	char* ptr;
+	
+	TestClass* child;
+	
 	TestClass(){
 //		TRACE(<<"TestClass(): constructed"<<std::endl)
 	}
@@ -24,14 +29,22 @@ public:
 
 
 void Run(){
-	std::vector<ting::Ptr<TestClass> > vec;
+	std::deque<ting::Ptr<TestClass> > vec;
 
-	for(unsigned i = 0; i < 10000; ++i){
+	for(unsigned i = 0; i < 100; ++i){
 		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
 		vec.back()->a = int(i);
 		vec.back()->b = -int(i);
 	}
 
+	for(unsigned i = 0; i < 5; ++i){
+		vec.pop_front();
+	}
+	
+	for(unsigned i = 0; i < 10; ++i){
+		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
+	}
+	
 	while(vec.size() != 0){
 		vec.pop_back();
 	}
