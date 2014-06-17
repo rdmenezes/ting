@@ -113,7 +113,7 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 
 		void Free(ElemSlot& e)throw(){
 			ASSERT(this->HoldsElement(e))
-			ting::u32 idx = ting::u32(size_t(&e - &this->elements[0]) / sizeof(ElemSlot));
+			ting::u32 idx = ting::u32(&e - &this->elements[0]);
 			ASSERT(idx < num_elements_in_chunk)
 			this->freeIndices.push_back(idx);
 		}
