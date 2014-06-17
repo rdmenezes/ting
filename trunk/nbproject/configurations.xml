@@ -221,8 +221,8 @@
       <makefileType>
         <makeTool>
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
-          <buildCommand>${MAKE} -f makefile</buildCommand>
-          <cleanCommand>${MAKE} -f makefile clean</cleanCommand>
+          <buildCommand>${MAKE}</buildCommand>
+          <cleanCommand>${MAKE} clean</cleanCommand>
           <executablePath></executablePath>
         </makeTool>
       </makefileType>
@@ -544,9 +544,14 @@
       <makefileType>
         <makeTool>
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
-          <buildCommand>${MAKE}</buildCommand>
+          <buildCommand>${MAKE} debug=true</buildCommand>
           <cleanCommand>${MAKE} clean</cleanCommand>
           <executablePath>tests/PoolStored/tests</executablePath>
+          <ccTool>
+            <preprocessorList>
+              <Elem>DEBUG</Elem>
+            </preprocessorList>
+          </ccTool>
         </makeTool>
       </makefileType>
       <folder path="0">
@@ -554,13 +559,6 @@
           <incDir>
             <pElem>src</pElem>
           </incDir>
-        </ccTool>
-      </folder>
-      <folder path="1">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
         </ccTool>
       </folder>
       <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="4">
@@ -759,9 +757,14 @@
       <makefileType>
         <makeTool>
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
-          <buildCommand>${MAKE}</buildCommand>
+          <buildCommand>${MAKE} debug=true</buildCommand>
           <cleanCommand>${MAKE} clean</cleanCommand>
           <executablePath>tests/PoolStored/tests</executablePath>
+          <ccTool>
+            <preprocessorList>
+              <Elem>DEBUG</Elem>
+            </preprocessorList>
+          </ccTool>
         </makeTool>
       </makefileType>
       <folder path="0">
@@ -769,13 +772,6 @@
           <incDir>
             <pElem>src</pElem>
           </incDir>
-        </ccTool>
-      </folder>
-      <folder path="1">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
         </ccTool>
       </folder>
       <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="4">
@@ -790,7 +786,7 @@
         <ccTool flags="1">
         </ccTool>
       </item>
-      <item path="src/ting/fs/FSFile.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/ting/fs/FSFile.cpp" ex="false" tool="1" flavor2="9">
         <ccTool flags="1">
         </ccTool>
       </item>
@@ -802,7 +798,7 @@
         <ccTool flags="1">
         </ccTool>
       </item>
-      <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="9">
         <ccTool flags="1">
         </ccTool>
       </item>
@@ -810,7 +806,7 @@
         <ccTool flags="1">
         </ccTool>
       </item>
-      <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="9">
         <ccTool flags="1">
         </ccTool>
       </item>
@@ -822,7 +818,7 @@
         <ccTool flags="1">
         </ccTool>
       </item>
-      <item path="src/ting/net/HostNameResolver.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/ting/net/HostNameResolver.cpp" ex="false" tool="1" flavor2="9">
         <ccTool flags="1">
         </ccTool>
       </item>
@@ -854,37 +850,37 @@
         <ccTool flags="1">
         </ccTool>
       </item>
-      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/FSFile/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/FSFile/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/FSFile/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/FSFile/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Flags/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Flags/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Flags/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Flags/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/MemoryFile/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/MemoryFile/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/MemoryFile/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/MemoryFile/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/PoolStored/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/PoolStored/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/RefOverSharedLibrary/Ref_test.cpp"
             ex="false"
@@ -898,9 +894,9 @@
         <ccTool flags="0">
         </ccTool>
       </item>
-      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/SingletonOverSharedLibrary/Singleton_test.cpp"
             ex="false"
@@ -916,25 +912,25 @@
         <ccTool flags="0">
         </ccTool>
       </item>
-      <item path="tests/Thread/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Thread/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Thread/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/Thread/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/debug/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/debug/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/math/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/math/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/math/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/math/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/net/dns.cpp" ex="false" tool="1" flavor2="4">
       </item>
@@ -942,21 +938,21 @@
       </item>
       <item path="tests/net/socket.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="tests/timer/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/timer/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/utf8/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/utf8/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/util/main.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/util/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/util/tests.cpp" ex="false" tool="1" flavor2="0">
+      <item path="tests/util/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
     </conf>
   </confs>

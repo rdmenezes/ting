@@ -83,7 +83,7 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 		
 		ting::Inited<PoolElem*, 0> firstFree;//After element is freed it is placed into the single-linked list of free elements.
 		
-		inline Chunk(){
+		Chunk(){
 			//there is no reason in memory pool with only 1 element per chunk.
 			//This assumption will also help later to  determine if chunk was
 			//not full before it become empty, so it should reside in the free
@@ -91,15 +91,15 @@ template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPo
 			ASSERT(this->Size() > 1)
 		}
 
-		inline bool IsFull()const throw(){
+		bool IsFull()const throw(){
 			return this->numAllocated == this->Size();
 		}
 		
-		inline bool IsEmpty()const throw(){
+		bool IsEmpty()const throw(){
 			return this->numAllocated == 0;
 		}
 		
-		inline PoolElem* Alloc(){
+		PoolElem* Alloc(){
 			if(this->freeIndex != this->Size()){
 				ASSERT(this->freeIndex < this->Size())
 				PoolElem* ret = &this->operator[](this->freeIndex);
@@ -225,11 +225,11 @@ template <size_t element_size, size_t num_elements_in_chunk> class StaticMemoryP
 	static MemoryPool<element_size, num_elements_in_chunk> instance;
 public:
 	
-	static inline void* Alloc_ts(){
+	static void* Alloc_ts(){
 		return instance.Alloc_ts();
 	}
 	
-	static inline void Free_ts(void* p)throw(){
+	static void Free_ts(void* p)throw(){
 		instance.Free_ts(p);
 	}
 };
@@ -262,7 +262,7 @@ protected:
 
 public:
 
-	inline static void* operator new(size_t size){
+	static void* operator new(size_t size){
 		M_POOL_TRACE(<< "new(): size = " << size << std::endl)
 		if(size != sizeof(T)){
 			throw ting::Exc("PoolStored::operator new(): attempt to allocate memory block of incorrect size");
@@ -271,7 +271,7 @@ public:
 		return StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Alloc_ts();
 	}
 
-	inline static void operator delete(void *p)throw(){
+	static void operator delete(void *p)throw(){
 		StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Free_ts(p);
 	}
 
