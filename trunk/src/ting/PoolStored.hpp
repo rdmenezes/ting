@@ -36,11 +36,11 @@ THE SOFTWARE. */
 
 #include <new>
 #include <list>
+#include <vector>
 
 #include "debug.hpp"
 #include "types.hpp"
 #include "Exc.hpp"
-#include "Array.hpp"
 #include "atomic.hpp"
 
 
@@ -58,111 +58,105 @@ STATIC_ASSERT(sizeof(int) == 4)
 
 
 
-template <size_t element_size, size_t num_elements_in_chunk = 32> class MemoryPool{		
-	struct BufHolder{
+template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class MemoryPool{		
+	M_DECLARE_ALIGNED_MSVC(4) struct ElemHolder{
 		u8 buf[element_size];
-	};
-	
-	struct Chunk;
-
-	M_DECLARE_ALIGNED_MSVC(4) struct PoolElem : public BufHolder{
-		PoolElem *next; //initialized only when the PoolElem is freed for the first time.
-		Chunk* parent; //initialized only upon PoolElem allocation
 	}
 	//Align by sizeof(int) boundary, just to be more safe.
 	//I once had a problem with pthread mutex when it was not aligned by 4 byte boundary,
 	//so I resolved this by declaring PoolElem structure as aligned by sizeof(int).
 	M_DECLARE_ALIGNED(sizeof(int));
-
-	struct Chunk : public ting::StaticBuffer<PoolElem, num_elements_in_chunk>{
-		Chunk *next, *prev; //for linked list
-		
-		ting::Inited<size_t, 0> numAllocated;
-		
+	
+	struct Chunk{
 		ting::Inited<size_t, 0> freeIndex;//Used for first pass of elements allocation.
 		
-		ting::Inited<PoolElem*, 0> firstFree;//After element is freed it is placed into the single-linked list of free elements.
+		ElemHolder elements[num_elements_in_chunk];
 		
-		Chunk(){
-			//there is no reason in memory pool with only 1 element per chunk.
-			//This assumption will also help later to  determine if chunk was
-			//not full before it become empty, so it should reside in the free
-			//chunks list upon turning empty.
-			ASSERT(this->Size() > 1)
-		}
+		std::vector<ting::u32> freeIndices;
 
+		Chunk(){
+			ASSERT(num_elements_in_chunk != 0)
+		}
+		
+		ting::u32 NumAllocated()const throw(){
+			ASSERT(this->freeIndex > this->freeIndices.size() || (this->freeIndex == 0 && this->freeIndices.size() == 0))
+			return this->freeIndex - this->freeIndices.size();
+		}
+		
+		//returns number of free slots in chunk
+		ting::u32 NumFree()const throw(){
+			ASSERT(num_elements_in_chunk >= this->NumAllocated())
+			return num_elements_in_chunk - this->NumAllocated();
+		} 
+		
 		bool IsFull()const throw(){
-			return this->numAllocated == this->Size();
+			return this->freeIndex == num_elements_in_chunk && this->freeIndices.size() == 0;
 		}
 		
 		bool IsEmpty()const throw(){
-			return this->numAllocated == 0;
+			return this->freeIndex == this->freeIndices.size();
 		}
 		
-		PoolElem* Alloc(){
-			if(this->freeIndex != this->Size()){
-				ASSERT(this->freeIndex < this->Size())
-				PoolElem* ret = &this->operator[](this->freeIndex);
-				++this->numAllocated;
-				++this->freeIndex;
-				ret->parent = this;
-				return ret;
+		ElemHolder& Alloc(){
+			if(this->freeIndices.size() != 0){
+				ASSERT(this->freeIndex != 0)
+				
+				//use one of these to keep size of the vector at minimum
+				ting::u32 idx = this->freeIndices.back();
+				this->freeIndices.pop_back();
+				ASSERT(idx < this->freeIndex)
+				return this->elements[idx];
 			}
-			
-			ASSERT(this->firstFree)
-			
-			PoolElem* ret = this->firstFree;
-			ASSERT(ret->parent == this)
-			this->firstFree = ret->next;
-			++this->numAllocated;
-			ASSERT(this->numAllocated <= this->Size())
-			return ret;
+			ASSERT(this->freeIndex < num_elements_in_chunk)
+			return this->elements[this->freeIndex++];
 		}
 
+		void Free(ElemHolder& e)throw(){
+			ASSERT(this->HoldsElement(e))
+			this->freeIndices.push_back(ting::u32(size_t(&e - &this->elements[0]) / sizeof(ElemHolder)));
+		}
+		
+		bool HoldsElement(ElemHolder& e)const throw(){
+			ASSERT(num_elements_in_chunk != 0)
+			return (&this->elements[0] <= &e) && (&e <= &this->elements[num_elements_in_chunk - 1]);
+		}
+		
 	private:
-		Chunk(const Chunk&);
-		Chunk& operator=(const Chunk&);//assignment is not allowed (no operator=() implementation provided)
+		Chunk& operator=(const Chunk&);
 	};
 
-	ting::Inited<unsigned, 0> numChunks; //this is only used for making sure that there are no chunks upon memory pool destruction
-	ting::Inited<Chunk*, 0> freeHead; //head of the free chunks list (looped list)
+	typedef std::list<Chunk> T_ChunkList;
+	T_ChunkList fullChunks;
+	T_ChunkList chunks;
 	
 	ting::atomic::SpinLock lock;
 	
 public:
 	~MemoryPool()throw(){
-		ASSERT_INFO(this->numChunks == 0, "MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!")
+		ASSERT_INFO(
+				this->fullChunks.size() == 0 && this->chunks.size() == 0,
+				"MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!"
+			)
 	}
 	
 public:
 	void* Alloc_ts(){
 		atomic::SpinLock::GuardYield guard(this->lock);
 		
-		if(this->freeHead == 0){
-			Chunk* c = new Chunk();
-			c->next = c;
-			c->prev = c;
-			this->freeHead = c;
-			++this->numChunks;
+		if(this->chunks.size() == 0){
+			//create new chunk
+			this->chunks.push_front(Chunk());
 		}
 		
-		ASSERT(this->freeHead)
-		ASSERT(!this->freeHead->IsFull())
-		
-		void* ret = static_cast<BufHolder*>(this->freeHead->Alloc());
-		
-		if(this->freeHead->IsFull()){
-			//remove chunk from free chunks list
-			if(this->freeHead->next == this->freeHead){//if it is the only one chunk in the list
-				this->freeHead = 0;
-			}else{
-				this->freeHead->prev->next = this->freeHead->next;
-				this->freeHead->next->prev = this->freeHead->prev;
-				this->freeHead = this->freeHead->next;
-			}
+		//get first chunk and allocate element from it
+		ElemHolder& ret = this->chunks.front().Alloc();
+
+		//if chunk became full, move it to list of full chunks
+		if(this->chunks.front().IsFull()){
+			this->fullChunks.splice(this->fullChunks.begin(), this->chunks, this->chunks.begin());
 		}
-		
-		return ret;
+
+		return reinterpret_cast<void*>(&ret);
 	}
 
 	void Free_ts(void* p)throw(){
@@ -172,50 +166,25 @@ public:
 		
 		atomic::SpinLock::GuardYield guard(this->lock);
 		
-		PoolElem* e = static_cast<PoolElem*>(static_cast<BufHolder*>(p));
+		ElemHolder& e = *reinterpret_cast<ElemHolder*>(p);
 		
-		Chunk *c = e->parent;
-		
-		ASSERT(c->numAllocated > 0)
-		
-		if(c->numAllocated == 1){//freeing last element in the chunk
-			ASSERT(c->Size() >= 2)
-			//remove chunk, it should be in free chunks list
-			if(this->freeHead->next == this->freeHead){//if it is the only one chunk in the list
-				ASSERT(this->freeHead->prev == this->freeHead)
-				ASSERT(this->freeHead == c)
-				this->freeHead = 0;
-			}else{
-				ASSERT(this->freeHead->prev != this->freeHead)
-				this->freeHead->prev->next = this->freeHead->next;
-				this->freeHead->next->prev = this->freeHead->prev;
-				if(this->freeHead == c){
-					this->freeHead = this->freeHead->next;
+		for(typename T_ChunkList::iterator i = this->chunks.begin(); i != this->chunks.end(); ++i){
+			if(i->HoldsElement(e)){
+				i->Free(e);
+				if(i->IsEmpty()){
+					this->chunks.erase(i);
 				}
-			}
-			delete c;
-			--this->numChunks;
-			return;
-		}
-		
-		if(c->IsFull()){//if chunk is full before freeing the element, need to add to the list of free chunks
-			//move chunk to the beginning of the list
-			ASSERT(c != this->freeHead)
-			if(this->freeHead == 0){
-				c->next = c;
-				c->prev = c;
-				this->freeHead = c;
-			}else{
-				c->prev = this->freeHead;
-				c->next = this->freeHead->next;
-				c->prev->next = c;
-				c->next->prev = c;
+				return;
 			}
 		}
 		
-		e->next = c->firstFree;
-		c->firstFree = e;
-		--c->numAllocated;
+		for(typename T_ChunkList::iterator i = this->fullChunks.begin(); i != this->fullChunks.end(); ++i){
+			if(i->HoldsElement(e)){
+				i->Free(e);
+				this->chunks.splice(this->chunks.end(), this->fullChunks, i);
+				return;
+			}
+		}
 	}
 };//~template class MemoryPool
 

@@ -31,17 +31,17 @@ public:
 void Run(){
 	std::deque<ting::Ptr<TestClass> > vec;
 
-	for(unsigned i = 0; i < 3; ++i){
+	for(unsigned i = 0; i < 10000; ++i){
 		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
 		vec.back()->a = int(i);
 		vec.back()->b = -int(i);
 	}
 
-	for(unsigned i = 0; i < 1; ++i){
+	for(unsigned i = 0; i < 50; ++i){
 		vec.pop_front();
 	}
 	
-	for(unsigned i = 0; i < 1; ++i){
+	for(unsigned i = 0; i < 100; ++i){
 		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
 	}
 	
