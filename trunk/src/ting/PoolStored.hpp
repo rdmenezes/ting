@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ STATIC_ASSERT(sizeof(int) == 4)
 
 
 template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class MemoryPool{		
-	M_DECLARE_ALIGNED_MSVC(4) struct ElemHolder{
+	M_DECLARE_ALIGNED_MSVC(4) struct ElemSlot{
 		u8 buf[element_size];
 	}
 	//Align by sizeof(int) boundary, just to be more safe.
@@ -70,7 +70,7 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 	struct Chunk{
 		ting::Inited<size_t, 0> freeIndex;//Used for first pass of elements allocation.
 		
-		ElemHolder elements[num_elements_in_chunk];
+		ElemSlot elements[num_elements_in_chunk];
 		
 		std::vector<ting::u32> freeIndices;
 
@@ -97,7 +97,7 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 			return this->freeIndex == this->freeIndices.size();
 		}
 		
-		ElemHolder& Alloc(){
+		ElemSlot& Alloc(){
 			if(this->freeIndices.size() != 0){
 				ASSERT(this->freeIndex != 0)
 				
@@ -111,12 +111,14 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 			return this->elements[this->freeIndex++];
 		}
 
-		void Free(ElemHolder& e)throw(){
+		void Free(ElemSlot& e)throw(){
 			ASSERT(this->HoldsElement(e))
-			this->freeIndices.push_back(ting::u32(size_t(&e - &this->elements[0]) / sizeof(ElemHolder)));
+			ting::u32 idx = ting::u32(size_t(&e - &this->elements[0]) / sizeof(ElemSlot));
+			ASSERT(idx < num_elements_in_chunk)
+			this->freeIndices.push_back(idx);
 		}
 		
-		bool HoldsElement(ElemHolder& e)const throw(){
+		bool HoldsElement(ElemSlot& e)const throw(){
 			ASSERT(num_elements_in_chunk != 0)
 			return (&this->elements[0] <= &e) && (&e <= &this->elements[num_elements_in_chunk - 1]);
 		}
@@ -149,7 +151,7 @@ public:
 		}
 		
 		//get first chunk and allocate element from it
-		ElemHolder& ret = this->chunks.front().Alloc();
+		ElemSlot& ret = this->chunks.front().Alloc();
 
 		//if chunk became full, move it to list of full chunks
 		if(this->chunks.front().IsFull()){
@@ -166,7 +168,7 @@ public:
 		
 		atomic::SpinLock::GuardYield guard(this->lock);
 		
-		ElemHolder& e = *reinterpret_cast<ElemHolder*>(p);
+		ElemSlot& e = *reinterpret_cast<ElemSlot*>(p);
 		
 		for(typename T_ChunkList::iterator i = this->chunks.begin(); i != this->chunks.end(); ++i){
 			if(i->HoldsElement(e)){
