@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -104,12 +104,12 @@ public:
 	 * @brief get singleton instance.
 	 * @return reference to singleton object instance.
 	 */
-	inline static T& Inst(){
+	static T& Inst(){
 		ASSERT_INFO(IsCreated(), "IntrusiveSingleton::Inst(): Singleton object is not created")
 		return *T_InstanceOwner::instance;
 	}
 
-	~IntrusiveSingleton(){
+	virtual ~IntrusiveSingleton(){
 		ASSERT(T_InstanceOwner::instance == static_cast<T*>(this))
 		T_InstanceOwner::instance = 0;
 	}
@@ -140,8 +140,8 @@ public:
  */
 template <class T> class Singleton : public IntrusiveSingleton<T, Singleton<T> >{
 	friend class IntrusiveSingleton<T, Singleton<T> >;
-public:
-	inline Singleton(){}
+protected:
+	Singleton(){}
 	
 private:
 
