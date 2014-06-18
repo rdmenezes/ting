@@ -13,7 +13,7 @@ public:
 	{
 //		TRACE(<< "TestSingleton(): constructed, this->a = " << this->a << std::endl)
 	}
-	~TestSingleton(){
+	~TestSingleton()throw(){
 //		TRACE(<< "~TestSingleton(): destructed" << std::endl)
 	}
 };
