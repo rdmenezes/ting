@@ -1,5 +1,7 @@
 = ting project history =
 
+2014-06-24: libting-4.0.0 released. Bug fixes and refactoring. API changed slightly.
+
 2013-08-06: libting-3.0.0 released. Added IPv6 support and Full MacOS X support.
 
 2013-02-21: libting-2.0.0 released. Some API changes.
