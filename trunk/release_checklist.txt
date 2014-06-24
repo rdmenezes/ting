@@ -4,7 +4,7 @@
 
 * update Version in pkg-config/ting.pc file
 
-* Check if SO-name needs increment and update debian/control, debian/libting*.sh and src/makefile files accordingly if needed
+* Check if SO-name needs increment and update debian/control, debian/libting*.install and src/makefile files accordingly if needed
 
 * make version tag in version control system
 
