@@ -17,7 +17,7 @@ debug := false
 
 name := libting
 
-so_name := 2
+so_name := 3
 
 ifeq ($(platform), linux)
     name := $(name).so

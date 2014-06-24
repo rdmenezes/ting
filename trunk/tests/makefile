@@ -9,7 +9,9 @@ subdirs += Flags
 subdirs += FSFile
 subdirs += math
 subdirs += MemoryFile
-subdirs += net
+ifeq ($(testnet), true)
+    subdirs += net
+endif
 subdirs += PoolStored
 subdirs += Ptr
 subdirs += Ref
