@@ -91,7 +91,7 @@ inline std::ofstream& DebugLogger(){
 		{ \
 			std::stringstream ss; \
 			ss x; \
-			__android_log_print(ANDROID_LOG_INFO, "ting_debug", ss.str().c_str()); \
+			__android_log_write(ANDROID_LOG_INFO, "ting_debug", ss.str().c_str()); \
 		}
 #	define LOG_ALWAYS(x) //logging is not supported on Android, yet.
 
