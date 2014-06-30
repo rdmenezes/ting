@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2013 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,7 @@ THE SOFTWARE. */
 #include "../WaitSet.hpp"
 #include "../Ptr.hpp"
 #include "../atomic.hpp"
+#include "../util.hpp"
 
 #include "Message.hpp"
 #include "Semaphore.hpp"
@@ -131,25 +132,20 @@ public:
 
 private:
 #if M_OS == M_OS_WINDOWS
-	//override
-	HANDLE GetHandle();
+	HANDLE GetHandle() OVERRIDE;
 
 	u32 flagsMask;//flags to wait for
 
-	//override
-	virtual void SetWaitingEvents(u32 flagsToWaitFor);
+	void SetWaitingEvents(u32 flagsToWaitFor) OVERRIDE;
 
 	//returns true if signaled
-	//override
-	virtual bool CheckSignaled();
+	bool CheckSignaled() OVERRIDE;
 
 #elif M_OS == M_OS_LINUX
-	//override
-	int GetHandle();
+	int GetHandle() OVERRIDE;
 
-#elif M_OS == M_OS_MACOSX //Mac OS
-	//override
-	int GetHandle();
+#elif M_OS == M_OS_MACOSX
+	int GetHandle() OVERRIDE;
 
 #else
 #	error "Unsupported OS"

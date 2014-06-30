@@ -95,11 +95,11 @@ public:
 protected:
 	ting::Inited<u32, NOT_READY> readinessFlags;
 
-	inline Waitable(){}
+	Waitable(){}
 
 
 
-	inline bool IsAdded()const throw(){
+	bool IsAdded()const throw(){
 		return this->isAdded;
 	}
 
@@ -112,7 +112,7 @@ protected:
 	 * Use this copy constructor only if you really know what you are doing.
 	 * @param w - Waitable object to copy.
 	 */
-	inline Waitable(const Waitable& w);
+	Waitable(const Waitable& w);
 
 
 
@@ -123,35 +123,35 @@ protected:
 	 * Use this copy constructor only if you really know what you are doing.
 	 * @param w - Waitable object to assign to this object.
 	 */
-	inline Waitable& operator=(const Waitable& w);
+	Waitable& operator=(const Waitable& w);
 
 
 
-	inline void SetCanReadFlag()throw(){
+	void SetCanReadFlag()throw(){
 		this->readinessFlags |= READ;
 	}
 
-	inline void ClearCanReadFlag()throw(){
+	void ClearCanReadFlag()throw(){
 		this->readinessFlags &= (~READ);
 	}
 
-	inline void SetCanWriteFlag()throw(){
+	void SetCanWriteFlag()throw(){
 		this->readinessFlags |= WRITE;
 	}
 
-	inline void ClearCanWriteFlag()throw(){
+	void ClearCanWriteFlag()throw(){
 		this->readinessFlags &= (~WRITE);
 	}
 
-	inline void SetErrorFlag()throw(){
+	void SetErrorFlag()throw(){
 		this->readinessFlags |= ERROR_CONDITION;
 	}
 
-	inline void ClearErrorFlag()throw(){
+	void ClearErrorFlag()throw(){
 		this->readinessFlags &= (~ERROR_CONDITION);
 	}
 
-	inline void ClearAllReadinessFlags()throw(){
+	void ClearAllReadinessFlags()throw(){
 		this->readinessFlags = NOT_READY;
 	}
 
@@ -164,7 +164,7 @@ public:
 	 * @brief Check if "Can read" flag is set.
 	 * @return true if Waitable is ready for reading.
 	 */
-	inline bool CanRead()const throw(){
+	bool CanRead()const throw(){
 		return (this->readinessFlags & READ) != 0;
 	}
 
@@ -172,7 +172,7 @@ public:
 	 * @brief Check if "Can write" flag is set.
 	 * @return true if Waitable is ready for writing.
 	 */
-	inline bool CanWrite()const throw(){
+	bool CanWrite()const throw(){
 		return (this->readinessFlags & WRITE) != 0;
 	}
 
@@ -180,7 +180,7 @@ public:
 	 * @brief Check if "error" flag is set.
 	 * @return true if Waitable is in error state.
 	 */
-	inline bool ErrorCondition()const throw(){
+	bool ErrorCondition()const throw(){
 		return (this->readinessFlags & ERROR_CONDITION) != 0;
 	}
 
@@ -190,7 +190,7 @@ public:
 	 * @return pointer to the user data.
 	 * @return zero pointer if the user data was not set.
 	 */
-	inline void* GetUserData()throw(){
+	void* GetUserData()throw(){
 		return this->userData;
 	}
 
@@ -199,7 +199,7 @@ public:
 	 * See description of GetUserData() for more details.
 	 * @param data - pointer to the user data to associate with this Waitable.
 	 */
-	inline void SetUserData(void* data)throw(){
+	void SetUserData(void* data)throw(){
 		this->userData = data;
 	}
 
@@ -214,10 +214,14 @@ protected:
 		return this->readinessFlags != 0;
 	}
 
-
-
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
-protected:
+public:
+	/**
+	 * @brief Get Unix file descriptor.
+	 * This method is specific to Unix-based operating systems, like Linux, MAC OS X, Unix.
+	 * This method is made public in order to ease embedding Waitables to existing epoll() sets.
+	 * Use this method only if you know what you are doing!
+	 */
 	virtual int GetHandle() = 0;
 
 #else
@@ -260,7 +264,7 @@ public:
 	 */
 	class Exc : public ting::Exc{
 	public:
-		inline Exc(const std::string& message = std::string()) :
+		Exc(const std::string& message = std::string()) :
 				ting::Exc(message)
 		{}
 	};
@@ -331,7 +335,7 @@ public:
 	 * @brief Get maximum size of the wait set.
 	 * @return maximum number of Waitables this WaitSet can hold.
 	 */
-	inline unsigned Size()const throw(){
+	unsigned Size()const throw(){
 		return this->size;
 	}
 
@@ -339,7 +343,7 @@ public:
 	 * @brief Get number of Waitables already added to this WaitSet.
 	 * @return number of Waitables added to this WaitSet.
 	 */
-	inline unsigned NumWaitables()const throw(){
+	unsigned NumWaitables()const throw(){
 		return this->numWaitables;
 	}
 
@@ -392,7 +396,7 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 objects triggered.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	inline unsigned Wait(Buffer<Waitable*>* out_events = 0){
+	unsigned Wait(Buffer<Waitable*>* out_events = 0){
 		return this->Wait(true, 0, out_events);
 	}
 
@@ -413,7 +417,7 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	inline unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
+	unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
 	}
 
