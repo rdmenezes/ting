@@ -335,6 +335,7 @@ public:
 	 * Seek file pointer forward relatively to current position.
 	 * There is a default implementation of this function which uses Read() method
 	 * to skip the specified number of bytes by reading the data and wasting it away.
+	 * It will not go beyond the end of file.
 	 * @param numBytesToSeek - number of bytes to skip.
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.

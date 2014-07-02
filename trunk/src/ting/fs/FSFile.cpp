@@ -164,19 +164,28 @@ size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 		ASSERT(offset > 0)
 		
 		if(fseek(this->handle, seekForward ? offset : (-offset), SEEK_CUR) != 0){
-			if(seekForward){
-				if(feof(this->handle)){
-					//end of file reached
-					long p = ftell(this->handle);
-					if(p >= 0){
+			if(!ferror(this->handle)){
+				if(seekForward){
+					if(feof(this->handle)){
+						//end of file reached
+						long p = ftell(this->handle);
+						if(p < 0){
+							throw File::Exc("ftell() failed");
+						}
 						ASSERT(size_t(p) >= this->CurPos())
 						return size_t(p) - this->CurPos();
 					}
-				}
-			}else{
-				//check for beginning of file
-				if(ftell(this->handle) == 0){
-					return this->CurPos();
+				}else{
+					long p = ftell(this->handle);
+
+					if(p < 0){
+						throw File::Exc("ftell() failed");
+					}
+
+					//check for beginning of file
+					if(p == 0){
+						return this->CurPos();
+					}
 				}
 			}
 			
