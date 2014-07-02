@@ -51,14 +51,13 @@ namespace fs{
  */
 class File{
 	std::string path;
-
-	ting::Inited<size_t, 0> curPos;//holds current position from file beginning
 	
 	//TODO: add file permissions
 
-protected:
 	ting::Inited<bool, false> isOpened;
-
+	
+	ting::Inited<size_t, 0> curPos;//holds current position from file beginning
+	
 public:
 	/**
 	 * @brief Basic exception class.
