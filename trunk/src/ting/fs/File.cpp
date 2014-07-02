@@ -116,7 +116,10 @@ size_t File::Read(
 
 	ASSERT(actualNumBytesToRead + offset <= buf.Size())
 	ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
-	return this->ReadInternal(b);
+	
+	size_t ret = this->ReadInternal(b);
+	this->curPos += ret;
+	return ret;
 }
 
 
@@ -147,26 +150,32 @@ size_t File::Write(
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
 	ting::Buffer<const ting::u8> b(buf.Begin() + offset, actualNumBytesToWrite);
-	return this->WriteInternal(b);
+	
+	size_t ret = this->WriteInternal(b);
+	this->curPos += ret;
+	return ret;
 }
 
 
 
-void File::SeekForwardInternal(size_t numBytesToSeek){
+size_t File::SeekForwardInternal(size_t numBytesToSeek){
 	ting::StaticBuffer<ting::u8, 0xfff> buf;//4kb buffer
 	
-	for(size_t bytesRead = 0; bytesRead != numBytesToSeek;){
+	size_t bytesRead = 0;
+	for(; bytesRead != numBytesToSeek;){
 		size_t curNumToRead = numBytesToSeek - bytesRead;
 		ting::util::ClampTop(curNumToRead, buf.Size());
 		size_t res = this->Read(buf, curNumToRead);
-		if(res != curNumToRead){//if end of file reached
-			throw ting::Exc("File::SeekForward(): end of file reached, seeking did not complete");
-		}
 		ASSERT(bytesRead < numBytesToSeek)
 		ASSERT(numBytesToSeek >= res)
 		ASSERT(bytesRead <= numBytesToSeek - res)
 		bytesRead += res;
+		
+		if(res != curNumToRead){//if end of file reached
+			break;
+		}
 	}
+	return bytesRead;
 }
 
 

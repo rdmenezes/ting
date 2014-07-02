@@ -29,6 +29,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include "File.hpp"
+#include "../util.hpp"
 
 namespace ting{
 namespace fs{
@@ -65,26 +66,20 @@ public:
 	virtual ~BufferFile()throw(){}
 
 protected:
-	//override
-	void OpenInternal(E_Mode mode);
+
+	void OpenInternal(E_Mode mode) OVERRIDE;
 	
-	//override
-	void CloseInternal()throw(){}
+	void CloseInternal()throw() OVERRIDE{}
 	
-	//override
-	size_t ReadInternal(const ting::Buffer<ting::u8>& buf);
+	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) OVERRIDE;
+
+	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) OVERRIDE;
 	
-	//override
-	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf);
+	size_t SeekForwardInternal(size_t numBytesToSeek) OVERRIDE;
 	
-	//override
-	void SeekForwardInternal(size_t numBytesToSeek);
+	size_t SeekBackwardInternal(size_t numBytesToSeek) OVERRIDE;
 	
-	//override
-	void SeekBackwardInternal(size_t numBytesToSeek);
-	
-	//override
-	void RewindInternal();
+	void RewindInternal() OVERRIDE;
 };
 
 }}//~namespace

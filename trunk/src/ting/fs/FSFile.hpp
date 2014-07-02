@@ -32,9 +32,9 @@ THE SOFTWARE. */
 #include <cstdio>
 
 #include "../debug.hpp"
-
-#include "File.hpp"
 #include "../Ptr.hpp"
+#include "File.hpp"
+#include "../util.hpp"
 
 
 
@@ -54,7 +54,7 @@ class FSFile : public File{
 
 protected:
 
-	inline std::string TruePath()const{
+	std::string TruePath()const{
 		return this->rootDir + this->Path();
 	}
 
@@ -92,38 +92,21 @@ public:
 	 * for more details.
      * @return Current root directory.
      */
-	inline const std::string& GetRootDir()const throw(){
+	const std::string& GetRootDir()const throw(){
 		return this->rootDir;
 	}
 
+	void OpenInternal(E_Mode mode) OVERRIDE;
 
-	//override
-	virtual void OpenInternal(E_Mode mode);
+	void CloseInternal()throw() OVERRIDE;
 
+	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) OVERRIDE;
 
+	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) OVERRIDE;
 
-	//override
-	virtual void CloseInternal()throw();
-
-
-
-	//override
-	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf);
-
-
-
-	//override
-	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf);
-
-
-
-	//override
-	virtual void SeekForwardInternal(size_t numBytesToSeek);
+	size_t SeekForwardInternal(size_t numBytesToSeek) OVERRIDE;
 	
-	
-	
-	//override
-	virtual void SeekBackwardInternal(size_t numBytesToSeek);
+	size_t SeekBackwardInternal(size_t numBytesToSeek) OVERRIDE;
 
 	
 	
@@ -132,8 +115,9 @@ public:
      * @param numBytesToSeek - number of bytes to seek.
      * @param seekForward - if true, then the seeking will be done forward.
 	 *                      If false, then the seeking will be done backward.
+	 * @return Number of bytes actually skipped.
      */
-	void Seek(size_t numBytesToSeek, bool seekForward);
+	size_t Seek(size_t numBytesToSeek, bool seekForward);
 	
 	
 	//override
@@ -170,7 +154,7 @@ public:
      * @param pathName - path to a file.
      * @return Auto-pointer holding a new FSFile instance.
      */
-	static inline ting::Ptr<FSFile> New(const std::string& pathName = std::string()){
+	static ting::Ptr<FSFile> New(const std::string& pathName = std::string()){
 		return ting::Ptr<FSFile>(new FSFile(pathName));
 	}
 };

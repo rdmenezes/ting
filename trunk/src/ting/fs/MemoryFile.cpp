@@ -53,21 +53,23 @@ size_t MemoryFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 
 
 //override
-void MemoryFile::SeekForwardInternal(size_t numBytesToSeek){
+size_t MemoryFile::SeekForwardInternal(size_t numBytesToSeek){
 	ASSERT(this->idx <= this->data.size())
 	numBytesToSeek = std::min(this->data.size() - this->idx, numBytesToSeek);
 	this->idx += numBytesToSeek;
 	ASSERT(this->idx <= this->data.size())
+	return numBytesToSeek;
 }
 
 
 
 //override
-void MemoryFile::SeekBackwardInternal(size_t numBytesToSeek){
+size_t MemoryFile::SeekBackwardInternal(size_t numBytesToSeek){
 	ASSERT(this->idx <= this->data.size())
 	numBytesToSeek = std::min(this->idx, numBytesToSeek);
 	this->idx -= numBytesToSeek;
 	ASSERT(this->idx <= this->data.size())
+	return numBytesToSeek;
 }
 
 

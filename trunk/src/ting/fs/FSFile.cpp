@@ -135,7 +135,7 @@ size_t FSFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 
 
 
-void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
+size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("cannot seek, file is not opened");
 	}
@@ -164,6 +164,22 @@ void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 		ASSERT(offset > 0)
 		
 		if(fseek(this->handle, seekForward ? offset : (-offset), SEEK_CUR) != 0){
+			if(seekForward){
+				if(feof(this->handle)){
+					//end of file reached
+					long p = ftell(this->handle);
+					if(p >= 0){
+						ASSERT(size_t(p) >= this->CurPos())
+						return size_t(p) - this->CurPos();
+					}
+				}
+			}else{
+				//check for beginning of file
+				if(ftell(this->handle) == 0){
+					return this->CurPos();
+				}
+			}
+			
 			throw File::Exc("fseek() failed");
 		}
 		
@@ -172,20 +188,22 @@ void FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 		
 		numBytesLeft -= size_t(offset);
 	}
+	
+	return numBytesToSeek;
 }
 
 
 
 //override
-void FSFile::SeekForwardInternal(size_t numBytesToSeek){
-	this->Seek(numBytesToSeek, true);
+size_t FSFile::SeekForwardInternal(size_t numBytesToSeek){
+	return this->Seek(numBytesToSeek, true);
 }
 
 
 
 //override
-void FSFile::SeekBackwardInternal(size_t numBytesToSeek){
-	this->Seek(numBytesToSeek, false);
+size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
+	return this->Seek(numBytesToSeek, false);
 }
 
 

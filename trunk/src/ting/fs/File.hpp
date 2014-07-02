@@ -52,6 +52,8 @@ namespace fs{
 class File{
 	std::string path;
 
+	ting::Inited<size_t, 0> curPos;//holds current position from file beginning
+	
 	//TODO: add file permissions
 
 protected:
@@ -105,13 +107,13 @@ protected:
 	 * @brief Constructor.
 	 * @param pathName - initial path to set to the newly created File instance.
 	 */
-	inline File(const std::string& pathName = std::string()) :
+	File(const std::string& pathName = std::string()) :
 			path(pathName)
 	{}
 
 private:
 	//no copying
-	inline File(const File& f);
+	File(const File& f);
 
 	//no assigning
 	File& operator=(const File& f);
@@ -131,7 +133,7 @@ public:
 	 * @brief Set the path for this File instance.
 	 * @param pathName - the path to a file or directory.
 	 */
-	inline void SetPath(const std::string& pathName){
+	void SetPath(const std::string& pathName){
 		if(this->IsOpened()){
 			throw File::IllegalStateExc("Cannot set path when file is opened");
 		}
@@ -143,10 +145,18 @@ public:
 	 * @brief Get the current path being held by this File instance.
 	 * @return The path this File instance holds.
 	 */
-	inline const std::string& Path()const throw(){
+	const std::string& Path()const throw(){
 		return this->path;
 	}
 
+	/**
+	 * @brief Get current position from beginning of the file.
+     * @return Current position from beginning of the file
+     */
+	size_t CurPos()const throw(){
+		return this->curPos;
+	}
+	
 	/**
 	 * @brief Get file extension.
 	 * Returns a string containing the tail part of the file path, everything that
@@ -190,6 +200,8 @@ public:
 		}
 
 		this->isOpened = true;
+		
+		this->curPos = 0;
 	};
 	
 protected:
@@ -225,7 +237,7 @@ public:
 	 * @return true - if the file is opened.
 	 * @return false - otherwise.
 	 */
-	inline bool IsOpened()const throw(){
+	bool IsOpened()const throw(){
 		return this->isOpened;
 	}
 
@@ -328,11 +340,13 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	void SeekForward(size_t numBytesToSeek){
+	size_t SeekForward(size_t numBytesToSeek){
 		if(!this->IsOpened()){
 			throw File::IllegalStateExc("SeekForward(): file is not opened");
 		}
-		this->SeekForwardInternal(numBytesToSeek);
+		size_t ret = this->SeekForwardInternal(numBytesToSeek);
+		this->curPos += ret;
+		return ret;
 	}
 	
 protected:
@@ -343,8 +357,9 @@ protected:
 	 * Otherwise, there is a default implementation which just reads and wastes
 	 * necessary amount of bytes.
      * @param numBytesToSeek - number of bytes to seek.
+	 * @return number of bytes actually skipped.
      */
-	virtual void SeekForwardInternal(size_t numBytesToSeek);
+	virtual size_t SeekForwardInternal(size_t numBytesToSeek);
 	
 public:
 
@@ -356,11 +371,14 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	void SeekBackward(size_t numBytesToSeek){
+	size_t SeekBackward(size_t numBytesToSeek){
 		if(!this->IsOpened()){
 			throw File::IllegalStateExc("SeekForward(): file is not opened");
 		}
-		this->SeekBackwardInternal(numBytesToSeek);
+		size_t ret = this->SeekBackwardInternal(numBytesToSeek);
+		ASSERT(ret <= this->curPos)
+		this->curPos -= ret;
+		return ret;
 	}
 	
 protected:
@@ -369,8 +387,9 @@ protected:
 	 * This function is called by SeekBackward() after it has done some safety checks.
 	 * Derived class may override this function with its own implementation.
      * @param numBytesToSeek - number of bytes to seek.
+	 * @return number of bytes actually skipped.
      */
-	virtual void SeekBackwardInternal(size_t numBytesToSeek){
+	virtual size_t SeekBackwardInternal(size_t numBytesToSeek){
 		throw ting::Exc("SeekBackward(): unsupported");
 	}
 	
@@ -378,14 +397,15 @@ public:
 
 	/**
 	 * @brief Seek to the beginning of the file.
-	 * Not all file systems support rewinding.
+	 * There is a default implementation of this operation by just closing and opening the file again.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	void Rewind(){
 		if(!this->IsOpened()){
-			throw File::IllegalStateExc("SeekForward(): file is not opened");
+			throw File::IllegalStateExc("Rewind(): file is not opened");
 		}
 		this->RewindInternal();
+		this->curPos = 0;
 	}
 	
 protected:
@@ -395,7 +415,9 @@ protected:
 	 * Derived class may override this function with its own implementation.
      */
 	virtual void RewindInternal(){
-		throw ting::Exc("Rewind(): unsupported");
+		E_Mode m = this->ioMode;
+		this->Close();
+		this->Open(m);
 	}
 	
 public:
