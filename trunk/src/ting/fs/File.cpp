@@ -159,7 +159,7 @@ size_t File::Write(
 
 
 size_t File::SeekForwardInternal(size_t numBytesToSeek){
-	ting::StaticBuffer<ting::u8, 0xfff> buf;//4kb buffer
+	ting::StaticBuffer<ting::u8, 0x1000> buf;//4kb buffer
 	
 	size_t bytesRead = 0;
 	for(; bytesRead != numBytesToSeek;){
