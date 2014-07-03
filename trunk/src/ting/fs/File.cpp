@@ -175,6 +175,7 @@ size_t File::SeekForwardInternal(size_t numBytesToSeek){
 			break;
 		}
 	}
+	this->curPos -= bytesRead;//make correction to curPos, since we were using Read()
 	return bytesRead;
 }
 
