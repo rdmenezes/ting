@@ -135,11 +135,8 @@ size_t FSFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 
 
 
-size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
-	if(!this->IsOpened()){
-		throw File::IllegalStateExc("cannot seek, file is not opened");
-	}
-
+//override
+size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
 	ASSERT(this->handle)
 	
 	//NOTE: fseek() accepts 'long int' as offset argument which is signed and can be
@@ -150,6 +147,10 @@ size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 	const size_t DMax = ((size_t(T_FSeekOffset(-1))) >> 1);
 	ASSERT((size_t(1) << ((sizeof(T_FSeekOffset) * 8) - 1)) - 1 == DMax)
 	STATIC_ASSERT(size_t(-(-T_FSeekOffset(DMax))) == DMax)
+	
+	if(numBytesToSeek > this->CurPos()){
+		numBytesToSeek = this->CurPos();
+	}
 	
 	for(size_t numBytesLeft = numBytesToSeek; numBytesLeft != 0;){
 		ASSERT(numBytesLeft <= numBytesToSeek)
@@ -163,32 +164,7 @@ size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 		
 		ASSERT(offset > 0)
 		
-		if(fseek(this->handle, seekForward ? offset : (-offset), SEEK_CUR) != 0){
-			if(!ferror(this->handle)){
-				if(seekForward){
-					if(feof(this->handle)){
-						//end of file reached
-						long p = ftell(this->handle);
-						if(p < 0){
-							throw File::Exc("ftell() failed");
-						}
-						ASSERT(size_t(p) >= this->CurPos())
-						return size_t(p) - this->CurPos();
-					}
-				}else{
-					long p = ftell(this->handle);
-
-					if(p < 0){
-						throw File::Exc("ftell() failed");
-					}
-
-					//check for beginning of file
-					if(p == 0){
-						return this->CurPos();
-					}
-				}
-			}
-			
+		if(fseek(this->handle, -offset, SEEK_CUR) != 0){
 			throw File::Exc("fseek() failed");
 		}
 		
@@ -199,20 +175,6 @@ size_t FSFile::Seek(size_t numBytesToSeek, bool seekForward){
 	}
 	
 	return numBytesToSeek;
-}
-
-
-
-//override
-size_t FSFile::SeekForwardInternal(size_t numBytesToSeek){
-	return this->Seek(numBytesToSeek, true);
-}
-
-
-
-//override
-size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
-	return this->Seek(numBytesToSeek, false);
 }
 
 

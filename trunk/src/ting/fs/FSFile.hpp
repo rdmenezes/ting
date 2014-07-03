@@ -104,34 +104,16 @@ public:
 
 	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) OVERRIDE;
 
-	size_t SeekForwardInternal(size_t numBytesToSeek) OVERRIDE;
+	//NOTE: use default implementation of SeekForward() because of the problems with
+	//      fseek() as it can set file pointer beyond the end of file.
 	
 	size_t SeekBackwardInternal(size_t numBytesToSeek) OVERRIDE;
-
 	
+	void RewindInternal() OVERRIDE;
 	
-	/**
-	 * @brief Seek forward or backward.
-     * @param numBytesToSeek - number of bytes to seek.
-     * @param seekForward - if true, then the seeking will be done forward.
-	 *                      If false, then the seeking will be done backward.
-	 * @return Number of bytes actually skipped.
-     */
-	size_t Seek(size_t numBytesToSeek, bool seekForward);
+	bool Exists()const OVERRIDE;
 	
-	
-	//override
-	virtual void RewindInternal();
-	
-
-
-	//override
-	virtual bool Exists()const;
-
-
-
-	//override
-	virtual void MakeDir();
+	void MakeDir() OVERRIDE;
 
 
 
