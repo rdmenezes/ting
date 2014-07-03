@@ -39,6 +39,7 @@ THE SOFTWARE. */
 #include <sstream>
 
 #include "FSFile.hpp"
+#include "../util.hpp"
 
 
 
@@ -148,9 +149,7 @@ size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
 	ASSERT((size_t(1) << ((sizeof(T_FSeekOffset) * 8) - 1)) - 1 == DMax)
 	STATIC_ASSERT(size_t(-(-T_FSeekOffset(DMax))) == DMax)
 	
-	if(numBytesToSeek > this->CurPos()){
-		numBytesToSeek = this->CurPos();
-	}
+	ting::util::ClampTop(numBytesToSeek, this->CurPos());
 	
 	for(size_t numBytesLeft = numBytesToSeek; numBytesLeft != 0;){
 		ASSERT(numBytesLeft <= numBytesToSeek)
