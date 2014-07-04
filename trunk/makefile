@@ -33,7 +33,7 @@ PREFIX := /usr
 
 install:
 #install header files
-	@for i in $(patsubst src/%,%,$(shell find src/$(lib_name) -type f -name *.hpp -or -name *.h)); do \
+	@for i in $(patsubst src/%,%,$(shell find src/$(lib_name) -type f -name *.hpp)); do \
 	    install -D src/$$i $(DESTDIR)$(PREFIX)/include/$$i; \
 	done
 #install library files

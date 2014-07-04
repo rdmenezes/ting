@@ -38,7 +38,7 @@ THE SOFTWARE. */
 
 
 #if M_OS == M_OS_WINDOWS
-#	include "../windows.h"
+#	include "../windows.hpp"
 
 #elif M_OS == M_OS_SYMBIAN
 #	include <string.h>

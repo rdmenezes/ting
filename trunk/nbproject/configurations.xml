@@ -57,7 +57,6 @@
         <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
         <in>atomic.hpp</in>
-        <in>codegen.h</in>
         <in>config.hpp</in>
         <in>debug.hpp</in>
         <in>math.hpp</in>
@@ -251,8 +250,6 @@
       <item path="src/ting/WaitSet.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/atomic.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/ting/codegen.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/config.hpp" ex="false" tool="3" flavor2="0">
       </item>

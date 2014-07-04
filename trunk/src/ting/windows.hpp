@@ -35,7 +35,7 @@ THE SOFTWARE. */
 #include "config.hpp"
 
 #if M_OS != M_OS_WINDOWS
-#	error "including windows.h from non-windows specific code"
+#	error "including windows.hpp from non-windows specific code"
 #endif
 
 //if _WINSOCKAPI_ macro is not defined then it means that the winsock header file

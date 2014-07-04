@@ -33,7 +33,7 @@ THE SOFTWARE. */
 
 #if M_OS == M_OS_WINDOWS
 #	include <winsock2.h>
-#	include "../windows.h"
+#	include "../windows.hpp"
 
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_UNIX || M_OS == M_OS_MACOSX
 #	include <signal.h>
