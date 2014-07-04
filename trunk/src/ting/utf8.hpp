@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2012-2013 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2012-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include "types.hpp"
+#include "Buffer.hpp"
 
 
 
@@ -73,7 +74,7 @@ public:
 	 * @brief Get current unicode character.
      * @return unicode value of the character this interator is currently pointing to.
      */
-	inline ting::u32 Char()const throw(){
+	ting::u32 Char()const throw(){
 		return this->c;
 	}
 
@@ -124,7 +125,7 @@ public:
      * @return true if iterator points to the end of the string.
 	 * @return false otherwise.
      */
-	inline bool IsEnd()const throw(){
+	bool IsEnd()const throw(){
 		return this->c == 0;
 	}
 
@@ -133,10 +134,27 @@ public:
      * @return false if iterator points to the end of the string.
 	 * @return true otherwise.
      */
-	inline bool IsNotEnd()const throw(){
+	bool IsNotEnd()const throw(){
 		return !this->IsEnd();
 	}
 };
+
+
+
+/**
+ * @brief Fill buffer with UTF-32 string.
+ * @param buf - buffer to fill.
+ * @param str - iterator into the utf-8 string.
+ * @return Number of characters filled in to the buffer.
+ */
+inline size_t FillBuffer(const ting::Buffer<ting::u32>& buf, Iterator& str){
+	ting::u32* p = buf.Begin();
+	for(; p != buf.End() && str.IsNotEnd(); ++p, ++str){
+		*p = str.Char();
+	}
+	ASSERT(buf.Overlaps(p) || p == buf.End())
+	return size_t(p - buf.Begin());
+}
 
 
 
