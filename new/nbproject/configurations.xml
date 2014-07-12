@@ -222,7 +222,7 @@
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>${MAKE}</buildCommand>
           <cleanCommand>${MAKE} clean</cleanCommand>
-          <executablePath></executablePath>
+          <executablePath>/home/ivan/prj/ting/tests/Ref/tests</executablePath>
         </makeTool>
       </makefileType>
       <item path="src/ting/Array.hpp" ex="false" tool="3" flavor2="0">
@@ -539,7 +539,7 @@
           <buildCommandWorkingDir>.</buildCommandWorkingDir>
           <buildCommand>${MAKE} debug=true</buildCommand>
           <cleanCommand>${MAKE} clean</cleanCommand>
-          <executablePath>tests/PoolStored/tests</executablePath>
+          <executablePath>tests/Ref/tests</executablePath>
           <ccTool>
             <preprocessorList>
               <Elem>DEBUG</Elem>
