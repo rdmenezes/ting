@@ -1,9 +1,0 @@
-Name: ting   # human-readable name
-Description: C++ utility library # human-readable description
-Version: 4.0.0
-URL: http://ting.googlecode.com
-Requires:
-Conflicts:
-Libs: -lting
-Libs.private:
-Cflags:
