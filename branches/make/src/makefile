@@ -67,15 +67,15 @@ endif
 
 
 
-compiler_flags := -Wall #enable all warnings
-compiler_flags += -Wno-comment #no warnings on nested comments
-compiler_flags += -funsigned-char #the 'char' type is unsigned
-compiler_flags += -Wnon-virtual-dtor #warn if base class has non-virtual destructor
-compiler_flags += -fno-operator-names #do not treat 'and', 'bitand','bitor','compl','not','or','xor' as keywords
-compiler_flags += -Werror #treat warnings as errors
-compiler_flags += -Wfatal-errors # stop on first error encountered
-compiler_flags += -fstrict-aliasing #strict aliasing (in order to comply with the c++ standard more strictly)
-compiler_flags += -g #include debugging symbols
+this_cflags := -Wall #enable all warnings
+this_cflags += -Wno-comment #no warnings on nested comments
+this_cflags += -funsigned-char #the 'char' type is unsigned
+this_cflags += -Wnon-virtual-dtor #warn if base class has non-virtual destructor
+this_cflags += -fno-operator-names #do not treat 'and', 'bitand','bitor','compl','not','or','xor' as keywords
+this_cflags += -Werror #treat warnings as errors
+this_cflags += -Wfatal-errors # stop on first error encountered
+this_cflags += -fstrict-aliasing #strict aliasing (in order to comply with the c++ standard more strictly)
+this_cflags += -g #include debugging symbols
                 #-P -E #-Wreorder
                 #-O3 -funroll-loops -fomit-frame-pointer
 #compiler_flags += -std=c++0x
@@ -83,10 +83,10 @@ compiler_flags += -g #include debugging symbols
 
 
 ifeq ($(os), linux)
-    compiler_flags += -fPIC # Since we are building shared library, we need Position-Independend Code
+    this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
 ifeq ($(os), maemo_linux)
-    compiler_flags += -fPIC # Since we are building shared library, we need Position-Independend Code
+    this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
 
 
@@ -105,13 +105,13 @@ endif
 #  Include directories
 #=======================
 ifeq ($(os), maemo_linux)
-    include_dirs :=
+    this_cflags +=
 endif
 ifeq ($(os), linux)
-    include_dirs :=
+    this_cflags +=
 endif
 ifeq ($(os), windows)
-    include_dirs :=
+    this_cflags +=
 endif
 
 

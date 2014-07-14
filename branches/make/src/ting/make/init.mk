@@ -6,4 +6,6 @@ include ./os.mk
 ting_obj_dir := obj
 
 
+#TODO: clear this_* variables
+
 endif
