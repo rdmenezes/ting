@@ -11,7 +11,7 @@
 #    maemo_linux
 #    win32
 #    macosx
-include ../platform.mk
+include ting/make/init.mk
 
 debug := false
 
@@ -19,50 +19,50 @@ name := libting
 
 so_name := 3
 
-ifeq ($(platform), linux)
+ifeq ($(os), linux)
     name := $(name).so
 endif
-ifeq ($(platform), macosx)
+ifeq ($(os), macosx)
     name := $(name).so
 endif
-ifeq ($(platform), windows)
+ifeq ($(os), windows)
     name := $(name).dll
 endif
 
 
 
 #Sources
-srcs :=
-srcs += ting/fs/BufferFile.cpp
-srcs += ting/fs/File.cpp
-srcs += ting/fs/FSFile.cpp
-srcs += ting/fs/MemoryFile.cpp
-srcs += ting/mt/Mutex.cpp
-srcs += ting/mt/MsgThread.cpp
-srcs += ting/mt/Queue.cpp
-srcs += ting/mt/Semaphore.cpp
-srcs += ting/mt/Thread.cpp
-srcs += ting/net/HostNameResolver.cpp
-srcs += ting/net/IPAddress.cpp
-srcs += ting/net/Lib.cpp
-srcs += ting/net/Socket.cpp
-srcs += ting/net/TCPServerSocket.cpp
-srcs += ting/net/TCPSocket.cpp
-srcs += ting/net/UDPSocket.cpp
-srcs += ting/Ref.cpp
-srcs += ting/timer.cpp
-srcs += ting/WaitSet.cpp
+this_srcs :=
+this_srcs += ting/fs/BufferFile.cpp
+this_srcs += ting/fs/File.cpp
+this_srcs += ting/fs/FSFile.cpp
+this_srcs += ting/fs/MemoryFile.cpp
+this_srcs += ting/mt/Mutex.cpp
+this_srcs += ting/mt/MsgThread.cpp
+this_srcs += ting/mt/Queue.cpp
+this_srcs += ting/mt/Semaphore.cpp
+this_srcs += ting/mt/Thread.cpp
+this_srcs += ting/net/HostNameResolver.cpp
+this_srcs += ting/net/IPAddress.cpp
+this_srcs += ting/net/Lib.cpp
+this_srcs += ting/net/Socket.cpp
+this_srcs += ting/net/TCPServerSocket.cpp
+this_srcs += ting/net/TCPSocket.cpp
+this_srcs += ting/net/UDPSocket.cpp
+this_srcs += ting/Ref.cpp
+this_srcs += ting/timer.cpp
+this_srcs += ting/WaitSet.cpp
 
 
 
-defines :=
+this_cflags :=
 
 ifeq ($(debug), true)
-    defines += -DDEBUG
+    this_cflags += -DDEBUG
 endif
 
-ifeq ($(platform), maemo_linux)
-    defines += -DM_MAEMO
+ifeq ($(os), maemo_linux)
+    this_cflags += -DM_MAEMO
 endif
 
 
@@ -82,20 +82,20 @@ compiler_flags += -g #include debugging symbols
 
 
 
-ifeq ($(platform), linux)
+ifeq ($(os), linux)
     compiler_flags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
-ifeq ($(platform), maemo_linux)
+ifeq ($(os), maemo_linux)
     compiler_flags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
 
 
 linker_flags := -shared
 
-ifeq ($(platform), linux)
+ifeq ($(os), linux)
     linker_flags += -Wl,-soname,$(name).$(so_name)
 endif
-ifeq ($(platform), windows)
+ifeq ($(os), windows)
     linker_flags += -s
 endif
 
@@ -104,13 +104,13 @@ endif
 #=======================
 #  Include directories
 #=======================
-ifeq ($(platform), maemo_linux)
+ifeq ($(os), maemo_linux)
     include_dirs :=
 endif
-ifeq ($(platform), linux)
+ifeq ($(os), linux)
     include_dirs :=
 endif
-ifeq ($(platform), windows)
+ifeq ($(os), windows)
     include_dirs :=
 endif
 
@@ -119,13 +119,13 @@ endif
 #============================
 #  Libs and lib directories
 #============================
-ifeq ($(platform), maemo_linux)
+ifeq ($(os), maemo_linux)
     libs := -lpthread -lrt
 endif
-ifeq ($(platform), linux)
+ifeq ($(os), linux)
     libs := -lpthread -lrt
 endif
-ifeq ($(platform), windows)
+ifeq ($(os), windows)
     libs := -lws2_32
 endif
 
@@ -154,9 +154,9 @@ create-obj-dir:
 
 
 #find all .cpp files and get an .o file name for it to get dependancies for this target
-$(name): $(addprefix $(obj_dir)/,$(patsubst %.cpp,%.o,$(srcs)))
+$(name): $(addprefix $(obj_dir)/,$(patsubst %.cpp,%.o,$(this_srcs)))
 	@echo Linking $@...
-ifeq ($(platform), windows)
+ifeq ($(os), windows)
 	@ar cr $(patsubst %.dll,%.a,$@) $^
 	@$(compiler) $^ -o "$@" $(libs) $(linker_flags)
 else
@@ -166,21 +166,7 @@ else
 endif
 
 
-#======================
-#=compile .cpp sources=
-$(obj_dir)/%.o:%.cpp
-	@echo Compiling $<...
-	@mkdir -p $(dir $@)
-# -MF option specifies dependency output file name
-	@$(compiler) -c -MF "$(patsubst %.o,%.d,$@)" -MD -o "$@" $(compiler_flags) $(defines) $(include_dirs) $<
-#workaround for gcc 4.2 compiler (it behaves differently than gcc 4.1 for some reason)
-#ifeq ($(platform), linux)
-#	@echo -n $(obj_dir)/ > $(patsubst %.o,%.d_,$@)
-#	@cat $(patsubst %.o,%.d,$@) >> $(patsubst %.o,%.d_,$@)
-#	@mv $(patsubst %.o,%.d_,$@) $(patsubst %.o,%.d,$@)
-#endif
-
-include $(wildcard $(addsuffix /*.d,$(dir $(addprefix $(obj_dir)/,$(srcs)))))
+include ting/make/compile_cpp.mk
 
 
 
@@ -198,7 +184,7 @@ test:
 #it is an abstract target (not a file), declare as .PHONY
 .PHONY: clean
 clean:
-ifeq ($(platform),windows)
+ifeq ($(os),windows)
 	@rm -f $(name)
 	@rm -f $(patsubst %.dll,%.a,$(name))
 	@rm -rf $(dir $(obj_dir))
