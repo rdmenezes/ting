@@ -1,0 +1,21 @@
+remove = del
+
+binary_name := tests.exe
+
+
+#compiler flags
+cf := /EHsc /W3
+cf += /D"DEBUG"
+cf += /D"WIN32"
+
+
+default: $(binary_name)
+	@echo running $^...
+	@./$^
+
+$(binary_name): main.cpp socket.cpp dns.cpp ../../src/ting/net/IPAddress.cpp ../../src/ting/net/TCPSocket.cpp
+	@echo Building $@...
+	cl $(cf) ws2_32.lib $^
+
+clean:
+	@$(remove) $(binary_name)
