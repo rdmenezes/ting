@@ -11,7 +11,7 @@
 #    maemo_linux
 #    win32
 #    macosx
-include ting/make/init.mk
+include ting/make/prorab.mk
 
 debug := false
 
@@ -166,7 +166,7 @@ else
 endif
 
 
-include ting/make/compile_cpp.mk
+$(call prorab-compile-single-cpp,ting/WaitSet.cpp)
 
 
 

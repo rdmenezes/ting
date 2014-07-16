@@ -14,9 +14,6 @@
           <in>MemoryFile.cpp</in>
           <in>MemoryFile.hpp</in>
         </df>
-        <df name="make">
-          <in>init.mk</in>
-        </df>
         <df name="mt">
           <in>Message.hpp</in>
           <in>MsgThread.cpp</in>
@@ -275,8 +272,6 @@
       <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ting/fs/MemoryFile.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/ting/make/init.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/math.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -571,8 +566,6 @@
       </item>
       <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="src/ting/make/init.mk" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="4">
@@ -737,8 +730,6 @@
       <item path="src/ting/fs/File.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="4">
-      </item>
-      <item path="src/ting/make/init.mk" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="9">
       </item>
