@@ -149,12 +149,12 @@ compiler := g++
 default: create-obj-dir $(name)
 
 create-obj-dir:
-	@mkdir -p $(obj_dir)
+	@mkdir -p $(prorab_obj_dir)
 
 
 
 #find all .cpp files and get an .o file name for it to get dependancies for this target
-$(name): $(addprefix $(obj_dir)/,$(patsubst %.cpp,%.o,$(this_srcs)))
+$(name): $(addprefix $(prorab_obj_dir)/,$(patsubst %.cpp,%.o,$(this_srcs)))
 	@echo Linking $@...
 ifeq ($(os), windows)
 	@ar cr $(patsubst %.dll,%.a,$@) $^
@@ -166,8 +166,13 @@ else
 endif
 
 
-$(call prorab-compile-single-cpp,ting/WaitSet.cpp)
 
+$(info prorab_dir = $(prorab_dir))
+$(info prorab_this_dir = $(prorab_this_dir))
+$(info prorab_os = $(prorab_os))
+$(info $(call prorab-compile-single-cpp,ting/WaitSet.cpp))
+#$(info $(prorab-compile-cpp))
+#$(prorab-compile-cpp)
 
 
 #==================
