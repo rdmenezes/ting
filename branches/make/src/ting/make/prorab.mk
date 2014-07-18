@@ -45,7 +45,9 @@ ifneq ($(prorab_init_included),true)
 
 
     #compile rules
-    define prorab-compile-cpp
+    define prorab-build
+    all:: $(prorab_this_dir)$(this_name).a $(prorab_this_dir)$(this_name)$(this_extension)
+
     $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 	@echo Compiling $$<...
 	@mkdir -p $$(dir $$@)
@@ -54,15 +56,6 @@ ifneq ($(prorab_init_included),true)
 
     #include rules for header dependencies
     include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_obj_dir),$(this_srcs)))))
-
-    clean::
-	@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-    endef
-
-    
-
-    #link rules
-    define prorab-link
 
     #default rule goes first
     ifneq ($(prorab_os),windows)
@@ -82,6 +75,7 @@ ifneq ($(prorab_init_included),true)
 
     #clean rule
     clean::
+	@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
 	@rm -f $(this_name)$(this_extension)
 	@rm -f $(this_name)$(this_extension)$(this_so_name)
 	@rm -f $(this_name).a

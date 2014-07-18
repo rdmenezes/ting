@@ -147,6 +147,4 @@ endif
 #$(info $(prorab-compile-cpp))
 
 #$(info $(prorab-link))
-$(eval $(prorab-link))
-
-$(eval $(prorab-compile-cpp))
+$(eval $(prorab-build))
