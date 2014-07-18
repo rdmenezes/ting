@@ -44,21 +44,50 @@ ifneq ($(prorab_init_included),true)
     prorab_obj_dir := obj/
 
 
+    #compile rules
     define prorab-compile-cpp
     $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 	@echo Compiling $$<...
 	@mkdir -p $$(dir $$@)
     # -MF option specifies dependency output file name
-	@$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_сflags) $$<
+	@$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
     #include rules for header dependencies
-    include $(wildcard $(addsuffix /*.d,$(dir $(addprefix $(prorab_obj_dir)/,$(this_srcs)))))
+    include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_obj_dir),$(this_srcs)))))
 
     clean::
 	@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
     endef
 
     
+
+    #link rules
+    define prorab-link
+
+    #default rule goes first
+    ifneq ($(prorab_os),windows)
+        $(prorab_this_dir)$(this_name)$(this_extension): $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
+	@echo "Creating symbolic link $$@ -> $$<..."
+	@ln -f -s $$< $$@
+    endif
+
+    #static library rule
+    $(prorab_this_dir)$(this_name).a: $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+	@ar cr $$@ $$^
+
+    #link rule
+    $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+	@echo Linking $$@...
+	@$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS)
+
+    #clean rule
+    clean::
+	@rm -f $(this_name)$(this_extension)
+	@rm -f $(this_name)$(this_extension)$(this_so_name)
+	@rm -f $(this_name).a
+    endef
+
+
 endif
 
 #TODO: clear this_* variables

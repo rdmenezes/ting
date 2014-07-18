@@ -15,18 +15,19 @@ include ting/make/prorab.mk
 
 debug := false
 
-name := libting
+this_name := libting
 
-so_name := 3
-
-ifeq ($(os), linux)
-    name := $(name).so
+ifeq ($(prorab_os),linux)
+    this_extension := .so
+    this_so_name := .3
 endif
-ifeq ($(os), macosx)
-    name := $(name).so
+ifeq ($(prorab_os),macosx)
+    this_extension := .so
+    this_so_name := .3
 endif
-ifeq ($(os), windows)
-    name := $(name).dll
+ifeq ($(prorab_os),windows)
+    this_extension := .dll
+    this_so_name :=
 endif
 
 
@@ -55,19 +56,19 @@ this_srcs += ting/WaitSet.cpp
 
 
 
-this_cflags :=
+this_cflags := 
 
-ifeq ($(debug), true)
+ifeq ($(debug),true)
     this_cflags += -DDEBUG
 endif
 
-ifeq ($(os), maemo_linux)
+ifeq ($(prorab_os),maemo_linux)
     this_cflags += -DM_MAEMO
 endif
 
 
 
-this_cflags := -Wall #enable all warnings
+this_cflags += -Wall #enable all warnings
 this_cflags += -Wno-comment #no warnings on nested comments
 this_cflags += -funsigned-char #the 'char' type is unsigned
 this_cflags += -Wnon-virtual-dtor #warn if base class has non-virtual destructor
@@ -82,21 +83,20 @@ this_cflags += -g #include debugging symbols
 
 
 
-ifeq ($(os), linux)
+ifeq ($(prorab_os),linux)
+    this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
+else ifeq ($(prorab_os),maemo_linux)
     this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
-ifeq ($(os), maemo_linux)
-    this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
+
+
+this_ldflags := -shared
+
+ifeq ($(prorab_os),linux)
+    this_ldflags += -Wl,-soname,$(this_name)$(this_extension)$(this_so_name)
 endif
-
-
-linker_flags := -shared
-
-ifeq ($(os), linux)
-    linker_flags += -Wl,-soname,$(name).$(so_name)
-endif
-ifeq ($(os), windows)
-    linker_flags += -s
+ifeq ($(prorab_os),windows)
+    this_ldflags += -s
 endif
 
 
@@ -104,13 +104,13 @@ endif
 #=======================
 #  Include directories
 #=======================
-ifeq ($(os), maemo_linux)
+ifeq ($(prorab_os),maemo_linux)
     this_cflags +=
 endif
-ifeq ($(os), linux)
+ifeq ($(prorab_os),linux)
     this_cflags +=
 endif
-ifeq ($(os), windows)
+ifeq ($(prorab_os),windows)
     this_cflags +=
 endif
 
@@ -119,14 +119,14 @@ endif
 #============================
 #  Libs and lib directories
 #============================
-ifeq ($(os), maemo_linux)
-    libs := -lpthread -lrt
+ifeq ($(prorab_os),maemo_linux)
+    this_ldlibs := -lpthread -lrt
 endif
-ifeq ($(os), linux)
-    libs := -lpthread -lrt
+ifeq ($(prorab_os),linux)
+    this_ldlibs := -lpthread -lrt
 endif
-ifeq ($(os), windows)
-    libs := -lws2_32
+ifeq ($(prorab_os),windows)
+    this_ldlibs := -lws2_32
 endif
 
 
@@ -140,55 +140,13 @@ endif
 
 
 
-
-#==============================================================================
-#=============================TARGETS==========================================
-#==============================================================================
-
-#==========================
-#=project default target=
-all: clean $(name)
-
-
-
-
 #$(info prorab_dir = $(prorab_dir))
 #$(info prorab_this_dir = $(prorab_this_dir))
 #$(info prorab_os = $(prorab_os))
 #$(info $(call prorab-compile-single-cpp,ting/WaitSet.cpp))
 #$(info $(prorab-compile-cpp))
 
+#$(info $(prorab-link))
+$(eval $(prorab-link))
+
 $(eval $(prorab-compile-cpp))
-
-
-
-#find all .cpp files and get an .o file name for it to get dependancies for this target
-$(name): $(addprefix $(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
-	@echo Linking $@...
-ifeq ($(os), windows)
-	@ar cr $(patsubst %.dll,%.a,$@) $^
-	@$(compiler) $^ -o "$@" $(libs) $(linker_flags)
-else
-	@ar cr $(patsubst %.so,%.a,$@) $^
-	@$(compiler) $^ -o "$@".$(so_name) $(libs) $(linker_flags)
-	@ln -f -s $@.$(so_name) $@
-endif
-
-
-
-#==============
-#=clean target=
-#delete all objects and executables
-
-#it is an abstract target (not a file), declare as .PHONY
-clean::
-ifeq ($(os),windows)
-	@rm -f $(name)
-	@rm -f $(patsubst %.dll,%.a,$(name))
-	@rm -rf $(dir $(obj_dir))
-else
-	@rm -f $(name)
-	@rm -f $(patsubst %.so,%.a,$(name))
-	@rm -f $(name).$(so_name)
-	@rm -rf $(dir $(obj_dir))
-endif
