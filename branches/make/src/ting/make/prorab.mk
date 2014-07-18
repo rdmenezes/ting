@@ -14,13 +14,17 @@ endif
 
 #define this directory for parent makefile
 prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
-
+ifeq ($(prorab_this_dir),./)
+    prorab_this_dir :=
+endif
 
 
 
 
 ifneq ($(prorab_init_included),true)
     prorab_init_included := true
+
+    .PHONY: clean
 
     #directory of current makefile
     prorab_dir := $(dir $(lastword $(MAKEFILE_LIST)))
@@ -37,24 +41,24 @@ ifneq ($(prorab_init_included),true)
     endif
 
 
-
     prorab_obj_dir := obj/
 
 
-    define prorab-compile-single-cpp
-    $(prorab_this_dir)$(prorab_obj_dir)$(patsubst %.cpp,%.o,$(1)): $(prorab_this_dir)$(1)
-	@echo Compiling $<...
-	mkdir -p $(dir $@)
-    # -MF option specifies dependency output file name
-	$(CXX) -c -MF "$(patsubst %.o,%.d,$@)" -MD -o "$@" $(CXXFLAGS) $(CPPFLAGS) $(this_сflags) $<
-    endef
-
     define prorab-compile-cpp
-    $(foreach src,$(this_srcs),$(call prorab-compile-single-cpp,$(src)))
+    $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
+	@echo Compiling $$<...
+	@mkdir -p $$(dir $$@)
+    # -MF option specifies dependency output file name
+	@$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_сflags) $$<
 
+    #include rules for header dependencies
     include $(wildcard $(addsuffix /*.d,$(dir $(addprefix $(prorab_obj_dir)/,$(this_srcs)))))
+
+    clean::
+	@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
     endef
 
+    
 endif
 
 #TODO: clear this_* variables

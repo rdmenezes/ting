@@ -136,8 +136,9 @@ endif
 #==============================================================================
 
 
-obj_dir := obj/1/2
-compiler := g++
+
+
+
 
 
 #==============================================================================
@@ -146,15 +147,23 @@ compiler := g++
 
 #==========================
 #=project default target=
-default: create-obj-dir $(name)
+all: clean $(name)
 
-create-obj-dir:
-	@mkdir -p $(prorab_obj_dir)
+
+
+
+#$(info prorab_dir = $(prorab_dir))
+#$(info prorab_this_dir = $(prorab_this_dir))
+#$(info prorab_os = $(prorab_os))
+#$(info $(call prorab-compile-single-cpp,ting/WaitSet.cpp))
+#$(info $(prorab-compile-cpp))
+
+$(eval $(prorab-compile-cpp))
 
 
 
 #find all .cpp files and get an .o file name for it to get dependancies for this target
-$(name): $(addprefix $(prorab_obj_dir)/,$(patsubst %.cpp,%.o,$(this_srcs)))
+$(name): $(addprefix $(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 	@echo Linking $@...
 ifeq ($(os), windows)
 	@ar cr $(patsubst %.dll,%.a,$@) $^
@@ -167,28 +176,12 @@ endif
 
 
 
-$(info prorab_dir = $(prorab_dir))
-$(info prorab_this_dir = $(prorab_this_dir))
-$(info prorab_os = $(prorab_os))
-$(info $(call prorab-compile-single-cpp,ting/WaitSet.cpp))
-#$(info $(prorab-compile-cpp))
-#$(prorab-compile-cpp)
-
-
-#==================
-#=build all target=
-all: clean proj
-
-
-test:
-
 #==============
 #=clean target=
 #delete all objects and executables
 
 #it is an abstract target (not a file), declare as .PHONY
-.PHONY: clean
-clean:
+clean::
 ifeq ($(os),windows)
 	@rm -f $(name)
 	@rm -f $(patsubst %.dll,%.a,$(name))
@@ -199,5 +192,3 @@ else
 	@rm -f $(name).$(so_name)
 	@rm -rf $(dir $(obj_dir))
 endif
-
-include ../targets.mk
