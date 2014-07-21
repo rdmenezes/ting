@@ -10,7 +10,7 @@ endif
 
 debug := false
 
-#TODO: take this into use
+#TODO: take this into use lib/app
 this_is := shared
 
 this_name := libting
