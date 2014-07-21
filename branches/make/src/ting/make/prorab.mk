@@ -57,7 +57,7 @@ ifneq ($(prorab_init_included),true)
     #include rules for header dependencies
     include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_obj_dir),$(this_srcs)))))
 
-    #default rule goes first
+    #symbolic link to shared lib
     ifneq ($(prorab_os),windows)
         $(prorab_this_dir)$(this_name)$(this_extension): $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
 	@echo "Creating symbolic link $$@ -> $$<..."
