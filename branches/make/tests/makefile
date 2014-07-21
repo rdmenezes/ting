@@ -1,5 +1,13 @@
 $(info entered tests/makefile)
 
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../src/ting/make/prorab.mk
+endif
+
+
 #include ../platform.mk
 
 #subdirs :=

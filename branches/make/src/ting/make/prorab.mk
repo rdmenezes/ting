@@ -29,9 +29,6 @@ ifneq ($(prorab_included),true)
 
     #define this directory for parent makefile
     prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
-    ifeq ($(prorab_this_dir),./)
-        prorab_this_dir :=
-    endif
 
 
     .PHONY: clean all
