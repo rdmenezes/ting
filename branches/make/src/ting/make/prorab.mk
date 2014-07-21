@@ -1,7 +1,10 @@
 # Author: Ivan Gagis <igagis@gmail.com>
 
 
+
+
 #define arithmetic functions
+#pragma once
 ifneq ($(prorab_arithmetic_functions_defined),true)
     prorab_arithmetic_functions_defined := true
 
@@ -15,6 +18,7 @@ endif
 
 
 
+
 #define this directory for parent makefile
 prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
 ifeq ($(prorab_this_dir),./)
@@ -24,6 +28,8 @@ endif
 
 
 
+
+#pragma once
 ifneq ($(prorab_init_included),true)
     prorab_init_included := true
 

@@ -3,17 +3,18 @@ include ting/make/prorab.mk
 
 debug := false
 
+#TODO: take this into use
+this_is := shared
+
 this_name := libting
 
 ifeq ($(prorab_os),linux)
     this_extension := .so
     this_so_name := .3
-endif
-ifeq ($(prorab_os),macosx)
+else ifeq ($(prorab_os),macosx)
     this_extension := .so
     this_so_name := .3
-endif
-ifeq ($(prorab_os),windows)
+else ifeq ($(prorab_os),windows)
     this_extension := .dll
     this_so_name :=
 endif
@@ -50,9 +51,6 @@ ifeq ($(debug),true)
     this_cflags += -DDEBUG
 endif
 
-ifeq ($(prorab_os),maemo_linux)
-    this_cflags += -DM_MAEMO
-endif
 
 
 
@@ -73,8 +71,6 @@ this_cflags += -g #include debugging symbols
 
 ifeq ($(prorab_os),linux)
     this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
-else ifeq ($(prorab_os),maemo_linux)
-    this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
 endif
 
 
@@ -82,8 +78,7 @@ this_ldflags := -shared
 
 ifeq ($(prorab_os),linux)
     this_ldflags += -Wl,-soname,$(this_name)$(this_extension)$(this_so_name)
-endif
-ifeq ($(prorab_os),windows)
+else ifeq ($(prorab_os),windows)
     this_ldflags += -s
 endif
 
@@ -92,13 +87,9 @@ endif
 #=======================
 #  Include directories
 #=======================
-ifeq ($(prorab_os),maemo_linux)
-    this_cflags +=
-endif
 ifeq ($(prorab_os),linux)
     this_cflags +=
-endif
-ifeq ($(prorab_os),windows)
+else ifeq ($(prorab_os),windows)
     this_cflags +=
 endif
 
@@ -107,22 +98,11 @@ endif
 #============================
 #  Libs and lib directories
 #============================
-ifeq ($(prorab_os),maemo_linux)
-    this_ldlibs := -lpthread -lrt
-endif
 ifeq ($(prorab_os),linux)
     this_ldlibs := -lpthread -lrt
-endif
-ifeq ($(prorab_os),windows)
+else ifeq ($(prorab_os),windows)
     this_ldlibs := -lws2_32
 endif
-
-
-
-#                     __
-#                    /  \__/  end of configuration part
-#==============================================================================
-
 
 
 
