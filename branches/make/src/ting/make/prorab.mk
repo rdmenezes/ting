@@ -2,34 +2,6 @@
 # Author: Ivan Gagis <igagis@gmail.com>
 
 
-
-
-#define arithmetic functions
-#pragma once
-ifneq ($(prorab_arithmetic_functions_defined),true)
-    prorab_arithmetic_functions_defined := true
-
-    prorab-num = $(words $1)
-    prorab-add = $1 $2
-    prarab-inc = x $1
-    prorab-dec = $(wordlist 2,$(words $1),$1)
-
-endif
-
-
-
-
-
-#define this directory for parent makefile
-prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
-ifeq ($(prorab_this_dir),./)
-    prorab_this_dir :=
-endif
-
-
-
-
-
 #pragma once
 ifneq ($(prorab_init_included),true)
     prorab_init_included := true
@@ -39,6 +11,20 @@ ifneq ($(prorab_init_included),true)
     prorab_min_gnumake_version := 3.81
     ifeq ($(filter $(prorab_min_gnumake_version),$(firstword $(sort $(MAKE_VERSION) $(prorab_min_gnumake_version)))),)
         $(error GNU make $(prorab_min_gnumake_version) or higher is needed, but found only $(MAKE_VERSION))
+    endif
+
+
+    #define arithmetic functions
+    prorab-num = $(words $1)
+    prorab-add = $1 $2
+    prarab-inc = x $1
+    prorab-dec = $(wordlist 2,$(words $1),$1)
+
+
+    #define this directory for parent makefile
+    prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
+    ifeq ($(prorab_this_dir),./)
+        prorab_this_dir :=
     endif
 
 
@@ -63,8 +49,8 @@ ifneq ($(prorab_init_included),true)
     prorab_obj_dir := obj/
 
 
-    #compile rules
-    define prorab-build
+    #build rules
+    define prorab-build-rules
     all:: $(prorab_this_dir)$(this_name).a $(prorab_this_dir)$(this_name)$(this_extension)
 
     $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
@@ -99,6 +85,14 @@ ifneq ($(prorab_init_included),true)
 	@rm -f $(this_name)$(this_extension)$(this_so_name)
 	@rm -f $(this_name).a
     endef
+
+
+
+    define prorab-subdirs-rule
+        prorab_this_dir := 
+        include $$(wildcard $$(prorab_this_dir)*/makefile)
+    endef
+
 
 
 endif

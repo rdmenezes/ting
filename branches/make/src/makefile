@@ -1,5 +1,10 @@
 #this should be the first include
-include ting/make/prorab.mk
+ifeq (prorab_init_included,true)
+    include $(prorab_dir)prorab.mk
+else
+    include ting/make/prorab.mk
+endif
+
 
 debug := false
 
@@ -115,4 +120,4 @@ endif
 #$(info $(prorab-compile-cpp))
 
 #$(info $(prorab-link))
-$(eval $(prorab-build))
+$(eval $(prorab-build-rules))

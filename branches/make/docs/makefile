@@ -1,12 +1,8 @@
-default: doc
+include $(prorab_dir)prorab.mk
 
-doc: html_doc_files
-
-html_doc_files:
+all::
 	@echo Building docs...
-	@doxygen doxygen.cfg
+	@doxygen $(prorab_this_dir)doxygen.cfg
 
-clean:
-	@rm -rf html_doc_files
-
-include ../targets.mk
+clean::
+	@rm -rf $(prorab_this_dir)doxygen
