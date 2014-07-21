@@ -1,3 +1,6 @@
+# Author: Ivan Gagis <igagis@gmail.com>
+
+
 #define arithmetic functions
 ifneq ($(prorab_arithmetic_functions_defined),true)
     prorab_arithmetic_functions_defined := true
@@ -24,7 +27,7 @@ endif
 ifneq ($(prorab_init_included),true)
     prorab_init_included := true
 
-    .PHONY: clean
+    .PHONY: clean all
 
     #directory of current makefile
     prorab_dir := $(dir $(lastword $(MAKEFILE_LIST)))
@@ -84,4 +87,7 @@ ifneq ($(prorab_init_included),true)
 
 endif
 
-#TODO: clear this_* variables
+
+
+#reset this_* variables
+$(foreach var,$(filter this_%,$(.VARIABLES)),undefine var)

@@ -1,16 +1,4 @@
-# Author: Ivan Gagis <igagis@gmail.com>
-
-#==============================================================================
-#==============================================================================
-#==============================================================================
-#                        Project configuration part
-#             change these strings to configure project building
-
-#Known platforms are:
-#    linux
-#    maemo_linux
-#    win32
-#    macosx
+#this should be the first include
 include ting/make/prorab.mk
 
 debug := false
