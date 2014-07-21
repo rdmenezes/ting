@@ -72,7 +72,7 @@ ifneq ($(prorab_included),true)
     ifneq ($(prorab_os),windows)
         $(prorab_this_dir)$(this_name)$(this_extension): $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
 	@echo "Creating symbolic link $$@ -> $$<..."
-	@ln -f -s $$< $$@
+	@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
     endif
 
     #static library rule
@@ -94,11 +94,29 @@ ifneq ($(prorab_included),true)
 
 
 
-    define prorab-subdirs-rule
-        prorab_this_dir := 
-        include $(wildcard $(prorab_this_dir)*/makefile)
+
+    prorab_private_this_dirs :=
+
+    define prorab-include
+        prorab_private_this_dirs += $(prorab_this_dir)
+        prorab_this_dir := $(dir $(prorab_this_dir)$1)
+        include $1
+        prorab_this_dir := $(lastword $(prorab_private_this_dirs))
+	prorab_private_this_dirs := $(wordlist 1,$(call prorab-num,$(call prorab-dec,$(prorab_private_this_dirs))),$(prorab_private_this_dirs))
+	
     endef
 
+
+    define prorab-subdirs-rule
+        $(foreach path,$(wildcard $(prorab_this_dir)*/makefile),$(call prorab-include,$(path)))
+    endef
+
+
+    #new line character
+    define prorab_newline
+
+
+    endef
 
 
 endif
@@ -106,4 +124,5 @@ endif
 
 
 #reset this_* variables
-$(foreach var,$(filter this_%,$(.VARIABLES)),undefine var)
+$(eval $(foreach var,$(filter this_%,$(.VARIABLES)),$(var) := $(prorab_newline)))
+

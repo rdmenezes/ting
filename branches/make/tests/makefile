@@ -1,3 +1,5 @@
+$(info entered tests/makefile)
+
 #include ../platform.mk
 
 #subdirs :=
@@ -46,3 +48,4 @@
 #	@$(MAKE) -C $@ $(target)
 
 
+$(info left tests/makefile)

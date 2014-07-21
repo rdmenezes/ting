@@ -1,6 +1,6 @@
 include src/ting/make/prorab.mk
 
-$(info $(prorab-subdirs-rule))
+#$(info $(prorab-subdirs-rule))
 $(eval $(prorab-subdirs-rule))
 
 

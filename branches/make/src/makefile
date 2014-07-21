@@ -1,3 +1,5 @@
+$(info entered src/makefile)
+
 #this should be the first include
 ifeq ($(prorab_included),true)
     include $(prorab_dir)prorab.mk
@@ -121,3 +123,6 @@ endif
 
 #$(info $(prorab-link))
 $(eval $(prorab-build-rules))
+
+
+$(info left src/makefile)
