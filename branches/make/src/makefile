@@ -115,13 +115,6 @@ endif
 
 
 
-#$(info prorab_dir = $(prorab_dir))
-#$(info prorab_this_dir = $(prorab_this_dir))
-#$(info prorab_os = $(prorab_os))
-#$(info $(call prorab-compile-single-cpp,ting/WaitSet.cpp))
-#$(info $(prorab-compile-cpp))
-
-#$(info $(prorab-link))
 $(eval $(prorab-build-rules))
 
 
