@@ -1,5 +1,5 @@
 #this should be the first include
-ifeq (prorab_init_included,true)
+ifeq ($(prorab_included),true)
     include $(prorab_dir)prorab.mk
 else
     include ting/make/prorab.mk

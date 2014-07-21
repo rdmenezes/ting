@@ -3,14 +3,20 @@
 
 
 #pragma once
-ifneq ($(prorab_init_included),true)
-    prorab_init_included := true
+ifneq ($(prorab_included),true)
+    prorab_included := true
 
 
     #check if running minimal supported GNU make version
     prorab_min_gnumake_version := 3.81
     ifeq ($(filter $(prorab_min_gnumake_version),$(firstword $(sort $(MAKE_VERSION) $(prorab_min_gnumake_version)))),)
         $(error GNU make $(prorab_min_gnumake_version) or higher is needed, but found only $(MAKE_VERSION))
+    endif
+
+
+    #check that prorab.mk is the first file included
+    ifneq ($(words $(MAKEFILE_LIST)),2)
+        $(error prorab.mk is not a first include in the makefile, include prorab.mk should be the very first thing done in the makefile.)
     endif
 
 
@@ -49,7 +55,7 @@ ifneq ($(prorab_init_included),true)
     prorab_obj_dir := obj/
 
 
-    #build rules
+    #build rule
     define prorab-build-rules
     all:: $(prorab_this_dir)$(this_name).a $(prorab_this_dir)$(this_name)$(this_extension)
 
@@ -60,7 +66,7 @@ ifneq ($(prorab_init_included),true)
 	@$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
     #include rules for header dependencies
-    include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_obj_dir),$(this_srcs)))))
+    include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
     #symbolic link to shared lib
     ifneq ($(prorab_os),windows)
@@ -81,16 +87,16 @@ ifneq ($(prorab_init_included),true)
     #clean rule
     clean::
 	@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-	@rm -f $(this_name)$(this_extension)
-	@rm -f $(this_name)$(this_extension)$(this_so_name)
-	@rm -f $(this_name).a
+	@rm -f $(prorab_this_dir)$(this_name)$(this_extension)
+	@rm -f $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
+	@rm -f $(prorab_this_dir)$(this_name).a
     endef
 
 
 
     define prorab-subdirs-rule
         prorab_this_dir := 
-        include $$(wildcard $$(prorab_this_dir)*/makefile)
+        include $(wildcard $(prorab_this_dir)*/makefile)
     endef
 
 
