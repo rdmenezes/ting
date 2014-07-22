@@ -56,59 +56,61 @@ ifneq ($(prorab_included),true)
     prorab_obj_dir := obj/
 
 
-    #build rule
-    define prorab-build-rules
-        ifeq ($1,app)
-            ifeq ($(prorab_os),windows)
-                $(eval prorab_private_name := $(this_name).exe)
-            else
-                $(eval prorab_private_name := $(this_name))
-            endif
-        else ifeq ($1,lib)
-            $(eval prorab_private_lib_ldflags := -shared)
+    define prorab-private-app-specific-rules
+        ifeq ($(prorab_os),windows)
+            $(eval prorab_private_name := $(this_name).exe)
+        else
+            $(eval prorab_private_name := $(this_name))
+        endif
+    endef
 
-            ifeq ($(prorab_os),windows)
-                $(eval prorab_private_name := lib$(this_name).dll)
-                $(eval prorab_private_lib_ldflags += -s)
-            else
-                $(eval prorab_private_symbolic_link := lib$(this_name).so)
-                $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
-                $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
 
-                #symbolic link to shared lib rule
-                $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
+    define prorab-private-lib-specific-rules
+        $(eval prorab_private_lib_ldflags := -shared)
+
+        ifeq ($(prorab_os),windows)
+            $(eval prorab_private_name := lib$(this_name).dll)
+            $(eval prorab_private_lib_ldflags += -s)
+        else
+            $(eval prorab_private_symbolic_link := lib$(this_name).so)
+            $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
+            $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
+
+            #symbolic link to shared lib rule
+            $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
 			@echo "Creating symbolic link $$@ -> $$<..."
 			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
 
-                #addition to "all" rule
-                all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
-
-
-                #addition to "clean" rule
-                clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
-            endif
-
-            $(eval prorab_private_static_lib_name := lib$(this_name).a)
-
-            #default target
-            all:: $(prorab_this_dir)$(prorab_private_static_lib_name)
-
-
-            #static library rule
-            $(prorab_this_dir)$(prorab_private_static_lib_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
-			@echo "Creating static library $$@..."
-			@ar cr $$@ $$^
+            #addition to "all" rule
+            all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
 
 
             #addition to "clean" rule
             clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
-
+			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
         endif
 
+        $(eval prorab_private_static_lib_name := lib$(this_name).a)
 
+        #default target
+        all:: $(prorab_this_dir)$(prorab_private_static_lib_name)
+
+
+        #static library rule
+        $(prorab_this_dir)$(prorab_private_static_lib_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+			@echo "Creating static library $$@..."
+			@ar cr $$@ $$^
+
+
+        #addition to "clean" rule
+        clean::
+			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
+
+    endef
+
+
+    define prorab-private-common-rules
         #default target
         all:: $(prorab_this_dir)$(prorab_private_name)
 
@@ -132,12 +134,19 @@ ifneq ($(prorab_included),true)
         clean::
 		@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
 		@rm -f $(prorab_this_dir)$(prorab_private_name)
-    endef #~prorab-build-rules
+    endef
 
 
+    define prorab-lib-rules
+        $(prorab-private-lib-specific-rules)
+        $(prorab-private-common-rules)
+    endef
 
-    prorab-lib-rules = $(call prorab-build-rules,lib)
-    prorab-app-rules = $(call prorab-build-rules,app)
+
+    define prorab-app-rules
+        $(prorab-private-app-specific-rules)
+        $(prorab-private-common-rules)
+    endef
 
 
 
