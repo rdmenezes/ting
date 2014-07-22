@@ -33,6 +33,8 @@ ifneq ($(prorab_included),true)
 
     .PHONY: clean all
 
+    #define the very first default target
+    all::
 
     #directory of current makefile
     prorab_dir := $(dir $(lastword $(MAKEFILE_LIST)))
