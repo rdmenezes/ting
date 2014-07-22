@@ -60,13 +60,13 @@ ifneq ($(prorab_included),true)
             ifeq ($1,app)
                 $(eval prorab_private_name := $(this_name).exe)
             else
-                $(eval prorab_private_name := $(this_name).dll)
+                $(eval prorab_private_name := lib$(this_name).dll)
 	    endif
         else
             ifeq ($1,app)
                 $(eval prorab_private_name := $(this_name))
             else
-                $(eval prorab_private_symbolic_link := $(this_name).so)
+                $(eval prorab_private_symbolic_link := lib$(this_name).so)
                 $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
 	    endif
         endif
@@ -77,18 +77,21 @@ ifneq ($(prorab_included),true)
 
 
         ifeq ($1,lib)
+            $(eval prorab_private_static_lib_name := lib$(this_name).a)
+
             #default target
-            all:: $(prorab_this_dir)$(this_name).a
+            all:: $(prorab_this_dir)$(prorab_private_static_lib_name)
 
 
             #static library rule
-            $(prorab_this_dir)$(this_name).a: $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+            $(prorab_this_dir)$(prorab_private_static_lib_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+			@echo "Creating static library $$@..."
 			@ar cr $$@ $$^
 
 
             #addition to "clean" rule
             clean::
-			@rm -f $(prorab_this_dir)$(this_name).a
+			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
 
 
             $(eval prorab_private_lib_ldflags := -shared)

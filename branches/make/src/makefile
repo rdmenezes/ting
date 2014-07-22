@@ -11,7 +11,7 @@ endif
 debug := false
 
 
-this_name := libting
+this_name := ting
 
 this_so_name := 3
 
