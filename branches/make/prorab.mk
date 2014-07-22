@@ -58,27 +58,38 @@ ifneq ($(prorab_included),true)
 
     #build rule
     define prorab-build-rules
-        ifeq ($(prorab_os),windows)
-            ifeq ($1,app)
+        ifeq ($1,app)
+            ifeq ($(prorab_os),windows)
                 $(eval prorab_private_name := $(this_name).exe)
             else
-                $(eval prorab_private_name := lib$(this_name).dll)
-	    endif
-        else
-            ifeq ($1,app)
                 $(eval prorab_private_name := $(this_name))
+            endif
+        else ifeq ($1,lib)
+            $(eval prorab_private_lib_ldflags := -shared)
+
+            ifeq ($(prorab_os),windows)
+                $(eval prorab_private_name := lib$(this_name).dll)
+                $(eval prorab_private_lib_ldflags += -s)
             else
                 $(eval prorab_private_symbolic_link := lib$(this_name).so)
                 $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
-	    endif
-        endif
+                $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
+
+                #symbolic link to shared lib rule
+                $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
+			@echo "Creating symbolic link $$@ -> $$<..."
+			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
 
-        #default target
-        all:: $(prorab_this_dir)$(prorab_private_name)
+                #addition to "all" rule
+                all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
 
 
-        ifeq ($1,lib)
+                #addition to "clean" rule
+                clean::
+			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
+            endif
+
             $(eval prorab_private_static_lib_name := lib$(this_name).a)
 
             #default target
@@ -95,30 +106,12 @@ ifneq ($(prorab_included),true)
             clean::
 			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
 
-
-            $(eval prorab_private_lib_ldflags := -shared)
-
-            ifeq ($(prorab_os),windows)
-                $(eval prorab_private_lib_ldflags += -s)
-            else
-                $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
-
-
-                #symbolic link to shared lib rule
-                $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
-			@echo "Creating symbolic link $$@ -> $$<..."
-			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
-
-
-                #addition to "all" rule
-                all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
-
-
-                #addition to "clean" rule
-                clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
-            endif
         endif
+
+
+        #default target
+        all:: $(prorab_this_dir)$(prorab_private_name)
+
 
         #compile pattern rule
         $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
