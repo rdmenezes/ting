@@ -4,8 +4,12 @@ $(info entered tests/makefile)
 ifeq ($(prorab_included),true)
     include $(prorab_dir)prorab.mk
 else
-    include ../src/ting/make/prorab.mk
+    include ../prorab.mk
 endif
+
+#$(info prorab_this_dir = $(prorab_this_dir))
+
+$(eval $(prorab-subdirs-rule))
 
 
 #include ../platform.mk

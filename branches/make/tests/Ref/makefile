@@ -1,51 +1,32 @@
-include ../../platform.mk
+$(info entered tests/Ref/makefile)
 
-binary_name := tests
-
-ifeq ($(platform),windows)
-binary_name := $(binary_name).exe
-endif
-
-default: $(binary_name)
-
-ifeq ($(platform),windows)
-    libs :=
-endif
-ifeq ($(platform),macosx)
-    libs :=
-endif
-ifeq ($(platform),linux)
-    libs := -pthread
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../../prorab.mk
 endif
 
 
-#external compiler flags (to be passed to make from command line)
-ecf :=
+
+this_name := tests
+
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -DDEBUG
-cf += -fstrict-aliasing #strict aliasing!!!
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
 
-compiler := g++
-ifeq ($(platform),macosx)
-    compiler := clang++
-endif
-
-
-include ../test_target.mk
-
-include ../libting.mk
-
-$(binary_name): main.cpp tests.cpp $(libting)
-	@echo Building $@...
-	@$(compiler) -o $@ $(cf) $^ $(libs)
+this_srcs := main.cpp tests.cpp
 
 
 
-clean:
-	@rm -rf $(binary_name)
+#$(info prorab_this_dir = $(prorab_this_dir))
+include $(prorab_this_dir)../test_target.mk
 
-include ../../targets.mk
 
+$(eval $(prorab-app-rules))
+
+
+$(info left tests/Ref/makefile)

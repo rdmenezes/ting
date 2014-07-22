@@ -132,7 +132,7 @@ ifneq ($(prorab_included),true)
         #link rule
         $(prorab_this_dir)$(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
-		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
+		$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
 
 
         #clean rule
@@ -152,12 +152,15 @@ ifneq ($(prorab_included),true)
 
     #include file with correct prorab_this_dir
     define prorab-include
-        prorab_private_this_dirs += $(prorab_this_dir)
-        prorab_this_dir := $(dir $(prorab_this_dir)$1)
+#        $$(info before: prorab_private_this_dirs = $$(prorab_private_this_dirs), path = $1, prorab_this_dir = $$(prorab_this_dir))
+        prorab_private_this_dirs += $$(prorab_this_dir)
+        prorab_this_dir := $$(dir $1)
+#        $$(info prorab_this_dir set to $$(prorab_this_dir))
         include $1
-        prorab_this_dir := $(lastword $(prorab_private_this_dirs))
-	prorab_private_this_dirs := $(wordlist 1,$(call prorab-num,$(call prorab-dec,$(prorab_private_this_dirs))),$(prorab_private_this_dirs))
-	
+        prorab_this_dir := $$(lastword $$(prorab_private_this_dirs))
+        prorab_private_this_dirs := $$(wordlist 1,$$(call prorab-num,$$(call prorab-dec,$$(prorab_private_this_dirs))),$$(prorab_private_this_dirs))
+#        $$(info after: prorab_private_this_dirs = $$(prorab_private_this_dirs), prorab_this_dir = $$(prorab_this_dir))
+
     endef
 
     #rule for building all makefiles in subdirectories

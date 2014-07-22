@@ -1,9 +1,9 @@
-test: $(binary_name)
+test:: $(prorab_this_dir)$(this_name)
 	@echo running $^...
-ifeq ($(platform),windows)
+ifeq ($(prorab_os),windows)
 	@./$^
 else
-    ifeq ($(platform),macosx)
+    ifeq ($(prorab_os),macosx)
 	@DYLD_LIBRARY_PATH=../../src ./$^
     else
 	@LD_LIBRARY_PATH=../../src ./$^
@@ -12,12 +12,12 @@ endif
 
 
 
-gdb: $(binary_name)
+gdb:: $(prorab_this_dir)$(this_name)
 	@echo gdb debugging $^...
-ifeq ($(platform),windows)
+ifeq ($(prorab_os),windows)
 	@gdb ./$^
 else
-    ifeq ($(platform),macosx)
+    ifeq ($(prorab_os),macosx)
 	@DYLD_LIBRARY_PATH=../../src gdb ./$^
     else
 	@LD_LIBRARY_PATH=../../src gdb ./$^

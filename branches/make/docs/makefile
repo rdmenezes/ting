@@ -5,7 +5,7 @@ $(info entered docs/makefile)
 ifeq ($(prorab_included),true)
     include $(prorab_dir)prorab.mk
 else
-    include ../src/ting/make/prorab.mk
+    include ../prorab.mk
 endif
 
 

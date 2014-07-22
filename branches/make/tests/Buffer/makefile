@@ -1,44 +1,32 @@
-include ../../platform.mk
+$(info entered tests/Buffer/makefile)
 
-binary_name := tests
-
-ifeq ($(platform),windows)
-binary_name := $(binary_name).exe
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../../prorab.mk
 endif
 
-default: $(binary_name)
 
-ifeq ($(platform),windows)
-    libs := 
-endif
-ifeq ($(platform),macosx)
-    libs := 
-endif
-ifeq ($(platform),linux)
-    libs := 
-endif
 
-#external compiler flags (to be passed to make from command line)
-ecf :=
+this_name := tests
+
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -DDEBUG
-cf += -fstrict-aliasing #strict aliasing!!!
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+
+this_srcs := main.cpp tests.cpp
 
 
 
-include ../test_target.mk
+#$(info prorab_this_dir = $(prorab_this_dir))
+include $(prorab_this_dir)../test_target.mk
 
-include ../libting.mk
 
-$(binary_name): main.cpp tests.cpp $(libting)
-	@echo Building $@...
-	@g++ -o $@ $(cf) $^ $(libs)
+$(eval $(prorab-app-rules))
 
-clean:
-	@rm -rf $(binary_name)
 
-include ../../targets.mk
-
+$(info left tests/Buffer/makefile)
