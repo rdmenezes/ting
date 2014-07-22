@@ -56,12 +56,19 @@ ifneq ($(prorab_included),true)
     prorab_obj_dir := obj/
 
 
+
+    define prorab_newline :=
+
+
+    endef
+
+
+
     define prorab-private-app-specific-rules
-        ifeq ($(prorab_os),windows)
-            $(eval prorab_private_name := $(this_name).exe)
-        else
-            $(eval prorab_private_name := $(this_name))
-        endif
+        $(if $(filter windows,$(prorab_os)), \
+                $(eval prorab_private_name := $(this_name).exe), \
+	        $(eval prorab_private_name := $(this_name)) \
+	    )
     endef
 
 
