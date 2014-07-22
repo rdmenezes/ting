@@ -7,6 +7,10 @@ ifneq ($(prorab_included),true)
     prorab_included := true
 
 
+    #for storing included makefiles
+    prorab_included_makefiles :=
+
+
     #check if running minimal supported GNU make version
     prorab_min_gnumake_version := 3.81
     ifeq ($(filter $(prorab_min_gnumake_version),$(firstword $(sort $(MAKE_VERSION) $(prorab_min_gnumake_version)))),)
@@ -28,7 +32,8 @@ ifneq ($(prorab_included),true)
 
 
     #define this directory for parent makefile
-    prorab_this_dir := $(dir $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST)))
+    prorab_this_makefile := $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST))
+    prorab_this_dir := $(dir $(prorab_this_makefile))
 
 
     .PHONY: clean all
@@ -57,50 +62,48 @@ ifneq ($(prorab_included),true)
 
 
 
-    define prorab_newline :=
-
-
+    define prorab-private-app-specific-rules
+        $(eval prorab_private_lib_ldflags := )
+	
+        $(if $(filter windows,$(prorab_os)), \
+                $(eval prorab_private_name := $(this_name).exe) \
+            , \
+                $(eval prorab_private_name := $(this_name)) \
+            )
     endef
 
 
 
-    define prorab-private-app-specific-rules
-        $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := $(this_name).exe), \
-	        $(eval prorab_private_name := $(this_name)) \
-	    )
+    define prorab-private-lib-specific-rules-nix-systems
+        $(eval prorab_private_symbolic_link := lib$(this_name).so)
+        $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
+        $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
+
+        #symbolic link to shared library rule
+        $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
+			@echo "Creating symbolic link $$@ -> $$<..."
+			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
+
+        all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
+
+        clean::
+			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
     endef
 
 
     define prorab-private-lib-specific-rules
         $(eval prorab_private_lib_ldflags := -shared)
 
-        ifeq ($(prorab_os),windows)
-            $(eval prorab_private_name := lib$(this_name).dll)
-            $(eval prorab_private_lib_ldflags += -s)
-        else
-            $(eval prorab_private_symbolic_link := lib$(this_name).so)
-            $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
-            $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
-
-            #symbolic link to shared lib rule
-            $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
-			@echo "Creating symbolic link $$@ -> $$<..."
-			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
-
-
-            #addition to "all" rule
-            all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
-
-
-            #addition to "clean" rule
-            clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
-        endif
+        $(if $(filter windows,$(prorab_os)), \
+                $(eval prorab_private_name := lib$(this_name).dll) \
+                $(eval prorab_private_lib_ldflags += -s) \
+            , \
+                $(prorab-private-lib-specific-rules-nix-systems) \
+            )
 
         $(eval prorab_private_static_lib_name := lib$(this_name).a)
 
-        #default target
+
         all:: $(prorab_this_dir)$(prorab_private_static_lib_name)
 
 
@@ -110,7 +113,6 @@ ifneq ($(prorab_included),true)
 			@ar cr $$@ $$^
 
 
-        #addition to "clean" rule
         clean::
 			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
 
@@ -134,7 +136,7 @@ ifneq ($(prorab_included),true)
         #link rule
         $(prorab_this_dir)$(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
-		$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
+		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
 
 
         #clean rule
@@ -157,18 +159,28 @@ ifneq ($(prorab_included),true)
 
 
 
-    prorab_private_this_dirs :=
+
+    define prorab-include
+        $(if $(filter $1,$(prorab_included_makefiles)), \
+            , \
+                $(eval prorab_included_makefiles += $1) \
+                $(call prorab-private-include,$1) \
+            )
+    endef
+
+
+    #for storing previous prorab_this_makefile when including other makefiles
+    prorab_private_this_makefiles :=
 
     #include file with correct prorab_this_dir
-    define prorab-include
-#        $$(info before: prorab_private_this_dirs = $$(prorab_private_this_dirs), path = $1, prorab_this_dir = $$(prorab_this_dir))
-        prorab_private_this_dirs += $$(prorab_this_dir)
-        prorab_this_dir := $$(dir $1)
-#        $$(info prorab_this_dir set to $$(prorab_this_dir))
+    define prorab-private-include
+        prorab_private_this_makefiles += $$(prorab_this_dir)
+        prorab_this_makefile := $1
+        prorab_this_dir := $$(dir $$(prorab_this_makefile))
         include $1
-        prorab_this_dir := $$(lastword $$(prorab_private_this_dirs))
-        prorab_private_this_dirs := $$(wordlist 1,$$(call prorab-num,$$(call prorab-dec,$$(prorab_private_this_dirs))),$$(prorab_private_this_dirs))
-#        $$(info after: prorab_private_this_dirs = $$(prorab_private_this_dirs), prorab_this_dir = $$(prorab_this_dir))
+        prorab_this_makefile := $$(lastword $$(prorab_private_this_makefiles))
+        prorab_this_dir := $$(dir $$(prorab_this_makefile))
+        prorab_private_this_makefiles := $$(wordlist 1,$$(call prorab-num,$$(call prorab-dec,$$(prorab_private_this_makefiles))),$$(prorab_private_this_makefiles))
 
     endef
 
@@ -178,9 +190,18 @@ ifneq ($(prorab_included),true)
     endef
 
 
+    
+
 endif #~once
 
 
+$(if $(filter $(prorab_this_makefile),$(prorab_included_makefiles)), \
+        \
+    , \
+        $(eval prorab_included_makefiles += $(prorab_this_makefile)) \
+    )
+
+#$(info $(prorab_included_makefiles))
 
 #reset this_* variables
 $(foreach var,$(filter this_%,$(.VARIABLES)),$(eval $(var) := ))

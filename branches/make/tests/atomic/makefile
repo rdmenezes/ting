@@ -8,6 +8,9 @@ else
 endif
 
 
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
+
 
 this_name := tests
 
@@ -22,10 +25,21 @@ this_srcs := main.cpp tests.cpp
 
 
 
+this_ldlibs := -lting -lpthread
+
+this_ldflags := -L$(prorab_this_dir)../../src/
+
+
+#add dependency on libting.so
+$(prorab_this_dir)tests: $(prorab_this_dir)../../src/libting.so
+
+
+
 #$(info prorab_this_dir = $(prorab_this_dir))
 include $(prorab_this_dir)../test_target.mk
 
 
+#$(info $(prorab-app-rules))
 $(eval $(prorab-app-rules))
 
 

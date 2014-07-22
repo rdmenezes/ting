@@ -26,6 +26,7 @@ this_srcs := main.cpp tests.cpp
 include $(prorab_this_dir)../test_target.mk
 
 
+#$(info $(prorab-app-rules))
 $(eval $(prorab-app-rules))
 
 
