@@ -68,7 +68,7 @@ ifneq ($(prorab_included),true)
         $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 		@echo Compiling $$<...
 		@mkdir -p $$(dir $$@)
-		$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
+		@$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
         #include rules for header dependencies
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
@@ -77,12 +77,12 @@ ifneq ($(prorab_included),true)
         ifneq ($(prorab_os),windows)
             $(prorab_this_dir)$(prorab_private_name): $(prorab_this_dir)$(prorab_private_so_name)
 			@echo "Creating symbolic link $$@ -> $$<..."
-			(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
+			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
         endif
 
         #static library rule
         $(prorab_this_dir)$(this_name).a: $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
-		ar cr $$@ $$^
+		@ar cr $$@ $$^
 
 
         ifeq ($(prorab_os),windows)
@@ -94,14 +94,16 @@ ifneq ($(prorab_included),true)
         #link rule
         $(prorab_this_dir)$(prorab_private_so_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
-		$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) -shared $(prorab_private_lib_ldflags)
+		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) -shared $(prorab_private_lib_ldflags)
 
         #clean rule
         clean::
-		rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-		rm -f $(prorab_this_dir)$(prorab_private_name)
-		rm -f $(prorab_this_dir)$(prorab_private_so_name)
-		rm -f $(prorab_this_dir)$(this_name).a
+		@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
+		@rm -f $(prorab_this_dir)$(prorab_private_name)
+        ifneq ($(prorab_os),windows)
+		@rm -f $(prorab_this_dir)$(prorab_private_so_name)
+        endif
+		@rm -f $(prorab_this_dir)$(this_name).a
     endef
 
 
@@ -125,16 +127,10 @@ ifneq ($(prorab_included),true)
     endef
 
 
-    define prorab-clear-var
-        $1 :=
-	
-    endef
-
-
 endif #~once
 
 
 
 #reset this_* variables
-$(eval $(foreach var,$(filter this_%,$(.VARIABLES)),$(call prorab-clear-var,$(var))))
+$(foreach var,$(filter this_%,$(.VARIABLES)),$(eval $(var) := ))
 
