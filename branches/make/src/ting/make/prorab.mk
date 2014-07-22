@@ -53,39 +53,55 @@ ifneq ($(prorab_included),true)
 
 
     #build rule
-    define prorab-build-rules
-        all:: $(prorab_this_dir)$(this_name).a $(prorab_this_dir)$(this_name)$(this_extension)
+    define prorab-lib-rules
+        ifeq ($(prorab_os),windows)
+            $(eval prorab_private_name := $(this_name).dll)
+	    $(eval prorab_private_so_name := $$(prorab_private_name))
+        else
+            $(eval prorab_private_name := $(this_name).so)
+	    $(eval prorab_private_so_name := $(this_name).so.$(this_so_name))
+        endif
 
+        all:: $(prorab_this_dir)$(this_name).a $(prorab_this_dir)$(prorab_private_name)
+
+        #compile pattern rule
         $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 		@echo Compiling $$<...
 		@mkdir -p $$(dir $$@)
-		@$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
+		$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
         #include rules for header dependencies
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #symbolic link to shared lib
         ifneq ($(prorab_os),windows)
-            $(prorab_this_dir)$(this_name)$(this_extension): $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
+            $(prorab_this_dir)$(prorab_private_name): $(prorab_this_dir)$(prorab_private_so_name)
 			@echo "Creating symbolic link $$@ -> $$<..."
-			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
+			(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
         endif
 
         #static library rule
         $(prorab_this_dir)$(this_name).a: $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
-		@ar cr $$@ $$^
+		ar cr $$@ $$^
+
+
+        ifeq ($(prorab_os),windows)
+            $(eval prorab_private_lib_ldflags := -s)
+        else
+            $(eval prorab_private_lib_ldflags := -Wl,-soname,$$(prorab_private_so_name))
+        endif
 
         #link rule
-        $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+        $(prorab_this_dir)$(prorab_private_so_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
-		@$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS)
+		$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) -shared $(prorab_private_lib_ldflags)
 
         #clean rule
         clean::
-		@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-		@rm -f $(prorab_this_dir)$(this_name)$(this_extension)
-		@rm -f $(prorab_this_dir)$(this_name)$(this_extension)$(this_so_name)
-		@rm -f $(prorab_this_dir)$(this_name).a
+		rm -rf $(prorab_this_dir)$(prorab_obj_dir)
+		rm -f $(prorab_this_dir)$(prorab_private_name)
+		rm -f $(prorab_this_dir)$(prorab_private_so_name)
+		rm -f $(prorab_this_dir)$(this_name).a
     endef
 
 
@@ -109,10 +125,9 @@ ifneq ($(prorab_included),true)
     endef
 
 
-    #new line character
-    define prorab_newline
-
-
+    define prorab-clear-var
+        $1 :=
+	
     endef
 
 
@@ -121,5 +136,5 @@ endif #~once
 
 
 #reset this_* variables
-$(eval $(foreach var,$(filter this_%,$(.VARIABLES)),$(var) := $(prorab_newline)))
+$(eval $(foreach var,$(filter this_%,$(.VARIABLES)),$(call prorab-clear-var,$(var))))
 

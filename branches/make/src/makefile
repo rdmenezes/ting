@@ -10,21 +10,10 @@ endif
 
 debug := false
 
-#TODO: take this into use lib/app
-this_is := shared
 
 this_name := libting
 
-ifeq ($(prorab_os),linux)
-    this_extension := .so
-    this_so_name := .3
-else ifeq ($(prorab_os),macosx)
-    this_extension := .so
-    this_so_name := .3
-else ifeq ($(prorab_os),windows)
-    this_extension := .dll
-    this_so_name :=
-endif
+this_so_name := 3
 
 
 
@@ -81,13 +70,6 @@ ifeq ($(prorab_os),linux)
 endif
 
 
-this_ldflags := -shared
-
-ifeq ($(prorab_os),linux)
-    this_ldflags += -Wl,-soname,$(this_name)$(this_extension)$(this_so_name)
-else ifeq ($(prorab_os),windows)
-    this_ldflags += -s
-endif
 
 
 
@@ -115,7 +97,7 @@ endif
 
 
 
-$(eval $(prorab-build-rules))
+$(eval $(prorab-lib-rules))
 
 
 $(info left src/makefile)
