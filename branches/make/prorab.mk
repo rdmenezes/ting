@@ -161,9 +161,10 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-include
-        $(if $(filter $1,$(prorab_included_makefiles)), \
+        $(if $(filter $(abspath $1),$(prorab_included_makefiles)), \
             , \
-                $(eval prorab_included_makefiles += $1) \
+                $(info including $(abspath $1)) \
+                $(eval prorab_included_makefiles += $(abspath $1)) \
                 $(call prorab-private-include,$1) \
             )
     endef
@@ -198,7 +199,7 @@ endif #~once
 $(if $(filter $(prorab_this_makefile),$(prorab_included_makefiles)), \
         \
     , \
-        $(eval prorab_included_makefiles += $(prorab_this_makefile)) \
+        $(eval prorab_included_makefiles += $(abspath $(prorab_this_makefile))) \
     )
 
 #$(info $(prorab_included_makefiles))
