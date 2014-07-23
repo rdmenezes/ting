@@ -70,6 +70,8 @@ ifneq ($(prorab_included),true)
             , \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name))) \
             )
+
+        $(eval prorab_this_name := $(prorab_private_name))
     endef
 
 
@@ -79,9 +81,11 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
         $(eval prorab_private_lib_ldflags += -Wl,-soname,$(notdir $(prorab_private_name)))
 
+        $(eval prorab_this_name := $(prorab_private_symbolic_link))
+
         #symbolic link to shared library rule
         $(prorab_private_symbolic_link): $(prorab_private_name)
-			@echo "Creating symbolic link $$@ -> $$<..."
+			@echo "Creating symbolic link $$(notdir $$@) -> $$(notdir $$<)..."
 			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
         all: $(prorab_private_symbolic_link)
@@ -97,24 +101,25 @@ ifneq ($(prorab_included),true)
         $(if $(filter windows,$(prorab_os)), \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).dll)) \
                 $(eval prorab_private_lib_ldflags += -s) \
+                $(eval prorab_this_name := $(prorab_private_name)) \
             , \
                 $(prorab-private-lib-specific-rules-nix-systems) \
             )
 
-        $(eval prorab_private_static_lib_name := lib$(this_name).a)
+        $(eval prorab_this_staticlib := lib$(this_name).a)
 
 
-        all: $(prorab_this_dir)$(prorab_private_static_lib_name)
+        all: $(prorab_this_dir)$(prorab_this_staticlib)
 
 
         #static library rule
-        $(prorab_this_dir)$(prorab_private_static_lib_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
-			@echo "Creating static library $$@..."
+        $(prorab_this_dir)$(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+			@echo "Creating static library $$(notdir $$@)..."
 			@ar cr $$@ $$^
 
 
         clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_static_lib_name)
+			@rm -f $(prorab_this_dir)$(prorab_this_staticlib)
 
     endef
 
@@ -163,7 +168,6 @@ ifneq ($(prorab_included),true)
     define prorab-include
         $(if $(filter $(abspath $1),$(prorab_included_makefiles)), \
             , \
-                $(info including $(abspath $1)) \
                 $(eval prorab_included_makefiles += $(abspath $1)) \
                 $(call prorab-private-include,$1) \
             )
