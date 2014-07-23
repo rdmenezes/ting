@@ -67,7 +67,7 @@ $(info left tests/SingletonOverSharedLibrary/makefile)
 
 
 
-define TODO_write_fwefwe
+define TODO_remove_after_testing_under_windows
 include ../../platform.mk
 
 binary_name := tests

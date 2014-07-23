@@ -151,7 +151,7 @@ ifneq ($(prorab_included),true)
 
         $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
 
-        #compile pattern rule
+        #compile static pattern rule
         $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 		@echo Compiling $$<...
 		$(prorab_echo)mkdir -p $$(dir $$@)
