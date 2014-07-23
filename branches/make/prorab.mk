@@ -64,6 +64,8 @@ ifneq ($(prorab_included),true)
     prorab_obj_dir := obj/
 
 
+    prorab_echo := @
+
 
     define prorab-private-app-specific-rules
         $(eval prorab_private_lib_ldflags := )
@@ -77,8 +79,8 @@ ifneq ($(prorab_included),true)
         $(eval prorab_this_name := $(prorab_private_name))
 
         install:: $(prorab_private_name)
-		@install -d $(DESTDIR)$(PREFIX)/bin/
-		@install $(prorab_private_name) $(DESTDIR)$(PREFIX)/bin/
+		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/bin/
+		$(prorab_echo)install $(prorab_private_name) $(DESTDIR)$(PREFIX)/bin/
     endef
 
 
@@ -93,16 +95,16 @@ ifneq ($(prorab_included),true)
         #symbolic link to shared library rule
         $(prorab_private_symbolic_link): $(prorab_private_name)
 			@echo "Creating symbolic link $$(notdir $$@) -> $$(notdir $$<)..."
-			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
+			$(prorab_echo)(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
         all: $(prorab_private_symbolic_link)
 
         install:: $(prorab_private_symbolic_link)
 		@install -d $(DESTDIR)$(PREFIX)/lib/
-		@(cd $(DESTDIR)$(PREFIX)/lib/; ln -f -s $(notdir $(prorab_private_name)) $(notdir $(prorab_private_symbolic_link)))
+		$(prorab_echo)(cd $(DESTDIR)$(PREFIX)/lib/; ln -f -s $(notdir $(prorab_private_name)) $(notdir $(prorab_private_symbolic_link)))
 
         clean::
-		@rm -f $(prorab_private_symbolic_link)
+		$(prorab_echo)rm -f $(prorab_private_symbolic_link)
     endef
 
 
@@ -126,19 +128,19 @@ ifneq ($(prorab_included),true)
         #static library rule
         $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 			@echo "Creating static library $$(notdir $$@)..."
-			@ar cr $$@ $$^
+			$(prorab_echo)ar cr $$@ $$^
 
 
         clean::
-		@rm -f $(prorab_this_staticlib)
+		$(prorab_echo)rm -f $(prorab_this_staticlib)
 
         install:: $(prorab_this_staticlib) $(prorab_private_name)
-		@for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name "*.hpp")); do \
+		$(prorab_echo)for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name "*.hpp")); do \
 		    install -D $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
 		done
-		@install -d $(DESTDIR)$(PREFIX)/lib/
-		@install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
-		@install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
+		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/lib/
+		$(prorab_echo)install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
+		$(prorab_echo)install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
 
     endef
 
@@ -147,25 +149,26 @@ ifneq ($(prorab_included),true)
         #default target
         all: $(prorab_private_name)
 
+        $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
 
         #compile pattern rule
-        $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
+        $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
 		@echo Compiling $$<...
-		@mkdir -p $$(dir $$@)
-		@$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
+		$(prorab_echo)mkdir -p $$(dir $$@)
+		$(prorab_echo)$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
         #include rules for header dependencies
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+        $(prorab_private_name): $(prorab_this_objs)
 		@echo Linking $$@...
-		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
+		$(prorab_echo)$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
 
         #clean rule
         clean::
-		@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-		@rm -f $(prorab_private_name)
+		$(prorab_echo)rm -rf $(prorab_this_dir)$(prorab_obj_dir)
+		$(prorab_echo)rm -f $(prorab_private_name)
     endef
 
 
@@ -227,6 +230,5 @@ $(if $(filter $(prorab_this_makefile),$(prorab_included_makefiles)), \
 
 #$(info $(prorab_included_makefiles))
 
-#reset this_* variables
 
 $(prorab-clear-this-vars)

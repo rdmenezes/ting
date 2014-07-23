@@ -1,6 +1,4 @@
-
-
-$(info entered tests/Signal/makefile)
+$(info entered tests/SingletonOverSharedLibrary/makefile)
 
 #this should be the first include
 ifeq ($(prorab_included),true)
@@ -8,6 +6,28 @@ ifeq ($(prorab_included),true)
 else
     include ../../prorab.mk
 endif
+
+
+
+this_name := testso
+this_so_name := 0
+
+this_cflags :=
+this_cflags += -Wall
+this_cflags += #-DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+this_cflags += -fPIC
+
+this_srcs := testso.cpp
+
+#$(info $(prorab-build-lib))
+$(eval $(prorab-build-lib))
+
+lib_target_name := $(prorab_this_name)
+
+
+
+$(prorab-clear-this-vars)
 
 
 
@@ -20,18 +40,25 @@ this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
 
-this_srcs := main.cpp tests.cpp
+this_srcs := Singleton_test.cpp
 
-
-
-#$(info prorab_this_dir = $(prorab_this_dir))
-include $(prorab_this_dir)../test_target.mk
+this_ldlibs := $(lib_target_name)
 
 
 $(eval $(prorab-build-app))
 
+$(prorab_this_name): $(lib_target_name)
 
-$(info left tests/Signal/makefile)
+
+define this_rules
+test:: $(prorab_this_name)
+	@echo running $$^...
+	@(cd $(prorab_this_dir); $(if $(filter windows,$(prorab_os)), $$^, LD_LIBRARY_PATH=. $$^))
+endef
+$(eval $(this_rules))
+
+
+$(info left tests/SingletonOverSharedLibrary/makefile)
 
 
 
