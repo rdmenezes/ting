@@ -1,7 +1,7 @@
 
 
 ifeq ($(prorab_os),windows)
-    this_test_cmd := (cd $(prorab_this_dir); ./$$(notdir $$^))
+    this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; ./$$(notdir $$^))
 else
     ifeq ($(prorab_os),macosx)
         this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
@@ -23,7 +23,7 @@ $(eval $(this_rule))
 
 
 ifeq ($(prorab_os),windows)
-    this_gdb_cmd := (cd $(prorab_this_dir); gdb ./$$(notdir $$^))
+    this_gdb_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; gdb ./$$(notdir $$^))
 else
     ifeq ($(prorab_os),macosx)
         this_gdb_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))

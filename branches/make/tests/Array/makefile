@@ -20,7 +20,9 @@ this_cflags += -fstrict-aliasing #strict aliasing!!!
 
 this_srcs := main.cpp tests.cpp
 
-
+ifeq ($(prorab_os),windows)
+    this_ldlibs := -mwindows
+endif
 
 #$(info prorab_this_dir = $(prorab_this_dir))
 include $(prorab_this_dir)../test_target.mk

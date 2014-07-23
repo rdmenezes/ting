@@ -18,7 +18,7 @@ doc: $(prorab_this_dir)doxygen
 
 $(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
 	@echo Building docs...
-	@(cd $(prorab_this_dir); doxygen doxygen.cfg)
+	@(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
 
 clean::
 	@rm -rf $(prorab_this_dir)doxygen

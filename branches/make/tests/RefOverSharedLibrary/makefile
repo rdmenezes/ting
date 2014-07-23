@@ -16,7 +16,11 @@ this_cflags :=
 this_cflags += -Wall
 this_cflags += #-DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
-this_cflags += -fPIC
+
+ifeq ($(prorab_os),windows)
+else
+    this_cflags += -fPIC
+endif
 
 this_srcs := testso.cpp
 
@@ -44,7 +48,13 @@ this_srcs := Ref_test.cpp
 
 this_ldflags := -L$(prorab_this_dir)../../src/
 
-this_ldlibs := $(lib_target_name) -lpthread -lting
+this_ldlibs := $(lib_target_name) -lting
+
+ifeq ($(prorab_os),windows)
+else
+    this_cflags += -fPIC
+    this_ldlibs := -lpthread
+endif
 
 
 $(eval $(prorab-build-app))
@@ -62,7 +72,7 @@ $(eval $(this_rules))
 
 
 #add dependency on libting.so
-$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting.so)
+$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 
 #include makefile for building ting

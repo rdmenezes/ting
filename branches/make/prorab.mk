@@ -60,6 +60,14 @@ ifneq ($(prorab_included),true)
         prorab_os := linux
     endif
 
+    #set library extension
+    ifeq ($(prorab_os),windows)
+        prorab_lib_extension := .dll
+    else
+        prorab_lib_extension := .so
+    endif
+
+
 
     prorab_obj_dir := obj/
 
@@ -86,7 +94,7 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-private-lib-specific-rules-nix-systems
-        $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name).so))
+        $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension)))
         $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
         $(eval prorab_private_lib_ldflags += -Wl,-soname,$(notdir $(prorab_private_name)))
 
@@ -112,7 +120,7 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_lib_ldflags := -shared)
 
         $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).dll)) \
+                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
                 $(eval prorab_private_lib_ldflags += -s) \
                 $(eval prorab_this_name := $(prorab_private_name)) \
             , \

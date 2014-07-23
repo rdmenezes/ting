@@ -499,7 +499,8 @@ public:
 					default:
 						//we should not get here since if type is not the record type which we know then 'if(type == r->recordType)' condition will not trigger.
 						ASSERT(false)
-						return ParseResult(ting::net::HostNameResolver::ERROR);
+						h = IPAddress::Host(0,0,0,0);
+						break;
 				}
 				
 				TRACE(<< "host resolved: " << r->hostName << " = " << h.ToString() << std::endl)

@@ -20,12 +20,17 @@ this_cflags += -fstrict-aliasing #strict aliasing!!!
 
 this_srcs := main.cpp tests.cpp
 
-this_ldlibs := -lting -lpthread
+this_ldlibs := -lting
+
+ifeq ($(prorab_os),windows)
+else
+    this_ldlibs := -lpthread
+endif
 
 this_ldflags := -L$(prorab_this_dir)../../src/
 
 #add dependency on libting.so
-$(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting.so)
+$(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 #$(info prorab_this_dir = $(prorab_this_dir))
 include $(prorab_this_dir)../test_target.mk

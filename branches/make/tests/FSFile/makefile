@@ -32,8 +32,8 @@ include $(prorab_this_dir)../test_target.mk
 
 $(eval $(prorab-build-app))
 
-#add dependency on libting.so
-$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting.so)
+#add dependency on libting
+this_target_name := $(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 
 #include makefile for building ting

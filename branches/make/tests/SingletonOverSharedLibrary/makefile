@@ -16,7 +16,12 @@ this_cflags :=
 this_cflags += -Wall
 this_cflags += #-DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
-this_cflags += -fPIC
+
+
+ifeq ($(prorab_os),windows)
+else
+    this_cflags += -fPIC
+endif
 
 this_srcs := testso.cpp
 
@@ -50,12 +55,15 @@ $(eval $(prorab-build-app))
 $(prorab_this_name): $(lib_target_name)
 
 
+#no test under windows, it will fails there
+ifneq ($(prorab_os),windows)
 define this_rules
 test:: $(prorab_this_name)
 	@echo running $$^...
 	@(cd $(prorab_this_dir); $(if $(filter windows,$(prorab_os)), $$^, LD_LIBRARY_PATH=. $$^))
 endef
 $(eval $(this_rules))
+endif
 
 
 $(info left tests/SingletonOverSharedLibrary/makefile)
