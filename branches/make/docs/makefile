@@ -23,6 +23,10 @@ $(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
 clean::
 	@rm -rf $(prorab_this_dir)doxygen
 
+install::
+	@install -d $(DESTDIR)$(PREFIX)/share/doc/libting
+	@install docs/doxygen/* $(DESTDIR)$(PREFIX)/share/doc/libting
+
 endef
 #$(info $(this_rules))
 $(eval $(this_rules))

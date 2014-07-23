@@ -46,6 +46,9 @@ ifneq ($(prorab_included),true)
     #directory of prorab.mk
     prorab_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
+    #initialize standard vars for "install" target
+    DESTDIR :=
+    PREFIX := /usr
 
     #Detect operating system
     prorab_operating_system := $(shell uname)
@@ -64,7 +67,7 @@ ifneq ($(prorab_included),true)
 
     define prorab-private-app-specific-rules
         $(eval prorab_private_lib_ldflags := )
-	
+
         $(if $(filter windows,$(prorab_os)), \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name).exe)) \
             , \
@@ -72,6 +75,10 @@ ifneq ($(prorab_included),true)
             )
 
         $(eval prorab_this_name := $(prorab_private_name))
+
+        install:: $(prorab_private_name)
+		@install -d $(DESTDIR)$(PREFIX)/bin/
+		@install $(prorab_private_name) $(DESTDIR)$(PREFIX)/bin/
     endef
 
 
@@ -90,8 +97,12 @@ ifneq ($(prorab_included),true)
 
         all: $(prorab_private_symbolic_link)
 
+        install:: $(prorab_private_symbolic_link)
+		@install -d $(DESTDIR)$(PREFIX)/lib/
+		@(cd $(DESTDIR)$(PREFIX)/lib/; ln -f -s $(notdir $(prorab_private_name)) $(notdir $(prorab_private_symbolic_link)))
+
         clean::
-			@rm -f $(prorab_private_symbolic_link)
+		@rm -f $(prorab_private_symbolic_link)
     endef
 
 
@@ -106,21 +117,28 @@ ifneq ($(prorab_included),true)
                 $(prorab-private-lib-specific-rules-nix-systems) \
             )
 
-        $(eval prorab_this_staticlib := lib$(this_name).a)
+        $(eval prorab_this_staticlib := $(abspath $(prorab_this_dir)lib$(this_name).a))
 
 
-        all: $(prorab_this_dir)$(prorab_this_staticlib)
+        all: $(prorab_this_staticlib)
 
 
         #static library rule
-        $(prorab_this_dir)$(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+        $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 			@echo "Creating static library $$(notdir $$@)..."
 			@ar cr $$@ $$^
 
 
         clean::
-			@rm -f $(prorab_this_dir)$(prorab_this_staticlib)
+		@rm -f $(prorab_this_staticlib)
 
+        install:: $(prorab_this_staticlib) $(prorab_private_name)
+		@for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name *.hpp)); do \
+		    install -D $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
+		done
+		@install -d $(DESTDIR)$(PREFIX)/lib/
+		@install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
+		@install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
     endef
 
 
@@ -142,7 +160,6 @@ ifneq ($(prorab_included),true)
         $(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
 		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
-
 
         #clean rule
         clean::
