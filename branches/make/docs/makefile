@@ -25,7 +25,7 @@ clean::
 
 install::
 	@install -d $(DESTDIR)$(PREFIX)/share/doc/libting
-	@install docs/doxygen/* $(DESTDIR)$(PREFIX)/share/doc/libting
+	@install $(prorab_this_dir)doxygen/* $(DESTDIR)$(PREFIX)/share/doc/libting
 
 endef
 #$(info $(this_rules))
