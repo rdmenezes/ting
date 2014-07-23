@@ -66,28 +66,28 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_lib_ldflags := )
 	
         $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := $(this_name).exe) \
+                $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name).exe)) \
             , \
-                $(eval prorab_private_name := $(this_name)) \
+                $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name))) \
             )
     endef
 
 
 
     define prorab-private-lib-specific-rules-nix-systems
-        $(eval prorab_private_symbolic_link := lib$(this_name).so)
+        $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name).so))
         $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
-        $(eval prorab_private_lib_ldflags += -Wl,-soname,$(prorab_private_name))
+        $(eval prorab_private_lib_ldflags += -Wl,-soname,$(notdir $(prorab_private_name)))
 
         #symbolic link to shared library rule
-        $(prorab_this_dir)$(prorab_private_symbolic_link): $(prorab_this_dir)$(prorab_private_name)
+        $(prorab_private_symbolic_link): $(prorab_private_name)
 			@echo "Creating symbolic link $$@ -> $$<..."
 			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
-        all: $(prorab_this_dir)$(prorab_private_symbolic_link)
+        all: $(prorab_private_symbolic_link)
 
         clean::
-			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
+			@rm -f $(prorab_private_symbolic_link)
     endef
 
 
@@ -95,7 +95,7 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_lib_ldflags := -shared)
 
         $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := lib$(this_name).dll) \
+                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).dll)) \
                 $(eval prorab_private_lib_ldflags += -s) \
             , \
                 $(prorab-private-lib-specific-rules-nix-systems) \
@@ -121,7 +121,7 @@ ifneq ($(prorab_included),true)
 
     define prorab-private-common-rules
         #default target
-        all: $(prorab_this_dir)$(prorab_private_name)
+        all: $(prorab_private_name)
 
 
         #compile pattern rule
@@ -134,7 +134,7 @@ ifneq ($(prorab_included),true)
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_this_dir)$(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
+        $(prorab_private_name): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 		@echo Linking $$@...
 		@$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
 
@@ -142,7 +142,7 @@ ifneq ($(prorab_included),true)
         #clean rule
         clean::
 		@rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-		@rm -f $(prorab_this_dir)$(prorab_private_name)
+		@rm -f $(prorab_private_name)
     endef
 
 

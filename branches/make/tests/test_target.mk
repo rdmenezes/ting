@@ -11,7 +11,7 @@ else
 endif
 
 define this_rule
-test:: $(prorab_this_dir)$(this_name)
+test:: $(abspath $(prorab_this_dir)$(this_name))
 	@echo running $$^...
 	@$(this_test_cmd)
 endef
@@ -34,7 +34,7 @@ endif
 
 
 define this_rule
-gdb:: $(prorab_this_dir)$(this_name)
+gdb:: $(abspath $(prorab_this_dir)$(this_name))
 	@echo running $$^...
 	@$(this_gdb_cmd)
 endef
