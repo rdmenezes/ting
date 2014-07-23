@@ -47,7 +47,7 @@ $(info left tests/net/makefile)
 
 
 
-define Commented_werfwegewrherh
+define TODO_remov-after-testing-in-Windows
 include ../../platform.mk
 
 binary_name := tests
