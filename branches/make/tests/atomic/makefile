@@ -26,7 +26,7 @@ this_ldlibs := -lting -lpthread
 this_ldflags := -L$(prorab_this_dir)../../src/
 
 #add dependency on libting.so
-$(prorab_this_dir)tests: $(prorab_this_dir)../../src/libting.so
+$(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting.so)
 
 
 
