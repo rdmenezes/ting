@@ -1,73 +1,83 @@
-include ../../platform.mk
+$(info entered tests/RefOverSharedLibrary/makefile)
 
-binary_name := tests
-lib_name := testso
-
-ifeq ($(platform),windows)
-
-binary_name := $(binary_name).exe
-lib_ext := dll
-
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
 else
-
-lib_ext := so
-
+    include ../../prorab.mk
 endif
 
 
-ifeq ($(platform),windows)
-    libs := ../../src/libting.dll -mwindows
+
+this_name := testso
+this_so_name := 0
+
+this_cflags :=
+this_cflags += -Wall
+this_cflags += #-DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+
+ifeq ($(prorab_os),windows)
 else
-    libs := ../../src/libting.so -pthread
+    this_cflags += -fPIC
 endif
 
-#external compiler flags (to be passed to make from command line)
-ecf :=
+this_srcs := testso.cpp
+
+#$(info $(prorab-build-lib))
+$(eval $(prorab-build-lib))
+
+lib_target_name := $(prorab_this_name)
+
+
+
+$(prorab-clear-this-vars)
+
+
+
+this_name := tests
+
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -DDEBUG
-cf += -fstrict-aliasing #strict aliasing!!!
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
 
+this_srcs := Ref_test.cpp
 
-default: $(binary_name)
+this_ldflags := -L$(prorab_this_dir)../../src/
 
-test: $(binary_name)
-	@echo running $^...
-ifeq ($(platform),windows)
-	@cp ../../src/libting.dll .
-	@$^
+this_ldlibs := $(lib_target_name) -lting
+
+ifeq ($(prorab_os),windows)
 else
-    ifeq ($(platform),macosx)
-	@DYLD_LIBRARY_PATH=../../src:. ./$^
-    else
-	@LD_LIBRARY_PATH=../../src:. ./$^
-    endif
+    this_cflags += -fPIC
+    this_ldlibs := -lpthread
 endif
 
 
+$(eval $(prorab-build-app))
+
+$(prorab_this_name): $(lib_target_name)
 
 
-lib$(lib_name).$(lib_ext): testso.cpp
-ifeq ($(platform),windows)
-	@g++ $< -shared -o lib$(lib_name).$(lib_ext) $(cf)
-else
-#use -fPIC (position-independent code) for shared libraries.
-	@g++ $< -shared -fPIC -o lib$(lib_name).$(lib_ext) $(cf)
-endif
-
-
-
-
-$(binary_name): Ref_test.cpp lib$(lib_name).$(lib_ext)
-	@echo Building $@...
-	@g++ -o $@ $(cf) $< $(libs) -L. -l$(lib_name)
+define this_rules
+test:: $(prorab_this_name)
+	@echo running $$^...
+	@(cd $(prorab_this_dir); $(if $(filter windows,$(prorab_os)), $$^, LD_LIBRARY_PATH=.:../../src $$^))
+endef
+$(eval $(this_rules))
 
 
 
-clean:
-	@rm -rf $(binary_name)
-	@rm -rf lib$(lib_name).$(lib_ext)
+#add dependency on libting.so
+$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
-include ../../targets.mk
+
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
+
+
+
+$(info left tests/RefOverSharedLibrary/makefile)

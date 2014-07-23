@@ -499,6 +499,7 @@ public:
 					default:
 						//we should not get here since if type is not the record type which we know then 'if(type == r->recordType)' condition will not trigger.
 						ASSERT(false)
+						h = IPAddress::Host(0,0,0,0);
 						break;
 				}
 				

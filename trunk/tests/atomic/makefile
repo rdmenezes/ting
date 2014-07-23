@@ -1,47 +1,47 @@
-include ../../platform.mk
+$(info entered tests/atomic/makefile)
 
-binary_name := tests
-
-ifeq ($(platform),windows)
-binary_name := $(binary_name).exe
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../../prorab.mk
 endif
 
-default: $(binary_name)
 
+this_name := tests
 
-ifeq ($(platform),windows)
-    libs :=
-endif
-ifeq ($(platform),macosx)
-    libs := 
-endif
-ifeq ($(platform),linux)
-    libs := -pthread
-endif
-
-#external compiler flags (to be passed to make from command line)
-ecf :=
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -DDEBUG
-cf += -fstrict-aliasing #strict aliasing!!!
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+
+this_srcs := main.cpp tests.cpp
 
 
 
-include ../test_target.mk
+this_ldlibs := -lting
 
-include ../libting.mk
+ifeq ($(prorab_os),windows)
+else
+    this_ldlibs := -lpthread
+endif
 
-$(binary_name): main.cpp tests.cpp $(libting)
-	@echo Building $@...
-	@g++ -o $@ $(cf) $^ $(libs)
+this_ldflags := -L$(prorab_this_dir)../../src/
+
+#add dependency on libting.so
+$(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 
+#$(info $(prorab-app-rules))
+$(eval $(prorab-build-app))
 
-clean:
-	@rm -rf $(binary_name)
+include $(prorab_this_dir)../test_target.mk
 
-include ../../targets.mk
 
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
+
+
+$(info left tests/atomic/makefile)

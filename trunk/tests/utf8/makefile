@@ -1,47 +1,39 @@
-include ../../platform.mk
+$(info entered tests/utf8/makefile)
 
-binary_name := tests
-
-ifeq ($(platform),windows)
-    binary_name := $(binary_name).exe
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../../prorab.mk
 endif
 
-default: $(binary_name)
 
 
-ifeq ($(platform),windows)
-    libs :=
-endif
-ifeq ($(platform),macosx)
-    libs := 
-endif
-ifeq ($(platform),linux)
-    libs :=
-endif
+this_name := tests
 
-#external compiler flags (to be passed to make from command line)
-ecf :=
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -DDEBUG
-cf += -fstrict-aliasing #strict aliasing!!!
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+
+this_srcs := main.cpp tests.cpp
+
+this_ldlibs := -lting
+
+this_ldflags := -L$(prorab_this_dir)../../src/
+
+#add dependency on libting.so
+$(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 
+$(eval $(prorab-build-app))
 
-include ../test_target.mk
-
-include ../libting.mk
-
-$(binary_name): main.cpp tests.cpp $(libting)
-	@echo Building $@...
-	@g++ -o $@ $(cf) $^ $(libs)
+include $(prorab_this_dir)../test_target.mk
 
 
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
 
-clean:
-	@rm -rf $(binary_name)
-
-include ../../targets.mk
-
+$(info left tests/utf8/makefile)

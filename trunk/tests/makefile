@@ -1,49 +1,14 @@
-include ../platform.mk
+$(info entered tests/makefile)
 
-subdirs :=
-subdirs += Array
-subdirs += atomic
-subdirs += Buffer
-subdirs += debug
-subdirs += Flags
-subdirs += FSFile
-subdirs += math
-subdirs += MemoryFile
-ifeq ($(testnet), true)
-    subdirs += net
-endif
-subdirs += PoolStored
-subdirs += Ptr
-subdirs += Ref
-subdirs += RefOverSharedLibrary
-subdirs += Signal
-subdirs += Thread
-subdirs += timer
-subdirs += types
-subdirs += utf8
-subdirs += util
-subdirs += WaitSet
-
-
-#Looks like static variables are not shared between dll boundaries on win32,
-#so exclude these tests
-ifeq ($(platform),windows)
-
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
 else
-
-subdirs += SingletonOverSharedLibrary
-
+    include ../prorab.mk
 endif
 
 
-
-include ../targets.mk
-
-$(possible_targets_list):
-	@$(MAKE) $(subdirs) target=$@
-
-.PHONY: $(subdirs)
-$(subdirs):
-	@$(MAKE) -C $@ $(target)
+$(eval $(prorab-build-subdirs))
 
 
+$(info left tests/makefile)

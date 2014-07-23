@@ -1,25 +1,41 @@
-test: $(binary_name)
-	@echo running $^...
-ifeq ($(platform),windows)
-	@./$^
+
+
+ifeq ($(prorab_os),windows)
+    this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll . || true; ./$$(notdir $$^))
 else
-    ifeq ($(platform),macosx)
-	@DYLD_LIBRARY_PATH=../../src ./$^
+    ifeq ($(prorab_os),macosx)
+        this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
     else
-	@LD_LIBRARY_PATH=../../src ./$^
+        this_test_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src ./$$(notdir $$^))
+    endif
+endif
+
+define this_rule
+test:: $(prorab_this_name)
+	@echo running $$^...
+	@$(this_test_cmd)
+endef
+$(eval $(this_rule))
+
+
+
+
+
+
+ifeq ($(prorab_os),windows)
+    this_gdb_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll . || true; gdb ./$$(notdir $$^))
+else
+    ifeq ($(prorab_os),macosx)
+        this_gdb_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))
+    else
+        this_gdb_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))
     endif
 endif
 
 
-
-gdb: $(binary_name)
-	@echo gdb debugging $^...
-ifeq ($(platform),windows)
-	@gdb ./$^
-else
-    ifeq ($(platform),macosx)
-	@DYLD_LIBRARY_PATH=../../src gdb ./$^
-    else
-	@LD_LIBRARY_PATH=../../src gdb ./$^
-    endif
-endif
+define this_rule
+gdb:: $(prorab_this_name)
+	@echo running $$^...
+	@$(this_gdb_cmd)
+endef
+$(eval $(this_rule))

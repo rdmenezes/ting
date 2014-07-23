@@ -1,50 +1,69 @@
-include ../../platform.mk
+$(info entered tests/net/makefile)
 
-binary_name := tests
-
-ifeq ($(platform),windows)
-    binary_name := $(binary_name).exe
-endif
-
-default: $(binary_name)
-
-ifeq ($(platform),windows)
-    libs := -lws2_32
-endif
-ifeq ($(platform),macosx)
-    libs := 
-endif
-ifeq ($(platform),linux)
-    libs := -pthread -lrt
+#this should be the first include
+ifeq ($(prorab_included),true)
+    include $(prorab_dir)prorab.mk
+else
+    include ../../prorab.mk
 endif
 
 
-#external compiler flags (to be passed to make from command line)
-ecf := -DDEBUG
+
+this_name := tests
+
 
 #compiler flags
-cf := $(ecf)
-cf += -Wall
-cf += -g
+this_cflags :=
+this_cflags += -Wall
+this_cflags += -DDEBUG
+this_cflags += -fstrict-aliasing #strict aliasing!!!
+
+this_srcs := main.cpp socket.cpp dns.cpp
+
+this_ldlibs := -lting
+
+ifeq ($(prorab_os),windows)
+    this_ldlibs := -lws2_32
+else
+    this_ldlibs := -lpthread
+endif
+
+this_ldflags := -L$(prorab_this_dir)../../src/
 
 
-include ../test_target.mk
-
-
-%.o:%.cpp
-	@echo Compiling $<...
-	@g++ -c -o $@ $(cf) $<
-
-include ../libting.mk
-
-$(binary_name): socket.o dns.o main.o $(libting)
-	@echo Linking $@...
-	@g++ $^ -o $@ $(cf) $(libs)
 
 
 
-clean:
-	@rm -rf $(binary_name)
-	@rm -rf *.o
+ifeq ($(prorab_os),windows)
+    this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; ./$$(notdir $$^))
+else
+    ifeq ($(prorab_os),macosx)
+        this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
+    else
+        this_test_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src ./$$(notdir $$^))
+    endif
+endif
 
-include ../../targets.mk
+define this_rule
+testnet:: $(abspath $(prorab_this_dir)$(this_name))
+	@echo running $$^...
+	@$(this_test_cmd)
+endef
+$(eval $(this_rule))
+
+
+
+
+
+
+$(eval $(prorab-build-app))
+
+#add dependency on libting.so
+$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
+
+
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
+
+
+$(info left tests/net/makefile)
