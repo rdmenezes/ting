@@ -1,25 +1,41 @@
+
+
+ifeq ($(prorab_os),windows)
+    this_test_cmd := (cd $(prorab_this_dir); ./$$(notdir $$^))
+else
+    ifeq ($(prorab_os),macosx)
+        this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
+    else
+        this_test_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src ./$$(notdir $$^))
+    endif
+endif
+
+define this_rule
 test:: $(prorab_this_dir)$(this_name)
-	@echo running $^...
+	@echo running $$^...
+	@$(this_test_cmd)
+endef
+$(eval $(this_rule))
+
+
+
+
+
+
 ifeq ($(prorab_os),windows)
-	@./$^
+    this_gdb_cmd := (cd $(prorab_this_dir); gdb ./$$(notdir $$^))
 else
     ifeq ($(prorab_os),macosx)
-	@DYLD_LIBRARY_PATH=../../src ./$^
+        this_gdb_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))
     else
-	@LD_LIBRARY_PATH=../../src ./$^
+        this_gdb_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))
     endif
 endif
 
 
-
+define this_rule
 gdb:: $(prorab_this_dir)$(this_name)
-	@echo gdb debugging $^...
-ifeq ($(prorab_os),windows)
-	@gdb ./$^
-else
-    ifeq ($(prorab_os),macosx)
-	@DYLD_LIBRARY_PATH=../../src gdb ./$^
-    else
-	@LD_LIBRARY_PATH=../../src gdb ./$^
-    endif
-endif
+	@echo running $$^...
+	@$(this_gdb_cmd)
+endef
+$(eval $(this_rule))

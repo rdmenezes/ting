@@ -12,7 +12,7 @@ endif
 #$(info prorab_this_dir = $(prorab_this_dir))
 
 define this_rules
-all:: doc
+all: doc
 
 doc: $(prorab_this_dir)doxygen
 

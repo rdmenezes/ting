@@ -8,10 +8,6 @@ else
 endif
 
 
-#include makefile for building ting
-$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
-
-
 this_name := tests
 
 
@@ -29,7 +25,6 @@ this_ldlibs := -lting -lpthread
 
 this_ldflags := -L$(prorab_this_dir)../../src/
 
-
 #add dependency on libting.so
 $(prorab_this_dir)tests: $(prorab_this_dir)../../src/libting.so
 
@@ -41,6 +36,10 @@ include $(prorab_this_dir)../test_target.mk
 
 #$(info $(prorab-app-rules))
 $(eval $(prorab-app-rules))
+
+
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
 
 
 $(info left tests/atomic/makefile)

@@ -40,7 +40,7 @@ ifneq ($(prorab_included),true)
 
 
     #define the very first default target
-    all::
+    all:
 
 
     #directory of prorab.mk
@@ -84,7 +84,7 @@ ifneq ($(prorab_included),true)
 			@echo "Creating symbolic link $$@ -> $$<..."
 			@(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
-        all:: $(prorab_this_dir)$(prorab_private_symbolic_link)
+        all: $(prorab_this_dir)$(prorab_private_symbolic_link)
 
         clean::
 			@rm -f $(prorab_this_dir)$(prorab_private_symbolic_link)
@@ -104,7 +104,7 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_static_lib_name := lib$(this_name).a)
 
 
-        all:: $(prorab_this_dir)$(prorab_private_static_lib_name)
+        all: $(prorab_this_dir)$(prorab_private_static_lib_name)
 
 
         #static library rule
@@ -121,7 +121,7 @@ ifneq ($(prorab_included),true)
 
     define prorab-private-common-rules
         #default target
-        all:: $(prorab_this_dir)$(prorab_private_name)
+        all: $(prorab_this_dir)$(prorab_private_name)
 
 
         #compile pattern rule
