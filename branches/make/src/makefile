@@ -97,7 +97,7 @@ endif
 
 
 
-$(eval $(prorab-lib-rules))
+$(eval $(prorab-build-lib))
 
 
 $(info left src/makefile)

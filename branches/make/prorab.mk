@@ -7,7 +7,7 @@ ifneq ($(prorab_included),true)
     prorab_included := true
 
 
-    #for storing included makefiles
+    #for storing list of included makefiles
     prorab_included_makefiles :=
 
 
@@ -169,13 +169,13 @@ ifneq ($(prorab_included),true)
     endef
 
 
-    define prorab-lib-rules
+    define prorab-build-lib
         $(prorab-private-lib-specific-rules)
         $(prorab-private-common-rules)
     endef
 
 
-    define prorab-app-rules
+    define prorab-build-app
         $(prorab-private-app-specific-rules)
         $(prorab-private-common-rules)
     endef
@@ -207,12 +207,13 @@ ifneq ($(prorab_included),true)
 
     endef
 
-    #rule for building all makefiles in subdirectories
-    define prorab-subdirs-rule
+    #include all makefiles in subdirectories
+    define prorab-build-subdirs
         $(foreach path,$(wildcard $(prorab_this_dir)*/makefile),$(call prorab-include,$(path)))
     endef
 
 
+    prorab-clear-this-vars = $(foreach var,$(filter this_%,$(.VARIABLES)),$(eval $(var) := ))
     
 
 endif #~once
@@ -227,5 +228,5 @@ $(if $(filter $(prorab_this_makefile),$(prorab_included_makefiles)), \
 #$(info $(prorab_included_makefiles))
 
 #reset this_* variables
-$(foreach var,$(filter this_%,$(.VARIABLES)),$(eval $(var) := ))
 
+$(prorab-clear-this-vars)

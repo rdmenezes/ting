@@ -31,7 +31,7 @@ $(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libtin
 include $(prorab_this_dir)../test_target.mk
 
 
-$(eval $(prorab-app-rules))
+$(eval $(prorab-build-app))
 
 #include makefile for building ting
 $(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))

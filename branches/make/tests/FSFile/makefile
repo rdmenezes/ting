@@ -30,7 +30,7 @@ this_ldflags := -L$(prorab_this_dir)../../src/
 include $(prorab_this_dir)../test_target.mk
 
 
-$(eval $(prorab-app-rules))
+$(eval $(prorab-build-app))
 
 #add dependency on libting.so
 $(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting.so)

@@ -3,10 +3,7 @@ $(info entered makefile)
 include prorab.mk
 
 
-$(eval $(prorab-subdirs-rule))
-
-
-lib_name := ting
+$(eval $(prorab-build-subdirs))
 
 
 
