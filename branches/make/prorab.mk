@@ -133,12 +133,13 @@ ifneq ($(prorab_included),true)
 		@rm -f $(prorab_this_staticlib)
 
         install:: $(prorab_this_staticlib) $(prorab_private_name)
-		@for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name *.hpp)); do \
+		@for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name "*.hpp")); do \
 		    install -D $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
 		done
 		@install -d $(DESTDIR)$(PREFIX)/lib/
 		@install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
 		@install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
+
     endef
 
 

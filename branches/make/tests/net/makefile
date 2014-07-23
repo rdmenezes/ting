@@ -1,5 +1,3 @@
-define TODO_wefwfqeferw
-
 $(info entered tests/net/makefile)
 
 #this should be the first include
@@ -20,8 +18,11 @@ this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
 
-this_srcs := main.cpp tests.cpp
+this_srcs := main.cpp socket.cpp dns.cpp
 
+this_ldlibs := -lting -lpthread
+
+this_ldflags := -L$(prorab_this_dir)../../src/
 
 
 #$(info prorab_this_dir = $(prorab_this_dir))
@@ -29,6 +30,13 @@ include $(prorab_this_dir)../test_target.mk
 
 
 $(eval $(prorab-app-rules))
+
+#add dependency on libting.so
+$(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting.so)
+
+
+#include makefile for building ting
+$(eval $(call prorab-include,$(prorab_this_dir)../../src/makefile))
 
 
 $(info left tests/net/makefile)
@@ -39,7 +47,7 @@ $(info left tests/net/makefile)
 
 
 
-
+define Commented_werfwegewrherh
 include ../../platform.mk
 
 binary_name := tests
