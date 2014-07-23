@@ -1,4 +1,4 @@
-define TODO_write_fwefwe
+
 
 $(info entered tests/Signal/makefile)
 
@@ -40,7 +40,7 @@ $(info left tests/Signal/makefile)
 
 
 
-
+define TODO_write_fwefwe
 include ../../platform.mk
 
 binary_name := tests
