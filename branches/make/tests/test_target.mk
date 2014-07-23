@@ -1,7 +1,7 @@
 
 
 ifeq ($(prorab_os),windows)
-    this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; ./$$(notdir $$^))
+    this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll . || true; ./$$(notdir $$^))
 else
     ifeq ($(prorab_os),macosx)
         this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
@@ -11,7 +11,7 @@ else
 endif
 
 define this_rule
-test:: $(abspath $(prorab_this_dir)$(this_name))
+test:: $(prorab_this_name)
 	@echo running $$^...
 	@$(this_test_cmd)
 endef
@@ -23,7 +23,7 @@ $(eval $(this_rule))
 
 
 ifeq ($(prorab_os),windows)
-    this_gdb_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; gdb ./$$(notdir $$^))
+    this_gdb_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll . || true; gdb ./$$(notdir $$^))
 else
     ifeq ($(prorab_os),macosx)
         this_gdb_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src gdb ./$$(notdir $$^))
@@ -34,7 +34,7 @@ endif
 
 
 define this_rule
-gdb:: $(abspath $(prorab_this_dir)$(this_name))
+gdb:: $(prorab_this_name)
 	@echo running $$^...
 	@$(this_gdb_cmd)
 endef

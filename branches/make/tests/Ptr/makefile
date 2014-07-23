@@ -22,11 +22,10 @@ this_srcs := main.cpp tests.cpp
 
 
 
-#$(info prorab_this_dir = $(prorab_this_dir))
+$(eval $(prorab-build-app))
+
 include $(prorab_this_dir)../test_target.mk
 
-
-$(eval $(prorab-build-app))
 
 
 $(info left tests/Ptr/makefile)

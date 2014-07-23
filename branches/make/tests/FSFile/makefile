@@ -26,11 +26,11 @@ this_ldlibs := -lting
 this_ldflags := -L$(prorab_this_dir)../../src/
 
 
-#$(info prorab_this_dir = $(prorab_this_dir))
-include $(prorab_this_dir)../test_target.mk
-
 
 $(eval $(prorab-build-app))
+
+include $(prorab_this_dir)../test_target.mk
+
 
 #add dependency on libting
 this_target_name := $(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))

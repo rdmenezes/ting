@@ -34,13 +34,10 @@ this_ldflags := -L$(prorab_this_dir)../../src/
 $(abspath $(prorab_this_dir)tests): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))
 
 
-
-#$(info prorab_this_dir = $(prorab_this_dir))
-include $(prorab_this_dir)../test_target.mk
-
-
 #$(info $(prorab-app-rules))
 $(eval $(prorab-build-app))
+
+include $(prorab_this_dir)../test_target.mk
 
 
 #include makefile for building ting

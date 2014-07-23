@@ -24,12 +24,11 @@ ifeq ($(prorab_os),windows)
     this_ldlibs := -mwindows
 endif
 
-#$(info prorab_this_dir = $(prorab_this_dir))
-include $(prorab_this_dir)../test_target.mk
 
-
-#$(info $(prorab-app-rules))
 $(eval $(prorab-build-app))
+
+
+include $(prorab_this_dir)../test_target.mk
 
 
 $(info left tests/Array/makefile)
