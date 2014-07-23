@@ -36,7 +36,7 @@ ifneq ($(prorab_included),true)
     prorab_this_dir := $(dir $(prorab_this_makefile))
 
 
-    .PHONY: clean all
+    .PHONY: clean all install
 
 
     #define the very first default target
