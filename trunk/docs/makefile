@@ -9,26 +9,9 @@ else
 endif
 
 
-#$(info prorab_this_dir = $(prorab_this_dir))
+this_name := ting
 
-define this_rules
-all: doc
+$(eval $(prorab-build-doxygen))
 
-doc: $(prorab_this_dir)doxygen
-
-$(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
-	@echo Building docs...
-	@(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
-
-clean::
-	@rm -rf $(prorab_this_dir)doxygen
-
-install::
-	@install -d $(DESTDIR)$(PREFIX)/share/doc/libting
-	@install $(prorab_this_dir)doxygen/* $(DESTDIR)$(PREFIX)/share/doc/libting || true
-
-endef
-#$(info $(this_rules))
-$(eval $(this_rules))
 
 $(info left docs/makefile)

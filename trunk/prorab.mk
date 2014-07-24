@@ -1,5 +1,5 @@
 # Prorab build system
-# Author: Ivan Gagis <igagis@gmail.com>
+# Copyright Ivan Gagis <igagis@gmail.com>, 2014
 
 
 #pragma once
@@ -226,6 +226,26 @@ ifneq ($(prorab_included),true)
 
     prorab-clear-this-vars = $(foreach var,$(filter this_%,$(.VARIABLES)),$(eval $(var) := ))
     
+
+
+    define prorab-build-doxygen
+        all: doc
+
+        doc:: $(prorab_this_dir)doxygen
+
+        $(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
+		@echo Building docs...
+		@(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
+
+        clean::
+		@rm -rf $(prorab_this_dir)doxygen
+
+        install::
+		@install -d $(DESTDIR)$(PREFIX)/share/doc/$(this_name)
+		@install $(prorab_this_dir)doxygen/* $(DESTDIR)$(PREFIX)/share/doc/$(this_name) || true #ignore error, not all systems have doxygen
+
+    endef
+
 
 endif #~once
 
