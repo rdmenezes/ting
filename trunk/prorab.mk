@@ -154,7 +154,7 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-private-common-rules
-        #default target
+
         all: $(prorab_private_name)
 
         $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
