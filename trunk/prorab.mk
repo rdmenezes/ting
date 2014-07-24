@@ -35,6 +35,15 @@ ifneq ($(prorab_included),true)
     prorab_this_makefile := $(word $(call prorab-num,$(call prorab-dec,$(MAKEFILE_LIST))),$(MAKEFILE_LIST))
     prorab_this_dir := $(dir $(prorab_this_makefile))
 
+    #define local variables used by prorab
+    this_name :=
+    this_so_name :=
+    this_cflags :=
+    this_ldflags :=
+    this_ldlibs :=
+    this_srcs :=
+    
+
 
     .PHONY: clean all install
 
