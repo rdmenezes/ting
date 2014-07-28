@@ -58,10 +58,10 @@ this_cflags += -fno-operator-names #do not treat 'and', 'bitand','bitor','compl'
 this_cflags += -Werror #treat warnings as errors
 this_cflags += -Wfatal-errors # stop on first error encountered
 this_cflags += -fstrict-aliasing #strict aliasing (in order to comply with the c++ standard more strictly)
+this_cflags += -std=c++11
 this_cflags += -g #include debugging symbols
                 #-P -E #-Wreorder
                 #-O3 -funroll-loops -fomit-frame-pointer
-#compiler_flags += -std=c++0x
 
 
 
