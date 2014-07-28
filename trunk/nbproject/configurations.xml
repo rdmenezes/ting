@@ -52,6 +52,7 @@
         <in>Ptr.hpp</in>
         <in>Ref.cpp</in>
         <in>Ref.hpp</in>
+        <in>Shared.hpp</in>
         <in>Signal.hpp</in>
         <in>Singleton.hpp</in>
         <in>WaitSet.cpp</in>
@@ -241,6 +242,8 @@
       <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ting/Ref.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/Signal.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -557,6 +560,8 @@
       </folder>
       <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="4">
       </item>
+      <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/ting/fs/BufferFile.cpp" ex="false" tool="1" flavor2="4">
@@ -721,6 +726,8 @@
         </ccTool>
       </folder>
       <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="4">
+      </item>
+      <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="4">
       </item>
