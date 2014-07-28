@@ -28,13 +28,11 @@ public:
 
 
 class TestClassRC : public ting::RefCounted{
-	TestClassRC(){}
+	
 public:
+	TestClassRC(){}
+	
 	int a;
-
-	static ting::Ref<TestClassRC> New(){
-		return ting::Ref<TestClassRC>(new TestClassRC());
-	}
 };
 
 
@@ -74,7 +72,7 @@ void Run(){
 	}
 
 	{
-		ting::Ref<TestClassRC> c = TestClassRC::New();
+		ting::Ref<TestClassRC> c = ting::New<TestClassRC>();
 
 		//make sure, "c" is valid before accessing member a.
 		ASS(c)->a = 13;

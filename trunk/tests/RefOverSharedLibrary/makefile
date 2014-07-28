@@ -16,6 +16,7 @@ this_cflags :=
 this_cflags += -Wall
 this_cflags += #-DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
+this_cflags += -std=c++11
 
 ifeq ($(prorab_os),windows)
 else
@@ -43,6 +44,7 @@ this_cflags :=
 this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
+this_cflags += -std=c++11
 
 this_srcs := Ref_test.cpp
 

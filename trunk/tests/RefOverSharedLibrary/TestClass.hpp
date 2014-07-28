@@ -20,8 +20,4 @@ public:
 //		TRACE(<< "~TestClass(): destructed" << std::endl)
 		*this->destroyed = true;
 	}
-
-	static ting::Ref<TestClass> New(bool* destroyed){
-		return ting::Ref<TestClass>(new TestClass(destroyed));
-	}
 };

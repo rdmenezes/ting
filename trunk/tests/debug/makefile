@@ -17,6 +17,7 @@ this_cflags :=
 this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
+this_cflags += -std=c++11
 
 this_srcs := main.cpp tests.cpp
 
