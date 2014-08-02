@@ -49,6 +49,8 @@ namespace ting{
 template <class T> class Ref;//forward declaration
 template <class T> class WeakRef;//forward declaration
 
+template< class T, class... Args > ting::Ref<T> New(Args&&... args);//forward declaration
+
 /**
  * @brief base class for a reference counted object.
  * All object which are supposed to be used with reference counted pointers (ting::Ref)
