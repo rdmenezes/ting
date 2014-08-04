@@ -68,6 +68,7 @@ const int DMinInt = ~DMaxInt;
 
 /**
  * @brief Unsigned 8 bit type.
+ * @deprecated Use std::uint8_t from C++'11 instead.
  */
 typedef unsigned char u8;
 
