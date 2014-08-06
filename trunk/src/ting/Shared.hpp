@@ -37,6 +37,9 @@ namespace ting{
 
 
 
+/**
+ * @brief Base class for objects managed by std::shared_ptr.
+ */
 class Shared{
 	template< class T, class... Args > friend std::shared_ptr<T> ting::New(Args&&...);
 	
@@ -47,6 +50,11 @@ class Shared{
 
 
 
+/**
+ * @brief Function to construct new Shared objects.
+ * @param args - arguments of object class constructor.
+ * @return std::shared_ptr pointing to a newly created object.
+ */
 template< class T, class... Args > std::shared_ptr<T> New(Args&&... args){
 	return std::move(std::shared_ptr<T>(new T(args...)));
 }
