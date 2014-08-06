@@ -28,6 +28,7 @@ THE SOFTWARE. */
  * @file codegen.h
  * @author Ivan Gagis <igagis@gmail.com>
  * @brief Code generation with preprocessor.
+ * @derecated was only needed for Signal which is deprecated now.
  */
 
 #pragma once

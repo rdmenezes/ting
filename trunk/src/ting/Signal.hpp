@@ -28,6 +28,7 @@ THE SOFTWARE. */
  * @file Signal.hpp
  * @author Ivan Gagis <igagis@gmail.com>
  * @brief Templates to implement signal-slot callback technique.
+ * @deprecated use std::function and lambdas from c++11.
  */
 
 #pragma once

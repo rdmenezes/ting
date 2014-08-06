@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2013 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -74,36 +74,43 @@ typedef unsigned char u8;
 
 /**
  * @brief Signed 8 bit type.
+ * @deprecated Use std::int8_t from C++'11 instead.
  */
 typedef signed char s8;
 
 /**
  * @brief Unsigned 16 bit type.
+ * @deprecated Use std::uint16_t from C++'11 instead.
  */
 typedef unsigned short int u16;
 
 /**
  * @brief Signed 16 bit type.
+ * @deprecated Use std::int16_t from C++'11 instead.
  */
 typedef signed short int s16;
 
 /**
  * @brief Unsigned 32 bit type.
+ * @deprecated Use std::uint32_t from C++'11 instead.
  */
 typedef unsigned int u32;
 
 /**
  * @brief Signed 32 bit type.
+ * @deprecated Use std::int32_t from C++'11 instead.
  */
 typedef signed int s32;
 
 /**
  * @brief Unsigned 64 bit type.
+ * @deprecated Use std::uint64_t from C++'11 instead.
  */
 typedef unsigned long long int u64;
 
 /**
  * @brief Signed 64 bit type.
+ * @deprecated Use std::int64_t from C++'11 instead.
  */
 typedef long long int s64;
 
@@ -127,6 +134,7 @@ STATIC_ASSERT(sizeof(s64) == 8)
 
 /**
  * @brief Thin wrapper above any C++ built-in type allowing initialization from int.
+ * @deprecated c++11 allows inline initialization in classes.
  * Thin wrapper above any C++ built-in type which allows initialization from C++ int type.
  * This wrapper allows initialize the variable to some int value right
  * in place of declaration.

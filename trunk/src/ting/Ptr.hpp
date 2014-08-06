@@ -46,6 +46,7 @@ namespace ting{
 
 /**
  * @brief Auto-pointer template class.
+ * @deprecated use std::unique_ptr from c++11.
  * Auto-pointer class is a wrapper above ordinary pointer.
  * It holds a pointer to an object and it will 'delete'
  * that object when pointer goes out of scope.

@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2008-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2008-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,7 @@ namespace ting{
 
 /**
  * @brief wrapper above new[]/delete[].
+ * @deprecated use std::vector and std::move from c++11 where needed.
  * This template class is a wrapper above new[]/delete[] operators.
  * Note that it behaves like auto-pointer. It defines operator=() and copy constructor and
  * when one class instance is assigned (by operator=() or copy constructor) to another,

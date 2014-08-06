@@ -182,6 +182,9 @@ inline void LogAssert(const char* msg, const char* file, int line){
 //==================
 //=  Static assert =
 //==================
+
+//TODO: deprecated. c++11 has built in static_assert()
+
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
 namespace ting{
 namespace ting_debug{
