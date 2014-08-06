@@ -38,6 +38,7 @@ THE SOFTWARE. */
 
 namespace ting{
 
+//TODO: rewrite using C++11
 
 /**
  * @brief class representing a set of flags.

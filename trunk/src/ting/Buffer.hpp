@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2012 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ THE SOFTWARE. */
 #pragma once
 
 #ifdef DEBUG
-#include <iostream>
+#	include <iostream>
 #endif
 
 #include "types.hpp"
@@ -43,6 +43,7 @@ THE SOFTWARE. */
 
 namespace ting{
 
+//TODO:
 
 
 /**
@@ -50,9 +51,7 @@ namespace ting{
  * This class is a wrapper of memory buffer, it encapsulates pointer to memory block and size of that memory block.
  */
 template <class T> class Buffer{
-
-	//forbid copying
-	inline Buffer(const Buffer&);
+	Buffer(const Buffer&) = delete;
 
 protected:
 	T* buf;
@@ -63,7 +62,7 @@ protected:
 	 * @brief Default constructor.
 	 * It is protected, so only accessible by subclasses.
 	 */
-	inline Buffer(){}
+	Buffer() = default;
 
 	/**
 	 * @brief Assignment operator.
@@ -75,7 +74,7 @@ protected:
 	 * @param - Buffer to assign from.
 	 * @return reference to this Buffer object.
 	 */
-	inline Buffer& operator=(const Buffer&){
+	Buffer& operator=(const Buffer&){
 		//do nothing
 		return *this;
 	}
@@ -87,7 +86,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	inline Buffer(T* bufPtr, size_t bufSize)throw() :
+	Buffer(T* bufPtr, size_t bufSize)noexcept :
 			buf(bufPtr),
 			size(bufSize)
 	{}
@@ -96,7 +95,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	inline size_t Size()const throw(){
+	size_t Size()const throw(){
 		return this->size;
 	}
 
@@ -106,7 +105,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	inline size_t SizeOfElem()const throw(){
+	size_t SizeOfElem()const throw(){
 		return sizeof(this->buf[0]);
 	}
 
@@ -116,7 +115,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	inline size_t SizeInBytes()const throw(){
+	size_t SizeInBytes()const throw(){
 		return this->Size() * this->SizeOfElem();
 	}
 
@@ -128,7 +127,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline T& operator[](size_t i)const throw(){
+	T& operator[](size_t i)const throw(){
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -140,7 +139,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	inline T& operator[](size_t i)throw(){
+	T& operator[](size_t i)throw(){
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -151,7 +150,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	inline T* Begin()throw(){
+	T* Begin()throw(){
 		return this->buf;
 	}
 
@@ -161,7 +160,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	inline T* Begin()const throw(){
+	T* Begin()const throw(){
 		return this->buf;
 	}
 
@@ -171,7 +170,7 @@ public:
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	inline T* End()throw(){
+	T* End()throw(){
 		return this->buf + this->size;
 	}
 
@@ -181,7 +180,7 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	inline T* End()const throw(){
+	T* End()const throw(){
 		return this->buf + this->size;
 	}
 
@@ -193,13 +192,13 @@ public:
 	 * @return true - if pointer passed as argument points somewhere within the buffer.
 	 * @return false otherwise.
 	 */
-	inline bool Overlaps(const T* p)const throw(){
+	bool Overlaps(const T* p)const throw(){
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 
 
 
-	inline operator const Buffer<const T>& ()const throw(){
+	operator const Buffer<const T>& ()const throw(){
 		return *reinterpret_cast<const Buffer<const T>* >(this);
 	}
 
@@ -218,12 +217,13 @@ public:
 
 /**
  * @brief static buffer class template.
+ * @deprecated use std::array
  * The static buffer template.
  */
 template <class T, size_t bufSize> class StaticBuffer : public ting::Buffer<T>{
 	T staticBuffer[bufSize];
 public:
-	inline StaticBuffer() :
+	StaticBuffer() :
 			ting::Buffer<T>(staticBuffer, bufSize)
 	{}
 
@@ -234,7 +234,7 @@ public:
 	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
 	 * @param buf - static buffer to copy.
 	 */
-	inline StaticBuffer(const StaticBuffer<T, bufSize>& buf) :
+	StaticBuffer(const StaticBuffer<T, bufSize>& buf) :
 			ting::Buffer<T>(staticBuffer, bufSize),
 			staticBuffer(buf.staticBuffer)
 	{}

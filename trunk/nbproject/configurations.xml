@@ -225,6 +225,9 @@
           <buildCommand>${MAKE}</buildCommand>
           <cleanCommand>${MAKE} clean</cleanCommand>
           <executablePath></executablePath>
+          <ccTool>
+            <standard>8</standard>
+          </ccTool>
         </makeTool>
       </makefileType>
       <item path="src/ting/Array.hpp" ex="false" tool="3" flavor2="0">
