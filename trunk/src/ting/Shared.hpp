@@ -48,8 +48,8 @@ class Shared : public std::enable_shared_from_this<Shared>{
 	}
 	
 protected:
-	template <class T> std::shared_ptr<T> SharedFromThis(T* thisPtr){
-		return std::move(std::dynamic_pointer_cast<T>(this->shared_from_this()));
+	template <class T> std::shared_ptr<T> SharedFromThis(T* thisPtr)const{
+		return std::move(std::dynamic_pointer_cast<T>(const_cast<Shared*>(this)->shared_from_this()));
 	}
 	
 public:
