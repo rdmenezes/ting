@@ -72,7 +72,7 @@ void Run(){
 	}
 
 	{
-		ting::Ref<TestClassRC> c = ting::New<TestClassRC>();
+		ting::Ref<TestClassRC> c = ting::NewRefCounted<TestClassRC>();
 
 		//make sure, "c" is valid before accessing member a.
 		ASS(c)->a = 13;

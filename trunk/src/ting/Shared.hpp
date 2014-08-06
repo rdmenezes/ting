@@ -37,25 +37,18 @@ namespace ting{
 
 
 
-class Shared : public std::enable_shared_from_this<Shared>{
-	template< class T, class... Args > friend std::shared_ptr<T> ting::NewShared(Args&&...);
+class Shared{
+	template< class T, class... Args > friend std::shared_ptr<T> ting::New(Args&&...);
 	
 	static void* operator new(size_t size){
 		return ::operator new(size);
 	}
-
-protected:
-
-	
-public:
-	
-	
 };
 
 
 
-template< class T, class... Args > std::shared_ptr<T> NewShared(Args&&... args){
-	return std::shared_ptr<T>(new T(args...));
+template< class T, class... Args > std::shared_ptr<T> New(Args&&... args){
+	return std::move(std::shared_ptr<T>(new T(args...)));
 }
 
 

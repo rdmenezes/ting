@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 
 	bool destroyed = false;
 
-	ting::Ref<TestClass> tc = ting::New<TestClass>(&destroyed);
+	ting::Ref<TestClass> tc = ting::NewRefCounted<TestClass>(&destroyed);
 
 	DoSmth(tc);
 

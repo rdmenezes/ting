@@ -18,7 +18,7 @@ public:
 
 void TestConversionToBool(){
 	ting::Ref<TestClass> a;
-	ting::Ref<TestClass> b = ting::New<TestClass>();
+	ting::Ref<TestClass> b = ting::NewRefCounted<TestClass>();
 
 	//test conversion to bool
 	if(a){
@@ -35,7 +35,7 @@ void TestConversionToBool(){
 
 void TestOperatorLogicalNot(){
 	ting::Ref<TestClass> a;
-	ting::Ref<TestClass> b = ting::New<TestClass>();
+	ting::Ref<TestClass> b = ting::NewRefCounted<TestClass>();
 
 	//test operator !()
 	if(!a){
@@ -63,8 +63,8 @@ public:
 
 
 void Run1(){
-	ting::Ref<A> a = ting::New<A>();
-	ting::Ref<const A> ac = ting::New<A>();
+	ting::Ref<A> a = ting::NewRefCounted<A>();
+	ting::Ref<const A> ac = ting::NewRefCounted<A>();
 
 	ASSERT_ALWAYS(a)
 	ASSERT_ALWAYS(ac)
@@ -88,8 +88,8 @@ void Run1(){
 }
 
 void Run2(){
-	const ting::Ref<A> a = ting::New<A>();
-	const ting::Ref<const A> ac = ting::New<A>();
+	const ting::Ref<A> a = ting::NewRefCounted<A>();
+	const ting::Ref<const A> ac = ting::NewRefCounted<A>();
 
 	ASSERT_ALWAYS(a)
 	ASSERT_ALWAYS(ac)
@@ -129,7 +129,7 @@ public:
 
 void Run1(){
 	for(unsigned i = 0; i < 1000; ++i){
-		ting::Ref<TestClass> a = ting::New<TestClass>();
+		ting::Ref<TestClass> a = ting::NewRefCounted<TestClass>();
 		ASSERT_ALWAYS(a.IsValid())
 
 		bool wasDestroyed = false;
@@ -148,7 +148,7 @@ void Run1(){
 }
 
 void Run2(){
-	ting::Ref<TestClass> a = ting::New<TestClass>();
+	ting::Ref<TestClass> a = ting::NewRefCounted<TestClass>();
 	ASSERT_ALWAYS(a.IsValid())
 
 	bool wasDestroyed = false;
@@ -191,7 +191,7 @@ public:
 
 void Run(){
 	try{
-		ting::Ref<TestClass> a = ting::New<TestClass>();
+		ting::Ref<TestClass> a = ting::NewRefCounted<TestClass>();
 		ASSERT_ALWAYS(false)
 	}catch(ting::Exc&){
 		//do nothing
@@ -318,7 +318,7 @@ public:
 
 
 void Run1(){
-	ting::Ref<C> c = ting::New<C>();
+	ting::Ref<C> c = ting::NewRefCounted<C>();
 	ASSERT_ALWAYS(c)
 
 	const int DConstA = 1;
@@ -420,7 +420,7 @@ public:
 void Run1(){
 	bool isDestroyed = false;
 
-	ting::Ref<C> p = ting::New<C>(isDestroyed);
+	ting::Ref<C> p = ting::NewRefCounted<C>(isDestroyed);
 
 	ASSERT_ALWAYS(!isDestroyed)
 	ASSERT_ALWAYS(p.IsValid())
@@ -434,7 +434,7 @@ void Run1(){
 void Run2(){
 	bool isDestroyed = false;
 
-	ting::Ref<A> p = ting::New<C>(isDestroyed);
+	ting::Ref<A> p = ting::NewRefCounted<C>(isDestroyed);
 
 	ASSERT_ALWAYS(!isDestroyed)
 	ASSERT_ALWAYS(p.IsValid())
@@ -448,7 +448,7 @@ void Run2(){
 void Run3(){
 	bool isDestroyed = false;
 
-	ting::Ref<ting::RefCounted> p = ting::New<C>(isDestroyed);
+	ting::Ref<ting::RefCounted> p = ting::NewRefCounted<C>(isDestroyed);
 
 	ASSERT_ALWAYS(!isDestroyed)
 	ASSERT_ALWAYS(p.IsValid())
@@ -471,7 +471,7 @@ public:
 };
 
 void Run1(){
-	ting::Ref<TestClass> a = ting::New<TestClass>();
+	ting::Ref<TestClass> a = ting::NewRefCounted<TestClass>();
 	ting::Ref<const TestClass> b(a);
 
 	ASSERT_ALWAYS(a)
@@ -531,7 +531,7 @@ public:
 void Run(){
 	{
 		ASSERT_ALWAYS(!DeleteCalled(false))
-		ting::Ref<ting::RefCounted> a = ting::New<TestClass>();
+		ting::Ref<ting::RefCounted> a = ting::NewRefCounted<TestClass>();
 
 		ASSERT_ALWAYS(!DeleteCalled(false))
 	}

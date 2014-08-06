@@ -465,7 +465,7 @@ void Run(){
 		ting::Signal0 signal0;
 		ting::Signal1<int> signal1;
 
-		ting::Ref<TestClass> a = ting::New<TestClass>();
+		ting::Ref<TestClass> a = ting::NewRefCounted<TestClass>();
 
 		ting::WeakRef<TestClass> wa(a);
 
@@ -509,7 +509,7 @@ void Run(){
 	{
 		ting::Signal3<int, long, char*> sig;
 
-		ting::Ref<TestClass> tc = ting::New<TestClass>();
+		ting::Ref<TestClass> tc = ting::NewRefCounted<TestClass>();
 		ting::WeakRef<TestClass> wa(tc);
 
 
@@ -580,7 +580,7 @@ void Run(){
 		ting::Ref<TestClass> a;
 
 		{
-			a = ting::New<TestClass>();
+			a = ting::NewRefCounted<TestClass>();
 
 			signal0.Connect(
 					a.GetWeakRef(),
@@ -606,7 +606,7 @@ void Run(){
 			//Now we have 2 dead connections (weak refs are invalid)
 			ASSERT_ALWAYS(signal0.NumConnections() == 2)
 
-			a = ting::New<TestClass>();
+			a = ting::NewRefCounted<TestClass>();
 			//this connect should remove dead connections
 			signal0.Connect(
 					a.GetWeakRef(),
@@ -664,7 +664,7 @@ static void DoSomethingWithA(){
 
 
 void Run(){
-	ting::Ref<TestRefClass> rc = ting::New<TestRefClass>();
+	ting::Ref<TestRefClass> rc = ting::NewRefCounted<TestRefClass>();
 	TestClass tc;
 
 	ting::Signal2<long, unsigned> sig;

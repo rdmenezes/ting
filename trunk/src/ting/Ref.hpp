@@ -49,10 +49,11 @@ namespace ting{
 template <class T> class Ref;//forward declaration
 template <class T> class WeakRef;//forward declaration
 
-template< class T, class... Args > ting::Ref<T> New(Args&&... args);//forward declaration
+template< class T, class... Args > ting::Ref<T> NewRefCounted(Args&&... args);//forward declaration
 
 /**
  * @brief base class for a reference counted object.
+ * @deprecated use std::shared_ptr, std::weeak_ptr and ting::Shared.
  * All object which are supposed to be used with reference counted pointers (ting::Ref)
  * should be derived from ting::RefCounted.
  * Typical usage:
@@ -93,7 +94,7 @@ class RefCounted{
 	template <class T> friend class WeakRef;
 
 	
-	template< class T, class... Args > friend ting::Ref<T> ting::New(Args&&...);
+	template< class T, class... Args > friend ting::Ref<T> ting::NewRefCounted(Args&&...);
 	
 
 private:
@@ -1059,7 +1060,7 @@ template <class T> Ref<T>::Ref(const WeakRef<T> &r)throw(){
 
 
 
-template< class T, class... Args > ting::Ref<T> New(Args&&... args){
+template< class T, class... Args > ting::Ref<T> NewRefCounted(Args&&... args){
 	return ting::Ref<T>(new T(args...));
 }
 
