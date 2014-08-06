@@ -17,6 +17,9 @@ public:
 	
 	TestClass(int i) : a(i) {}
 	
+	std::shared_ptr<TestClass> getPtr(){
+		return this->SharedFromThis(this);
+	}
 };
 
 
@@ -28,6 +31,8 @@ void Run(){
 	
 	ASSERT_ALWAYS(p1->a == 4)
 	ASSERT_ALWAYS(p2->a == 21)
+	
+	ASSERT_ALWAYS(p2->getPtr().operator->() == p2.operator->())
 }
 
 

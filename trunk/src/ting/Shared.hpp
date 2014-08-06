@@ -40,12 +40,20 @@ namespace ting{
 /**
  * @brief Base class for objects managed by std::shared_ptr.
  */
-class Shared{
+class Shared : public std::enable_shared_from_this<Shared>{
 	template< class T, class... Args > friend std::shared_ptr<T> ting::New(Args&&...);
 	
 	static void* operator new(size_t size){
 		return ::operator new(size);
 	}
+	
+protected:
+	template <class T> std::shared_ptr<T> SharedFromThis(T* thisPtr){
+		return std::move(std::dynamic_pointer_cast<T>(this->shared_from_this()));
+	}
+	
+public:
+	virtual ~Shared()noexcept{}
 };
 
 
