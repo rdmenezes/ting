@@ -243,7 +243,7 @@ void Run(){
 				ASSERT_ALWAYS(bytesSent <= sendBuffer.size())
 
 				if(sendBuffer.size() == bytesSent){
-					sendBuffer.reserve(0xffff + 1);
+					sendBuffer.resize(0xffff + 1);
 					bytesSent = 0;
 					
 					STATIC_ASSERT(sizeof(std::uint32_t) == 4)
