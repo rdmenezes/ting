@@ -75,6 +75,12 @@ public:
 	
 	
 	Buffer(Buffer&& b){
+		this->operator=(std::move(b));
+	}
+	
+	
+	
+	Buffer& operator=(Buffer&& b){
 		this->buf = b.buf;
 		this->bufSize = b.bufSize;
 		b.buf = 0;
