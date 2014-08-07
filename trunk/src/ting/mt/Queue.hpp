@@ -98,6 +98,7 @@ public:
 
 
 
+	//TODO: rewrite using std::function
 	/**
 	 * @brief Pushes a new message to the queue.
 	 * @param msg - the message to push into the queue.
