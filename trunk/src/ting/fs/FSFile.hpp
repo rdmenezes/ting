@@ -96,24 +96,24 @@ public:
 		return this->rootDir;
 	}
 
-	void OpenInternal(E_Mode mode) OVERRIDE;
+	void OpenInternal(E_Mode mode) override;
 
-	void CloseInternal()noexcept OVERRIDE;
+	void CloseInternal()noexcept override;
 
-	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) OVERRIDE;
+	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) override;
 
-	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) OVERRIDE;
+	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) override;
 
 	//NOTE: use default implementation of SeekForward() because of the problems with
 	//      fseek() as it can set file pointer beyond the end of file.
 	
-	size_t SeekBackwardInternal(size_t numBytesToSeek) OVERRIDE;
+	size_t SeekBackwardInternal(size_t numBytesToSeek) override;
 	
-	void RewindInternal() OVERRIDE;
+	void RewindInternal() override;
 	
-	bool Exists()const OVERRIDE;
+	bool Exists()const override;
 	
-	void MakeDir() OVERRIDE;
+	void MakeDir() override;
 
 
 

@@ -132,20 +132,20 @@ public:
 
 private:
 #if M_OS == M_OS_WINDOWS
-	HANDLE GetHandle() OVERRIDE;
+	HANDLE GetHandle() override;
 
 	u32 flagsMask;//flags to wait for
 
-	void SetWaitingEvents(u32 flagsToWaitFor) OVERRIDE;
+	void SetWaitingEvents(u32 flagsToWaitFor) override;
 
 	//returns true if signaled
-	bool CheckSignaled() OVERRIDE;
+	bool CheckSignaled() override;
 
 #elif M_OS == M_OS_LINUX
-	int GetHandle() OVERRIDE;
+	int GetHandle() override;
 
 #elif M_OS == M_OS_MACOSX
-	int GetHandle() OVERRIDE;
+	int GetHandle() override;
 
 #else
 #	error "Unsupported OS"

@@ -62,22 +62,6 @@ THE SOFTWARE. */
 
 
 
-//TODO: remove, deprecated, use c++11 directly
-//define macros for some C++11 features
-#if __cplusplus > 199711L
-// C++'11 standard or higher
-#	define OVERRIDE override
-#	define FINAL final
-
-#else
-// C++'03 standard
-#	define OVERRIDE
-#	define FINAL
-
-#endif
-
-
-
 namespace ting{
 namespace util{
 
