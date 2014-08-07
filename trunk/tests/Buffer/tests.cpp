@@ -120,6 +120,13 @@ void Run(){
 		Func2(buf);
 	}
 	
+	{
+		std::vector<TestClass> buf(20);
+		
+//		Func(buf);
+		Func2(buf);
+	}
+	
 //	Func(ting::Buffer<TestClass>(0, 0));
 	Func2(ting::Buffer<const TestClass>(0, 0));
 }
