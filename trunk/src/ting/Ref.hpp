@@ -199,7 +199,7 @@ protected:
 		//since RefCounted is being destroyed, that means that there are no strong ref's left
 		ASSERT(this->counter->numStrongRefs.FetchAndAdd(0) == 0)
 		{
-			ting::u32 res = this->counter->numWeakRefs.FetchAndAdd(0);
+			std::uint32_t res = this->counter->numWeakRefs.FetchAndAdd(0);
 			ASSERT_INFO(res >= 1, "res = " << res)
 		}
 #endif
@@ -220,7 +220,7 @@ public:
 	 */
 	unsigned NumRefs()const noexcept{
 		ASSERT(this->counter)
-		ting::u32 ret = this->counter->numStrongRefs.FetchAndAdd(0);
+		std::uint32_t ret = this->counter->numStrongRefs.FetchAndAdd(0);
 		ASSERT(ret > 0)
 		return unsigned(ret);
 	}
@@ -776,7 +776,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			DEBUG_CODE(ting::u32 res =) this->counter->numWeakRefs.FetchAndAdd(1);
+			DEBUG_CODE(std::uint32_t res =) this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT_INFO(res >= 1, "res = " << res)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
@@ -808,7 +808,7 @@ template <class T> class WeakRef{
 
 		//increment number of weak references
 		{
-			DEBUG_CODE(ting::u32 res =) this->counter->numWeakRefs.FetchAndAdd(1);
+			DEBUG_CODE(std::uint32_t res =) this->counter->numWeakRefs.FetchAndAdd(1);
 			ASSERT(res >= 1)//make sure there was at least one weak reference (RefCounted itself acts like a weak reference as well)
 		}
 	}
@@ -1042,8 +1042,8 @@ template <class T> Ref<T>::Ref(const WeakRef<T> &r)noexcept{
 
 	//Try incrementing number of strong references.
 	//We want to increment only if it is not 0.
-	for(ting::u32 guess = 1; ;){//start with 1, not with 0, since we don't want to increment if value is 0.
-		ting::u32 oldVal = r.counter->numStrongRefs.CompareAndExchange(guess, guess + 1);
+	for(std::uint32_t guess = 1; ;){//start with 1, not with 0, since we don't want to increment if value is 0.
+		std::uint32_t oldVal = r.counter->numStrongRefs.CompareAndExchange(guess, guess + 1);
 		if(oldVal == 0){
 			//there are no strong references, weak ref is invalid
 			this->p = 0;

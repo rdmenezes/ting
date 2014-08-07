@@ -94,7 +94,7 @@ ting::Array<std::string> File::ListDirContents(size_t maxEntries){
 
 
 size_t File::Read(
-			const ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<std::uint8_t>& buf,
 			size_t numBytesToRead,
 			size_t offset
 		)
@@ -115,7 +115,7 @@ size_t File::Read(
 	}
 
 	ASSERT(actualNumBytesToRead + offset <= buf.size())
-	ting::Buffer<ting::u8> b(buf.begin() + offset, actualNumBytesToRead);
+	ting::Buffer<std::uint8_t> b(buf.begin() + offset, actualNumBytesToRead);
 	
 	size_t ret = this->ReadInternal(b);
 	this->curPos += ret;
@@ -125,7 +125,7 @@ size_t File::Read(
 
 
 size_t File::Write(
-			const ting::Buffer<const ting::u8>& buf,
+			const ting::Buffer<const std::uint8_t>& buf,
 			size_t numBytesToWrite,
 			size_t offset
 		)
@@ -149,7 +149,7 @@ size_t File::Write(
 	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-	ting::Buffer<const ting::u8> b(buf.begin() + offset, actualNumBytesToWrite);
+	ting::Buffer<const std::uint8_t> b(buf.begin() + offset, actualNumBytesToWrite);
 	
 	size_t ret = this->WriteInternal(b);
 	this->curPos += ret;
@@ -159,7 +159,7 @@ size_t File::Write(
 
 
 size_t File::SeekForwardInternal(size_t numBytesToSeek){
-	ting::StaticBuffer<ting::u8, 0x1000> buf;//4kb buffer
+	ting::StaticBuffer<std::uint8_t, 0x1000> buf;//4kb buffer
 	
 	size_t bytesRead = 0;
 	for(; bytesRead != numBytesToSeek;){
@@ -193,7 +193,7 @@ const size_t DReadBlockSize = 4 * 1024;
 //Define a class derived from StaticBuffer. This is just to define custom
 //copy constructor which will do nothing to avoid unnecessary buffer copying when
 //inserting new element to the list of chunks.
-struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
+struct Chunk : public ting::StaticBuffer<std::uint8_t, DReadBlockSize>{
 	inline Chunk(){}
 	inline Chunk(const Chunk&){}
 };
@@ -201,7 +201,7 @@ struct Chunk : public ting::StaticBuffer<ting::u8, DReadBlockSize>{
 
 
 
-ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
+ting::Array<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	if(this->IsOpened()){
 		throw File::IllegalStateExc("file should not be opened");
 	}
@@ -242,14 +242,14 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	ASSERT(maxBytesToLoad >= bytesRead)
 	
 	if(chunks.size() == 0){
-		return ting::Array<ting::u8>();
+		return ting::Array<std::uint8_t>();
 	}
 	
 	ASSERT(chunks.size() >= 1)
 	
-	ting::Array<ting::u8> ret((chunks.size() - 1) * chunks.front().size() + res);
+	ting::Array<std::uint8_t> ret((chunks.size() - 1) * chunks.front().size() + res);
 	
-	ting::u8* p;
+	std::uint8_t* p;
 	for(p = ret.begin(); chunks.size() > 1; p += chunks.front().size()){
 		ASSERT(p < ret.end())
 		memcpy(p, chunks.front().begin(), chunks.front().size());

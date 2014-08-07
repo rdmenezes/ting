@@ -100,9 +100,9 @@ public:
 
 	void CloseInternal()noexcept override;
 
-	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) override;
+	size_t ReadInternal(const ting::Buffer<std::uint8_t>& buf) override;
 
-	size_t WriteInternal(const ting::Buffer<const ting::u8>& buf) override;
+	size_t WriteInternal(const ting::Buffer<const std::uint8_t>& buf) override;
 
 	//NOTE: use default implementation of SeekForward() because of the problems with
 	//      fseek() as it can set file pointer beyond the end of file.

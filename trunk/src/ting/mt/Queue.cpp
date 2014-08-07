@@ -292,7 +292,7 @@ HANDLE Queue::GetHandle(){
 
 
 //override
-void Queue::SetWaitingEvents(ting::u32 flagsToWaitFor){
+void Queue::SetWaitingEvents(std::uint32_t flagsToWaitFor){
 	//It is not allowed to wait on queue for write,
 	//because it is always possible to push new message to queue.
 	//Error condition is not possible for Queue.

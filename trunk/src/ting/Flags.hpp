@@ -43,23 +43,21 @@ namespace ting{
 /**
  * @brief class representing a set of flags.
  * If you define an enumeration according to the following rules:
- * - enumeration is defined inside of a struct/class namespace
- * - enumeration name is 'Type'
+ * - enumeration is a 'enum class'.
  * - there is no direct assignment of values to enumeration items, i.e. values are in strict ascending order
  * - the very last item is ENUM_SIZE
  * 
  * For example:
  * @code
- * struct MyEnum{
- *     enum Type{
- *         MY_ZEROTH_ITEM,
- *         MY_FIRST_ITEM,
- *         MY_SECOND_ITEM,
- *         MY_THIRD_ITEM,
- *         ...
- *         ENUM_SIZE
- *     };
+ * enum class MyEnum{
+ *     MY_ZEROTH_ITEM,
+ *     MY_FIRST_ITEM,
+ *     MY_SECOND_ITEM,
+ *     MY_THIRD_ITEM,
+ *     ...
+ *     ENUM_SIZE
  * };
+ * 
  * @endcode
  * Then, the Flags can be used as follows:
  * @code
@@ -78,10 +76,14 @@ namespace ting{
  * @endcode
  */
 template <class T_Enum> class Flags{
-	ting::u8 flags[T_Enum::ENUM_SIZE / 8 + 1];
+public:
+	typedef typename ting::UnsignedTypeForSize<sizeof(T_Enum)>::Type index_t;
+	
+private:
+	std::uint8_t flags[index_t(T_Enum::ENUM_SIZE) / 8 + 1];
 
 public:
-	typedef typename ting::UnsignedTypeForSize<sizeof(typename T_Enum::Type)>::Type index_t;
+
 
 	/**
 	 * @brief Constructor.
@@ -97,7 +99,7 @@ public:
 	 * @return Number of flags in this flag set.
 	 */
 	index_t Size()const noexcept{
-		return T_Enum::ENUM_SIZE;
+		return index_t(T_Enum::ENUM_SIZE);
 	}
 
 	/**
@@ -106,9 +108,9 @@ public:
 	 * @return true if the flag is set.
 	 * @return false otherwise.
 	 */
-	bool Get(enum T_Enum::Type flag)const noexcept{
+	bool Get(T_Enum flag)const noexcept{
 		ASSERT(flag < T_Enum::ENUM_SIZE)
-		return (this->flags[flag / 8] & (1 << (flag % 8))) != 0;
+		return (this->flags[index_t(flag) / 8] & (1 << (index_t(flag) % 8))) != 0;
 	}
 
 	/**
@@ -120,7 +122,7 @@ public:
 	 * @return value of the flag given by index.
 	 */
 	bool Get(index_t i)const noexcept{
-		return this->Get(typename T_Enum::Type(i));
+		return this->Get(T_Enum(i));
 	}
 
 	/**
@@ -129,12 +131,12 @@ public:
 	 * @param value - value to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& SetTo(enum T_Enum::Type flag, bool value)noexcept{
+	Flags& SetTo(T_Enum flag, bool value)noexcept{
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		if(value){
-			this->flags[flag / 8] |= (1 << (flag % 8));
+			this->flags[index_t(flag) / 8] |= (1 << (index_t(flag) % 8));
 		}else{
-			this->flags[flag / 8] &= (~(1 << (flag % 8)));
+			this->flags[index_t(flag) / 8] &= (~(1 << (index_t(flag) % 8)));
 		}
 		return *this;
 	}
@@ -144,7 +146,7 @@ public:
 	 * @param flag - flag to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Set(enum T_Enum::Type flag)noexcept{
+	Flags& Set(T_Enum flag)noexcept{
 		return this->SetTo(flag, true);
 	}
 
@@ -153,7 +155,7 @@ public:
 	 * @param flag - flag to clear.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Clear(enum T_Enum::Type flag)noexcept{
+	Flags& Clear(T_Enum flag)noexcept{
 		return this->SetTo(flag, false);
 	}
 
@@ -167,7 +169,7 @@ public:
 	 * @return Reference to this Flags.
 	 */
 	Flags& SetTo(index_t i, bool value)noexcept{
-		return this->SetTo(typename T_Enum::Type(i), value);
+		return this->SetTo(T_Enum(i), value);
 	}
 
 	/**
@@ -198,7 +200,7 @@ public:
 	 * @return Reference to this Flags.
 	 */
 	Flags& SetAllTo(bool value)noexcept{
-		memset(this->flags, value ? ting::u8(-1) : 0, sizeof(this->flags));
+		memset(this->flags, value ? std::uint8_t(-1) : 0, sizeof(this->flags));
 		return *this;
 	}
 
@@ -230,7 +232,7 @@ public:
 	bool IsAllSet()const noexcept{
 		ASSERT(sizeof(this->flags) > 0)
 		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
-			if(this->flags[i] != ting::u8(-1)){
+			if(this->flags[i] != std::uint8_t(-1)){
 				return false;
 			}
 		}

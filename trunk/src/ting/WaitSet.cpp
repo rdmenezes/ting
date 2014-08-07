@@ -102,8 +102,8 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	e.data.fd = w.GetHandle();
 	e.data.ptr = &w;
 	e.events =
-			(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
-			| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
+			(std::uint32_t(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
+			| (std::uint32_t(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
 			| (EPOLLERR);
 	int res = epoll_ctl(
 			this->epollSet,
@@ -118,10 +118,10 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 #elif M_OS == M_OS_MACOSX
 	ASSERT(this->NumWaitables() <= revents.size() / 2)
 	
-	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
+	if((std::uint32_t(flagsToWaitFor) & Waitable::READ) != 0){
 		this->AddFilter(w, EVFILT_READ);
 	}
-	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
+	if((std::uint32_t(flagsToWaitFor) & Waitable::WRITE) != 0){
 		this->AddFilter(w, EVFILT_WRITE);
 	}
 #else
@@ -162,8 +162,8 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	e.data.fd = w.GetHandle();
 	e.data.ptr = &w;
 	e.events =
-			(u32(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
-			| (u32(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
+			(std::uint32_t(flagsToWaitFor) & Waitable::READ ? (EPOLLIN | EPOLLPRI) : 0)
+			| (std::uint32_t(flagsToWaitFor) & Waitable::WRITE ? EPOLLOUT : 0)
 			| (EPOLLERR);
 	int res = epoll_ctl(
 			this->epollSet,
@@ -175,12 +175,12 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw Exc("WaitSet::Change(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
+	if((std::uint32_t(flagsToWaitFor) & Waitable::READ) != 0){
 		this->AddFilter(w, EVFILT_READ);
 	}else{
 		this->RemoveFilter(w, EVFILT_READ);
 	}
-	if((u32(flagsToWaitFor) & Waitable::WRITE) != 0){
+	if((std::uint32_t(flagsToWaitFor) & Waitable::WRITE) != 0){
 		this->AddFilter(w, EVFILT_WRITE);
 	}else{
 		this->RemoveFilter(w, EVFILT_WRITE);
@@ -245,7 +245,7 @@ void WaitSet::Remove(Waitable& w)noexcept{
 
 
 
-unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events){
+unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, Buffer<Waitable*>* out_events){
 	if(this->numWaitables == 0){
 		throw Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
 	}

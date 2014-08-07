@@ -35,7 +35,7 @@ using namespace ting::net;
 
 
 
-void TCPServerSocket::Open(ting::u16 port, bool disableNaggle, ting::u16 queueLength){
+void TCPServerSocket::Open(std::uint16_t port, bool disableNaggle, std::uint16_t queueLength){
 	if(*this){
 		throw net::Exc("TCPServerSocket::Open(): socket already opened");
 	}
@@ -215,7 +215,7 @@ TCPSocket TCPServerSocket::Accept(){
 
 #if M_OS == M_OS_WINDOWS
 //override
-void TCPServerSocket::SetWaitingEvents(ting::u32 flagsToWaitFor){
+void TCPServerSocket::SetWaitingEvents(std::uint32_t flagsToWaitFor){
 	if(flagsToWaitFor != 0 && flagsToWaitFor != Waitable::READ){
 		throw ting::Exc("TCPServerSocket::SetWaitingEvents(): only Waitable::READ flag allowed");
 	}

@@ -210,7 +210,7 @@ public:
 	 * The type supports operator==() and operator!=() operators.
 	 */
 #if M_OS == M_OS_WINDOWS
-	typedef ting::u32 T_ThreadID;
+	typedef std::uint32_t T_ThreadID;
 #else
 	typedef unsigned long int T_ThreadID;
 #endif

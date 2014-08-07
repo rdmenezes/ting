@@ -45,8 +45,8 @@ namespace utf8{
  * @brief Iterator to iterate through utf-8 encoded unicode characters.
  */
 class Iterator{
-	ting::u32 c;
-	const ting::u8* n;
+	std::uint32_t c;
+	const std::uint8_t* n;
 
 public:
 	/**
@@ -61,7 +61,7 @@ public:
      * @param begin - pointer to the first byte of the null-terminated utf-8 encoded string.
      */
 	Iterator(const char* begin) :
-			n(reinterpret_cast<const ting::u8*>(begin))
+			n(reinterpret_cast<const std::uint8_t*>(begin))
 	{
 		if(this->n == 0){
 			this->c = 0;
@@ -74,7 +74,7 @@ public:
 	 * @brief Get current unicode character.
      * @return unicode value of the character this interator is currently pointing to.
      */
-	ting::u32 Char()const noexcept{
+	std::uint32_t Char()const noexcept{
 		return this->c;
 	}
 
@@ -87,11 +87,11 @@ public:
      * @return reference to this iterator object.
      */
 	Iterator& operator++()noexcept{
-		ting::u8 b = *this->n;
+		std::uint8_t b = *this->n;
 //		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
 		++this->n;
 		if((b & 0x80) == 0){
-			this->c = ting::u32(b);
+			this->c = std::uint32_t(b);
 			return *this;
 		}
 
@@ -103,16 +103,16 @@ public:
 		++this->n;
 
 		unsigned i = 2;
-		for(; (ting::u8(b << i) >> 7); ++i, ++this->n){
-//			TRACE(<< "utf8::Iterator::operator++(): ting::u8(b << i) = " << std::hex << unsigned(ting::u8(b << i)) << std::endl)
-//			TRACE(<< "utf8::Iterator::operator++(): ((b << i) >> 7) = " << std::hex << unsigned(ting::u8(b << i) >> 7) << std::endl)
+		for(; (std::uint8_t(b << i) >> 7); ++i, ++this->n){
+//			TRACE(<< "utf8::Iterator::operator++(): std::uint8_t(b << i) = " << std::hex << unsigned(std::uint8_t(b << i)) << std::endl)
+//			TRACE(<< "utf8::Iterator::operator++(): ((b << i) >> 7) = " << std::hex << unsigned(std::uint8_t(b << i) >> 7) << std::endl)
 //			TRACE(<< "utf8::Iterator::operator++(): *n = " << std::hex << unsigned(*this->n) << std::endl)
 			this->c <<= 6;
 //			TRACE(<< "utf8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 			this->c |= (*this->n) & 0x3f;
 //			TRACE(<< "utf8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 		}
-		this->c |= (ting::u32(ting::u8(b << (i + 1)) >> (i + 1)) << (6 * (i - 1)));
+		this->c |= (std::uint32_t(std::uint8_t(b << (i + 1)) >> (i + 1)) << (6 * (i - 1)));
 //		TRACE(<< "utf8::Iterator::operator++(): c = " << std::hex << c << std::endl)
 
 		return *this;
@@ -147,8 +147,8 @@ public:
  * @param str - iterator into the utf-8 string.
  * @return Number of characters filled in to the buffer.
  */
-inline size_t FillBuffer(const ting::Buffer<ting::u32>& buf, Iterator& str){
-	ting::u32* p = buf.begin();
+inline size_t FillBuffer(const ting::Buffer<std::uint32_t>& buf, Iterator& str){
+	std::uint32_t* p = buf.begin();
 	for(; p != buf.end() && str.IsNotEnd(); ++p, ++str){
 		*p = str.Char();
 	}

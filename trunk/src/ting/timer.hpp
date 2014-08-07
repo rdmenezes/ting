@@ -86,7 +86,7 @@ namespace timer{
  * It is not guaranteed that the ticks counting started at the system start.
  * @return constantly increasing millisecond ticks.
  */
-inline ting::u32 GetTicks(){
+inline std::uint32_t GetTicks(){
 #if M_OS == M_OS_WINDOWS
 	static LARGE_INTEGER perfCounterFreq = {{0, 0}};
 	if(perfCounterFreq.QuadPart == 0){
@@ -100,19 +100,19 @@ inline ting::u32 GetTicks(){
 		return GetTickCount();
 	}
 
-	return ting::u32((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
+	return std::uint32_t((ticks.QuadPart * 1000) / perfCounterFreq.QuadPart);
 #elif M_OS == M_OS_MACOSX
 	//Mac os X doesn't support clock_gettime
 	timeval t;
 	gettimeofday(&t, 0);
-	return ting::u32(t.tv_sec * 1000 + (t.tv_usec / 1000));
+	return std::uint32_t(t.tv_sec * 1000 + (t.tv_usec / 1000));
 #elif M_OS == M_OS_LINUX
 	timespec ts;
 	if(clock_gettime(CLOCK_MONOTONIC, &ts) == -1){
 		throw ting::Exc("GetTicks(): clock_gettime() returned error");
 	}
 
-	return u32(u32(ts.tv_sec) * 1000 + u32(ts.tv_nsec / 1000000));
+	return std::uint32_t(std::uint32_t(ts.tv_sec) * 1000 + std::uint32_t(ts.tv_nsec / 1000000));
 #else
 #	error "Unsupported OS"
 #endif
@@ -131,15 +131,15 @@ class Timer{
 	friend class Lib;
 
 	//This constant is for testing purposes.
-	//Should be set to ting::u32(-1) in release.
-	inline static ting::u32 DMaxTicks(){
-		return ting::u32(-1);
+	//Should be set to std::uint32_t(-1) in release.
+	inline static std::uint32_t DMaxTicks(){
+		return std::uint32_t(-1);
 	}
 	
 	ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
 
 private:
-	typedef std::multimap<ting::u64, Timer*> T_TimerList;
+	typedef std::multimap<std::uint64_t, Timer*> T_TimerList;
 	typedef T_TimerList::iterator T_TimerIter;
 
 	T_TimerIter i;//if timer is running, this is the iterator into the map of timers
@@ -185,7 +185,7 @@ public:
 	 * This method is thread-safe.
 	 * @param millisec - timer timeout in milliseconds.
 	 */
-	inline void Start(ting::u32 millisec);
+	inline void Start(std::uint32_t millisec);
 
 	/**
 	 * @brief Stop the timer.
@@ -235,14 +235,14 @@ class Lib : public IntrusiveSingleton<Lib>{
 
 
 
-		ting::Inited<ting::u64, 0> ticks;
+		ting::Inited<std::uint64_t, 0> ticks;
 		ting::Inited<bool, false> incTicks;//flag indicates that high word of ticks needs increment
 
-		//This function should be called at least once in 16 days (half of ting::u32(-1) milliseconds)
+		//This function should be called at least once in 16 days (half of std::uint32_t(-1) milliseconds)
 		//in order to function properly.
 		//This is achieved by having a repeating timer set to 16 days, which will do nothing but
 		//calling this function.
-		inline ting::u64 GetTicks();
+		inline std::uint64_t GetTicks();
 
 
 
@@ -255,7 +255,7 @@ class Lib : public IntrusiveSingleton<Lib>{
 			ASSERT(this->timers.size() == 0)
 		}
 
-		void AddTimer_ts(Timer* timer, u32 timeout);
+		void AddTimer_ts(Timer* timer, std::uint32_t timeout);
 
 		bool RemoveTimer_ts(Timer* timer)noexcept;
 
@@ -318,7 +318,7 @@ inline Timer::~Timer()noexcept{
 
 
 
-inline void Timer::Start(ting::u32 millisec){
+inline void Timer::Start(std::uint32_t millisec){
 	ASSERT_INFO(Lib::IsCreated(), "Timer library is not initialized, you need to create TimerLib singletone object first")
 
 	Lib::Inst().thread.AddTimer_ts(this, millisec);
@@ -333,13 +333,13 @@ inline bool Timer::Stop()noexcept{
 
 
 
-inline ting::u64 Lib::TimerThread::GetTicks(){
-	ting::u32 ticks = ting::timer::GetTicks() % Timer::DMaxTicks();
+inline std::uint64_t Lib::TimerThread::GetTicks(){
+	std::uint32_t ticks = ting::timer::GetTicks() % Timer::DMaxTicks();
 
 	if(this->incTicks){
 		if(ticks < Timer::DMaxTicks() / 2){
 			this->incTicks = false;
-			this->ticks += (ting::u64(Timer::DMaxTicks()) + 1); //update 64 bit ticks counter
+			this->ticks += (std::uint64_t(Timer::DMaxTicks()) + 1); //update 64 bit ticks counter
 		}
 	}else{
 		if(ticks > Timer::DMaxTicks() / 2){
@@ -347,7 +347,7 @@ inline ting::u64 Lib::TimerThread::GetTicks(){
 		}
 	}
 
-	return this->ticks + ting::u64(ticks);
+	return this->ticks + std::uint64_t(ticks);
 }
 
 

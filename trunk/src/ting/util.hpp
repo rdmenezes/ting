@@ -179,7 +179,7 @@ template <class T> inline void ClampRange(T& v, const T bottom, const T top)noex
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16LE(u16 value, u8* out_buf)noexcept{
+inline void Serialize16LE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
 	out_buf[0] = value & 0xff;
 	out_buf[1] = value >> 8;
 }
@@ -192,14 +192,14 @@ inline void Serialize16LE(u16 value, u8* out_buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32LE(u32 value, u8* out_buf)noexcept{
-	*out_buf = u8(value & 0xff);
+inline void Serialize32LE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
+	*out_buf = std::uint8_t(value & 0xff);
 	++out_buf;
-	*out_buf = u8((value >> 8) & 0xff);
+	*out_buf = std::uint8_t((value >> 8) & 0xff);
 	++out_buf;
-	*out_buf = u8((value >> 16) & 0xff);
+	*out_buf = std::uint8_t((value >> 16) & 0xff);
 	++out_buf;
-	*out_buf = u8((value >> 24) & 0xff);
+	*out_buf = std::uint8_t((value >> 24) & 0xff);
 }
 
 
@@ -211,13 +211,13 @@ inline void Serialize32LE(u32 value, u8* out_buf)noexcept{
  * @param buf - pointer to buffer containing 2 bytes to convert from little-endian format.
  * @return 16 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u16 Deserialize16LE(const u8* buf)noexcept{
-	u16 ret;
+inline std::uint16_t Deserialize16LE(const std::uint8_t* buf)noexcept{
+	std::uint16_t ret;
 
 	//assume little-endian
-	ret = u16(*buf);
+	ret = std::uint16_t(*buf);
 	++buf;
-	ret |= ((u16(*buf)) << 8);
+	ret |= ((std::uint16_t(*buf)) << 8);
 
 	return ret;
 }
@@ -231,17 +231,17 @@ inline u16 Deserialize16LE(const u8* buf)noexcept{
  * @param buf - pointer to buffer containing 4 bytes to convert from little-endian format.
  * @return 32 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline u32 Deserialize32LE(const u8* buf)noexcept{
-	u32 ret;
+inline std::uint32_t Deserialize32LE(const std::uint8_t* buf)noexcept{
+	std::uint32_t ret;
 
 	//assume little-endian
-	ret = u32(*buf);
+	ret = std::uint32_t(*buf);
 	++buf;
-	ret |= ((u32(*buf)) << 8);
+	ret |= ((std::uint32_t(*buf)) << 8);
 	++buf;
-	ret |= ((u32(*buf)) << 16);
+	ret |= ((std::uint32_t(*buf)) << 16);
 	++buf;
-	ret |= ((u32(*buf)) << 24);
+	ret |= ((std::uint32_t(*buf)) << 24);
 
 	return ret;
 }
@@ -254,7 +254,7 @@ inline u32 Deserialize32LE(const u8* buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16BE(u16 value, u8* out_buf)noexcept{
+inline void Serialize16BE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
 	out_buf[0] = value >> 8;
 	out_buf[1] = value & 0xff;
 }
@@ -267,14 +267,14 @@ inline void Serialize16BE(u16 value, u8* out_buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32BE(u32 value, u8* out_buf)noexcept{
-	*out_buf = u8((value >> 24) & 0xff);
+inline void Serialize32BE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
+	*out_buf = std::uint8_t((value >> 24) & 0xff);
 	++out_buf;
-	*out_buf = u8((value >> 16) & 0xff);
+	*out_buf = std::uint8_t((value >> 16) & 0xff);
 	++out_buf;
-	*out_buf = u8((value >> 8) & 0xff);
+	*out_buf = std::uint8_t((value >> 8) & 0xff);
 	++out_buf;
-	*out_buf = u8(value & 0xff);
+	*out_buf = std::uint8_t(value & 0xff);
 }
 
 
@@ -286,13 +286,13 @@ inline void Serialize32BE(u32 value, u8* out_buf)noexcept{
  * @param buf - pointer to buffer containing 2 bytes to convert from big-endian format.
  * @return 16 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline u16 Deserialize16BE(const u8* buf)noexcept{
-	u16 ret;
+inline std::uint16_t Deserialize16BE(const std::uint8_t* buf)noexcept{
+	std::uint16_t ret;
 
 	//assume big-endian
-	ret = ((u16(*buf)) << 8);
+	ret = ((std::uint16_t(*buf)) << 8);
 	++buf;
-	ret |= u16(*buf);
+	ret |= std::uint16_t(*buf);
 
 	return ret;
 }
@@ -306,17 +306,17 @@ inline u16 Deserialize16BE(const u8* buf)noexcept{
  * @param buf - pointer to buffer containing 4 bytes to convert from big-endian format.
  * @return 32 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline u32 Deserialize32BE(const u8* buf)noexcept{
-	u32 ret;
+inline std::uint32_t Deserialize32BE(const std::uint8_t* buf)noexcept{
+	std::uint32_t ret;
 
 	//assume big-endian
-	ret = ((u32(*buf)) << 24);
+	ret = ((std::uint32_t(*buf)) << 24);
 	++buf;
-	ret |= ((u32(*buf)) << 16);
+	ret |= ((std::uint32_t(*buf)) << 16);
 	++buf;
-	ret |= ((u32(*buf)) << 8);
+	ret |= ((std::uint32_t(*buf)) << 8);
 	++buf;
-	ret |= u32(*buf);
+	ret |= std::uint32_t(*buf);
 
 	return ret;
 }

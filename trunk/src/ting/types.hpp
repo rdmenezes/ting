@@ -50,89 +50,6 @@ namespace ting{
 
 
 /**
- * @brief Maximal value of unsigned integer type.
- */
-const unsigned DMaxUInt = unsigned(-1);
-
-/**
- * @brief Maximal value of integer type.
- */
-const int DMaxInt = int(DMaxUInt >> 1);
-
-/**
- * @brief Minimal value of integer type.
- */
-const int DMinInt = ~DMaxInt;
-
-
-
-/**
- * @brief Unsigned 8 bit type.
- * @deprecated Use std::uint8_t from C++'11 instead.
- */
-typedef unsigned char u8;
-
-/**
- * @brief Signed 8 bit type.
- * @deprecated Use std::int8_t from C++'11 instead.
- */
-typedef signed char s8;
-
-/**
- * @brief Unsigned 16 bit type.
- * @deprecated Use std::uint16_t from C++'11 instead.
- */
-typedef unsigned short int u16;
-
-/**
- * @brief Signed 16 bit type.
- * @deprecated Use std::int16_t from C++'11 instead.
- */
-typedef signed short int s16;
-
-/**
- * @brief Unsigned 32 bit type.
- * @deprecated Use std::uint32_t from C++'11 instead.
- */
-typedef unsigned int u32;
-
-/**
- * @brief Signed 32 bit type.
- * @deprecated Use std::int32_t from C++'11 instead.
- */
-typedef signed int s32;
-
-/**
- * @brief Unsigned 64 bit type.
- * @deprecated Use std::uint64_t from C++'11 instead.
- */
-typedef unsigned long long int u64;
-
-/**
- * @brief Signed 64 bit type.
- * @deprecated Use std::int64_t from C++'11 instead.
- */
-typedef long long int s64;
-
-
-#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-
-STATIC_ASSERT(u8(-1) == 0xff)//assert that byte consists of exactly 8 bits, e.g. some systems have 10 bits per byte!!!
-STATIC_ASSERT(sizeof(u8) == 1)
-STATIC_ASSERT(sizeof(s8) == 1)
-STATIC_ASSERT(sizeof(u16) == 2)
-STATIC_ASSERT(sizeof(s16) == 2)
-STATIC_ASSERT(sizeof(u32) == 4)
-STATIC_ASSERT(sizeof(s32) == 4)
-STATIC_ASSERT(sizeof(u64) == 8)
-STATIC_ASSERT(u64(-1) == 0xffffffffffffffffLL)
-STATIC_ASSERT(sizeof(s64) == 8)
-
-#endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
-
-
-
-/**
  * @brief Thin wrapper above any C++ built-in type allowing initialization from int.
  * @deprecated c++11 allows inline initialization in classes.
  * Thin wrapper above any C++ built-in type which allows initialization from C++ int type.
@@ -208,17 +125,17 @@ public:
 
 
 
-template <size_t type_size> struct UnsignedTypeForSize{typedef ting::u64 Type;};
-template <> struct UnsignedTypeForSize<1>{typedef ting::u8 Type;};
-template <> struct UnsignedTypeForSize<2>{typedef ting::u16 Type;};
-template <> struct UnsignedTypeForSize<3>{typedef ting::u32 Type;};
-template <> struct UnsignedTypeForSize<4>{typedef ting::u32 Type;};
+template <size_t type_size> struct UnsignedTypeForSize{typedef std::uint64_t Type;};
+template <> struct UnsignedTypeForSize<1>{typedef std::uint8_t Type;};
+template <> struct UnsignedTypeForSize<2>{typedef std::uint16_t Type;};
+template <> struct UnsignedTypeForSize<3>{typedef std::uint32_t Type;};
+template <> struct UnsignedTypeForSize<4>{typedef std::uint32_t Type;};
 
-template <size_t type_size> struct SignedTypeForSize{typedef ting::s64 Type;};
-template <> struct SignedTypeForSize<1>{typedef ting::s8 Type;};
-template <> struct SignedTypeForSize<2>{typedef ting::s16 Type;};
-template <> struct SignedTypeForSize<3>{typedef ting::s32 Type;};
-template <> struct SignedTypeForSize<4>{typedef ting::s32 Type;};
+template <size_t type_size> struct SignedTypeForSize{typedef std::int64_t Type;};
+template <> struct SignedTypeForSize<1>{typedef std::int8_t Type;};
+template <> struct SignedTypeForSize<2>{typedef std::int16_t Type;};
+template <> struct SignedTypeForSize<3>{typedef std::int32_t Type;};
+template <> struct SignedTypeForSize<4>{typedef std::int32_t Type;};
 
 
 

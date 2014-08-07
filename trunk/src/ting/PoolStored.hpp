@@ -58,9 +58,9 @@ STATIC_ASSERT(sizeof(int) == 4)
 
 
 
-template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class MemoryPool{		
+template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class MemoryPool{		
 	M_DECLARE_ALIGNED_MSVC(4) struct ElemSlot{
-		u8 buf[element_size];
+		std::uint8_t buf[element_size];
 	}
 	//Align by sizeof(int) boundary, just to be more safe.
 	//I once had a problem with pthread mutex when it was not aligned by 4 byte boundary,
@@ -72,19 +72,19 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 		
 		ElemSlot elements[num_elements_in_chunk];
 		
-		std::vector<ting::u32> freeIndices;
+		std::vector<std::uint32_t> freeIndices;
 
 		Chunk(){
 			ASSERT(num_elements_in_chunk != 0)
 		}
 		
-		ting::u32 NumAllocated()const noexcept{
+		std::uint32_t NumAllocated()const noexcept{
 			ASSERT(this->freeIndex > this->freeIndices.size() || (this->freeIndex == 0 && this->freeIndices.size() == 0))
 			return this->freeIndex - this->freeIndices.size();
 		}
 		
 		//returns number of free slots in chunk
-		ting::u32 NumFree()const noexcept{
+		std::uint32_t NumFree()const noexcept{
 			ASSERT(num_elements_in_chunk >= this->NumAllocated())
 			return num_elements_in_chunk - this->NumAllocated();
 		} 
@@ -102,7 +102,7 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 				ASSERT(this->freeIndex != 0)
 				
 				//use one of these to keep size of the vector at minimum
-				ting::u32 idx = this->freeIndices.back();
+				std::uint32_t idx = this->freeIndices.back();
 				this->freeIndices.pop_back();
 				ASSERT(idx < this->freeIndex)
 				return this->elements[idx];
@@ -113,7 +113,7 @@ template <size_t element_size, ting::u32 num_elements_in_chunk = 32> class Memor
 
 		void Free(ElemSlot& e)noexcept{
 			ASSERT(this->HoldsElement(e))
-			ting::u32 idx = ting::u32(&e - &this->elements[0]);
+			std::uint32_t idx = std::uint32_t(&e - &this->elements[0]);
 			ASSERT(idx < num_elements_in_chunk)
 			this->freeIndices.push_back(idx);
 		}

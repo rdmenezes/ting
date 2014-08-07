@@ -16,9 +16,9 @@ void Run(){
 	ASSERT_ALWAYS(!f.IsOpened())
 	
 	for(unsigned numToSeek = 0; numToSeek < 0x1000; numToSeek += (0x1000 / 4)){
-		ting::StaticBuffer<ting::u8, 1> testByte;
+		ting::StaticBuffer<std::uint8_t, 1> testByte;
 		{
-			ting::Array<ting::u8> buf(numToSeek);
+			ting::Array<std::uint8_t> buf(numToSeek);
 			
 			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 			
@@ -36,7 +36,7 @@ void Run(){
 
 			f.File::SeekForward(numToSeek);
 
-			ting::StaticBuffer<ting::u8, 1> buf;
+			ting::StaticBuffer<std::uint8_t, 1> buf;
 
 			unsigned res = f.Read(buf, 1);
 			ASSERT_ALWAYS(res == 1)
@@ -49,7 +49,7 @@ void Run(){
 
 			f.SeekForward(numToSeek);
 
-			ting::StaticBuffer<ting::u8, 1> buf;
+			ting::StaticBuffer<std::uint8_t, 1> buf;
 
 			unsigned res = f.Read(buf, 1);
 			ASSERT_ALWAYS(res == 1)
@@ -104,27 +104,27 @@ void Run(){
 	ASSERT_ALWAYS(!f.IsOpened())
 	
 	{
-		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory();
+		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory();
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 	
 	{
-		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(66874);
+		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(66874);
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 	
 	{
-		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(4096);
+		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(4096);
 		ASSERT_ALWAYS(r.size() == 4096)
 	}
 	
 	{
-		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(35);
+		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(35);
 		ASSERT_ALWAYS(r.size() == 35)
 	}
 	
 	{
-		ting::Array<ting::u8> r = f.LoadWholeFileIntoMemory(1000000);
+		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(1000000);
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 }

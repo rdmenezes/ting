@@ -51,8 +51,8 @@ namespace{
 
 
 
-const ting::u16 D_DNSRecordA = 1;
-const ting::u16 D_DNSRecordAAAA = 28;
+const std::uint16_t D_DNSRecordA = 1;
+const std::uint16_t D_DNSRecordAAAA = 28;
 
 
 namespace dns{
@@ -64,7 +64,7 @@ struct Resolver;
 
 //After the successful completion the 'p' points to the byte right after the host name.
 //In case of unsuccessful completion 'p' is undefined.
-std::string ParseHostNameFromDNSPacket(const ting::u8* & p, const ting::u8* end){
+std::string ParseHostNameFromDNSPacket(const std::uint8_t* & p, const std::uint8_t* end){
 	std::string host;
 			
 	for(;;){
@@ -72,7 +72,7 @@ std::string ParseHostNameFromDNSPacket(const ting::u8* & p, const ting::u8* end)
 			return "";
 		}
 
-		ting::u8 len = *p;
+		std::uint8_t len = *p;
 		++p;
 
 		if(len == 0){
@@ -101,10 +101,10 @@ std::string ParseHostNameFromDNSPacket(const ting::u8* & p, const ting::u8* end)
 //this mutex is used to protect the dns::thread access.
 ting::mt::Mutex mutex;
 
-typedef std::multimap<ting::u32, Resolver*> T_ResolversTimeMap;
+typedef std::multimap<std::uint32_t, Resolver*> T_ResolversTimeMap;
 typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
 
-typedef std::map<ting::u16, Resolver*> T_IdMap;
+typedef std::map<std::uint16_t, Resolver*> T_IdMap;
 typedef T_IdMap::iterator T_IdIter;
 
 typedef std::list<Resolver*> T_RequestsToSendList;
@@ -120,12 +120,12 @@ struct Resolver : public ting::PoolStored<Resolver, 10>{
 	
 	std::string hostName; //host name to resolve
 	
-	ting::u16 recordType; //type of DNS record to get
+	std::uint16_t recordType; //type of DNS record to get
 	
 	T_ResolversTimeMap* timeMap;
 	T_ResolversTimeIter timeMapIter;
 	
-	ting::u16 id;
+	std::uint16_t id;
 	T_IdIter idIter;
 	
 	T_RequestsToSendIter sendIter;
@@ -176,7 +176,7 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex.
 	//throws HostNameResolver::TooMuchRequestsExc if all IDs are occupied.
-	ting::u16 FindFreeId(){
+	std::uint16_t FindFreeId(){
 		if(this->idMap.size() == 0){
 			return 0;
 		}
@@ -185,7 +185,7 @@ public:
 			return this->idMap.begin()->first - 1;
 		}
 		
-		if((--(this->idMap.end()))->first != ting::u16(-1)){
+		if((--(this->idMap.end()))->first != std::uint16_t(-1)){
 			return (--(this->idMap.end()))->first + 1;
 		}
 		
@@ -204,7 +204,7 @@ public:
 	//NOTE: call to this function should be protected by mutex, to make sure the request is not canceled while sending.
 	//returns true if request is sent, false otherwise.
 	bool SendRequestToDNS(const dns::Resolver* r){
-		ting::StaticBuffer<ting::u8, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
+		ting::StaticBuffer<std::uint8_t, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
 		
 		size_t packetSize =
 				2 + //ID
@@ -220,7 +220,7 @@ public:
 		
 		ASSERT(packetSize <= buf.size())
 		
-		ting::u8* p = buf.begin();
+		std::uint8_t* p = buf.begin();
 		
 		//ID
 		ting::util::Serialize16BE(r->id, p);
@@ -258,7 +258,7 @@ public:
 			size_t labelLength = dotPos - oldDotPos;
 			ASSERT(labelLength <= 0xff)
 			
-			*p = ting::u8(labelLength);//save label length
+			*p = std::uint8_t(labelLength);//save label length
 			++p;
 			//copy the label bytes
 			memcpy(p, r->hostName.c_str() + oldDotPos, labelLength);
@@ -283,7 +283,7 @@ public:
 		ASSERT(size_t(p - buf.begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		ting::Buffer<const ting::u8> bufToSend(buf.begin(), packetSize);
+		ting::Buffer<const std::uint8_t> bufToSend(buf.begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
@@ -320,7 +320,7 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex
 	//This function will call the Resolver callback.
-	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
+	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const std::uint8_t>& buf){
 		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
 #ifdef DEBUG
 		for(unsigned i = 0; i < buf.size(); ++i){
@@ -340,11 +340,11 @@ public:
 			return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 		}
 		
-		const ting::u8* p = buf.begin();
+		const std::uint8_t* p = buf.begin();
 		p += 2;//skip ID
 		
 		{
-			ting::u16 flags = ting::util::Deserialize16BE(p);
+			std::uint16_t flags = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if((flags & 0x8000) == 0){//we expect it to be a response, not query.
@@ -364,7 +364,7 @@ public:
 		}
 		
 		{//check number of questions
-			ting::u16 numQuestions = ting::util::Deserialize16BE(p);
+			std::uint16_t numQuestions = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(numQuestions != 1){
@@ -372,7 +372,7 @@ public:
 			}
 		}
 		
-		ting::u16 numAnswers = ting::util::Deserialize16BE(p);
+		std::uint16_t numAnswers = ting::util::Deserialize16BE(p);
 		p += 2;
 		ASSERT(buf.begin() <= p)
 		ASSERT(p <= (buf.end() - 1) || p == buf.end())
@@ -382,12 +382,12 @@ public:
 		}
 		
 		{
-//			ting::u16 nscount = ting::util::Deserialize16BE(p);
+//			std::uint16_t nscount = ting::util::Deserialize16BE(p);
 			p += 2;
 		}
 		
 		{
-//			ting::u16 arcount = ting::util::Deserialize16BE(p);
+//			std::uint16_t arcount = ting::util::Deserialize16BE(p);
 			p += 2;
 		}
 		
@@ -404,7 +404,7 @@ public:
 		
 		//check query type, we sent question type 1 (A query).
 		{
-			ting::u16 type = ting::util::Deserialize16BE(p);
+			std::uint16_t type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(type != r->recordType){
@@ -414,7 +414,7 @@ public:
 		
 		//check query class, we sent question class 1 (inet).
 		{
-			ting::u16 cls = ting::util::Deserialize16BE(p);
+			std::uint16_t cls = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(cls != 1){
@@ -425,7 +425,7 @@ public:
 		ASSERT(buf.Overlaps(p) || p == buf.end())
 		
 		//loop through the answers
-		for(ting::u16 n = 0; n != numAnswers; ++n){
+		for(std::uint16_t n = 0; n != numAnswers; ++n){
 			if(p == buf.end()){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
@@ -449,25 +449,25 @@ public:
 			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
-			ting::u16 type = ting::util::Deserialize16BE(p);
+			std::uint16_t type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
-//			ting::u16 cls = ting::util::Deserialize16(p);
+//			std::uint16_t cls = ting::util::Deserialize16(p);
 			p += 2;
 			
 			if(buf.end() - p < 4){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
-//			ting::u32 ttl = ting::util::Deserialize32(p);//time till the returned value can be cached.
+//			std::uint32_t ttl = ting::util::Deserialize32(p);//time till the returned value can be cached.
 			p += 4;
 			
 			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
-			ting::u16 dataLen = ting::util::Deserialize16BE(p);
+			std::uint16_t dataLen = ting::util::Deserialize16BE(p);
 			p += 2;
 			
 			if(buf.end() - p < dataLen){
@@ -650,10 +650,10 @@ private:
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 			ting::fs::FSFile f("/etc/resolv.conf");
 			
-			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
+			ting::Array<std::uint8_t> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
 			
-			for(ting::u8* p = buf.begin(); p != buf.end(); ++p){
-				ting::u8* start = p;
+			for(std::uint8_t* p = buf.begin(); p != buf.end(); ++p){
+				std::uint8_t* start = p;
 				
 				while(p != buf.end() && *p != '\n'){
 					++p;
@@ -690,7 +690,7 @@ private:
 #endif
 		}catch(...){
 		}
-		this->dns = ting::net::IPAddress(ting::u32(0), 0);
+		this->dns = ting::net::IPAddress(std::uint32_t(0), 0);
 	}
 	
 	
@@ -729,7 +729,7 @@ private:
 		this->waitSet.Add(this->socket, ting::Waitable::READ);
 		
 		while(!this->quitFlag){
-			ting::u32 timeout;
+			std::uint32_t timeout;
 			{
 				ting::mt::Mutex::Guard mutexGuard(this->mutex);
 				
@@ -742,25 +742,25 @@ private:
 				if(this->socket.CanRead()){
 					TRACE(<< "can read" << std::endl)
 					try{
-						ting::StaticBuffer<ting::u8, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes. So, no need to allocate bigger buffer.
+						ting::StaticBuffer<std::uint8_t, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes. So, no need to allocate bigger buffer.
 						ting::net::IPAddress address;
 						size_t ret = this->socket.Recv(buf, address);
 						
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.size())
 						if(ret >= 13){//at least there should be standard header and host name, otherwise ignore received UDP packet
-							ting::u16 id = ting::util::Deserialize16BE(buf.begin());
+							std::uint16_t id = ting::util::Deserialize16BE(buf.begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
 								ASSERT(id == i->second->id)
 								
 								//check by host name also
-								const ting::u8* p = buf.begin() + 12;//start of the host name
+								const std::uint8_t* p = buf.begin() + 12;//start of the host name
 								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.end());
 								
 								if(host == i->second->hostName){
-									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<ting::u8>(buf.begin(), ret));
+									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<std::uint8_t>(buf.begin(), ret));
 									
 									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && i->second->recordType == D_DNSRecordAAAA){
 										//try getting record type A
@@ -847,9 +847,9 @@ private:
 					}
 				}
 				
-				ting::u32 curTime = ting::timer::GetTicks();
+				std::uint32_t curTime = ting::timer::GetTicks();
 				{//check if time has warped around and it is necessary to swap time maps
-					bool isFirstHalf = curTime < (ting::u32(-1) / 2);
+					bool isFirstHalf = curTime < (std::uint32_t(-1) / 2);
 					if(isFirstHalf && !this->lastTicksInFirstHalf){
 						//Time warped.
 						//Timeout all requests from first time map
@@ -895,14 +895,14 @@ private:
 			}
 			
 			//Make sure that ting::GetTicks is called at least 4 times per full time warp around cycle.
-			ting::util::ClampTop(timeout, ting::u32(-1) / 4);
+			ting::util::ClampTop(timeout, std::uint32_t(-1) / 4);
 			
 //Workaround for strange bug on Win32 (reproduced on WinXP at least).
 //For some reason waiting for WRITE on UDP socket does not work. It hangs in the
 //Wait() method until timeout is hit. So, just check every 100ms if it is OK to write to UDP socket.
 #if M_OS == M_OS_WINDOWS
 			if(this->sendList.size() > 0){
-				ting::util::ClampTop(timeout, ting::u32(100));
+				ting::util::ClampTop(timeout, std::uint32_t(100));
 			}
 #endif
 			
@@ -973,7 +973,7 @@ HostNameResolver::~HostNameResolver(){
 
 
 
-void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeoutMillis, const ting::net::IPAddress& dnsIP){
+void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t timeoutMillis, const ting::net::IPAddress& dnsIP){
 //	TRACE(<< "HostNameResolver::Resolve_ts(): enter" << std::endl)
 	
 	ASSERT(ting::net::Lib::IsCreated())
@@ -1040,15 +1040,15 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 	{
 		r->id = dns::thread->FindFreeId();
 		std::pair<dns::T_IdIter, bool> res =
-				dns::thread->idMap.insert(std::pair<ting::u16, dns::Resolver*>(r->id, r.operator->()));
+				dns::thread->idMap.insert(std::pair<std::uint16_t, dns::Resolver*>(r->id, r.operator->()));
 		ASSERT(res.second)
 		r->idIter = res.first;
 	}
 	
 	//calculate time
-	ting::u32 curTime = ting::timer::GetTicks();
+	std::uint32_t curTime = ting::timer::GetTicks();
 	{
-		ting::u32 endTime = curTime + timeoutMillis;
+		std::uint32_t endTime = curTime + timeoutMillis;
 //		TRACE(<< "HostNameResolver::Resolve_ts(): curTime = " << curTime << std::endl)
 //		TRACE(<< "HostNameResolver::Resolve_ts(): endTime = " << endTime << std::endl)
 		if(endTime < curTime){//if warped around
@@ -1057,7 +1057,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 			r->timeMap = dns::thread->timeMap1;
 		}
 		try{
-			r->timeMapIter = r->timeMap->insert(std::pair<ting::u32, dns::Resolver*>(endTime, r.operator->()));
+			r->timeMapIter = r->timeMap->insert(std::pair<std::uint32_t, dns::Resolver*>(endTime, r.operator->()));
 		}catch(...){
 			dns::thread->idMap.erase(r->idIter);
 			throw;
@@ -1090,7 +1090,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 
 		//Start the thread if we created the new one.
 		if(needStartTheThread){
-			dns::thread->lastTicksInFirstHalf = curTime < (ting::u32(-1) / 2);
+			dns::thread->lastTicksInFirstHalf = curTime < (std::uint32_t(-1) / 2);
 			dns::thread->Start();
 			dns::thread->isExiting = false;//thread has just started, clear the exiting flag
 			TRACE(<< "HostNameResolver::Resolve_ts(): thread started" << std::endl)

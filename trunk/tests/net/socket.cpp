@@ -43,7 +43,7 @@ bool IsIPv6SupportedByOS(){
 
 namespace BasicClientServerTest{
 
-void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
+void SendAll(ting::net::TCPSocket& s, const ting::Buffer<std::uint8_t>& buf){
 	if(!s){
 		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
 	}
@@ -95,7 +95,7 @@ public:
 			ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
 			ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
-			ting::StaticBuffer<ting::u8, 4> data;
+			ting::StaticBuffer<std::uint8_t, 4> data;
 			data[0] = '0';
 			data[1] = '1';
 			data[2] = '2';
@@ -129,7 +129,7 @@ void Run(){
 		
 		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
-		ting::StaticBuffer<ting::u8, 4> data;
+		ting::StaticBuffer<std::uint8_t, 4> data;
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 30; ++i){
 			ASSERT_ALWAYS(bytesReceived < 4)
@@ -199,16 +199,16 @@ void Run(){
 	ws.Add(sockS, ting::Waitable::WRITE);
 
 
-	ting::u32 scnt = 0;
-	ting::Array<ting::u8> sendBuffer;
+	std::uint32_t scnt = 0;
+	ting::Array<std::uint8_t> sendBuffer;
 	unsigned bytesSent = 0;
 
-	ting::u32 rcnt = 0;
-	ting::StaticBuffer<ting::u8, sizeof(ting::u32)> recvBuffer;
+	std::uint32_t rcnt = 0;
+	ting::StaticBuffer<std::uint8_t, sizeof(std::uint32_t)> recvBuffer;
 	unsigned recvBufBytes = 0;
 
 
-	ting::u32 startTime = ting::timer::GetTicks();
+	std::uint32_t startTime = ting::timer::GetTicks();
 	
 	while(ting::timer::GetTicks() - startTime < 5000){ //5 seconds
 		ting::StaticBuffer<ting::Waitable*, 2> triggered;
@@ -247,16 +247,16 @@ void Run(){
 					sendBuffer.Init(0xffff + 1);
 					bytesSent = 0;
 					
-					STATIC_ASSERT(sizeof(ting::u32) == 4)
-					ASSERT_INFO_ALWAYS((sendBuffer.size() % sizeof(ting::u32)) == 0,
+					STATIC_ASSERT(sizeof(std::uint32_t) == 4)
+					ASSERT_INFO_ALWAYS((sendBuffer.size() % sizeof(std::uint32_t)) == 0,
 							"sendBuffer.Size() = " << sendBuffer.size()
-							<< " (sendBuffer.Size() % sizeof(ting::u32)) = "
-							<< (sendBuffer.size() % sizeof(ting::u32))
+							<< " (sendBuffer.Size() % sizeof(std::uint32_t)) = "
+							<< (sendBuffer.size() % sizeof(std::uint32_t))
 						)
 
-					ting::u8* p = sendBuffer.begin();
-					for(; p != sendBuffer.end(); p += sizeof(ting::u32)){
-						ASSERT_INFO_ALWAYS(p < (sendBuffer.end() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.end())
+					std::uint8_t* p = sendBuffer.begin();
+					for(; p != sendBuffer.end(); p += sizeof(std::uint32_t)){
+						ASSERT_INFO_ALWAYS(p < (sendBuffer.end() - (sizeof(std::uint32_t) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.end())
 						ting::util::Serialize32LE(scnt, p);
 						++scnt;
 					}
@@ -287,7 +287,7 @@ void Run(){
 				ASSERT_ALWAYS(!sockR.CanWrite())
 
 				while(true){
-					ting::StaticBuffer<ting::u8, 0x2000> buf; //8kb buffer
+					ting::StaticBuffer<std::uint8_t, 0x2000> buf; //8kb buffer
 					unsigned numBytesReceived;
 					try{
 						numBytesReceived = sockR.Recv(buf);
@@ -301,7 +301,7 @@ void Run(){
 						break;//~while(true)
 					}
 
-					const ting::u8* p = buf.begin();
+					const std::uint8_t* p = buf.begin();
 					for(unsigned i = 0; i < numBytesReceived && p != buf.end(); ++p, ++i){
 						recvBuffer[recvBufBytes] = *p;
 						++recvBufBytes;
@@ -310,7 +310,7 @@ void Run(){
 
 						if(recvBufBytes == recvBuffer.size()){
 							recvBufBytes = 0;
-							ting::u32 num = ting::util::Deserialize32LE(recvBuffer.begin());
+							std::uint32_t num = ting::util::Deserialize32LE(recvBuffer.begin());
 							ASSERT_INFO_ALWAYS(
 									rcnt == num,
 									"num = " << num << " rcnt = " << rcnt
@@ -366,19 +366,19 @@ void Run(){
 
 	//Here we have 2 sockets sockS and sockR
 
-	ting::u8 scnt = 0;
+	std::uint8_t scnt = 0;
 
-	ting::u8 rcnt = 0;
+	std::uint8_t rcnt = 0;
 
 
-	ting::u32 startTime = ting::timer::GetTicks();
+	std::uint32_t startTime = ting::timer::GetTicks();
 
 	while(ting::timer::GetTicks() - startTime < 5000){ //5 seconds
 
 		//SEND
 
 		try{
-			ting::Buffer<ting::u8> buf(&scnt, 1);
+			ting::Buffer<std::uint8_t> buf(&scnt, 1);
 			unsigned res = sockS.Send(buf);
 			ASSERT_ALWAYS(res <= 1)
 			if(res == 1){
@@ -394,7 +394,7 @@ void Run(){
 		//READ
 
 		while(true){
-			ting::StaticBuffer<ting::u8, 0x2000> buf; //8kb buffer
+			ting::StaticBuffer<std::uint8_t, 0x2000> buf; //8kb buffer
 			unsigned numBytesReceived;
 			try{
 				numBytesReceived = sockR.Recv(buf);
@@ -408,7 +408,7 @@ void Run(){
 				break;//~while(true)
 			}
 
-			const ting::u8* p = buf.begin();
+			const std::uint8_t* p = buf.begin();
 			for(unsigned i = 0; i < numBytesReceived && p != buf.end(); ++p, ++i){
 				ASSERT_INFO_ALWAYS(rcnt == *p, "rcnt = " << unsigned(rcnt) << " *p = " << unsigned(*p) << " diff = " << unsigned(rcnt - *p))
 				++rcnt;
@@ -484,7 +484,7 @@ void Run(){
 	try{
 		sendSock.Open();
 
-		ting::StaticBuffer<ting::u8, 4> data;
+		ting::StaticBuffer<std::uint8_t, 4> data;
 		data[0] = '0';
 		data[1] = '1';
 		data[2] = '2';
@@ -511,7 +511,7 @@ void Run(){
 	}
 
 	try{
-		ting::StaticBuffer<ting::u8, 1024> buf;
+		ting::StaticBuffer<std::uint8_t, 1024> buf;
 		
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 10; ++i){

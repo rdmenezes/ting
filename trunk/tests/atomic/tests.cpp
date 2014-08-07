@@ -66,7 +66,7 @@ void Run(){
 //	TRACE(<< "All threads finished" << std::endl)
 	
 	//Check atomic value
-	ASSERT_ALWAYS(a.FetchAndAdd(0) == ting::s32(DNumOps * threads.size()))
+	ASSERT_ALWAYS(a.FetchAndAdd(0) == std::int32_t(DNumOps * threads.size()))
 }
 }//~namespace
 

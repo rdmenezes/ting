@@ -406,14 +406,14 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	unsigned WaitWithTimeout(u32 timeout, Buffer<Waitable*>* out_events = 0){
+	unsigned WaitWithTimeout(std::uint32_t timeout, Buffer<Waitable*>* out_events = 0){
 		return this->Wait(false, timeout, out_events);
 	}
 
 
 
 private:
-	unsigned Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_events);
+	unsigned Wait(bool waitInfinitly, std::uint32_t timeout, Buffer<Waitable*>* out_events);
 	
 	
 #if M_OS == M_OS_MACOSX

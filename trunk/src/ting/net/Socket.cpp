@@ -173,11 +173,11 @@ std::uint16_t Socket::GetLocalPort(){
 	
 	if(addr.ss_family == AF_INET){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(addr);
-		return ting::u16(ntohs(a.sin_port));
+		return std::uint16_t(ntohs(a.sin_port));
 	}else{
 		ASSERT(addr.ss_family == AF_INET6)
 		sockaddr_in6& a = reinterpret_cast<sockaddr_in6&>(addr);
-		return ting::u16(ntohs(a.sin6_port));
+		return std::uint16_t(ntohs(a.sin6_port));
 	}
 }
 

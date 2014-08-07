@@ -277,7 +277,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Read(
-			const ting::Buffer<ting::u8>& buf,
+			const ting::Buffer<std::uint8_t>& buf,
 			size_t numBytesToRead = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -291,7 +291,7 @@ protected:
      * @param buf - buffer to fill with read data.
      * @return number of bytes actually read.
      */
-	virtual size_t ReadInternal(const ting::Buffer<ting::u8>& buf){
+	virtual size_t ReadInternal(const ting::Buffer<std::uint8_t>& buf){
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	
@@ -311,7 +311,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened or opened for reading only.
 	 */
 	size_t Write(
-			const ting::Buffer<const ting::u8>& buf,
+			const ting::Buffer<const std::uint8_t>& buf,
 			size_t numBytesToWrite = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -325,7 +325,7 @@ protected:
      * @param buf - buffer containing the data to write.
      * @return number of bytes actually written.
      */
-	virtual size_t WriteInternal(const ting::Buffer<const ting::u8>& buf){
+	virtual size_t WriteInternal(const ting::Buffer<const std::uint8_t>& buf){
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	
@@ -438,7 +438,7 @@ public:
 	 * @return Array containing loaded file data.
 	 * @throw IllegalStateExc - if file is already opened.
 	 */
-	ting::Array<ting::u8> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
+	ting::Array<std::uint8_t> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
 
 	/**
 	 * @brief Check for file/directory existence.

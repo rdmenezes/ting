@@ -87,7 +87,7 @@ public:
 	 * @param disableNaggle - enable/disable Naggle algorithm for all accepted connections.
 	 * @param queueLength - the maximum length of the queue of pending connections.
 	 */
-	void Open(u16 port, bool disableNaggle = false, u16 queueLength = 50);
+	void Open(std::uint16_t port, bool disableNaggle = false, std::uint16_t queueLength = 50);
 	
 	
 	

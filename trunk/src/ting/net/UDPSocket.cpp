@@ -1,5 +1,7 @@
 #include "UDPSocket.hpp"
 
+#include <limits>
+
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 #	include <netinet/in.h>
 #endif
@@ -10,7 +12,7 @@ using namespace ting::net;
 
 
 
-void UDPSocket::Open(ting::u16 port){
+void UDPSocket::Open(std::uint16_t port){
 	if(*this){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
@@ -150,7 +152,7 @@ void UDPSocket::Open(ting::u16 port){
 
 
 
-size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress& destinationIP){
+size_t UDPSocket::Send(const ting::Buffer<const std::uint8_t>& buf, const IPAddress& destinationIP){
 	if(!*this){
 		throw net::Exc("UDPSocket::Send(): socket is not opened");
 	}
@@ -256,7 +258,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		break;
 	}//~while
 
-	ASSERT(buf.size() <= size_t(ting::DMaxInt))
+	ASSERT(buf.size() <= size_t(std::numeric_limits<int>::max()))
 	ASSERT_INFO(len <= int(buf.size()), "res = " << len)
 	ASSERT_INFO((len == int(buf.size())) || (len == 0), "res = " << len)
 
@@ -266,7 +268,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 
 
 
-size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderIP){
+size_t UDPSocket::Recv(const ting::Buffer<std::uint8_t>& buf, IPAddress &out_SenderIP){
 	if(!*this){
 		throw net::Exc("UDPSocket::Recv(): socket is not opened");
 	}
@@ -333,14 +335,14 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 		break;
 	}//~while
 
-	ASSERT(buf.size() <= size_t(ting::DMaxInt))
+	ASSERT(buf.size() <= size_t(std::numeric_limits<int>::max()))
 	ASSERT_INFO(len <= int(buf.size()), "len = " << len)
 
 	if(sockAddr.ss_family == AF_INET){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);
 		out_SenderIP = IPAddress(
 				ntohl(a.sin_addr.s_addr),
-				ting::u16(ntohs(a.sin_port))
+				std::uint16_t(ntohs(a.sin_port))
 			);
 	}else{
 		ASSERT_INFO(sockAddr.ss_family == AF_INET6, "sockAddr.ss_family = " << unsigned(sockAddr.ss_family) << " AF_INET = " << AF_INET << " AF_INET6 = " << AF_INET6)
@@ -348,18 +350,18 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 		out_SenderIP = IPAddress(
 				IPAddress::Host(
 #if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && M_OS_NAME == M_OS_NAME_ANDROID)
-						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
-						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
-						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),
-						(ting::u32(a.sin6_addr.s6_addr[12]) << 24) | (ting::u32(a.sin6_addr.s6_addr[13]) << 16) | (ting::u32(a.sin6_addr.s6_addr[14]) << 8) | ting::u32(a.sin6_addr.s6_addr[15])
+						(std::uint32_t(a.sin6_addr.s6_addr[0]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[1]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[2]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[3]),
+						(std::uint32_t(a.sin6_addr.s6_addr[4]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[5]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[6]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[7]),
+						(std::uint32_t(a.sin6_addr.s6_addr[8]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[9]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[10]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[11]),
+						(std::uint32_t(a.sin6_addr.s6_addr[12]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[13]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[14]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[15])
 #else
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
 #endif
 					),
-				ting::u16(ntohs(a.sin6_port))
+				std::uint16_t(ntohs(a.sin6_port))
 			);
 	}
 	
@@ -371,7 +373,7 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 
 #if M_OS == M_OS_WINDOWS
 //override
-void UDPSocket::SetWaitingEvents(ting::u32 flagsToWaitFor){
+void UDPSocket::SetWaitingEvents(std::uint32_t flagsToWaitFor){
 	long flags = FD_CLOSE;
 	if((flagsToWaitFor & Waitable::READ) != 0){
 		flags |= FD_READ;

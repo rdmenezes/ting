@@ -199,7 +199,7 @@ public:
 #	if M_CPU_VERSION >= 6 //should support ldrex/strex instructions unless Thumb-1 mode is used
 #		if M_CPU_ARM_THUMB == 1 //Thumb-1 mode does not support ldrex/strex instructions, use interrupts disabling
 #			error "Not implemented"
-		ting::u32 tmp;
+		std::uint32_t tmp;
 		__asm__ __volatile__(
 				"mrs    %0, PRIMASK" "\n" //save interrupts mask
 				"cpsid  i"           "\n" //disable pioratizable interrupts
@@ -501,14 +501,14 @@ class S32{
 	atomic::SpinLock spinLock;
 #endif
 
-	volatile ting::s32 v;
+	volatile std::int32_t v;
 
 public:
 	/**
 	 * @brief Constructor.
 	 * @param initialValue - initial value to assign to this atomic variable.
 	 */
-	inline S32(ting::s32 initialValue = 0) :
+	inline S32(std::int32_t initialValue = 0) :
 			v(initialValue)
 	{}
 
@@ -524,11 +524,11 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAdd(ting::s32 value)noexcept{
+	inline std::int32_t FetchAndAdd(std::int32_t value)noexcept{
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		{
-			ting::s32 old;
+			std::int32_t old;
 #	if M_COMPILER == M_COMPILER_MSVC
 			__asm{
 				mov ebx, this
@@ -548,7 +548,7 @@ public:
 		}
 
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
-		ting::s32 old, sum;
+		std::int32_t old, sum;
 		int res;
 		__asm__ __volatile__(
 				"1:"                         "\n"
@@ -565,7 +565,7 @@ public:
 
 #else
 		this->spinLock.Lock();
-		ting::s32 old = this->v;
+		std::int32_t old = this->v;
 		this->v += value;
 		this->spinLock.Unlock();
 		return old;
@@ -580,8 +580,8 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAddAcquire(ting::s32 value)noexcept{
-		ting::s32 ret = this->FetchAndAdd(value);
+	inline std::int32_t FetchAndAddAcquire(std::int32_t value)noexcept{
+		std::int32_t ret = this->FetchAndAdd(value);
 		atomic::Flag::MemoryBarrier();
 		return ret;
 	}
@@ -594,7 +594,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAddRelease(ting::s32 value)noexcept{
+	inline std::int32_t FetchAndAddRelease(std::int32_t value)noexcept{
 		atomic::Flag::MemoryBarrier();
 		return this->FetchAndAdd(value);
 	}
@@ -611,10 +611,10 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
+	inline std::int32_t CompareAndExchange(std::int32_t compareTo, std::int32_t exchangeBy)noexcept{
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
-		ting::s32 old;
+		std::int32_t old;
 #	if M_COMPILER == M_COMPILER_MSVC
 		__asm{
 			mov ebx, this
@@ -634,7 +634,7 @@ public:
 		return old;
 
 #elif M_CPU == M_CPU_ARM && M_CPU_VERSION >= 6 && M_CPU_ARM_THUMB != 1
-		ting::s32 old;
+		std::int32_t old;
 		int res;
 #	if M_CPU_ARM_THUMB == 2
 		__asm__ __volatile__(
@@ -687,7 +687,7 @@ public:
 
 #else
 		this->spinLock.Lock();
-		ting::s32 old = this->v;
+		std::int32_t old = this->v;
 		if(old == compareTo){
 			this->v = exchangeBy;
 		}
@@ -708,8 +708,8 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchangeAcquire(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
-		ting::s32 ret = CompareAndExchange(compareTo, exchangeBy);
+	inline std::int32_t CompareAndExchangeAcquire(std::int32_t compareTo, std::int32_t exchangeBy)noexcept{
+		std::int32_t ret = CompareAndExchange(compareTo, exchangeBy);
 		atomic::Flag::MemoryBarrier();
 		return ret;
 	}
@@ -726,7 +726,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchangeRelease(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
+	inline std::int32_t CompareAndExchangeRelease(std::int32_t compareTo, std::int32_t exchangeBy)noexcept{
 		atomic::Flag::MemoryBarrier();
 		return CompareAndExchange(compareTo, exchangeBy);
 	}
@@ -745,8 +745,8 @@ public:
 	 * @brief Constructor.
 	 * @param initialValue - initial value to assign to this atomic variable.
 	 */
-	inline U32(ting::u32 initialValue = 0) :
-			v(ting::s32(initialValue))
+	inline U32(std::uint32_t initialValue = 0) :
+			v(std::int32_t(initialValue))
 	{}
 			
 	inline ~U32()noexcept{}
@@ -757,8 +757,8 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAdd(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAdd(ting::s32(value)));
+	inline std::uint32_t FetchAndAdd(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAdd(std::int32_t(value)));
 	}
 	
 	/**
@@ -767,8 +767,8 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAddAcquire(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAddAcquire(ting::s32(value)));
+	inline std::uint32_t FetchAndAddAcquire(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAddAcquire(std::int32_t(value)));
 	}
 	
 	/**
@@ -777,8 +777,8 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAddRelease(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAddRelease(ting::s32(value)));
+	inline std::uint32_t FetchAndAddRelease(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAddRelease(std::int32_t(value)));
 	}
 	
 	/**
@@ -787,8 +787,8 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtract(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAdd(-ting::s32(value)));
+	inline std::uint32_t FetchAndSubtract(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAdd(-std::int32_t(value)));
 	}
 	
 	/**
@@ -797,8 +797,8 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtractAcquire(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAddAcquire(-ting::s32(value)));
+	inline std::uint32_t FetchAndSubtractAcquire(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAddAcquire(-std::int32_t(value)));
 	}
 	
 	/**
@@ -807,8 +807,8 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtractRelease(ting::u32 value)noexcept{
-		return ting::u32(this->v.FetchAndAddRelease(-ting::s32(value)));
+	inline std::uint32_t FetchAndSubtractRelease(std::uint32_t value)noexcept{
+		return std::uint32_t(this->v.FetchAndAddRelease(-std::int32_t(value)));
 	}
 	
 	/**
@@ -821,8 +821,8 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchange(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
-		return ting::u32(this->v.CompareAndExchange(ting::s32(compareTo), ting::s32(exchangeBy)));
+	inline std::uint32_t CompareAndExchange(std::uint32_t compareTo, std::uint32_t exchangeBy)noexcept{
+		return std::uint32_t(this->v.CompareAndExchange(std::int32_t(compareTo), std::int32_t(exchangeBy)));
 	}
 
 	/**
@@ -835,8 +835,8 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchangeAcquire(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
-		return ting::u32(this->v.CompareAndExchangeAcquire(ting::s32(compareTo), ting::s32(exchangeBy)));
+	inline std::uint32_t CompareAndExchangeAcquire(std::uint32_t compareTo, std::uint32_t exchangeBy)noexcept{
+		return std::uint32_t(this->v.CompareAndExchangeAcquire(std::int32_t(compareTo), std::int32_t(exchangeBy)));
 	}
 	
 	/**
@@ -849,8 +849,8 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchangeRelease(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
-		return ting::u32(this->v.CompareAndExchangeRelease(ting::s32(compareTo), ting::s32(exchangeBy)));
+	inline std::uint32_t CompareAndExchangeRelease(std::uint32_t compareTo, std::uint32_t exchangeBy)noexcept{
+		return std::uint32_t(this->v.CompareAndExchangeRelease(std::int32_t(compareTo), std::int32_t(exchangeBy)));
 	}
 };
 

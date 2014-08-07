@@ -111,7 +111,7 @@ public:
      */
 	void Resolve_ts(
 			const std::string& hostName,
-			ting::u32 timeoutMillis = 20000,
+			std::uint32_t timeoutMillis = 20000,
 			const ting::net::IPAddress& dnsIP = ting::net::IPAddress(ting::net::IPAddress::Host(0), 0)
 		);
 	

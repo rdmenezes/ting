@@ -148,7 +148,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 
 
-size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
+size_t TCPSocket::Send(const ting::Buffer<const std::uint8_t>& buf, size_t offset){
 	if(!*this){
 		throw net::Exc("TCPSocket::Send(): socket is not opened");
 	}
@@ -214,7 +214,7 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 
 
 
-size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
+size_t TCPSocket::Recv(const ting::Buffer<std::uint8_t>& buf, size_t offset){
 	//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 	//calls to Recv() because it indicates that there's activity.
 	//So, do it at the beginning of the function.
@@ -290,8 +290,8 @@ IPAddress CreateIPAddressFromSockaddrStorage(const sockaddr_storage& addr){
 	if(addr.ss_family == AF_INET){
 		const sockaddr_in &a = reinterpret_cast<const sockaddr_in&>(addr);
 		return IPAddress(
-			ting::u32(ntohl(a.sin_addr.s_addr)),
-			ting::u16(ntohs(a.sin_port))
+			std::uint32_t(ntohl(a.sin_addr.s_addr)),
+			std::uint16_t(ntohs(a.sin_port))
 		);
 	}else{
 		ASSERT(addr.ss_family == AF_INET6)
@@ -301,18 +301,18 @@ IPAddress CreateIPAddressFromSockaddrStorage(const sockaddr_storage& addr){
 		return IPAddress(
 				IPAddress::Host(
 #if M_OS == M_OS_MACOSX || M_OS == M_OS_WINDOWS || (M_OS == M_OS_LINUX && M_OS_NAME == M_OS_NAME_ANDROID)
-						(ting::u32(a.sin6_addr.s6_addr[0]) << 24) | (ting::u32(a.sin6_addr.s6_addr[1]) << 16) | (ting::u32(a.sin6_addr.s6_addr[2]) << 8) | ting::u32(a.sin6_addr.s6_addr[3]),
-						(ting::u32(a.sin6_addr.s6_addr[4]) << 24) | (ting::u32(a.sin6_addr.s6_addr[5]) << 16) | (ting::u32(a.sin6_addr.s6_addr[6]) << 8) | ting::u32(a.sin6_addr.s6_addr[7]),
-						(ting::u32(a.sin6_addr.s6_addr[8]) << 24) | (ting::u32(a.sin6_addr.s6_addr[9]) << 16) | (ting::u32(a.sin6_addr.s6_addr[10]) << 8) | ting::u32(a.sin6_addr.s6_addr[11]),
-						(ting::u32(a.sin6_addr.s6_addr[12]) << 24) | (ting::u32(a.sin6_addr.s6_addr[13]) << 16) | (ting::u32(a.sin6_addr.s6_addr[14]) << 8) | ting::u32(a.sin6_addr.s6_addr[15])
+						(std::uint32_t(a.sin6_addr.s6_addr[0]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[1]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[2]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[3]),
+						(std::uint32_t(a.sin6_addr.s6_addr[4]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[5]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[6]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[7]),
+						(std::uint32_t(a.sin6_addr.s6_addr[8]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[9]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[10]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[11]),
+						(std::uint32_t(a.sin6_addr.s6_addr[12]) << 24) | (std::uint32_t(a.sin6_addr.s6_addr[13]) << 16) | (std::uint32_t(a.sin6_addr.s6_addr[14]) << 8) | std::uint32_t(a.sin6_addr.s6_addr[15])
 #else
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
-						ting::u32(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[0])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[1])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[2])),
+						std::uint32_t(ntohl(a.sin6_addr.__in6_u.__u6_addr32[3]))
 #endif
 					),
-				ting::u16(ntohs(a.sin6_port))
+				std::uint16_t(ntohs(a.sin6_port))
 			);
 	}
 }
@@ -380,7 +380,7 @@ IPAddress TCPSocket::GetRemoteAddress(){
 
 #if M_OS == M_OS_WINDOWS
 //override
-void TCPSocket::SetWaitingEvents(ting::u32 flagsToWaitFor){
+void TCPSocket::SetWaitingEvents(std::uint32_t flagsToWaitFor){
 	long flags = FD_CLOSE;
 	if((flagsToWaitFor & Waitable::READ) != 0){
 		flags |= FD_READ;

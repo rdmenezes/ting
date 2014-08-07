@@ -17,8 +17,8 @@ void Run(){
 	ASSERT_ALWAYS(f.Size() == 0)
 
 	{
-		ting::u8 buf[] = {1, 2, 3, 4};
-		ting::Buffer<ting::u8> b(buf, sizeof(buf));
+		std::uint8_t buf[] = {1, 2, 3, 4};
+		ting::Buffer<std::uint8_t> b(buf, sizeof(buf));
 		
 		ting::fs::File::Guard fileGuard(f, ting::fs::File::CREATE);
 		
@@ -26,7 +26,7 @@ void Run(){
 	}
 	
 	{
-		ting::StaticBuffer<ting::u8, 4> b;
+		ting::StaticBuffer<std::uint8_t, 4> b;
 		
 		ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 		

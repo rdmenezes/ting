@@ -66,7 +66,7 @@ template <class T> class Array : public ting::Buffer<T>{
 			return;
 		}
 
-		ting::u8 *buffer = new ting::u8[arraySize * sizeof(T)];
+		std::uint8_t *buffer = new std::uint8_t[arraySize * sizeof(T)];
 		ASSERT(buffer)
 
 		this->buf = reinterpret_cast<T*>(buffer);
@@ -116,7 +116,7 @@ template <class T> class Array : public ting::Buffer<T>{
 	}
 
 	inline void FreeMemory()noexcept{
-		ting::u8 *buffer = const_cast<ting::u8*>(reinterpret_cast<const ting::u8*>(this->buf));
+		std::uint8_t *buffer = const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(this->buf));
 
 		//check for strict aliasing
 		ASSERT(reinterpret_cast<const void*>(this->buf) == buffer)

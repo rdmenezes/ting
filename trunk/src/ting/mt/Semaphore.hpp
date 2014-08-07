@@ -170,7 +170,7 @@ public:
 	 * @return returns true if the semaphore value was decremented.
 	 * @return returns false if the timeout was hit.
 	 */
-	bool Wait(ting::u32 timeoutMillis);
+	bool Wait(std::uint32_t timeoutMillis);
 
 
 
@@ -199,7 +199,7 @@ public:
 			return;
 		}
 		
-		if(this->v < ting::u32(-1)){
+		if(this->v < std::uint32_t(-1)){
 			++this->v;
 		}else{
 			ASSERT(false)

@@ -66,7 +66,7 @@ bool Lib::TimerThread::RemoveTimer_ts(Timer* timer)noexcept{
 
 
 
-void Lib::TimerThread::AddTimer_ts(Timer* timer, ting::u32 timeout){
+void Lib::TimerThread::AddTimer_ts(Timer* timer, std::uint32_t timeout){
 	ASSERT(timer)
 	ting::mt::Mutex::Guard mutexGuard(this->mutex);
 
@@ -76,10 +76,10 @@ void Lib::TimerThread::AddTimer_ts(Timer* timer, ting::u32 timeout){
 
 	timer->isRunning = true;
 
-	ting::u64 stopTicks = this->GetTicks() + ting::u64(timeout);
+	std::uint64_t stopTicks = this->GetTicks() + std::uint64_t(timeout);
 
 	timer->i = this->timers.insert(
-			std::pair<ting::u64, Timer*>(stopTicks, timer)
+			std::pair<std::uint64_t, Timer*>(stopTicks, timer)
 		);
 
 	ASSERT(timer->i != this->timers.end())
@@ -96,7 +96,7 @@ void Lib::TimerThread::Run(){
 	M_TIMER_TRACE(<< "Lib::TimerThread::Run(): enter" << std::endl)
 
 	while(!this->quitFlag){
-		ting::u32 millis;
+		std::uint32_t millis;
 
 		while(true){
 			std::vector<Timer*> expiredTimers;
@@ -104,7 +104,7 @@ void Lib::TimerThread::Run(){
 			{
 				ting::mt::Mutex::Guard mutexGuard(this->mutex);
 
-				ting::u64 ticks = this->GetTicks();
+				std::uint64_t ticks = this->GetTicks();
 
 				for(Timer::T_TimerIter b = this->timers.begin(); b != this->timers.end(); b = this->timers.begin()){
 					if(b->first > ticks){
@@ -128,8 +128,8 @@ void Lib::TimerThread::Run(){
 
 					//calculate new waiting time
 					ASSERT(this->timers.begin()->first > ticks)
-					ASSERT(this->timers.begin()->first - ticks <= ting::u64(ting::u32(-1)))
-					millis = ting::u32(this->timers.begin()->first - ticks);
+					ASSERT(this->timers.begin()->first - ticks <= std::uint64_t(std::uint32_t(-1)))
+					millis = std::uint32_t(this->timers.begin()->first - ticks);
 
 					//zero out the semaphore for optimization purposes
 					while(this->sema.Wait(0)){}

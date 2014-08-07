@@ -22,7 +22,7 @@ void MemoryFile::OpenInternal(E_Mode mode){
 
 
 //override
-size_t MemoryFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
+size_t MemoryFile::ReadInternal(const ting::Buffer<std::uint8_t>& buf){
 	ASSERT(this->idx <= this->data.size())
 	size_t numBytesRead = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
 	memcpy(buf.begin(), &this->data[idx], numBytesRead);
@@ -34,7 +34,7 @@ size_t MemoryFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 
 
 //override
-size_t MemoryFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
+size_t MemoryFile::WriteInternal(const ting::Buffer<const std::uint8_t>& buf){
 	ASSERT(this->idx <= this->data.size())
 	
 	size_t numBytesTillEOF = this->data.size() - this->idx;

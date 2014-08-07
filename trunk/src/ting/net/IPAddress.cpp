@@ -189,7 +189,7 @@ IPAddress::Host IPAddress::Host::ParseIPv6(const char* ip){
 
 
 
-IPAddress::IPAddress(const char* ip, ting::u16 p) :
+IPAddress::IPAddress(const char* ip, std::uint16_t p) :
 		host(Host::Parse(ip)),
 		port(p)
 {}
@@ -272,10 +272,10 @@ IPAddress::IPAddress(const char* ip){
 	
 	--ip;
 	
-	ting::u32 port = 0;
+	std::uint32_t port = 0;
 	
 	for(unsigned i = 0; *ip != ':'; ++i, --ip){
-		ting::u32 pow = 1;
+		std::uint32_t pow = 1;
 		for(unsigned j = 0; j < i; ++j){
 			pow *= 10;
 		}
@@ -290,7 +290,7 @@ IPAddress::IPAddress(const char* ip){
 		throw ting::net::IPAddress::BadIPAddressFormatExc();
 	}
 	
-	this->port = ting::u16(port);
+	this->port = std::uint16_t(port);
 }
 
 

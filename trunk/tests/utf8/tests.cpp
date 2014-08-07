@@ -15,11 +15,11 @@ namespace TestSimple{
 void Run(){
 	ting::fs::FSFile fi("text.txt");
 	
-	ting::Array<ting::u8> buf = fi.LoadWholeFileIntoMemory();
+	ting::Array<std::uint8_t> buf = fi.LoadWholeFileIntoMemory();
 	
 //	TRACE_ALWAYS(<< "buf.Size() = " << buf.Size() << std::endl)
 	
-	ting::Array<ting::u8> str(buf.size() + 1);
+	ting::Array<std::uint8_t> str(buf.size() + 1);
 	memcpy(str.begin(), buf.begin(), buf.size());
 	str[buf.size()] = 0; //null-terminate
 	

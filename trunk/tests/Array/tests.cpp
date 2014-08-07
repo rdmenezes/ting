@@ -10,14 +10,14 @@ namespace BasicArrayTest{
 
 void Run(){
 	{
-		ting::Array<ting::u8> a;
+		ting::Array<std::uint8_t> a;
 		ASSERT_ALWAYS(a.size() == 0)
 		ASSERT_ALWAYS(a.begin() == 0)
 		ASSERT_ALWAYS(a.end() == a.begin())
 	}
 
 	{
-		ting::Array<ting::u8> a(143);
+		ting::Array<std::uint8_t> a(143);
 		ASSERT_ALWAYS(a.size() == 143)
 		ASSERT_ALWAYS(a.begin() != 0)
 		ASSERT_ALWAYS(a.end() == a.begin() + a.size())
@@ -25,9 +25,9 @@ void Run(){
 
 	//copy constructor
 	{
-		ting::Array<ting::u8> b(143);
+		ting::Array<std::uint8_t> b(143);
 
-		ting::Array<ting::u8> a(b);
+		ting::Array<std::uint8_t> a(b);
 		ASSERT_ALWAYS(a.size() == 143)
 		ASSERT_ALWAYS(a.begin() != 0)
 		ASSERT_ALWAYS(a.end() == a.begin() + a.size())
@@ -38,9 +38,9 @@ void Run(){
 
 	//operator=
 	{
-		ting::Array<ting::u8> b(143);
+		ting::Array<std::uint8_t> b(143);
 
-		ting::Array<ting::u8> a;
+		ting::Array<std::uint8_t> a;
 		a = b;
 		ASSERT_ALWAYS(a.size() == 143)
 		ASSERT_ALWAYS(a.begin() != 0)
@@ -52,10 +52,10 @@ void Run(){
 
 	//conversion to bool
 	{
-		ting::Array<ting::u8> b(143);
+		ting::Array<std::uint8_t> b(143);
 		ASSERT_ALWAYS(b)
 
-		ting::Array<ting::u8> a;
+		ting::Array<std::uint8_t> a;
 		ASSERT_ALWAYS(!a)
 
 		a = b;
@@ -65,11 +65,11 @@ void Run(){
 
 	// IsValid() / IsNotValid()
 	{
-		ting::Array<ting::u8> b(143);
+		ting::Array<std::uint8_t> b(143);
 		ASSERT_ALWAYS(b.IsValid())
 		ASSERT_ALWAYS(!b.IsNotValid())
 
-		ting::Array<ting::u8> a;
+		ting::Array<std::uint8_t> a;
 		ASSERT_ALWAYS(!a.IsValid())
 		ASSERT_ALWAYS(a.IsNotValid())
 	}
@@ -77,7 +77,7 @@ void Run(){
 
 	//Init() / Reset()
 	{
-		ting::Array<ting::u8> a;
+		ting::Array<std::uint8_t> a;
 		
 		a.Init(143);
 		ASSERT_ALWAYS(a)
