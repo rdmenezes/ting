@@ -44,7 +44,7 @@ bool IsIPv6SupportedByOS(){
 namespace BasicClientServerTest{
 
 void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
-	if(!s.IsValid()){
+	if(!s){
 		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
 	}
 
@@ -82,7 +82,7 @@ public:
 
 			//Accept some connection
 			ting::net::TCPSocket sock;
-			while(!sock.IsValid() && !this->quitFlag){
+			while(!sock && !this->quitFlag){
 				sock = listenSock.Accept();
 				ting::mt::Thread::Sleep(100);
 				if(ting::Ptr<ting::mt::Message> m = this->queue.PeekMsg()){
@@ -90,7 +90,7 @@ public:
 				}
 			}
 
-			ASSERT_ALWAYS(sock.IsValid())
+			ASSERT_ALWAYS(sock)
 
 			ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
 			ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
@@ -123,7 +123,7 @@ void Run(){
 
 		sock.Open(ip);
 
-		ASSERT_ALWAYS(sock.IsValid())
+		ASSERT_ALWAYS(sock)
 
 		ting::mt::Thread::Sleep(1000);//give some time for socket to connect
 		
@@ -175,13 +175,13 @@ void Run(){
 	//Accept connection
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::net::TCPSocket sockR;
-	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
+	for(unsigned i = 0; i < 20 && !sockR; ++i){
 		ting::mt::Thread::Sleep(100);
 		sockR = serverSock.Accept();
 	}
 
-	ASSERT_ALWAYS(sockS.IsValid())
-	ASSERT_ALWAYS(sockR.IsValid())
+	ASSERT_ALWAYS(sockS)
+	ASSERT_ALWAYS(sockR)
 
 	//Here we have 2 sockets sockS and sockR
 
@@ -356,13 +356,13 @@ void Run(){
 	//Accept connection
 //	TRACE(<< "SendDataContinuously::Run(): accepting connection" << std::endl)
 	ting::net::TCPSocket sockR;
-	for(unsigned i = 0; i < 20 && sockR.IsNotValid(); ++i){
+	for(unsigned i = 0; i < 20 && !sockR; ++i){
 		ting::mt::Thread::Sleep(100);
 		sockR = serverSock.Accept();
 	}
 
-	ASSERT_ALWAYS(sockS.IsValid())
-	ASSERT_ALWAYS(sockR.IsValid())
+	ASSERT_ALWAYS(sockS)
+	ASSERT_ALWAYS(sockR)
 
 	//Here we have 2 sockets sockS and sockR
 

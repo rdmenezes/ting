@@ -60,30 +60,21 @@ public:
 
 	
 	
-	/**
-	 * @brief A copy constructor.
-	 * Copy constructor creates a new socket object which refers to the same socket as s.
-	 * After constructor completes the s becomes invalid.
-	 * In other words, the behavior of copy constructor is similar to one of std::auto_ptr class from standard C++ library.
-	 * @param s - other TCP socket to make a copy from.
-	 */
-	//copy constructor
-	TCPServerSocket(const TCPServerSocket& s) :
-			Socket(s),
+
+	TCPServerSocket(const TCPServerSocket&) = delete;
+	
+	TCPServerSocket(TCPServerSocket&& s) :
+			Socket(std::move(s)),
 			disableNaggle(s.disableNaggle)
 	{}
 
 	
 	
-	/**
-	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s object referred, s become invalid.
-	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
-	 * @param s - socket to assign from.
-	 */
-	TCPServerSocket& operator=(const TCPServerSocket& s){
+	TCPServerSocket& operator=(const TCPServerSocket&) = delete;
+	
+	TCPServerSocket& operator=(TCPServerSocket&& s){
 		this->disableNaggle = s.disableNaggle;
-		this->Socket::operator=(s);
+		this->Socket::operator=(std::move(s));
 		return *this;
 	}
 

@@ -54,26 +54,15 @@ class UDPSocket : public Socket{
 public:
 	UDPSocket(){}
 
+	UDPSocket(const UDPSocket&) = delete;
 
-	/**
-	 * @brief Copy constructor.
-	 * It works the same way as for copy constructor of TCPSocket.
-	 * @param s - socket to copy from.
-	 */
-	UDPSocket(const UDPSocket& s) :
-			Socket(s)
+	UDPSocket(UDPSocket&& s) :
+			Socket(std::move(s))
 	{}
 
 
-
-	/**
-	 * @brief Assignment operator, works similar to std::auto_ptr::operator=().
-	 * After this assignment operator completes this socket object refers to the socket the s object referred before, s become invalid.
-	 * It works similar to std::auto_ptr::operator=() from standard C++ library.
-	 * @param s - socket to assign from.
-	 */
-	UDPSocket& operator=(const UDPSocket& s){
-		this->Socket::operator=(s);
+	UDPSocket& operator=(UDPSocket&& s){
+		this->Socket::operator=(std::move(s));
 		this->ipv4 = s.ipv4;
 		return *this;
 	}

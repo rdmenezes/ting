@@ -42,22 +42,8 @@ using namespace ting::net;
 
 
 
-Socket::Socket(const Socket& s) :
-		ting::Waitable(),
-		//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
-		//Therefore, initialize variables to invalid values.
-#if M_OS == M_OS_WINDOWS
-		eventForWaitable(WSA_INVALID_EVENT),
-#endif
-		socket(DInvalidSocket())
-{
-//		TRACE(<< "Socket::Socket(copy): invoked " << this << std::endl)
-	this->operator=(s);
-}
 
-
-
-Socket::~Socket()throw(){
+Socket::~Socket()noexcept{
 	this->Close();
 }
 
@@ -67,7 +53,7 @@ void Socket::Close()throw(){
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 	ASSERT_INFO(!this->IsAdded(), "Socket::Close(): trying to close socket which is added to the WaitSet. Remove the socket from WaitSet before closing.")
 	
-	if(this->IsValid()){
+	if(*this){
 		ASSERT(!this->IsAdded()) //make sure the socket is not added to WaitSet
 
 #if M_OS == M_OS_WINDOWS
@@ -90,7 +76,7 @@ void Socket::Close()throw(){
 
 
 //same as std::auto_ptr
-Socket& Socket::operator=(const Socket& s){
+Socket& Socket::operator=(Socket&& s){
 //	TRACE(<< "Socket::operator=(): invoked " << this << std::endl)
 	if(this == &s){//detect self-assignment
 		return *this;
@@ -98,7 +84,7 @@ Socket& Socket::operator=(const Socket& s){
 
 	//first, assign as Waitable, it may throw an exception
 	//if the waitable is added to some waitset
-	this->Waitable::operator=(s);
+	this->Waitable::operator=(std::move(s));
 
 	this->Close();
 	this->socket = s.socket;
@@ -115,7 +101,7 @@ Socket& Socket::operator=(const Socket& s){
 
 
 void Socket::DisableNaggle(){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("Socket::DisableNaggle(): socket is not valid");
 	}
 
@@ -132,7 +118,7 @@ void Socket::DisableNaggle(){
 
 
 void Socket::SetNonBlockingMode(){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("Socket::SetNonBlockingMode(): socket is not valid");
 	}
 
@@ -161,8 +147,8 @@ void Socket::SetNonBlockingMode(){
 
 
 
-ting::u16 Socket::GetLocalPort(){
-	if(!this->IsValid()){
+std::uint16_t Socket::GetLocalPort(){
+	if(!*this){
 		throw net::Exc("Socket::GetLocalPort(): socket is not valid");
 	}
 
@@ -211,7 +197,7 @@ HANDLE Socket::GetHandle(){
 bool Socket::CheckSignaled(){
 	WSANETWORKEVENTS events;
 	memset(&events, 0, sizeof(events));
-	ASSERT(this->IsValid())
+	ASSERT(*this)
 	if(WSAEnumNetworkEvents(this->socket, this->eventForWaitable, &events) != 0){
 		throw net::Exc("Socket::CheckSignaled(): WSAEnumNetworkEvents() failed");
 	}
@@ -282,7 +268,7 @@ void Socket::CloseEventForWaitable(){
 
 
 void Socket::SetWaitingEventsForWindows(long flags){
-	ASSERT_INFO(this->IsValid() && (this->eventForWaitable != WSA_INVALID_EVENT), "HINT: Most probably, you are trying to remove the _closed_ socket from WaitSet. If so, you should first remove the socket from WaitSet and only then call the Close() method.")
+	ASSERT_INFO(*this && (this->eventForWaitable != WSA_INVALID_EVENT), "HINT: Most probably, you are trying to remove the _closed_ socket from WaitSet. If so, you should first remove the socket from WaitSet and only then call the Close() method.")
 
 	if(WSAEventSelect(
 			this->socket,

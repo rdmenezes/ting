@@ -38,7 +38,7 @@ using namespace ting::net;
 
 
 void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
-	if(this->IsValid()){
+	if(*this){
 		throw net::Exc("TCPSocket::Open(): socket already opened");
 	}
 
@@ -149,7 +149,7 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 
 size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("TCPSocket::Send(): socket is not opened");
 	}
 
@@ -220,7 +220,7 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 	//So, do it at the beginning of the function.
 	this->ClearCanReadFlag();
 
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("TCPSocket::Recv(): socket is not opened");
 	}
 
@@ -322,7 +322,7 @@ IPAddress CreateIPAddressFromSockaddrStorage(const sockaddr_storage& addr){
 
 
 IPAddress TCPSocket::GetLocalAddress(){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("Socket::GetLocalAddress(): socket is not valid");
 	}
 
@@ -344,7 +344,7 @@ IPAddress TCPSocket::GetLocalAddress(){
 
 
 IPAddress TCPSocket::GetRemoteAddress(){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("TCPSocket::GetRemoteAddress(): socket is not valid");
 	}
 

@@ -11,7 +11,7 @@ using namespace ting::net;
 
 
 void UDPSocket::Open(ting::u16 port){
-	if(this->IsValid()){
+	if(*this){
 		throw net::Exc("UDPSocket::Open(): the socket is already opened");
 	}
 
@@ -151,7 +151,7 @@ void UDPSocket::Open(ting::u16 port){
 
 
 size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress& destinationIP){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("UDPSocket::Send(): socket is not opened");
 	}
 
@@ -267,7 +267,7 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 
 
 size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderIP){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("UDPSocket::Recv(): socket is not opened");
 	}
 

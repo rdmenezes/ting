@@ -36,6 +36,7 @@ THE SOFTWARE. */
 #include <vector>
 #include <sstream>
 #include <cerrno>
+#include <cstdint>
 
 #include "config.hpp"
 #include "types.hpp"
@@ -93,37 +94,25 @@ public:
 	};
 
 protected:
-	ting::Inited<u32, NOT_READY> readinessFlags;
+	std::uint32_t readinessFlags = NOT_READY;
 
-	Waitable(){}
+	Waitable() = default;
 
 
 
-	bool IsAdded()const throw(){
+	bool IsAdded()const noexcept{
 		return this->isAdded;
 	}
 
 
 
-	/**
-	 * @brief Copy constructor.
-	 * It is not possible to copy a waitable which is currently added to WaitSet.
-	 * Works as std::auto_ptr, i.e. the object it copied from becomes invalid.
-	 * Use this copy constructor only if you really know what you are doing.
-	 * @param w - Waitable object to copy.
-	 */
-	Waitable(const Waitable& w);
+
+	Waitable(const Waitable& w) = delete;
+	
+	Waitable(Waitable&& w);
 
 
-
-	/**
-	 * @brief Assignment operator.
-	 * It is not possible to assign a waitable which is currently added to WaitSet.
-	 * Works as std::auto_ptr, i.e. the object it copied from becomes invalid.
-	 * Use this copy constructor only if you really know what you are doing.
-	 * @param w - Waitable object to assign to this object.
-	 */
-	Waitable& operator=(const Waitable& w);
+	Waitable& operator=(Waitable&& w);
 
 
 
@@ -436,14 +425,14 @@ private:
 
 
 
-inline Waitable::Waitable(const Waitable& w) :
+inline Waitable::Waitable(Waitable&& w) :
 		isAdded(false),
 		userData(w.userData),
 		readinessFlags(NOT_READY)//Treat copied Waitable as NOT_READY
 {
-	//cannot copy from waitable which is added to WaitSet
+	//cannot move from waitable which is added to WaitSet
 	if(w.isAdded){
-		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+		throw ting::WaitSet::Exc("Waitable::Waitable(move): cannot move Waitable which is added to WaitSet");
 	}
 
 	const_cast<Waitable&>(w).ClearAllReadinessFlags();
@@ -452,20 +441,18 @@ inline Waitable::Waitable(const Waitable& w) :
 
 
 
-inline Waitable& Waitable::operator=(const Waitable& w){
-	//cannot copy because this Waitable is added to WaitSet
+inline Waitable& Waitable::operator=(Waitable&& w){
 	if(this->isAdded){
-		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy while this Waitable is added to WaitSet");
+		throw ting::WaitSet::Exc("Waitable::Waitable(move): cannot move while this Waitable is added to WaitSet");
 	}
 
-	//cannot copy from waitable which is adde to WaitSet
 	if(w.isAdded){
-		throw ting::WaitSet::Exc("Waitable::Waitable(copy): cannot copy Waitable which is added to WaitSet");
+		throw ting::WaitSet::Exc("Waitable::Waitable(move): cannot move Waitable which is added to WaitSet");
 	}
 
 	ASSERT(!this->isAdded)
 
-	//Clear readiness flags on copying.
+	//Clear readiness flags on moving.
 	//Will need to wait for readiness again, using the WaitSet.
 	this->ClearAllReadinessFlags();
 	const_cast<Waitable&>(w).ClearAllReadinessFlags();

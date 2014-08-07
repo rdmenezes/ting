@@ -36,13 +36,12 @@ this_ldflags := -L$(prorab_this_dir)../../src/
 
 ifeq ($(prorab_os),windows)
     this_test_cmd := (cd $(prorab_this_dir); cp ../../src/libting.dll .; ./$$(notdir $$^))
+else ifeq ($(prorab_os),macosx)
+    this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
 else
-    ifeq ($(prorab_os),macosx)
-        this_test_cmd := (cd $(prorab_this_dir); DYLD_LIBRARY_PATH=../../src ./$$(notdir $$^))
-    else
-        this_test_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src ./$$(notdir $$^))
-    endif
+    this_test_cmd := (cd $(prorab_this_dir); LD_LIBRARY_PATH=../../src ./$$(notdir $$^))
 endif
+
 
 define this_rule
 testnet:: $(abspath $(prorab_this_dir)$(this_name))

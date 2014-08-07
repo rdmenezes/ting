@@ -36,7 +36,7 @@ using namespace ting::net;
 
 
 void TCPServerSocket::Open(ting::u16 port, bool disableNaggle, ting::u16 queueLength){
-	if(this->IsValid()){
+	if(*this){
 		throw net::Exc("TCPServerSocket::Open(): socket already opened");
 	}
 
@@ -166,7 +166,7 @@ void TCPServerSocket::Open(ting::u16 port, bool disableNaggle, ting::u16 queueLe
 
 
 TCPSocket TCPServerSocket::Accept(){
-	if(!this->IsValid()){
+	if(!*this){
 		throw net::Exc("TCPServerSocket::Accept(): the socket is not opened");
 	}
 

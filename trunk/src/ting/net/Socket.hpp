@@ -143,8 +143,7 @@ protected:
 
 
 
-	//same as std::auto_ptr
-	Socket& operator=(const Socket& s);
+	Socket& operator=(Socket&& s);
 
 
 
@@ -157,11 +156,17 @@ protected:
 
 
 public:
-	Socket(const Socket& s);
+	Socket(Socket&& s) :
+			//NOTE: operator=() will call Close, so the socket should be in invalid state!!!
+			//Therefore, initialize variables to invalid values.
+			Socket()
+	{
+		this->operator=(std::move(s));
+	}
 
 	
 	
-	virtual ~Socket()throw();
+	virtual ~Socket()noexcept;
 
 
 
@@ -169,19 +174,10 @@ public:
 	 * @brief Tells whether the socket is opened or not.
 	 * @return Returns true if the socket is opened or false otherwise.
 	 */
-	inline bool IsValid()const{
+	explicit operator bool()const noexcept{
 		return this->socket != DInvalidSocket();
 	}
 
-
-
-	/**
-	 * @brief Tells whether the socket is opened or not.
-	 * @return inverse of IsValid().
-	 */
-	inline bool IsNotValid()const{
-		return !this->IsValid();
-	}
 
 
 
@@ -197,7 +193,7 @@ public:
 	 * @return local port number to which this socket is bound,
 	 *         0 means that the socket is not bound to a port.
 	 */
-	u16 GetLocalPort();
+	std::uint16_t GetLocalPort();
 
 
 
