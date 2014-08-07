@@ -116,7 +116,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 		throw Exc("WaitSet::Add(): epoll_ctl() failed");
 	}
 #elif M_OS == M_OS_MACOSX
-	ASSERT(this->NumWaitables() <= revents.Size() / 2)
+	ASSERT(this->NumWaitables() <= revents.size() / 2)
 	
 	if((u32(flagsToWaitFor) & Waitable::READ) != 0){
 		this->AddFilter(w, EVFILT_READ);
@@ -251,7 +251,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	}
 
 	if(out_events){
-		if(out_events->Size() < this->numWaitables){
+		if(out_events->size() < this->numWaitables){
 			throw Exc("WaitSet::Wait(): passed out_events buffer is not large enough to hold all possible triggered objects");
 		}
 	}
@@ -287,7 +287,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	for(unsigned i = 0; i < this->numWaitables; ++i){
 		if(this->waitables[i]->CheckSignaled()){
 			if(out_events){
-				ASSERT(numEvents < out_events->Size())
+				ASSERT(numEvents < out_events->size())
 				out_events->operator[](numEvents) = this->waitables[i];
 			}
 			++numEvents;
@@ -315,8 +315,8 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 	while(true){
 		res = epoll_wait(
 				this->epollSet,
-				this->revents.Begin(),
-				this->revents.Size(),
+				this->revents.begin(),
+				this->revents.size(),
 				epollTimeout
 			);
 
@@ -335,12 +335,12 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		break;
 	};
 
-	ASSERT(unsigned(res) <= this->revents.Size())
+	ASSERT(unsigned(res) <= this->revents.size())
 
 	unsigned numEvents = 0;
 	for(
-			epoll_event *e = this->revents.Begin();
-			e < this->revents.Begin() + res;
+			epoll_event *e = this->revents.begin();
+			e < this->revents.begin() + res;
 			++e
 		)
 	{
@@ -357,7 +357,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 		}
 		ASSERT(w->CanRead() || w->CanWrite() || w->ErrorCondition())
 		if(out_events){
-			ASSERT(numEvents < out_events->Size())
+			ASSERT(numEvents < out_events->size())
 			out_events->operator[](numEvents) = w;
 			++numEvents;
 		}
@@ -377,8 +377,8 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 				this->queue,
 				0,
 				0,
-				this->revents.Begin(),
-				this->revents.Size(),
+				this->revents.begin(),
+				this->revents.size(),
 				(waitInfinitly) ? 0 : &ts
 			);
 
@@ -416,7 +416,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, u32 timeout, Buffer<Waitable*>* out_e
 						}
 					}
 					if(k == out_i){
-						ASSERT(out_i < out_events->Size())
+						ASSERT(out_i < out_events->size())
 						out_events->operator[](out_i) = w;
 						++out_i;
 					}

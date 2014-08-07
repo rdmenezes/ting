@@ -61,7 +61,7 @@ template <class T> class Array : public ting::Buffer<T>{
 
 	inline void AllocateMemory(size_t arraySize){
 		if(arraySize == 0){
-			this->size = 0;
+			this->bufSize = 0;
 			this->buf = 0;
 			return;
 		}
@@ -70,7 +70,7 @@ template <class T> class Array : public ting::Buffer<T>{
 		ASSERT(buffer)
 
 		this->buf = reinterpret_cast<T*>(buffer);
-		this->size = arraySize;
+		this->bufSize = arraySize;
 
 		//check for strict aliasing
 		ASSERT(this->buf)
@@ -78,13 +78,13 @@ template <class T> class Array : public ting::Buffer<T>{
 	}
 
 	inline void InitObjectsByDefaultConstructor(){
-		for(T* p = this->Begin(); p != this->End(); ++p){
+		for(T* p = this->begin(); p != this->end(); ++p){
 			try{
 				new (const_cast<void*>(reinterpret_cast<const void*>(p))) T();
 			}catch(...){
 				//exception thrown from one of the objects constructor,
 				//destroy all previously created objects.
-				for(T* k = this->Begin(); k != p; ++k){
+				for(T* k = this->begin(); k != p; ++k){
 					k->~T();
 				}
 				throw;//rethrow exception
@@ -93,15 +93,15 @@ template <class T> class Array : public ting::Buffer<T>{
 	}
 
 	inline void InitObjectsByCopyConstructor(const ting::Buffer<const T>& buffer){
-		ASSERT(this->Size() == buffer.Size())
-		const T* s = buffer.Begin();
-		for(T* p = this->Begin(); p != this->End(); ++p, ++s){
+		ASSERT(this->size() == buffer.size())
+		const T* s = buffer.begin();
+		for(T* p = this->begin(); p != this->end(); ++p, ++s){
 			try{
 				new (p) T(*s);
 			}catch(...){
 				//exception thrown from one of the objects copy constructor,
 				//destroy all previously created objects.
-				for(T* k = this->Begin(); k != p; ++k){
+				for(T* k = this->begin(); k != p; ++k){
 					k->~T();
 				}
 				throw;//rethrow exception
@@ -110,7 +110,7 @@ template <class T> class Array : public ting::Buffer<T>{
 	}
 
 	inline void DestroyObjects()noexcept{
-		for(T* p = &this->buf[0]; p != &this->buf[this->size]; ++p){
+		for(T* p = &this->buf[0]; p != &this->buf[this->bufSize]; ++p){
 			p->~T();
 		}
 	}
@@ -167,7 +167,7 @@ public:
 	 */
 	//NOTE: the constructor is explicit to avoid possible ambiguities.
 	explicit inline Array(const ting::Buffer<const T>& b){
-		this->AllocateMemory(b.Size());
+		this->AllocateMemory(b.size());
 		try{
 			this->InitObjectsByCopyConstructor(b);
 		}catch(...){
@@ -180,9 +180,9 @@ public:
 
 private:
 	inline void CopyFrom(const Array& a){
-		this->size = a.size;
+		this->bufSize = a.bufSize;
 		this->buf = a.buf;
-		const_cast<Array&>(a).size = 0;
+		const_cast<Array&>(a).bufSize = 0;
 		const_cast<Array&>(a).buf = 0;
 	}
 
@@ -255,7 +255,7 @@ public:
 		}catch(...){
 			this->FreeMemory();
 			this->buf = 0;
-			this->size = 0;
+			this->bufSize = 0;
 			throw;
 		}
 	}
@@ -271,13 +271,13 @@ public:
 	 */
 	void Init(const ting::Buffer<const T>& b){
 		this->Destroy();
-		this->AllocateMemory(b.Size());
+		this->AllocateMemory(b.size());
 		try{
 			this->InitObjectsByCopyConstructor(b);
 		}catch(...){
 			this->FreeMemory();
 			this->buf = 0;
-			this->size = 0;
+			this->bufSize = 0;
 			throw;
 		}
 	}
@@ -329,7 +329,7 @@ public:
 	inline void Reset()noexcept{
 		this->Destroy();
 		this->buf = 0;
-		this->size = 0;
+		this->bufSize = 0;
 	}
 	
 	

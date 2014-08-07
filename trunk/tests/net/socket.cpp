@@ -48,7 +48,7 @@ void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
 		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
 	}
 
-	DEBUG_CODE(int left = int(buf.Size());)
+	DEBUG_CODE(int left = int(buf.size());)
 	ASSERT(left >= 0)
 
 	size_t offset = 0;
@@ -58,7 +58,7 @@ void SendAll(ting::net::TCPSocket& s, const ting::Buffer<ting::u8>& buf){
 		DEBUG_CODE(left -= res;)
 		ASSERT(left >= 0)
 		offset += res;
-		if(offset == buf.Size()){
+		if(offset == buf.size()){
 				break;
 		}
 		//give 30ms to allow data from send buffer to be sent
@@ -241,29 +241,29 @@ void Run(){
 				ASSERT_ALWAYS(!sockS.ErrorCondition())
 				ASSERT_ALWAYS(sockS.CanWrite())
 
-				ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
+				ASSERT_ALWAYS(bytesSent <= sendBuffer.size())
 
-				if(sendBuffer.Size() == bytesSent){
+				if(sendBuffer.size() == bytesSent){
 					sendBuffer.Init(0xffff + 1);
 					bytesSent = 0;
 					
 					STATIC_ASSERT(sizeof(ting::u32) == 4)
-					ASSERT_INFO_ALWAYS((sendBuffer.Size() % sizeof(ting::u32)) == 0,
-							"sendBuffer.Size() = " << sendBuffer.Size()
+					ASSERT_INFO_ALWAYS((sendBuffer.size() % sizeof(ting::u32)) == 0,
+							"sendBuffer.Size() = " << sendBuffer.size()
 							<< " (sendBuffer.Size() % sizeof(ting::u32)) = "
-							<< (sendBuffer.Size() % sizeof(ting::u32))
+							<< (sendBuffer.size() % sizeof(ting::u32))
 						)
 
-					ting::u8* p = sendBuffer.Begin();
-					for(; p != sendBuffer.End(); p += sizeof(ting::u32)){
-						ASSERT_INFO_ALWAYS(p < (sendBuffer.End() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.End())
+					ting::u8* p = sendBuffer.begin();
+					for(; p != sendBuffer.end(); p += sizeof(ting::u32)){
+						ASSERT_INFO_ALWAYS(p < (sendBuffer.end() - (sizeof(ting::u32) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.end())
 						ting::util::Serialize32LE(scnt, p);
 						++scnt;
 					}
-					ASSERT_ALWAYS(p == sendBuffer.End())
+					ASSERT_ALWAYS(p == sendBuffer.end())
 				}
 
-				ASSERT_ALWAYS(sendBuffer.Size() > 0)
+				ASSERT_ALWAYS(sendBuffer.size() > 0)
 
 				try{
 					unsigned res = sockS.Send(sendBuffer, bytesSent);
@@ -277,7 +277,7 @@ void Run(){
 				}catch(ting::net::Exc& e){
 					ASSERT_INFO_ALWAYS(false, "sockS.Send() failed: " << e.What())
 				}
-				ASSERT_ALWAYS(bytesSent <= sendBuffer.Size())
+				ASSERT_ALWAYS(bytesSent <= sendBuffer.size())
 			}else if(triggered[i] == &sockR){
 				ASSERT_ALWAYS(triggered[i] != &sockS)
 
@@ -294,23 +294,23 @@ void Run(){
 					}catch(ting::net::Exc& e){
 						ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
 					}
-					ASSERT_ALWAYS(numBytesReceived <= buf.Size())
+					ASSERT_ALWAYS(numBytesReceived <= buf.size())
 //					TRACE(<< "SendDataContinuously::Run(): " << numBytesReceived << " bytes received" << std::endl)
 
 					if(numBytesReceived == 0){
 						break;//~while(true)
 					}
 
-					const ting::u8* p = buf.Begin();
-					for(unsigned i = 0; i < numBytesReceived && p != buf.End(); ++p, ++i){
+					const ting::u8* p = buf.begin();
+					for(unsigned i = 0; i < numBytesReceived && p != buf.end(); ++p, ++i){
 						recvBuffer[recvBufBytes] = *p;
 						++recvBufBytes;
 
-						ASSERT_ALWAYS(recvBufBytes <= recvBuffer.Size())
+						ASSERT_ALWAYS(recvBufBytes <= recvBuffer.size())
 
-						if(recvBufBytes == recvBuffer.Size()){
+						if(recvBufBytes == recvBuffer.size()){
 							recvBufBytes = 0;
-							ting::u32 num = ting::util::Deserialize32LE(recvBuffer.Begin());
+							ting::u32 num = ting::util::Deserialize32LE(recvBuffer.begin());
 							ASSERT_INFO_ALWAYS(
 									rcnt == num,
 									"num = " << num << " rcnt = " << rcnt
@@ -401,15 +401,15 @@ void Run(){
 			}catch(ting::net::Exc& e){
 				ASSERT_INFO_ALWAYS(false, "sockR.Recv() failed: " << e.What())
 			}
-			ASSERT_ALWAYS(numBytesReceived <= buf.Size())
+			ASSERT_ALWAYS(numBytesReceived <= buf.size())
 //			TRACE(<< "SendDataContinuously::Run(): " << numBytesReceived << " bytes received" << std::endl)
 
 			if(numBytesReceived == 0){
 				break;//~while(true)
 			}
 
-			const ting::u8* p = buf.Begin();
-			for(unsigned i = 0; i < numBytesReceived && p != buf.End(); ++p, ++i){
+			const ting::u8* p = buf.begin();
+			for(unsigned i = 0; i < numBytesReceived && p != buf.end(); ++p, ++i){
 				ASSERT_INFO_ALWAYS(rcnt == *p, "rcnt = " << unsigned(rcnt) << " *p = " << unsigned(*p) << " diff = " << unsigned(rcnt - *p))
 				++rcnt;
 			}//~for

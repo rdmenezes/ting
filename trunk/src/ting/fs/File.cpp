@@ -104,18 +104,18 @@ size_t File::Read(
 	}
 
 	size_t actualNumBytesToRead =
-			numBytesToRead == 0 ? buf.Size() : numBytesToRead;
+			numBytesToRead == 0 ? buf.size() : numBytesToRead;
 
-	if(offset > buf.Size()){
+	if(offset > buf.size()){
 		throw File::Exc("offset is out of buffer bounds");
 	}
 
-	if(actualNumBytesToRead > buf.Size() - offset){
+	if(actualNumBytesToRead > buf.size() - offset){
 		throw File::Exc("attempt to read more bytes than the number of bytes from offset to the buffer end");
 	}
 
-	ASSERT(actualNumBytesToRead + offset <= buf.Size())
-	ting::Buffer<ting::u8> b(buf.Begin() + offset, actualNumBytesToRead);
+	ASSERT(actualNumBytesToRead + offset <= buf.size())
+	ting::Buffer<ting::u8> b(buf.begin() + offset, actualNumBytesToRead);
 	
 	size_t ret = this->ReadInternal(b);
 	this->curPos += ret;
@@ -140,16 +140,16 @@ size_t File::Write(
 
 	size_t actualNumBytesToWrite = (numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite);
 
-	if(offset > buf.Size()){
+	if(offset > buf.size()){
 		throw File::Exc("offset is out of buffer bounds");
 	}
 
-	if(actualNumBytesToWrite > buf.Size() - offset){
+	if(actualNumBytesToWrite > buf.size() - offset){
 		throw File::Exc("attempt to write more bytes than passed buffer contains");
 	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-	ting::Buffer<const ting::u8> b(buf.Begin() + offset, actualNumBytesToWrite);
+	ting::Buffer<const ting::u8> b(buf.begin() + offset, actualNumBytesToWrite);
 	
 	size_t ret = this->WriteInternal(b);
 	this->curPos += ret;
@@ -164,7 +164,7 @@ size_t File::SeekForwardInternal(size_t numBytesToSeek){
 	size_t bytesRead = 0;
 	for(; bytesRead != numBytesToSeek;){
 		size_t curNumToRead = numBytesToSeek - bytesRead;
-		ting::util::ClampTop(curNumToRead, buf.Size());
+		ting::util::ClampTop(curNumToRead, buf.size());
 		size_t res = this->Read(buf, curNumToRead);
 		ASSERT(bytesRead < numBytesToSeek)
 		ASSERT(numBytesToSeek >= res)
@@ -223,14 +223,14 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 		ASSERT(maxBytesToLoad > bytesRead)
 		
 		size_t numBytesToRead = maxBytesToLoad - bytesRead;
-		ting::util::ClampTop(numBytesToRead, chunks.back().Size());
+		ting::util::ClampTop(numBytesToRead, chunks.back().size());
 		
 		res = this->Read(chunks.back(), numBytesToRead);
 
 		bytesRead += res;
 		
 		if(res != numBytesToRead){
-			ASSERT(res < chunks.back().Size())
+			ASSERT(res < chunks.back().size())
 			ASSERT(res < numBytesToRead)
 			if(res == 0){
 				chunks.pop_back();//pop empty chunk
@@ -247,19 +247,19 @@ ting::Array<ting::u8> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	
 	ASSERT(chunks.size() >= 1)
 	
-	ting::Array<ting::u8> ret((chunks.size() - 1) * chunks.front().Size() + res);
+	ting::Array<ting::u8> ret((chunks.size() - 1) * chunks.front().size() + res);
 	
 	ting::u8* p;
-	for(p = ret.Begin(); chunks.size() > 1; p += chunks.front().Size()){
-		ASSERT(p < ret.End())
-		memcpy(p, chunks.front().Begin(), chunks.front().Size());
+	for(p = ret.begin(); chunks.size() > 1; p += chunks.front().size()){
+		ASSERT(p < ret.end())
+		memcpy(p, chunks.front().begin(), chunks.front().size());
 		chunks.pop_front();
 	}
 	
 	ASSERT(chunks.size() == 1)
-	ASSERT(res <= chunks.front().Size())
-	memcpy(p, chunks.front().Begin(), res);
-	ASSERT(p + res == ret.End())
+	ASSERT(res <= chunks.front().size())
+	memcpy(p, chunks.front().begin(), res);
+	ASSERT(p + res == ret.end())
 	
 	return ret;
 }

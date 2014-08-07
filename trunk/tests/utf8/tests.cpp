@@ -19,11 +19,11 @@ void Run(){
 	
 //	TRACE_ALWAYS(<< "buf.Size() = " << buf.Size() << std::endl)
 	
-	ting::Array<ting::u8> str(buf.Size() + 1);
-	memcpy(str.Begin(), buf.Begin(), buf.Size());
-	str[buf.Size()] = 0; //null-terminate
+	ting::Array<ting::u8> str(buf.size() + 1);
+	memcpy(str.begin(), buf.begin(), buf.size());
+	str[buf.size()] = 0; //null-terminate
 	
-	utf8::Iterator i(reinterpret_cast<char*>(str.Begin()));
+	utf8::Iterator i(reinterpret_cast<char*>(str.begin()));
 	
 	ASSERT_ALWAYS(i.Char() == 'a')
 	++i;

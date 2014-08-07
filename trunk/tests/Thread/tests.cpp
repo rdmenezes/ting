@@ -84,13 +84,13 @@ void Run(){
 #endif
 		> thr;
 
-	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
+	for(TestThread1 *i = thr.begin(); i != thr.end(); ++i){
 		i->Start();
 	}
 
 	ting::mt::Thread::Sleep(1000);
 
-	for(TestThread1 *i = thr.Begin(); i != thr.End(); ++i){
+	for(TestThread1 *i = thr.begin(); i != thr.end(); ++i){
 		i->PushQuitMessage();
 		i->Join();
 	}

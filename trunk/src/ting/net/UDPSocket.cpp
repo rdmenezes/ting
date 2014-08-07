@@ -214,8 +214,8 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 	while(true){
 		len = ::sendto(
 				this->socket,
-				reinterpret_cast<const char*>(buf.Begin()),
-				buf.Size(),
+				reinterpret_cast<const char*>(buf.begin()),
+				buf.size(),
 				0,
 				reinterpret_cast<struct sockaddr*>(&sockAddr),
 				sockAddrLen
@@ -256,9 +256,9 @@ size_t UDPSocket::Send(const ting::Buffer<const ting::u8>& buf, const IPAddress&
 		break;
 	}//~while
 
-	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
-	ASSERT_INFO(len <= int(buf.Size()), "res = " << len)
-	ASSERT_INFO((len == int(buf.Size())) || (len == 0), "res = " << len)
+	ASSERT(buf.size() <= size_t(ting::DMaxInt))
+	ASSERT_INFO(len <= int(buf.size()), "res = " << len)
+	ASSERT_INFO((len == int(buf.size())) || (len == 0), "res = " << len)
 
 	ASSERT(len >= 0)
 	return size_t(len);
@@ -296,8 +296,8 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 	while(true){
 		len = ::recvfrom(
 				this->socket,
-				reinterpret_cast<char*>(buf.Begin()),
-				buf.Size(),
+				reinterpret_cast<char*>(buf.begin()),
+				buf.size(),
 				0,
 				reinterpret_cast<sockaddr*>(&sockAddr),
 				&sockLen
@@ -333,8 +333,8 @@ size_t UDPSocket::Recv(const ting::Buffer<ting::u8>& buf, IPAddress &out_SenderI
 		break;
 	}//~while
 
-	ASSERT(buf.Size() <= size_t(ting::DMaxInt))
-	ASSERT_INFO(len <= int(buf.Size()), "len = " << len)
+	ASSERT(buf.size() <= size_t(ting::DMaxInt))
+	ASSERT_INFO(len <= int(buf.size()), "len = " << len)
 
 	if(sockAddr.ss_family == AF_INET){
 		sockaddr_in& a = reinterpret_cast<sockaddr_in&>(sockAddr);

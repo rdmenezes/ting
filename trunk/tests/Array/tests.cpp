@@ -11,16 +11,16 @@ namespace BasicArrayTest{
 void Run(){
 	{
 		ting::Array<ting::u8> a;
-		ASSERT_ALWAYS(a.Size() == 0)
-		ASSERT_ALWAYS(a.Begin() == 0)
-		ASSERT_ALWAYS(a.End() == a.Begin())
+		ASSERT_ALWAYS(a.size() == 0)
+		ASSERT_ALWAYS(a.begin() == 0)
+		ASSERT_ALWAYS(a.end() == a.begin())
 	}
 
 	{
 		ting::Array<ting::u8> a(143);
-		ASSERT_ALWAYS(a.Size() == 143)
-		ASSERT_ALWAYS(a.Begin() != 0)
-		ASSERT_ALWAYS(a.End() == a.Begin() + a.Size())
+		ASSERT_ALWAYS(a.size() == 143)
+		ASSERT_ALWAYS(a.begin() != 0)
+		ASSERT_ALWAYS(a.end() == a.begin() + a.size())
 	}
 
 	//copy constructor
@@ -28,12 +28,12 @@ void Run(){
 		ting::Array<ting::u8> b(143);
 
 		ting::Array<ting::u8> a(b);
-		ASSERT_ALWAYS(a.Size() == 143)
-		ASSERT_ALWAYS(a.Begin() != 0)
-		ASSERT_ALWAYS(a.End() == a.Begin() + a.Size())
-		ASSERT_ALWAYS(b.Size() == 0)
-		ASSERT_ALWAYS(b.Begin() == 0)
-		ASSERT_ALWAYS(b.End() == b.Begin())
+		ASSERT_ALWAYS(a.size() == 143)
+		ASSERT_ALWAYS(a.begin() != 0)
+		ASSERT_ALWAYS(a.end() == a.begin() + a.size())
+		ASSERT_ALWAYS(b.size() == 0)
+		ASSERT_ALWAYS(b.begin() == 0)
+		ASSERT_ALWAYS(b.end() == b.begin())
 	}
 
 	//operator=
@@ -42,12 +42,12 @@ void Run(){
 
 		ting::Array<ting::u8> a;
 		a = b;
-		ASSERT_ALWAYS(a.Size() == 143)
-		ASSERT_ALWAYS(a.Begin() != 0)
-		ASSERT_ALWAYS(a.End() == a.Begin() + a.Size())
-		ASSERT_ALWAYS(b.Size() == 0)
-		ASSERT_ALWAYS(b.Begin() == 0)
-		ASSERT_ALWAYS(b.End() == b.Begin())
+		ASSERT_ALWAYS(a.size() == 143)
+		ASSERT_ALWAYS(a.begin() != 0)
+		ASSERT_ALWAYS(a.end() == a.begin() + a.size())
+		ASSERT_ALWAYS(b.size() == 0)
+		ASSERT_ALWAYS(b.begin() == 0)
+		ASSERT_ALWAYS(b.end() == b.begin())
 	}
 
 	//conversion to bool
@@ -365,7 +365,7 @@ public:
 
 //this type of argument seems useless, but should work for some cases
 int Func(ting::Buffer<const TestClass>& buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	
@@ -373,7 +373,7 @@ int Func(ting::Buffer<const TestClass>& buf){
 }
 
 int Func2(const ting::Buffer<const TestClass>& buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	
@@ -382,7 +382,7 @@ int Func2(const ting::Buffer<const TestClass>& buf){
 
 //this type of argument seems useless, but should work in some cases
 int Func3(ting::Array<const TestClass>& buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	
@@ -391,7 +391,7 @@ int Func3(ting::Array<const TestClass>& buf){
 
 //this type of argument seems useless, but should work
 int Func4(const ting::Array<const TestClass>& buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	
@@ -399,7 +399,7 @@ int Func4(const ting::Array<const TestClass>& buf){
 }
 
 int Func5(ting::Array<const TestClass> buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	
@@ -407,7 +407,7 @@ int Func5(ting::Array<const TestClass> buf){
 }
 
 int Func6(const ting::Array<const TestClass> buf){
-	if(buf.Size() == 0){
+	if(buf.size() == 0){
 		return 0;
 	}
 	

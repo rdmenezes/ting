@@ -218,9 +218,9 @@ public:
 				2   //Question class
 			;
 		
-		ASSERT(packetSize <= buf.Size())
+		ASSERT(packetSize <= buf.size())
 		
-		ting::u8* p = buf.Begin();
+		ting::u8* p = buf.begin();
 		
 		//ID
 		ting::util::Serialize16BE(r->id, p);
@@ -266,7 +266,7 @@ public:
 			
 			++dotPos;
 			
-			ASSERT(p <= buf.End());
+			ASSERT(p <= buf.end());
 		}
 		
 		*p = 0; //terminate labels sequence
@@ -279,11 +279,11 @@ public:
 		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
-		ASSERT(buf.Begin() <= p && p <= buf.End());
-		ASSERT(size_t(p - buf.Begin()) == packetSize);
+		ASSERT(buf.begin() <= p && p <= buf.end());
+		ASSERT(size_t(p - buf.begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		ting::Buffer<const ting::u8> bufToSend(buf.Begin(), packetSize);
+		ting::Buffer<const ting::u8> bufToSend(buf.begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
@@ -323,12 +323,12 @@ public:
 	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const ting::u8>& buf){
 		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
 #ifdef DEBUG
-		for(unsigned i = 0; i < buf.Size(); ++i){
+		for(unsigned i = 0; i < buf.size(); ++i){
 			TRACE(<< std::hex << int(buf[i]) << std::dec << std::endl)
 		}
 #endif
 		
-		if(buf.Size() <
+		if(buf.size() <
 				2 + //ID
 				2 + //flags
 				2 + //Number of questions
@@ -340,7 +340,7 @@ public:
 			return ParseResult(ting::net::HostNameResolver::DNS_ERROR);
 		}
 		
-		const ting::u8* p = buf.Begin();
+		const ting::u8* p = buf.begin();
 		p += 2;//skip ID
 		
 		{
@@ -374,8 +374,8 @@ public:
 		
 		ting::u16 numAnswers = ting::util::Deserialize16BE(p);
 		p += 2;
-		ASSERT(buf.Begin() <= p)
-		ASSERT(p <= (buf.End() - 1) || p == buf.End())
+		ASSERT(buf.begin() <= p)
+		ASSERT(p <= (buf.end() - 1) || p == buf.end())
 		
 		if(numAnswers == 0){
 			return ParseResult(ting::net::HostNameResolver::NO_SUCH_HOST);
@@ -393,7 +393,7 @@ public:
 		
 		//parse host name
 		{
-			std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
+			std::string host = dns::ParseHostNameFromDNSPacket(p, buf.end());
 //			TRACE(<< "host = " << host << std::endl)
 			
 			if(r->hostName != host){
@@ -422,21 +422,21 @@ public:
 			}
 		}
 		
-		ASSERT(buf.Overlaps(p) || p == buf.End())
+		ASSERT(buf.Overlaps(p) || p == buf.end())
 		
 		//loop through the answers
 		for(ting::u16 n = 0; n != numAnswers; ++n){
-			if(p == buf.End()){
+			if(p == buf.end()){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			
 			//check if there is a domain name or a reference to the domain name
 			if(((*p) >> 6) == 0){ //check if two high bits are set
 				//skip possible domain name
-				for(; p != buf.End() && *p != 0; ++p){
+				for(; p != buf.end() && *p != 0; ++p){
 					ASSERT(buf.Overlaps(p))
 				}
-				if(p == buf.End()){
+				if(p == buf.end()){
 					return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 				}
 				++p;
@@ -446,31 +446,31 @@ public:
 				p += 2;
 			}
 			
-			if(buf.End() - p < 2){
+			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			ting::u16 type = ting::util::Deserialize16BE(p);
 			p += 2;
 			
-			if(buf.End() - p < 2){
+			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 //			ting::u16 cls = ting::util::Deserialize16(p);
 			p += 2;
 			
-			if(buf.End() - p < 4){
+			if(buf.end() - p < 4){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 //			ting::u32 ttl = ting::util::Deserialize32(p);//time till the returned value can be cached.
 			p += 4;
 			
-			if(buf.End() - p < 2){
+			if(buf.end() - p < 2){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			ting::u16 dataLen = ting::util::Deserialize16BE(p);
 			p += 2;
 			
-			if(buf.End() - p < dataLen){
+			if(buf.end() - p < dataLen){
 				return ParseResult(ting::net::HostNameResolver::DNS_ERROR);//unexpected end of packet
 			}
 			if(type == r->recordType){
@@ -652,16 +652,16 @@ private:
 			
 			ting::Array<ting::u8> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
 			
-			for(ting::u8* p = buf.Begin(); p != buf.End(); ++p){
+			for(ting::u8* p = buf.begin(); p != buf.end(); ++p){
 				ting::u8* start = p;
 				
-				while(p != buf.End() && *p != '\n'){
+				while(p != buf.end() && *p != '\n'){
 					++p;
 				}
 				
 				ASSERT(p >= start)
 				std::string line(reinterpret_cast<const char*>(start), size_t(p - start));
-				if(p == buf.End()){
+				if(p == buf.end()){
 					--p;
 				}
 				
@@ -747,20 +747,20 @@ private:
 						size_t ret = this->socket.Recv(buf, address);
 						
 						ASSERT(ret != 0)
-						ASSERT(ret <= buf.Size())
+						ASSERT(ret <= buf.size())
 						if(ret >= 13){//at least there should be standard header and host name, otherwise ignore received UDP packet
-							ting::u16 id = ting::util::Deserialize16BE(buf.Begin());
+							ting::u16 id = ting::util::Deserialize16BE(buf.begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
 								ASSERT(id == i->second->id)
 								
 								//check by host name also
-								const ting::u8* p = buf.Begin() + 12;//start of the host name
-								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.End());
+								const ting::u8* p = buf.begin() + 12;//start of the host name
+								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.end());
 								
 								if(host == i->second->hostName){
-									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<ting::u8>(buf.Begin(), ret));
+									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<ting::u8>(buf.begin(), ret));
 									
 									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && i->second->recordType == D_DNSRecordAAAA){
 										//try getting record type A

@@ -17,18 +17,18 @@ using namespace fs;
 
 //override
 void BufferFile::OpenInternal(E_Mode mode){
-	this->ptr = this->data.Begin();
+	this->ptr = this->data.begin();
 }
 
 
 
 //override
 size_t BufferFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
-	ASSERT(this->ptr <= this->data.End())
-	size_t numBytesRead = std::min(buf.SizeInBytes(), size_t(this->data.End() - this->ptr));
-	memcpy(buf.Begin(), this->ptr, numBytesRead);
+	ASSERT(this->ptr <= this->data.end())
+	size_t numBytesRead = std::min(buf.SizeInBytes(), size_t(this->data.end() - this->ptr));
+	memcpy(buf.begin(), this->ptr, numBytesRead);
 	this->ptr += numBytesRead;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.End())
+	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
 	return numBytesRead;
 }
 
@@ -36,11 +36,11 @@ size_t BufferFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 
 //override
 size_t BufferFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
-	ASSERT(this->ptr <= this->data.End())
-	size_t numBytesWritten = std::min(buf.SizeInBytes(), size_t(this->data.End() - this->ptr));
-	memcpy(this->ptr, buf.Begin(), numBytesWritten);
+	ASSERT(this->ptr <= this->data.end())
+	size_t numBytesWritten = std::min(buf.SizeInBytes(), size_t(this->data.end() - this->ptr));
+	memcpy(this->ptr, buf.begin(), numBytesWritten);
 	this->ptr += numBytesWritten;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.End())
+	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
 	return numBytesWritten;
 }
 
@@ -48,10 +48,10 @@ size_t BufferFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 
 //override
 size_t BufferFile::SeekForwardInternal(size_t numBytesToSeek){
-	ASSERT(this->ptr <= this->data.End())
-	numBytesToSeek = std::min(size_t(this->data.End() - this->ptr), numBytesToSeek);
+	ASSERT(this->ptr <= this->data.end())
+	numBytesToSeek = std::min(size_t(this->data.end() - this->ptr), numBytesToSeek);
 	this->ptr += numBytesToSeek;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.End())
+	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
 	return numBytesToSeek;
 }
 
@@ -59,10 +59,10 @@ size_t BufferFile::SeekForwardInternal(size_t numBytesToSeek){
 
 //override
 size_t BufferFile::SeekBackwardInternal(size_t numBytesToSeek){
-	ASSERT(this->ptr >= this->data.Begin())
-	numBytesToSeek = std::min(size_t(this->ptr - this->data.Begin()), numBytesToSeek);
+	ASSERT(this->ptr >= this->data.begin())
+	numBytesToSeek = std::min(size_t(this->ptr - this->data.begin()), numBytesToSeek);
 	this->ptr -= numBytesToSeek;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.End())
+	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
 	return numBytesToSeek;
 }
 
@@ -70,5 +70,5 @@ size_t BufferFile::SeekBackwardInternal(size_t numBytesToSeek){
 
 //override
 void BufferFile::RewindInternal(){
-	this->ptr = this->data.Begin();
+	this->ptr = this->data.begin();
 }

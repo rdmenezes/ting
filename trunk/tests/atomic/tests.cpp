@@ -45,7 +45,7 @@ void Run(){
 	ting::StaticBuffer<ting::Ptr<Thread>, 100> threads;
 	
 	//Create and start all the threads
-	for(ting::Ptr<Thread>* i = threads.Begin(); i != threads.End(); ++i){
+	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
 		(*i) = ting::Ptr<Thread>(new Thread(a));
 		(*i)->Start();
 	}
@@ -55,18 +55,18 @@ void Run(){
 	
 	//signal all threads semaphores
 //	TRACE(<< "Signalling..." << std::endl)
-	for(ting::Ptr<Thread>* i = threads.Begin(); i != threads.End(); ++i){
+	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
 		(*i)->sema.Signal();
 	}
 	
 	//wait for all threads to finish
-	for(ting::Ptr<Thread>* i = threads.Begin(); i != threads.End(); ++i){
+	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
 		(*i)->Join();
 	}
 //	TRACE(<< "All threads finished" << std::endl)
 	
 	//Check atomic value
-	ASSERT_ALWAYS(a.FetchAndAdd(0) == ting::s32(DNumOps * threads.Size()))
+	ASSERT_ALWAYS(a.FetchAndAdd(0) == ting::s32(DNumOps * threads.size()))
 }
 }//~namespace
 

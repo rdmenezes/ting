@@ -60,7 +60,7 @@ public:
 	 */
 	//NOTE: ownership of the buffer is not taken, buffer must remain alive during this object's lifetime.
 	BufferFile(const ting::Buffer<ting::u8>& data) :
-			data(data.Begin(), data.Size())
+			data(data.begin(), data.size())
 	{}
 	
 	virtual ~BufferFile()noexcept{}

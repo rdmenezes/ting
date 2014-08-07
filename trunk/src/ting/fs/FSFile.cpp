@@ -112,8 +112,8 @@ void FSFile::CloseInternal()noexcept{
 //override
 size_t FSFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 	ASSERT(this->handle)
-	size_t numBytesRead = fread(buf.Begin(), 1, buf.Size(), this->handle);
-	if(numBytesRead != buf.Size()){//something happened
+	size_t numBytesRead = fread(buf.begin(), 1, buf.size(), this->handle);
+	if(numBytesRead != buf.size()){//something happened
 		if(!feof(this->handle)){
 			throw File::Exc("fread() error");//if it is not an EndOfFile then it is error
 		}
@@ -126,8 +126,8 @@ size_t FSFile::ReadInternal(const ting::Buffer<ting::u8>& buf){
 //override
 size_t FSFile::WriteInternal(const ting::Buffer<const ting::u8>& buf){
 	ASSERT(this->handle)
-	size_t bytesWritten = fwrite(buf.Begin(), 1, buf.Size(), this->handle);
-	if(bytesWritten != buf.Size()){//something bad has happened
+	size_t bytesWritten = fwrite(buf.begin(), 1, buf.size(), this->handle);
+	if(bytesWritten != buf.size()){//something bad has happened
 		throw File::Exc("fwrite error");
 	}
 

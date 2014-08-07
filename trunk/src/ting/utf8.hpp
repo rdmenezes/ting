@@ -148,12 +148,12 @@ public:
  * @return Number of characters filled in to the buffer.
  */
 inline size_t FillBuffer(const ting::Buffer<ting::u32>& buf, Iterator& str){
-	ting::u32* p = buf.Begin();
-	for(; p != buf.End() && str.IsNotEnd(); ++p, ++str){
+	ting::u32* p = buf.begin();
+	for(; p != buf.end() && str.IsNotEnd(); ++p, ++str){
 		*p = str.Char();
 	}
-	ASSERT(buf.Overlaps(p) || p == buf.End())
-	return size_t(p - buf.Begin());
+	ASSERT(buf.Overlaps(p) || p == buf.end())
+	return size_t(p - buf.begin());
 }
 
 

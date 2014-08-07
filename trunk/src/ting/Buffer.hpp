@@ -32,6 +32,9 @@ THE SOFTWARE. */
 
 #pragma once
 
+#include <array>
+#include <vector>
+
 #ifdef DEBUG
 #	include <iostream>
 #endif
@@ -54,7 +57,7 @@ template <class T> class Buffer{
 
 protected:
 	T* buf;
-	size_t size;
+	size_t bufSize;
 
 
 	/**
@@ -87,15 +90,48 @@ public:
 	 */
 	Buffer(T* bufPtr, size_t bufSize)noexcept :
 			buf(bufPtr),
-			size(bufSize)
+			bufSize(bufSize)
 	{}
-
+	
+	
+	
+	Buffer(Buffer&& b){
+		this->buf = b.buf;
+		this->bufSize = b.bufSize;
+		b.buf = 0;
+		b.bufSize = 0;
+	}
+	
+	
+	/**
+	 * @brief Create Buffer from std::array.
+	 * Creates a Buffer object pointing to the contents of given std::array.
+     * @param a - reference to instance of std::array.
+     */
+	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
+			buf(&(*a.begin())),
+			bufSize(a.size())
+	{}
+	
+	
+	/**
+	 * @brief Create Buffer from std::vector.
+	 * Creates a Buffer object pointing to the contents of given std::vector.
+     * @param v - reference to instance of std::vector.
+     */
+	template <class T_1> Buffer(const std::vector<T_1>& v) :
+			buf(&(*v.begin())),
+			bufSize(v.size())
+	{}
+	
+	
+	
 	/**
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	size_t Size()const noexcept{
-		return this->size;
+	size_t size()const noexcept{
+		return this->bufSize;
 	}
 
 
@@ -115,7 +151,7 @@ public:
 	 * @return size of array in bytes.
 	 */
 	size_t SizeInBytes()const noexcept{
-		return this->Size() * this->SizeOfElem();
+		return this->size() * this->SizeOfElem();
 	}
 
 
@@ -127,7 +163,7 @@ public:
 	 * @return reference to i'th element of the buffer.
 	 */
 	T& operator[](size_t i)const noexcept{
-		ASSERT(i < this->Size())
+		ASSERT(i < this->size())
 		return this->buf[i];
 	}
 
@@ -139,7 +175,7 @@ public:
 	 * @return reference to i'th element of the buffer.
 	 */
 	T& operator[](size_t i)noexcept{
-		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
+		ASSERT_INFO(i < this->size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
 
@@ -149,7 +185,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* Begin()noexcept{
+	T* begin()noexcept{
 		return this->buf;
 	}
 
@@ -159,7 +195,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* Begin()const noexcept{
+	T* begin()const noexcept{
 		return this->buf;
 	}
 
@@ -169,8 +205,8 @@ public:
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	T* End()noexcept{
-		return this->buf + this->size;
+	T* end()noexcept{
+		return this->buf + this->bufSize;
 	}
 
 
@@ -179,8 +215,8 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	T* End()const noexcept{
-		return this->buf + this->size;
+	T* end()const noexcept{
+		return this->buf + this->bufSize;
 	}
 
 
@@ -192,7 +228,7 @@ public:
 	 * @return false otherwise.
 	 */
 	bool Overlaps(const T* p)const noexcept{
-		return this->Begin() <= p && p <= (this->End() - 1);
+		return this->begin() <= p && p <= (this->end() - 1);
 	}
 
 
@@ -204,7 +240,7 @@ public:
 
 #ifdef DEBUG
 	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
-		for(size_t i = 0; i < buf.Size(); ++i){
+		for(size_t i = 0; i < buf.size(); ++i){
 			s << "\t" << buf[i] << std::endl;
 		}
 		return s;

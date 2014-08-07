@@ -156,12 +156,12 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 	this->ClearCanWriteFlag();
 
 	ASSERT_INFO((
-			(buf.Begin() + offset) <= (buf.End() - 1))
-					|| ((buf.Size() == 0) && (offset == 0))
+			(buf.begin() + offset) <= (buf.end() - 1))
+					|| ((buf.size() == 0) && (offset == 0))
 				,
-			"buf.Begin() = " << reinterpret_cast<const void*>(buf.Begin())
+			"buf.Begin() = " << reinterpret_cast<const void*>(buf.begin())
 					<< " offset = " << offset
-					<< " buf.End() = " << reinterpret_cast<const void*>(buf.End())
+					<< " buf.End() = " << reinterpret_cast<const void*>(buf.end())
 		)
 
 #if M_OS == M_OS_WINDOWS
@@ -173,8 +173,8 @@ size_t TCPSocket::Send(const ting::Buffer<const ting::u8>& buf, size_t offset){
 	while(true){
 		len = send(
 				this->socket,
-				reinterpret_cast<const char*>(buf.Begin() + offset),
-				buf.Size() - offset,
+				reinterpret_cast<const char*>(buf.begin() + offset),
+				buf.size() - offset,
 				0
 			);
 		if(len == DSocketError()){
@@ -225,12 +225,12 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 	}
 
 	ASSERT_INFO(
-			((buf.Begin() + offset) <= (buf.End() - 1))
-					|| ((buf.Size() == 0) && (offset == 0))
+			((buf.begin() + offset) <= (buf.end() - 1))
+					|| ((buf.size() == 0) && (offset == 0))
 				,
-			"buf.Begin() = " << reinterpret_cast<void*>(buf.Begin())
+			"buf.Begin() = " << reinterpret_cast<void*>(buf.begin())
 					<< " offset = " << offset
-					<< " buf.End() = " << reinterpret_cast<void*>(buf.End())
+					<< " buf.End() = " << reinterpret_cast<void*>(buf.end())
 		)
 
 #if M_OS == M_OS_WINDOWS
@@ -242,8 +242,8 @@ size_t TCPSocket::Recv(const ting::Buffer<ting::u8>& buf, size_t offset){
 	while(true){
 		len = recv(
 				this->socket,
-				reinterpret_cast<char*>(buf.Begin() + offset),
-				buf.Size() - offset,
+				reinterpret_cast<char*>(buf.begin() + offset),
+				buf.size() - offset,
 				0
 			);
 		if(len == DSocketError()){
