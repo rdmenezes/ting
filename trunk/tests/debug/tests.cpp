@@ -4,7 +4,6 @@
 #endif
 
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/Ref.hpp"
 #include "../../src/ting/Ptr.hpp"
 
 #include "tests.hpp"
@@ -22,16 +21,6 @@ bool DoSomethingAndReturnTrueOnSuccess(){
 
 class TestClass{
 public:
-	int a;
-};
-
-
-
-class TestClassRC : public ting::RefCounted{
-	
-public:
-	TestClassRC(){}
-	
 	int a;
 };
 
@@ -68,15 +57,6 @@ void Run(){
 		//make sure, "pc" is valid before accessing member a.
 		ASS(pc)->a = 13;
 		int b = ASS(pc)->a;
-		ASSERT_ALWAYS(b == 13)
-	}
-
-	{
-		ting::Ref<TestClassRC> c = ting::NewRefCounted<TestClassRC>();
-
-		//make sure, "c" is valid before accessing member a.
-		ASS(c)->a = 13;
-		int b = ASS(c)->a;
 		ASSERT_ALWAYS(b == 13)
 	}
 

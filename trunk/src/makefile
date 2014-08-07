@@ -35,7 +35,6 @@ this_srcs += ting/net/Socket.cpp
 this_srcs += ting/net/TCPServerSocket.cpp
 this_srcs += ting/net/TCPSocket.cpp
 this_srcs += ting/net/UDPSocket.cpp
-this_srcs += ting/Ref.cpp
 this_srcs += ting/timer.cpp
 this_srcs += ting/WaitSet.cpp
 

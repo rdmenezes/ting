@@ -50,8 +50,6 @@
         <in>Flags.hpp</in>
         <in>PoolStored.hpp</in>
         <in>Ptr.hpp</in>
-        <in>Ref.cpp</in>
-        <in>Ref.hpp</in>
         <in>Shared.hpp</in>
         <in>Singleton.hpp</in>
         <in>WaitSet.cpp</in>
@@ -244,10 +242,6 @@
       <item path="src/ting/PoolStored.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/Ptr.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src/ting/Ref.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
       </item>
@@ -709,10 +703,6 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="1">
-        </ccTool>
-      </item>
       <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="1">
         </ccTool>
@@ -988,8 +978,6 @@
           </incDir>
         </ccTool>
       </folder>
-      <item path="src/ting/Ref.cpp" ex="false" tool="1" flavor2="4">
-      </item>
       <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/WaitSet.cpp" ex="false" tool="1" flavor2="4">
