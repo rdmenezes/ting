@@ -59,27 +59,6 @@ protected:
 	T* buf;
 	size_t bufSize;
 
-
-	/**
-	 * @brief Default constructor.
-	 * It is protected, so only accessible by subclasses.
-	 */
-	Buffer() = default;
-
-	/**
-	 * @brief Assignment operator.
-	 * This operator implementation does nothing.
-	 * This operator is defined because it should not be available for outside use,
-	 * so make it protected. But it should be defined, because some subclass may have
-	 * meaningful automatically generated operator=() (e.g. StaticBuffer)
-	 * which subsequently will call this operator=().
-	 * @param - Buffer to assign from.
-	 * @return reference to this Buffer object.
-	 */
-	Buffer& operator=(const Buffer&){
-		//do nothing
-		return *this;
-	}
 public:
 	/**
 	 * @brief Create a Buffer object.
@@ -88,7 +67,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	Buffer(T* bufPtr, size_t bufSize = 0)noexcept :
+	Buffer(T* bufPtr = nullptr, size_t bufSize = 0)noexcept :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
