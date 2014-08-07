@@ -53,7 +53,6 @@
         <in>Ref.cpp</in>
         <in>Ref.hpp</in>
         <in>Shared.hpp</in>
-        <in>Signal.hpp</in>
         <in>Singleton.hpp</in>
         <in>WaitSet.cpp</in>
         <in>WaitSet.hpp</in>
@@ -251,8 +250,6 @@
       <item path="src/ting/Ref.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/Shared.hpp" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src/ting/Signal.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ting/Singleton.hpp" ex="false" tool="3" flavor2="0">
       </item>
