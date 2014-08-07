@@ -43,7 +43,6 @@ THE SOFTWARE. */
 
 namespace ting{
 
-//TODO:
 
 
 /**
@@ -95,7 +94,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	size_t Size()const throw(){
+	size_t Size()const noexcept{
 		return this->size;
 	}
 
@@ -105,7 +104,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	size_t SizeOfElem()const throw(){
+	size_t SizeOfElem()const noexcept{
 		return sizeof(this->buf[0]);
 	}
 
@@ -115,7 +114,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	size_t SizeInBytes()const throw(){
+	size_t SizeInBytes()const noexcept{
 		return this->Size() * this->SizeOfElem();
 	}
 
@@ -127,7 +126,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	T& operator[](size_t i)const throw(){
+	T& operator[](size_t i)const noexcept{
 		ASSERT(i < this->Size())
 		return this->buf[i];
 	}
@@ -139,7 +138,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	T& operator[](size_t i)throw(){
+	T& operator[](size_t i)noexcept{
 		ASSERT_INFO(i < this->Size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -150,7 +149,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* Begin()throw(){
+	T* Begin()noexcept{
 		return this->buf;
 	}
 
@@ -160,7 +159,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* Begin()const throw(){
+	T* Begin()const noexcept{
 		return this->buf;
 	}
 
@@ -170,7 +169,7 @@ public:
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	T* End()throw(){
+	T* End()noexcept{
 		return this->buf + this->size;
 	}
 
@@ -180,7 +179,7 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	T* End()const throw(){
+	T* End()const noexcept{
 		return this->buf + this->size;
 	}
 
@@ -192,13 +191,13 @@ public:
 	 * @return true - if pointer passed as argument points somewhere within the buffer.
 	 * @return false otherwise.
 	 */
-	bool Overlaps(const T* p)const throw(){
+	bool Overlaps(const T* p)const noexcept{
 		return this->Begin() <= p && p <= (this->End() - 1);
 	}
 
 
 
-	operator const Buffer<const T>& ()const throw(){
+	operator const Buffer<const T>& ()const noexcept{
 		return *reinterpret_cast<const Buffer<const T>* >(this);
 	}
 

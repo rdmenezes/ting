@@ -31,7 +31,7 @@ public:
 	}
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)noexcept{
 		TRACE(<< "OnCompleted_ts(): result = " << result << " ip = " << ip.ToString() << std::endl)
 		
 //		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
@@ -121,7 +121,7 @@ public:
 	E_Result result;
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)noexcept{
 //		ASSERT_INFO_ALWAYS(result == ting::net::HostNameResolver::OK, "result = " << result)
 		
 		if(this->host.size() == 0){
@@ -169,7 +169,7 @@ public:
 	ting::Inited<volatile bool, false> called;
 	
 	//override
-	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)throw(){
+	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)noexcept{
 		this->called = true;
 	}
 };

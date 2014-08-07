@@ -162,7 +162,7 @@ public:
 	 * quick initiation of the action which should be taken on timer expiration,
 	 * for example, post a message to the message queue of another thread to be handled by that another thread.
 	 */
-	virtual void OnExpired()throw() = 0;
+	virtual void OnExpired()noexcept = 0;
 
 	/**
 	 * @brief Constructor for new Timer instance.
@@ -172,7 +172,7 @@ public:
 		ASSERT(!this->isRunning)
 	}
 
-	virtual ~Timer()throw();
+	virtual ~Timer()noexcept;
 
 	/**
 	 * @brief Start timer.
@@ -200,7 +200,7 @@ public:
 	 * @return false if timer was not running already when the Stop() method was called. I.e.
 	 *         the timer has expired already or was not started.
 	 */
-	inline bool Stop()throw();
+	inline bool Stop()noexcept;
 };
 
 
@@ -250,16 +250,16 @@ class Lib : public IntrusiveSingleton<Lib>{
 			ASSERT(!this->quitFlag)
 		}
 
-		~TimerThread()throw(){
+		~TimerThread()noexcept{
 			//at the time of TimerLib destroying there should be no active timers
 			ASSERT(this->timers.size() == 0)
 		}
 
 		void AddTimer_ts(Timer* timer, u32 timeout);
 
-		bool RemoveTimer_ts(Timer* timer)throw();
+		bool RemoveTimer_ts(Timer* timer)noexcept;
 
-		inline void SetQuitFlagAndSignalSemaphore()throw(){
+		inline void SetQuitFlagAndSignalSemaphore()noexcept{
 			this->quitFlag = true;
 			this->sema.Signal();
 		}
@@ -272,7 +272,7 @@ class Lib : public IntrusiveSingleton<Lib>{
 	class HalfMaxTicksTimer : public Timer{
 	public:
 		//override
-		void OnExpired()throw(){
+		void OnExpired()noexcept{
 			try{
 				this->Start(Timer::DMaxTicks() / 2);
 			}catch(...){
@@ -294,7 +294,7 @@ public:
 	 * Note, that before destroying the timer library singleton object all the
 	 * timers should be stopped. Otherwise, in debug mode it will result in assertion failure.
 	 */
-	~Lib()throw(){
+	~Lib()noexcept{
 		//stop half max ticks timer
 		while(!this->halfMaxTicksTimer.Stop()){
 			ting::mt::Thread::Sleep(10);
@@ -312,7 +312,7 @@ public:
 
 
 
-inline Timer::~Timer()throw(){
+inline Timer::~Timer()noexcept{
 	ASSERT_INFO(!this->isRunning, "trying to destroy running timer. Stop the timer first and make sure its OnExpired() method will not be called, then destroy the timer object.")
 }
 
@@ -326,7 +326,7 @@ inline void Timer::Start(ting::u32 millisec){
 
 
 
-inline bool Timer::Stop()throw(){
+inline bool Timer::Stop()noexcept{
 	ASSERT(Lib::IsCreated())
 	return Lib::Inst().thread.RemoveTimer_ts(this);
 }

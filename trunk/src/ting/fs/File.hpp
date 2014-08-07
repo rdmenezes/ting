@@ -124,7 +124,7 @@ public:
 	 * The file shall be closed upon the object destruction, all the implementations should
 	 * assure that.
 	 */
-	virtual ~File()throw(){
+	virtual ~File()noexcept{
 		ASSERT(!this->IsOpened())
 	}
 
@@ -144,7 +144,7 @@ public:
 	 * @brief Get the current path being held by this File instance.
 	 * @return The path this File instance holds.
 	 */
-	const std::string& Path()const throw(){
+	const std::string& Path()const noexcept{
 		return this->path;
 	}
 
@@ -152,7 +152,7 @@ public:
 	 * @brief Get current position from beginning of the file.
      * @return Current position from beginning of the file
      */
-	size_t CurPos()const throw(){
+	size_t CurPos()const noexcept{
 		return this->curPos;
 	}
 	
@@ -215,7 +215,7 @@ public:
 	/**
 	 * @brief Close file.
 	 */
-	void Close()throw(){
+	void Close()noexcept{
 		if(!this->IsOpened()){
 			return;
 		}
@@ -228,7 +228,7 @@ protected:
 	 * @brief Close file, internal implementation.
 	 * Derived class should override this function with its own implementation.
      */
-	virtual void CloseInternal()throw() = 0;
+	virtual void CloseInternal()noexcept = 0;
 	
 public:
 	/**
@@ -236,7 +236,7 @@ public:
 	 * @return true - if the file is opened.
 	 * @return false - otherwise.
 	 */
-	bool IsOpened()const throw(){
+	bool IsOpened()const noexcept{
 		return this->isOpened;
 	}
 
@@ -249,7 +249,7 @@ public:
 	 * @return true - if current path points to a directory.
 	 * @return false - otherwise.
 	 */
-	bool IsDir()const throw();
+	bool IsDir()const noexcept;
 
 	/**
 	 * @brief Get list of files and subdirectories of a directory.

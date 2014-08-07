@@ -192,7 +192,7 @@ void WaitSet::Change(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 
 
 
-void WaitSet::Remove(Waitable& w)throw(){
+void WaitSet::Remove(Waitable& w)noexcept{
 	ASSERT(w.isAdded)
 	
 	ASSERT(this->NumWaitables() != 0)

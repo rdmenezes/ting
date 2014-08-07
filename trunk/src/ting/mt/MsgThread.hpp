@@ -87,7 +87,7 @@ public:
 	 * @brief Send preallocated 'Quit' message to thread's queue.
 	 * This function throws no exceptions. It can send the quit message only once.
 	 */
-	void PushPreallocatedQuitMessage()throw();
+	void PushPreallocatedQuitMessage()noexcept;
 	
 	
 	
@@ -111,7 +111,7 @@ public:
 	 * @brief Send a message to thread's queue.
 	 * @param msg - a message to send.
 	 */
-	inline void PushMessage(Ptr<Message> msg)throw(){
+	inline void PushMessage(Ptr<Message> msg)noexcept{
 		this->queue.PushMessage(msg);
 	}
 };

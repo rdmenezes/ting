@@ -56,7 +56,7 @@ Queue::Queue(){
 
 
 
-Queue::~Queue()throw(){
+Queue::~Queue()noexcept{
 	//destroy messages which are currently on the queue
 	{
 		atomic::SpinLock::GuardYield mutexGuard(this->mut);
@@ -88,7 +88,7 @@ Queue::~Queue()throw(){
 
 
 
-void Queue::PushMessage(ting::Ptr<ting::mt::Message> msg)throw(){
+void Queue::PushMessage(ting::Ptr<ting::mt::Message> msg)noexcept{
 	ASSERT(msg.IsValid())
 	atomic::SpinLock::GuardYield mutexGuard(this->mut);
 	if(this->first){

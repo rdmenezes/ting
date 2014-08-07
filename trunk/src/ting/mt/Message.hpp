@@ -52,10 +52,10 @@ class Message{
 	ting::Inited<Message*, 0> next;//pointer to the next message in a single-linked list
 
 protected:
-	Message()throw(){}
+	Message()noexcept{}
 
 public:
-	virtual ~Message()throw(){}
+	virtual ~Message()noexcept{}
 
 	/**
 	 * @brief message handler function.

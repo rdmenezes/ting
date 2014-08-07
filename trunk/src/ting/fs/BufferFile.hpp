@@ -63,13 +63,13 @@ public:
 			data(data.Begin(), data.Size())
 	{}
 	
-	virtual ~BufferFile()throw(){}
+	virtual ~BufferFile()noexcept{}
 
 protected:
 
 	void OpenInternal(E_Mode mode) OVERRIDE;
 	
-	void CloseInternal()throw() OVERRIDE{}
+	void CloseInternal()noexcept OVERRIDE{}
 	
 	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) OVERRIDE;
 

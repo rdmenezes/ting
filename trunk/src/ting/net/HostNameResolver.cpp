@@ -300,7 +300,7 @@ public:
 	
 	
 	//NOTE: call to this function should be protected by mutex
-	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, IPAddress::Host ip = IPAddress::Host(0, 0, 0, 0))throw(){
+	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, IPAddress::Host ip = IPAddress::Host(0, 0, 0, 0))noexcept{
 		this->completedMutex.Lock();
 		this->mutex.Unlock();
 		r->hnr->OnCompleted_ts(result, ip);
@@ -523,7 +523,7 @@ private:
 		ASSERT_INFO(ting::net::Lib::IsCreated(), "ting::net::Lib is not initialized before doing the DNS request")
 	}
 public:
-	~LookupThread()throw(){
+	~LookupThread()noexcept{
 		ASSERT(this->sendList.size() == 0)
 		ASSERT(this->resolversMap.size() == 0)
 		ASSERT(this->resolversByTime1.size() == 0)
@@ -534,7 +534,7 @@ public:
 	//returns Ptr owning the removed resolver, returns invalid Ptr if there was
 	//no such resolver object found.
 	//NOTE: call to this function should be protected by mutex.
-	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver)throw(){
+	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver)noexcept{
 		ting::Ptr<dns::Resolver> r;
 		{
 			dns::T_ResolversIter i = this->resolversMap.find(resolver);
@@ -1106,7 +1106,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, ting::u32 timeout
 
 
 
-bool HostNameResolver::Cancel_ts()throw(){
+bool HostNameResolver::Cancel_ts()noexcept{
 	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
 	
 	if(dns::thread.IsNotValid()){

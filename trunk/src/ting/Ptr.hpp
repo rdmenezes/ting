@@ -56,7 +56,7 @@ template <class T> class Ptr{
 
 	T* p;
 public:
-	explicit inline Ptr(T* ptr = 0)throw() :
+	explicit inline Ptr(T* ptr = 0)noexcept :
 			p(ptr)
 	{}
 
@@ -73,39 +73,39 @@ public:
 	 * @param ptr - pointer to copy.
 	 */
 	//const copy constructor
-	inline Ptr(const Ptr& ptr)throw(){
+	inline Ptr(const Ptr& ptr)noexcept{
 		M_PTR_PRINT(<< "Ptr::Ptr(copy): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr&>(ptr).p = 0;
 	}
 
-	template <class TS> inline Ptr(const Ptr<TS>& ptr)throw(){
+	template <class TS> inline Ptr(const Ptr<TS>& ptr)noexcept{
 		M_PTR_PRINT(<< "Ptr::Ptr(conversion): invoked, ptr.p = " << (ptr.p) << std::endl)
 		this->p = ptr.p;
 		const_cast<Ptr<TS>&>(ptr).p = 0;
 	}
 
-	inline ~Ptr()throw(){
+	inline ~Ptr()noexcept{
 		this->Destroy();
 	}
 
-	inline T* operator->()throw(){
+	inline T* operator->()noexcept{
 		return this->p;
 	}
 
 	//NOTE: the operator is const but returns non-const value because const Ptr
 	//      doesn't mean that it points to constant object, it means that
 	//      the pointer itself cannot be changed to point to another value.
-	inline T* operator->()const throw(){
+	inline T* operator->()const noexcept{
 		return this->p;
 	}
 
-	inline T& operator*()throw(){
+	inline T& operator*()noexcept{
 		ASSERT_INFO(this->p, "Ptr::operator*(): this->p is zero")
 		return *(this->operator->());
 	}
 
-	inline T& operator*()const throw(){
+	inline T& operator*()const noexcept{
 		ASSERT_INFO(this->p, "const Ptr::operator*(): this->p is zero")
 		return *(this->operator->());
 	}
@@ -121,7 +121,7 @@ public:
 	 * Thus, no memory leak occurs.
 	 * @param ptr - pointer to assign from.
 	 */
-	inline Ptr& operator=(const Ptr& ptr)throw(){
+	inline Ptr& operator=(const Ptr& ptr)noexcept{
 		M_PTR_PRINT(<< "Ptr::operator=(Ptr&): enter, this->p = " << (this->p) << std::endl)
 		this->Destroy();
 		this->p = ptr.p;
@@ -130,7 +130,7 @@ public:
 		return (*this);
 	}
 
-	template <class TS> inline Ptr& operator=(const Ptr<TS>& ptr)throw(){
+	template <class TS> inline Ptr& operator=(const Ptr<TS>& ptr)noexcept{
 		M_PTR_PRINT(<< "Ptr::operator=(conversion): enter, this->p = " << (this->p) << std::endl)
 		this->Destroy();
 		this->p = ptr.p;
@@ -139,15 +139,15 @@ public:
 		return (*this);
 	}
 
-	inline bool operator==(const T* ptr)const throw(){
+	inline bool operator==(const T* ptr)const noexcept{
 		return this->p == ptr;
 	}
 
-	inline bool operator!=(const T* ptr)const throw(){
+	inline bool operator!=(const T* ptr)const noexcept{
 		return !this->operator==(ptr);
 	}
 
-	inline bool operator!()const throw(){
+	inline bool operator!()const noexcept{
 		return this->IsNotValid();
 	}
 
@@ -157,7 +157,7 @@ public:
 	//Because if using simple "operator bool()" it may result in chained automatic
 	//conversion to undesired types such as int.
 	typedef void (Ptr::*unspecified_bool_type)();
-	inline operator unspecified_bool_type()const throw(){
+	inline operator unspecified_bool_type()const noexcept{
 		return this->IsValid() ? &Ptr::Reset : 0; //Ptr::Reset is taken just because it has matching signature
 	}
 
@@ -175,7 +175,7 @@ public:
 	 * at this point.
 	 * @return pointer to object previously owned by that Ptr instance.
 	 */
-	inline T* Extract()throw(){
+	inline T* Extract()noexcept{
 		T* pp = this->p;
 		this->p = 0;
 		return pp;
@@ -186,7 +186,7 @@ public:
 	 * This will destroy the object this pointer points to if any.
 	 * After that the pointer becomes invalid.
 	 */
-	inline void Reset()throw(){
+	inline void Reset()noexcept{
 		this->Destroy();
 		this->p = 0;
 	}
@@ -196,7 +196,7 @@ public:
 	 * @return true if pointer is valid and holding some object.
 	 * @return false otherwise.
 	 */
-	inline bool IsValid()const throw(){
+	inline bool IsValid()const noexcept{
 		return this->p != 0;
 	}
 
@@ -205,7 +205,7 @@ public:
 	 * @return false if object is valid.
 	 * @return true otherwise.
 	 */
-	inline bool IsNotValid()const throw(){
+	inline bool IsNotValid()const noexcept{
 		return !this->IsValid();
 	}
 
@@ -217,12 +217,12 @@ public:
 	 * will cause double 'delete' when both Ptr instances go out of scope.
 	 * @return pointer to casted class.
 	 */
-	template <class TS> inline TS* StaticCast()throw(){
+	template <class TS> inline TS* StaticCast()noexcept{
 		return static_cast<TS*>(this->operator->());
 	}
 
 private:
-	inline void Destroy()throw(){
+	inline void Destroy()noexcept{
 		M_PTR_PRINT(<< "Ptr::~Ptr(): delete invoked, this->p = " << this->p << std::endl)
 		delete this->p;
 	}

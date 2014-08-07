@@ -138,7 +138,7 @@ public:
 	Thread();
 	
 	
-	virtual ~Thread()throw();
+	virtual ~Thread()noexcept;
 
 
 
@@ -169,7 +169,7 @@ public:
 	 * Note: it is safe to call Join() on not started threads,
 	 *       in that case it will return immediately.
 	 */
-	void Join()throw();
+	void Join()noexcept;
 
 
 
@@ -180,7 +180,7 @@ public:
 	 * AT LEAST 'msec' milliseconds.
 	 * @param msec - number of milliseconds the thread should be suspended.
 	 */
-	static void Sleep(unsigned msec = 0)throw(){
+	static void Sleep(unsigned msec = 0)noexcept{
 #if M_OS == M_OS_WINDOWS
 		SleepEx(DWORD(msec), FALSE);// Sleep() crashes on MinGW (I do not know why), this is why SleepEx() is used here.
 #elif M_OS == M_OS_SYMBIAN
@@ -225,7 +225,7 @@ public:
 	 * created.
 	 * @return unique thread identifier.
 	 */
-	static inline T_ThreadID GetCurrentThreadID()throw(){
+	static inline T_ThreadID GetCurrentThreadID()noexcept{
 #if M_OS == M_OS_WINDOWS
 		return T_ThreadID(GetCurrentThreadId());
 #elif M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX

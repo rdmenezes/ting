@@ -96,7 +96,7 @@ public:
 	 * @brief Size of the flag set.
 	 * @return Number of flags in this flag set.
 	 */
-	index_t Size()const throw(){
+	index_t Size()const noexcept{
 		return T_Enum::ENUM_SIZE;
 	}
 
@@ -106,7 +106,7 @@ public:
 	 * @return true if the flag is set.
 	 * @return false otherwise.
 	 */
-	bool Get(enum T_Enum::Type flag)const throw(){
+	bool Get(enum T_Enum::Type flag)const noexcept{
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		return (this->flags[flag / 8] & (1 << (flag % 8))) != 0;
 	}
@@ -119,7 +119,7 @@ public:
 	 * @param i - index of the flag to get value of.
 	 * @return value of the flag given by index.
 	 */
-	bool Get(index_t i)const throw(){
+	bool Get(index_t i)const noexcept{
 		return this->Get(typename T_Enum::Type(i));
 	}
 
@@ -129,7 +129,7 @@ public:
 	 * @param value - value to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& SetTo(enum T_Enum::Type flag, bool value)throw(){
+	Flags& SetTo(enum T_Enum::Type flag, bool value)noexcept{
 		ASSERT(flag < T_Enum::ENUM_SIZE)
 		if(value){
 			this->flags[flag / 8] |= (1 << (flag % 8));
@@ -144,7 +144,7 @@ public:
 	 * @param flag - flag to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Set(enum T_Enum::Type flag)throw(){
+	Flags& Set(enum T_Enum::Type flag)noexcept{
 		return this->SetTo(flag, true);
 	}
 
@@ -153,7 +153,7 @@ public:
 	 * @param flag - flag to clear.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Clear(enum T_Enum::Type flag)throw(){
+	Flags& Clear(enum T_Enum::Type flag)noexcept{
 		return this->SetTo(flag, false);
 	}
 
@@ -166,7 +166,7 @@ public:
 	 * @param value - value to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& SetTo(index_t i, bool value)throw(){
+	Flags& SetTo(index_t i, bool value)noexcept{
 		return this->SetTo(typename T_Enum::Type(i), value);
 	}
 
@@ -177,7 +177,7 @@ public:
 	 * @param i - index of the flag to set.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Set(index_t i)throw(){
+	Flags& Set(index_t i)noexcept{
 		return this->SetTo(i, true);
 	}
 
@@ -188,7 +188,7 @@ public:
 	 * @param i - index of the flag to clear.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Clear(index_t i)throw(){
+	Flags& Clear(index_t i)noexcept{
 		return this->SetTo(i, false);
 	}
 
@@ -197,7 +197,7 @@ public:
 	 * @param value - value to set all flags to.
 	 * @return Reference to this Flags.
 	 */
-	Flags& SetAllTo(bool value)throw(){
+	Flags& SetAllTo(bool value)noexcept{
 		memset(this->flags, value ? ting::u8(-1) : 0, sizeof(this->flags));
 		return *this;
 	}
@@ -207,7 +207,7 @@ public:
 	 * @return true if all flags are cleared.
 	 * @return false otherwise.
 	 */
-	bool IsAllClear()const throw(){
+	bool IsAllClear()const noexcept{
 		ASSERT(sizeof(this->flags) > 0)
 		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
 			if(this->flags[i] != 0){
@@ -227,7 +227,7 @@ public:
 	 * @return true if all flags are set.
 	 * @return false otherwise.
 	 */
-	bool IsAllSet()const throw(){
+	bool IsAllSet()const noexcept{
 		ASSERT(sizeof(this->flags) > 0)
 		for(size_t i = 0; i != sizeof(this->flags) - 1; ++i){
 			if(this->flags[i] != ting::u8(-1)){
@@ -246,7 +246,7 @@ public:
 	 * @brief Inverts all the flags.
 	 * @return Reference to this Flags.
 	 */
-	Flags& Invert()throw(){
+	Flags& Invert()noexcept{
 		for(size_t i = 0; i != sizeof(this->flags); ++i){
 			this->flags[i] = ~this->flags[i];
 		}
@@ -257,7 +257,7 @@ public:
 	 * @brief Operator NOT.
 	 * @return Inverted instance of Flags.
 	 */
-	Flags operator~()const throw(){
+	Flags operator~()const noexcept{
 		return Flags(*this).Invert();
 	}
 
@@ -266,7 +266,7 @@ public:
      * @param f - flags to perform AND operation with.
      * @return Reference to this Flags.
      */
-	Flags& operator&=(const Flags& f)throw(){
+	Flags& operator&=(const Flags& f)noexcept{
 		for(size_t i = 0; i != sizeof(this->flags); ++i){
 			this->flags[i] &= f.flags[i];
 		}
@@ -278,7 +278,7 @@ public:
      * @param f - flags to perform AND operation with.
      * @return Instance of Flags resulting from AND operation.
      */
-	Flags operator&(const Flags& f)const throw(){
+	Flags operator&(const Flags& f)const noexcept{
 		return Flags(*this).operator&=(f);
 	}
 	
@@ -287,7 +287,7 @@ public:
      * @param f - flags to perform OR operation with.
      * @return Reference to this Flags.
      */
-	Flags& operator|=(const Flags& f)throw(){
+	Flags& operator|=(const Flags& f)noexcept{
 		for(size_t i = 0; i != sizeof(this->flags); ++i){
 			this->flags[i] |= f.flags[i];
 		}
@@ -299,7 +299,7 @@ public:
      * @param f - flags to perform OR operation with.
      * @return Instance of Flags resulting from OR operation.
      */
-	Flags operator|(const Flags& f)const throw(){
+	Flags operator|(const Flags& f)const noexcept{
 		return Flags(*this).operator|=(f);
 	}
 	
@@ -308,7 +308,7 @@ public:
      * @param f - flags to perform XOR operation with.
      * @return Reference to this Flags.
      */
-	Flags& operator^=(const Flags& f)throw(){
+	Flags& operator^=(const Flags& f)noexcept{
 		for(size_t i = 0; i != sizeof(this->flags); ++i){
 			this->flags[i] ^= f.flags[i];
 		}
@@ -320,7 +320,7 @@ public:
      * @param f - flags to perform OR operation with.
      * @return Instance of Flags resulting from OR operation.
      */
-	Flags operator^(const Flags& f)const throw(){
+	Flags operator^(const Flags& f)const noexcept{
 		return Flags(*this).operator^=(f);
 	}
 	

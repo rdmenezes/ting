@@ -94,7 +94,7 @@ public:
 	 * @brief Destructor.
 	 * When called, it also destroys all messages on the queue.
 	 */
-	~Queue()throw();
+	~Queue()noexcept;
 
 
 
@@ -102,7 +102,7 @@ public:
 	 * @brief Pushes a new message to the queue.
 	 * @param msg - the message to push into the queue.
 	 */
-	void PushMessage(Ptr<Message> msg)throw();
+	void PushMessage(Ptr<Message> msg)noexcept;
 
 
 

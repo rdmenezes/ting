@@ -109,7 +109,7 @@ public:
 		return *T_InstanceOwner::instance;
 	}
 
-	virtual ~IntrusiveSingleton()throw(){
+	virtual ~IntrusiveSingleton()noexcept{
 		ASSERT(T_InstanceOwner::instance == static_cast<T*>(this))
 		T_InstanceOwner::instance = 0;
 	}

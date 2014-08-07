@@ -38,7 +38,7 @@ Mutex quitMessageMutex;
 
 
 
-void MsgThread::PushPreallocatedQuitMessage()throw(){
+void MsgThread::PushPreallocatedQuitMessage()noexcept{
 	Mutex::Guard mutexGuard(quitMessageMutex);
 	
 	if(this->quitMessage.IsNotValid()){

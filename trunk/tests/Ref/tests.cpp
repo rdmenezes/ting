@@ -120,7 +120,7 @@ public:
 		destroyed(0)
 	{}
 
-	~TestClass()throw(){
+	~TestClass()noexcept{
 		if(this->destroyed){
 			*this->destroyed = true;
 		}
@@ -220,7 +220,7 @@ public:
 		return new TestClass();
 	}
 
-	~TestClass()throw(){
+	~TestClass()noexcept{
 		if(this->destroyed){
 			*this->destroyed = true;
 		}
@@ -412,7 +412,7 @@ public:
 			destroyed(destroyed)
 	{}
 
-	~C()throw(){
+	~C()noexcept{
 		this->destroyed = true;
 	}
 };

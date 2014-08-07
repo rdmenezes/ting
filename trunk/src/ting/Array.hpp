@@ -109,13 +109,13 @@ template <class T> class Array : public ting::Buffer<T>{
 		}
 	}
 
-	inline void DestroyObjects()throw(){
+	inline void DestroyObjects()noexcept{
 		for(T* p = &this->buf[0]; p != &this->buf[this->size]; ++p){
 			p->~T();
 		}
 	}
 
-	inline void FreeMemory()throw(){
+	inline void FreeMemory()noexcept{
 		ting::u8 *buffer = const_cast<ting::u8*>(reinterpret_cast<const ting::u8*>(this->buf));
 
 		//check for strict aliasing
@@ -126,7 +126,7 @@ template <class T> class Array : public ting::Buffer<T>{
 
 
 
-	inline void Destroy()throw(){
+	inline void Destroy()noexcept{
 		this->DestroyObjects();
 		this->FreeMemory();
 	}
@@ -231,7 +231,7 @@ public:
 
 
 
-	~Array()throw(){
+	~Array()noexcept{
 		M_ARRAY_PRINT(<< "Array::~Array(): invoked" << std::endl)
 		this->Destroy();
 		M_ARRAY_PRINT(<< "Array::~Array(): exit" << std::endl)
@@ -289,7 +289,7 @@ public:
 	 * @return true - if this Array object holds memory buffer of not zero size.
 	 * @return false - if this Array object does not hold any memory buffer.
 	 */
-	inline bool IsValid()const throw(){
+	inline bool IsValid()const noexcept{
 		return this->buf != 0;
 	}
 
@@ -301,7 +301,7 @@ public:
 	 * @return true - if Array is not valid.
 	 * @return false - if Array is valid.
 	 */
-	inline bool IsNotValid()const throw(){
+	inline bool IsNotValid()const noexcept{
 		return !this->IsValid();
 	}
 
@@ -326,7 +326,7 @@ public:
 	 * Frees memory buffer hold by Array object (if any).
 	 * After that the Array object becomes invalid.
 	 */
-	inline void Reset()throw(){
+	inline void Reset()noexcept{
 		this->Destroy();
 		this->buf = 0;
 		this->size = 0;
@@ -334,7 +334,7 @@ public:
 	
 	
 	
-	inline operator const Array<const T>& ()const throw(){
+	inline operator const Array<const T>& ()const noexcept{
 		return *reinterpret_cast<const Array<const T>* >(this);
 	}
 	

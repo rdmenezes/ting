@@ -61,7 +61,7 @@ class Lib : public IntrusiveSingleton<Lib>{
 public:
 	Lib();
 
-	~Lib()throw();
+	~Lib()noexcept;
 };
 
 

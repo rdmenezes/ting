@@ -82,7 +82,7 @@ class Flag{
 #	endif
 #endif
 
-	inline static void MemoryBarrier()throw(){
+	inline static void MemoryBarrier()noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		//do nothing
 
@@ -148,7 +148,7 @@ public:
 	 * be changed in parallel. It does not set any memory barrier.
 	 * @return current flag value.
 	 */
-	inline bool Get()const throw(){
+	inline bool Get()const noexcept{
 #if M_COMPILER == M_COMPILER_MSVC
 		return this->flag == 0 ? false : true; //this is to avoid compiler warning
 #else
@@ -165,7 +165,7 @@ public:
 	 * @param value - the flag value to set.
 	 * @return old flag value.
 	 */
-	inline bool Set(bool value = true)throw(){
+	inline bool Set(bool value = true)noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
 			ting::mt::Mutex::Guard mutexGuard(this->mutex);
@@ -248,7 +248,7 @@ public:
 	 * @param value - the flag value to set.
 	 * @return old flag value.
 	 */
-	inline bool SetAcquire(bool value = true)throw(){
+	inline bool SetAcquire(bool value = true)noexcept{
 		bool ret = this->Set(value);
 		atomic::Flag::MemoryBarrier();
 		return ret;
@@ -264,7 +264,7 @@ public:
 	 * @param value - the flag value to set.
 	 * @return old flag value.
 	 */
-	inline bool SetRelease(bool value = true)throw(){
+	inline bool SetRelease(bool value = true)noexcept{
 		atomic::Flag::MemoryBarrier();
 		return this->Set(value);
 	}
@@ -277,7 +277,7 @@ public:
 	 * its implementation can be faster.
 	 * It does not set any memory barrier.
 	 */
-	inline void Clear()throw(){
+	inline void Clear()noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		{
 			//still need to lock the mutex to generate the memory barrier.
@@ -301,7 +301,7 @@ public:
 	 * It sets acquire memory semantics barrier. It means that on weakly ordered architectures
 	 * memory access operations which go after the ClearAcquire() will be executed exactly after it.
 	 */
-	inline void ClearAcquire()throw(){
+	inline void ClearAcquire()noexcept{
 		this->Clear();
 		Flag::MemoryBarrier();
 	}
@@ -315,7 +315,7 @@ public:
 	 * It sets release memory semantics barrier. It means that on weakly ordered architectures
 	 * memory access operations which go before the ClearRelease() will be executed exactly before it.
 	 */
-	inline void ClearRelease()throw(){
+	inline void ClearRelease()noexcept{
 		Flag::MemoryBarrier();
 		this->Clear();
 	}
@@ -377,7 +377,7 @@ public:
 	 * reading the lock value until it becomes 'unlocked' and then try to lock again.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
-	inline void Lock()throw(){
+	inline void Lock()noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Lock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
@@ -399,7 +399,7 @@ public:
 	 * This will do Thread::Sleep(0) in the busy loop if the lock cannot be acquired immediately.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
-	inline void LockYield()throw(){
+	inline void LockYield()noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Lock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
@@ -420,7 +420,7 @@ public:
 	 * @brief Unlock the spinlock.
 	 * Right before releasing the lock the memory barrier is set.
 	 */
-	inline void Unlock()throw(){
+	inline void Unlock()noexcept{
 #if defined(M_ATOMIC_USE_MUTEX_FALLBACK)
 		this->mutex.Unlock();
 #elif M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64 || M_CPU == M_CPU_ARM
@@ -445,13 +445,13 @@ public:
 	class Guard{
 		SpinLock& sl;
 	public:
-		Guard(SpinLock& sl)throw() :
+		Guard(SpinLock& sl)noexcept :
 				sl(sl)
 		{
 			this->sl.Lock();
 		}
 		
-		~Guard()throw(){
+		~Guard()noexcept{
 			this->sl.Unlock();
 		}
 	};
@@ -466,13 +466,13 @@ public:
 	class GuardYield{
 		SpinLock& sl;
 	public:
-		GuardYield(SpinLock& sl)throw() :
+		GuardYield(SpinLock& sl)noexcept :
 				sl(sl)
 		{
 			this->sl.LockYield();
 		}
 		
-		~GuardYield()throw(){
+		~GuardYield()noexcept{
 			this->sl.Unlock();
 		}
 	};
@@ -514,7 +514,7 @@ public:
 
 
 
-	inline ~S32()throw(){}
+	inline ~S32()noexcept{}
 
 
 
@@ -524,7 +524,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAdd(ting::s32 value)throw(){
+	inline ting::s32 FetchAndAdd(ting::s32 value)noexcept{
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		{
@@ -580,7 +580,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAddAcquire(ting::s32 value)throw(){
+	inline ting::s32 FetchAndAddAcquire(ting::s32 value)noexcept{
 		ting::s32 ret = this->FetchAndAdd(value);
 		atomic::Flag::MemoryBarrier();
 		return ret;
@@ -594,7 +594,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::s32 FetchAndAddRelease(ting::s32 value)throw(){
+	inline ting::s32 FetchAndAddRelease(ting::s32 value)noexcept{
 		atomic::Flag::MemoryBarrier();
 		return this->FetchAndAdd(value);
 	}
@@ -611,7 +611,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
+	inline ting::s32 CompareAndExchange(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
 #if M_CPU == M_CPU_X86 || M_CPU == M_CPU_X86_64
 
 		ting::s32 old;
@@ -708,7 +708,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchangeAcquire(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
+	inline ting::s32 CompareAndExchangeAcquire(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
 		ting::s32 ret = CompareAndExchange(compareTo, exchangeBy);
 		atomic::Flag::MemoryBarrier();
 		return ret;
@@ -726,7 +726,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::s32 CompareAndExchangeRelease(ting::s32 compareTo, ting::s32 exchangeBy)throw(){
+	inline ting::s32 CompareAndExchangeRelease(ting::s32 compareTo, ting::s32 exchangeBy)noexcept{
 		atomic::Flag::MemoryBarrier();
 		return CompareAndExchange(compareTo, exchangeBy);
 	}
@@ -749,7 +749,7 @@ public:
 			v(ting::s32(initialValue))
 	{}
 			
-	inline ~U32()throw(){}
+	inline ~U32()noexcept{}
 	
 	/**
 	 * @brief Adds the value to this atomic variable and returns its initial value.
@@ -757,7 +757,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAdd(ting::u32 value)throw(){
+	inline ting::u32 FetchAndAdd(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAdd(ting::s32(value)));
 	}
 	
@@ -767,7 +767,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAddAcquire(ting::u32 value)throw(){
+	inline ting::u32 FetchAndAddAcquire(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAddAcquire(ting::s32(value)));
 	}
 	
@@ -777,7 +777,7 @@ public:
 	 * @param value - the value to add to this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndAddRelease(ting::u32 value)throw(){
+	inline ting::u32 FetchAndAddRelease(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAddRelease(ting::s32(value)));
 	}
 	
@@ -787,7 +787,7 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtract(ting::u32 value)throw(){
+	inline ting::u32 FetchAndSubtract(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAdd(-ting::s32(value)));
 	}
 	
@@ -797,7 +797,7 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtractAcquire(ting::u32 value)throw(){
+	inline ting::u32 FetchAndSubtractAcquire(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAddAcquire(-ting::s32(value)));
 	}
 	
@@ -807,7 +807,7 @@ public:
 	 * @param value - the value to subtract from this atomic variable.
 	 * @return initial value of this atomic variable.
 	 */
-	inline ting::u32 FetchAndSubtractRelease(ting::u32 value)throw(){
+	inline ting::u32 FetchAndSubtractRelease(ting::u32 value)noexcept{
 		return ting::u32(this->v.FetchAndAddRelease(-ting::s32(value)));
 	}
 	
@@ -821,7 +821,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchange(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+	inline ting::u32 CompareAndExchange(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
 		return ting::u32(this->v.CompareAndExchange(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}
 
@@ -835,7 +835,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchangeAcquire(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+	inline ting::u32 CompareAndExchangeAcquire(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
 		return ting::u32(this->v.CompareAndExchangeAcquire(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}
 	
@@ -849,7 +849,7 @@ public:
 	 *                     Otherwise, the current value will remain untouched.
 	 * @return Previous value.
 	 */
-	inline ting::u32 CompareAndExchangeRelease(ting::u32 compareTo, ting::u32 exchangeBy)throw(){
+	inline ting::u32 CompareAndExchangeRelease(ting::u32 compareTo, ting::u32 exchangeBy)noexcept{
 		return ting::u32(this->v.CompareAndExchangeRelease(ting::s32(compareTo), ting::s32(exchangeBy)));
 	}
 };

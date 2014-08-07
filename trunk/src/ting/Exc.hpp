@@ -53,7 +53,7 @@ public:
 			message(message)
 	{}
 
-	virtual ~Exc()throw(){}
+	virtual ~Exc()noexcept{}
 
 	/**
 	 * @brief Returns a pointer to exception message.
@@ -62,7 +62,7 @@ public:
 	 *         Note, that after the exception object is destroyed
 	 *         the pointer returned by this method become invalid.
 	 */
-	inline const char *What()const throw(){
+	inline const char *What()const noexcept{
 		return this->what();
 	}
 
@@ -70,7 +70,7 @@ public:
 
 private:
 	//override from std::exception
-	const char *what()const throw(){
+	const char *what()const noexcept{
 		return this->message.c_str();
 	}
 };

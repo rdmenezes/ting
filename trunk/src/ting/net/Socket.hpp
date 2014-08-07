@@ -184,7 +184,7 @@ public:
 	/**
 	 * @brief Closes the socket disconnecting it if necessary.
 	 */
-	void Close()throw();
+	void Close()noexcept;
 
 
 

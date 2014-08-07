@@ -60,7 +60,7 @@ public:
      */
 	MemoryFile(){}
 	
-	virtual ~MemoryFile()throw(){}
+	virtual ~MemoryFile()noexcept{}
 
 	/**
 	 * @brief Current file size.
@@ -74,7 +74,7 @@ protected:
 
 	void OpenInternal(E_Mode mode) OVERRIDE;
 	
-	void CloseInternal()throw() OVERRIDE{}
+	void CloseInternal()noexcept OVERRIDE{}
 	
 	size_t ReadInternal(const ting::Buffer<ting::u8>& buf) OVERRIDE;
 	

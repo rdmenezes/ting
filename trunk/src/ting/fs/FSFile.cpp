@@ -100,7 +100,7 @@ void FSFile::OpenInternal(E_Mode mode){
 
 
 //override
-void FSFile::CloseInternal()throw(){
+void FSFile::CloseInternal()noexcept{
 	ASSERT(this->handle)
 
 	fclose(this->handle);

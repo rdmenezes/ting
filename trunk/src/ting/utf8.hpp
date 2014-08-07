@@ -74,7 +74,7 @@ public:
 	 * @brief Get current unicode character.
      * @return unicode value of the character this interator is currently pointing to.
      */
-	ting::u32 Char()const throw(){
+	ting::u32 Char()const noexcept{
 		return this->c;
 	}
 
@@ -86,7 +86,7 @@ public:
 	 * If iterator points to the end of the string before this operation then the result of this operation is undefined.
      * @return reference to this iterator object.
      */
-	Iterator& operator++()throw(){
+	Iterator& operator++()noexcept{
 		ting::u8 b = *this->n;
 //		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
 		++this->n;
@@ -125,7 +125,7 @@ public:
      * @return true if iterator points to the end of the string.
 	 * @return false otherwise.
      */
-	bool IsEnd()const throw(){
+	bool IsEnd()const noexcept{
 		return this->c == 0;
 	}
 
@@ -134,7 +134,7 @@ public:
      * @return false if iterator points to the end of the string.
 	 * @return true otherwise.
      */
-	bool IsNotEnd()const throw(){
+	bool IsNotEnd()const noexcept{
 		return !this->IsEnd();
 	}
 };

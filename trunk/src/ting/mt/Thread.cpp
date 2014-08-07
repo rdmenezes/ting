@@ -105,7 +105,7 @@ Thread::Thread(){
 
 
 
-Thread::~Thread()throw(){
+Thread::~Thread()noexcept{
 	ASSERT_INFO(
 			this->state == JOINED || this->state == NEW,
 			"~Thread() destructor is called while the thread was not joined before. "
@@ -188,7 +188,7 @@ void Thread::Start(size_t stackSize){
 
 
 
-void Thread::Join() throw(){
+void Thread::Join() noexcept{
 //	TRACE(<< "Thread::Join(): enter" << std::endl)
 
 	//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously.

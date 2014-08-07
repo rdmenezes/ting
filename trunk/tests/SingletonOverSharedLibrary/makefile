@@ -12,7 +12,7 @@ endif
 this_name := testso
 this_so_name := 0
 
-this_cflags :=
+this_cflags += -std=c++11
 this_cflags += -Wall
 this_cflags += #-DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
@@ -40,7 +40,7 @@ this_name := tests
 
 
 #compiler flags
-this_cflags :=
+this_cflags += -std=c++11
 this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!

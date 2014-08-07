@@ -49,7 +49,7 @@ Socket::~Socket()noexcept{
 
 
 
-void Socket::Close()throw(){
+void Socket::Close()noexcept{
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 	ASSERT_INFO(!this->IsAdded(), "Socket::Close(): trying to close socket which is added to the WaitSet. Remove the socket from WaitSet before closing.")
 	

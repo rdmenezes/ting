@@ -82,7 +82,7 @@ template <class T_Ret> class FuncSlot##num_func_params : public SlotLink{ \
 public: \
 	T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)); \
 \
-	FuncSlot##num_func_params(T_Ret(*function)(M_FUNC_PARAM_TYPES(num_func_params)))throw() : \
+	FuncSlot##num_func_params(T_Ret(*function)(M_FUNC_PARAM_TYPES(num_func_params)))noexcept : \
 			f(function) \
 	{} \
 	virtual bool Execute(M_FUNC_PARAMS_FULL(num_sig_params)){ \
@@ -99,7 +99,7 @@ public: \
 	T_Ob* o; \
 	T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)); \
 \
-	MethodSlot##num_meth_params(T_Ob* object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params)))throw() : \
+	MethodSlot##num_meth_params(T_Ob* object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params)))noexcept : \
 			o(object), \
 			m(method) \
 	{} \
@@ -118,7 +118,7 @@ public: \
 	WeakRef<T_Ob> o; \
 	T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)); \
 \
-	WeakRefMethodSlot##num_meth_params(const WeakRef<T_Ob>& object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params)))throw() : \
+	WeakRefMethodSlot##num_meth_params(const WeakRef<T_Ob>& object, T_Ret(T_Ob::*method)(M_FUNC_PARAM_TYPES(num_meth_params)))noexcept : \
 			o(object), \
 			m(method) \
 	{} \
@@ -131,7 +131,7 @@ public: \
 		} \
 	} \
 \
-	virtual bool IsAlive()const throw(){ \
+	virtual bool IsAlive()const noexcept{ \
 		return !this->o.IsSurelyInvalid(); \
 	} \
 };
@@ -192,7 +192,7 @@ template <class T_Ob, class T_Ret> void Connect(const WeakRef<T_Ob>& o, T_Ret(T_
 
 //Search for existing connection to a given function
 #define M_SEARCH_FUNCSLOT(num_func_params, num_sig_params) \
-template <class T_Ret> T_SlotLinkIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
+template <class T_Ret> T_SlotLinkIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))noexcept{ \
 	ASSERT(f) \
 	for(T_SlotLinkIter i = this->slotLink.begin(); i != this->slotLink.end(); ++i){ \
 		FuncSlot##num_func_params<T_Ret> *slot = \
@@ -211,7 +211,7 @@ template <class T_Ret> T_SlotLinkIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPE
 
 //const version
 #define M_SEARCH_FUNCSLOT_CONST(num_func_params, num_sig_params) \
-template <class T_Ret> inline T_SlotLinkConstIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const throw(){ \
+template <class T_Ret> inline T_SlotLinkConstIter SearchFuncSlot(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const noexcept{ \
 	return const_cast<Signal##num_sig_params*>(this)->SearchFuncSlot(f); \
 }
 
@@ -222,7 +222,7 @@ template <class T_Ret> inline T_SlotLinkConstIter SearchFuncSlot(T_Ret(*f)(M_FUN
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)noexcept \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
@@ -248,7 +248,7 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchMethSlot( \
 template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchMethSlot( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)const throw() \
+	)const noexcept \
 { \
 	return const_cast<Signal##num_sig_params*>(this)->SearchMethSlot(o, m); \
 }
@@ -261,7 +261,7 @@ template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchMethSlot( \
 template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)noexcept \
 { \
 	ASSERT(m) \
 	ting::Ref<T_Ob> ho(o); \
@@ -293,7 +293,7 @@ template <class T_Ob, class T_Ret> T_SlotLinkIter SearchWeakRefMethSlot( \
 template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchWeakRefMethSlot( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)const throw() \
+	)const noexcept \
 { \
 	return const_cast<Signal##num_sig_params*>(this)->SearchWeakRefMethSlot(o, m); \
 }
@@ -306,7 +306,7 @@ template <class T_Ob, class T_Ret> inline T_SlotLinkConstIter SearchWeakRefMethS
 
 //Disconnect function slot
 #define M_DISCONNECT_FUNC(num_func_params, unused) \
-template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))throw(){ \
+template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))noexcept{ \
 	ASSERT(f) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkIter i = this->SearchFuncSlot(f); \
@@ -322,7 +322,7 @@ template <class T_Ret> bool Disconnect(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_par
 template <class T_Ob, class T_Ret> bool Disconnect( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)noexcept \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
@@ -340,7 +340,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 template <class T_Ob, class T_Ret> bool Disconnect( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)throw() \
+	)noexcept \
 { \
 	ASSERT(m) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
@@ -360,7 +360,7 @@ template <class T_Ob, class T_Ret> bool Disconnect( \
 
 //Function slot
 #define M_ISCONNECTED_FUNC(num_func_params, unused) \
-template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const throw(){ \
+template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_params)))const noexcept{ \
 	ASSERT(f) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 	T_SlotLinkConstIter i = this->SearchFuncSlot(f); \
@@ -375,7 +375,7 @@ template <class T_Ret> bool IsConnected(T_Ret(*f)(M_FUNC_PARAM_TYPES(num_func_pa
 template <class T_Ob, class T_Ret> bool IsConnected( \
 		T_Ob* o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)const throw() \
+	)const noexcept \
 { \
 	ASSERT(o) \
 	ASSERT(m) \
@@ -392,7 +392,7 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 template <class T_Ob, class T_Ret> bool IsConnected( \
 		const ting::WeakRef<T_Ob>& o, \
 		T_Ret(T_Ob::*m)(M_FUNC_PARAM_TYPES(num_meth_params)) \
-	)const throw() \
+	)const noexcept \
 { \
 	ASSERT(m) \
 	ting::mt::Mutex::Guard mutexGuard(this->mutex); \
@@ -417,9 +417,9 @@ template <class T_Ob, class T_Ret> bool IsConnected( \
 M_TEMPLATE(n) class Signal##n{ \
 	class SlotLink{ \
 	public: \
-		virtual ~SlotLink()throw(){} \
+		virtual ~SlotLink()noexcept{} \
 		virtual bool Execute(M_FUNC_PARAMS_FULL(n)) = 0; \
-		virtual bool IsAlive()const throw(){ \
+		virtual bool IsAlive()const noexcept{ \
 			return true; \
 		} \
 	}; \
@@ -466,12 +466,12 @@ public: \
 	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_METH, ) \
 	M_REPEAT2(M_INCREMENT(n), M_ISCONNECTED_METH_WEAKREF, ) \
 \
-	void DisconnectAll()throw(){ \
+	void DisconnectAll()noexcept{ \
 		ting::mt::Mutex::Guard mutexGuard(this->mutex); \
 		this->slotLink.clear(); \
 	} \
 \
-	inline unsigned NumConnections()const throw(){ \
+	inline unsigned NumConnections()const noexcept{ \
 		return this->slotLink.size(); \
 	} \
 };

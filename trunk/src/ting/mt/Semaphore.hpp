@@ -101,7 +101,7 @@ public:
 	 */
 	Semaphore(unsigned initialValue = 0);
 
-	~Semaphore()throw();
+	~Semaphore()noexcept;
 
 	
 	/**
@@ -185,7 +185,7 @@ public:
 	 * Because of that, in the debug mode (DEBUG macro defined) there are assertions to
 	 * detect such a condition.
 	 */
-	inline void Signal()throw(){
+	inline void Signal()noexcept{
 //		TRACE(<< "Semaphore::Signal(): invoked" << std::endl)
 #if M_OS == M_OS_WINDOWS
 		if(ReleaseSemaphore(this->s, 1, NULL) == 0){

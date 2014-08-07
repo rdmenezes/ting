@@ -116,36 +116,36 @@ protected:
 
 
 
-	void SetCanReadFlag()throw(){
+	void SetCanReadFlag()noexcept{
 		this->readinessFlags |= READ;
 	}
 
-	void ClearCanReadFlag()throw(){
+	void ClearCanReadFlag()noexcept{
 		this->readinessFlags &= (~READ);
 	}
 
-	void SetCanWriteFlag()throw(){
+	void SetCanWriteFlag()noexcept{
 		this->readinessFlags |= WRITE;
 	}
 
-	void ClearCanWriteFlag()throw(){
+	void ClearCanWriteFlag()noexcept{
 		this->readinessFlags &= (~WRITE);
 	}
 
-	void SetErrorFlag()throw(){
+	void SetErrorFlag()noexcept{
 		this->readinessFlags |= ERROR_CONDITION;
 	}
 
-	void ClearErrorFlag()throw(){
+	void ClearErrorFlag()noexcept{
 		this->readinessFlags &= (~ERROR_CONDITION);
 	}
 
-	void ClearAllReadinessFlags()throw(){
+	void ClearAllReadinessFlags()noexcept{
 		this->readinessFlags = NOT_READY;
 	}
 
 public:
-	virtual ~Waitable()throw(){
+	virtual ~Waitable()noexcept{
 		ASSERT(!this->isAdded)
 	}
 
@@ -153,7 +153,7 @@ public:
 	 * @brief Check if "Can read" flag is set.
 	 * @return true if Waitable is ready for reading.
 	 */
-	bool CanRead()const throw(){
+	bool CanRead()const noexcept{
 		return (this->readinessFlags & READ) != 0;
 	}
 
@@ -161,7 +161,7 @@ public:
 	 * @brief Check if "Can write" flag is set.
 	 * @return true if Waitable is ready for writing.
 	 */
-	bool CanWrite()const throw(){
+	bool CanWrite()const noexcept{
 		return (this->readinessFlags & WRITE) != 0;
 	}
 
@@ -169,7 +169,7 @@ public:
 	 * @brief Check if "error" flag is set.
 	 * @return true if Waitable is in error state.
 	 */
-	bool ErrorCondition()const throw(){
+	bool ErrorCondition()const noexcept{
 		return (this->readinessFlags & ERROR_CONDITION) != 0;
 	}
 
@@ -179,7 +179,7 @@ public:
 	 * @return pointer to the user data.
 	 * @return zero pointer if the user data was not set.
 	 */
-	void* GetUserData()throw(){
+	void* GetUserData()noexcept{
 		return this->userData;
 	}
 
@@ -188,7 +188,7 @@ public:
 	 * See description of GetUserData() for more details.
 	 * @param data - pointer to the user data to associate with this Waitable.
 	 */
-	void SetUserData(void* data)throw(){
+	void SetUserData(void* data)noexcept{
 		this->userData = data;
 	}
 
@@ -304,7 +304,7 @@ public:
 	 * It is user's responsibility to remove any waitable objects from the waitset
 	 * before the wait set object is destroyed.
 	 */
-	~WaitSet()throw(){
+	~WaitSet()noexcept{
 		//assert the wait set is empty
 		ASSERT_INFO(this->numWaitables == 0, "attempt to destroy WaitSet containig Waitables")
 #if M_OS == M_OS_WINDOWS
@@ -324,7 +324,7 @@ public:
 	 * @brief Get maximum size of the wait set.
 	 * @return maximum number of Waitables this WaitSet can hold.
 	 */
-	unsigned Size()const throw(){
+	unsigned Size()const noexcept{
 		return this->size;
 	}
 
@@ -332,7 +332,7 @@ public:
 	 * @brief Get number of Waitables already added to this WaitSet.
 	 * @return number of Waitables added to this WaitSet.
 	 */
-	unsigned NumWaitables()const throw(){
+	unsigned NumWaitables()const noexcept{
 		return this->numWaitables;
 	}
 
@@ -365,7 +365,7 @@ public:
 	 * @throw ting::WaitSet::Exc - in case the given Waitable is not added to this wait set or
 	 *                    other error occurs.
 	 */
-	void Remove(Waitable& w)throw();
+	void Remove(Waitable& w)noexcept;
 
 
 
