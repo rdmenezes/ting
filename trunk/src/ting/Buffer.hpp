@@ -88,7 +88,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	Buffer(T* bufPtr, size_t bufSize)noexcept :
+	Buffer(T* bufPtr, size_t bufSize = 0)noexcept :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
