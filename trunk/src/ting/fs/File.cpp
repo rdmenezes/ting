@@ -87,7 +87,7 @@ bool File::IsDir()const noexcept{
 
 
 
-ting::Array<std::string> File::ListDirContents(size_t maxEntries){
+std::vector<std::string> File::ListDirContents(size_t maxEntries){
 	throw File::Exc("File::ListDirContents(): not supported for this File instance");
 }
 
@@ -201,7 +201,7 @@ struct Chunk : public std::array<std::uint8_t, DReadBlockSize>{
 
 
 
-ting::Array<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
+std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	if(this->IsOpened()){
 		throw File::IllegalStateExc("file should not be opened");
 	}
@@ -242,26 +242,26 @@ ting::Array<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	ASSERT(maxBytesToLoad >= bytesRead)
 	
 	if(chunks.size() == 0){
-		return ting::Array<std::uint8_t>();
+		return std::move(std::vector<std::uint8_t>());
 	}
 	
 	ASSERT(chunks.size() >= 1)
 	
-	ting::Array<std::uint8_t> ret((chunks.size() - 1) * chunks.front().size() + res);
+	std::vector<std::uint8_t> ret((chunks.size() - 1) * chunks.front().size() + res);
 	
 	std::uint8_t* p;
-	for(p = ret.begin(); chunks.size() > 1; p += chunks.front().size()){
-		ASSERT(p < ret.end())
-		memcpy(p, chunks.front().begin(), chunks.front().size());
+	for(p = &*ret.begin(); chunks.size() > 1; p += chunks.front().size()){
+		ASSERT(p < &*ret.end())
+		memcpy(p, &*chunks.front().begin(), chunks.front().size());
 		chunks.pop_front();
 	}
 	
 	ASSERT(chunks.size() == 1)
 	ASSERT(res <= chunks.front().size())
 	memcpy(p, chunks.front().begin(), res);
-	ASSERT(p + res == ret.end())
+	ASSERT(p + res == &*ret.end())
 	
-	return ret;
+	return std::move(ret);
 }
 
 

@@ -129,7 +129,7 @@ public:
 
 
 	//override
-	virtual ting::Array<std::string> ListDirContents(size_t maxEntries = 0);
+	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0);
 	
 	/**
 	 * @brief Create new instance managed by auto-pointer.

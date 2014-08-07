@@ -279,7 +279,7 @@ std::string FSFile::GetHomeDir(){
 
 
 //override
-ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
+std::vector<std::string> FSFile::ListDirContents(size_t maxEntries){
 	if(!this->IsDir()){
 		throw File::Exc("FSFile::ListDirContents(): this is not a directory");
 	}
@@ -395,12 +395,5 @@ ting::Array<std::string> FSFile::ListDirContents(size_t maxEntries){
 #	error "FSFile::ListDirContents(): version is not implemented yet for this os"
 
 #endif
-	
-	ting::Array<std::string> filesArray(files.size());
-	
-	for(size_t i = 0; i < files.size(); ++i){
-		filesArray[i] = files[i];
-	}
-
-	return filesArray;
+	return std::move(files);
 }//~ListDirContents()

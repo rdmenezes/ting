@@ -315,7 +315,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, const Buffer<W
 	while(true){
 		res = epoll_wait(
 				this->epollSet,
-				this->revents.begin(),
+				&*this->revents.begin(),
 				this->revents.size(),
 				epollTimeout
 			);
@@ -339,8 +339,8 @@ unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, const Buffer<W
 
 	unsigned numEvents = 0;
 	for(
-			epoll_event *e = this->revents.begin();
-			e < this->revents.begin() + res;
+			epoll_event *e = &*this->revents.begin();
+			e < &*this->revents.begin() + res;
 			++e
 		)
 	{

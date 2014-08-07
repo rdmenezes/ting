@@ -42,7 +42,7 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "debug.hpp"
 #include "Exc.hpp"
-#include "Array.hpp"
+#include "Buffer.hpp"
 
 
 #if M_OS == M_OS_WINDOWS
@@ -237,7 +237,7 @@ class WaitSet{
 #elif M_OS == M_OS_LINUX
 	int epollSet;
 
-	Array<epoll_event> revents;//used for getting the result from epoll_wait()
+	std::vector<epoll_event> revents;//used for getting the result from epoll_wait()
 #elif M_OS == M_OS_MACOSX
 	int queue; // kqueue
 	

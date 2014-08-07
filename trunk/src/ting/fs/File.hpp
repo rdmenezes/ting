@@ -34,7 +34,6 @@ THE SOFTWARE. */
 #include "../debug.hpp"
 #include "../types.hpp"
 #include "../Buffer.hpp"
-#include "../Array.hpp"
 
 #include "Exc.hpp"
 
@@ -258,7 +257,7 @@ public:
 	 * @param maxEntries - maximum number of entries in the returned list. 0 means no limit.
 	 * @return The array of string objects representing the directory entries.
 	 */
-	virtual ting::Array<std::string> ListDirContents(size_t maxEntries = 0);
+	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0);
 
 	/**
 	 * @brief Read data from file.
@@ -438,7 +437,7 @@ public:
 	 * @return Array containing loaded file data.
 	 * @throw IllegalStateExc - if file is already opened.
 	 */
-	ting::Array<std::uint8_t> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
+	std::vector<std::uint8_t> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
 
 	/**
 	 * @brief Check for file/directory existence.

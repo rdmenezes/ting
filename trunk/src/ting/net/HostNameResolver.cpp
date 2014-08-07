@@ -650,18 +650,18 @@ private:
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX || M_OS == M_OS_UNIX
 			ting::fs::FSFile f("/etc/resolv.conf");
 			
-			ting::Array<std::uint8_t> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
+			std::vector<std::uint8_t> buf = f.LoadWholeFileIntoMemory(0xfff);//4kb max
 			
-			for(std::uint8_t* p = buf.begin(); p != buf.end(); ++p){
+			for(std::uint8_t* p = &*buf.begin(); p != &*buf.end(); ++p){
 				std::uint8_t* start = p;
 				
-				while(p != buf.end() && *p != '\n'){
+				while(p != &*buf.end() && *p != '\n'){
 					++p;
 				}
 				
 				ASSERT(p >= start)
 				std::string line(reinterpret_cast<const char*>(start), size_t(p - start));
-				if(p == buf.end()){
+				if(p == &*buf.end()){
 					--p;
 				}
 				

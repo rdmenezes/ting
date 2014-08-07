@@ -18,7 +18,7 @@ void Run(){
 	for(unsigned numToSeek = 0; numToSeek < 0x1000; numToSeek += (0x1000 / 4)){
 		std::array<std::uint8_t, 1> testByte;
 		{
-			ting::Array<std::uint8_t> buf(numToSeek);
+			std::vector<std::uint8_t> buf(numToSeek);
 			
 			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 			
@@ -67,15 +67,15 @@ void Run(){
 	ting::fs::FSFile curDir("./");
 	ting::fs::File& f = curDir;
 	
-	ting::Array<std::string> r = f.ListDirContents();
+	std::vector<std::string> r = f.ListDirContents();
 	ASSERT_ALWAYS(r.size() >= 3)
 //	TRACE_ALWAYS(<< "list = " << r << std::endl)
 	
-	ting::Array<std::string> r1 = f.ListDirContents(1);
+	std::vector<std::string> r1 = f.ListDirContents(1);
 	ASSERT_ALWAYS(r1.size() == 1)
 	ASSERT_ALWAYS(r[0] == r1[0])
 	
-	ting::Array<std::string> r2 = f.ListDirContents(2);
+	std::vector<std::string> r2 = f.ListDirContents(2);
 	ASSERT_ALWAYS(r2.size() == 2)
 	ASSERT_ALWAYS(r[0] == r2[0])
 	ASSERT_ALWAYS(r[1] == r2[1])
@@ -104,27 +104,27 @@ void Run(){
 	ASSERT_ALWAYS(!f.IsOpened())
 	
 	{
-		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory();
+		std::vector<std::uint8_t> r = f.LoadWholeFileIntoMemory();
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 	
 	{
-		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(66874);
+		std::vector<std::uint8_t> r = f.LoadWholeFileIntoMemory(66874);
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 	
 	{
-		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(4096);
+		std::vector<std::uint8_t> r = f.LoadWholeFileIntoMemory(4096);
 		ASSERT_ALWAYS(r.size() == 4096)
 	}
 	
 	{
-		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(35);
+		std::vector<std::uint8_t> r = f.LoadWholeFileIntoMemory(35);
 		ASSERT_ALWAYS(r.size() == 35)
 	}
 	
 	{
-		ting::Array<std::uint8_t> r = f.LoadWholeFileIntoMemory(1000000);
+		std::vector<std::uint8_t> r = f.LoadWholeFileIntoMemory(1000000);
 		ASSERT_ALWAYS(r.size() == 66874)
 	}
 }

@@ -15,15 +15,15 @@ namespace TestSimple{
 void Run(){
 	ting::fs::FSFile fi("text.txt");
 	
-	ting::Array<std::uint8_t> buf = fi.LoadWholeFileIntoMemory();
+	std::vector<std::uint8_t> buf = fi.LoadWholeFileIntoMemory();
 	
 //	TRACE_ALWAYS(<< "buf.Size() = " << buf.Size() << std::endl)
 	
-	ting::Array<std::uint8_t> str(buf.size() + 1);
-	memcpy(str.begin(), buf.begin(), buf.size());
+	std::vector<std::uint8_t> str(buf.size() + 1);
+	memcpy(&*str.begin(), &*buf.begin(), buf.size());
 	str[buf.size()] = 0; //null-terminate
 	
-	utf8::Iterator i(reinterpret_cast<char*>(str.begin()));
+	utf8::Iterator i(reinterpret_cast<char*>(&*str.begin()));
 	
 	ASSERT_ALWAYS(i.Char() == 'a')
 	++i;

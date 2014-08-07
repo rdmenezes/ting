@@ -8,7 +8,6 @@
 #include "../../src/ting/Ptr.hpp"
 #include "../../src/ting/WaitSet.hpp"
 #include "../../src/ting/Buffer.hpp"
-#include "../../src/ting/Array.hpp"
 #include "../../src/ting/config.hpp"
 #include "../../src/ting/util.hpp"
 
@@ -200,7 +199,7 @@ void Run(){
 
 
 	std::uint32_t scnt = 0;
-	ting::Array<std::uint8_t> sendBuffer;
+	std::vector<std::uint8_t> sendBuffer;
 	unsigned bytesSent = 0;
 
 	std::uint32_t rcnt = 0;
@@ -244,7 +243,7 @@ void Run(){
 				ASSERT_ALWAYS(bytesSent <= sendBuffer.size())
 
 				if(sendBuffer.size() == bytesSent){
-					sendBuffer.Init(0xffff + 1);
+					sendBuffer.reserve(0xffff + 1);
 					bytesSent = 0;
 					
 					STATIC_ASSERT(sizeof(std::uint32_t) == 4)
@@ -254,13 +253,13 @@ void Run(){
 							<< (sendBuffer.size() % sizeof(std::uint32_t))
 						)
 
-					std::uint8_t* p = sendBuffer.begin();
-					for(; p != sendBuffer.end(); p += sizeof(std::uint32_t)){
-						ASSERT_INFO_ALWAYS(p < (sendBuffer.end() - (sizeof(std::uint32_t) - 1)), "p = " << p << " sendBuffer.End() = " << sendBuffer.end())
+					std::uint8_t* p = &*sendBuffer.begin();
+					for(; p != &*sendBuffer.end(); p += sizeof(std::uint32_t)){
+						ASSERT_INFO_ALWAYS(p < (&*sendBuffer.end() - (sizeof(std::uint32_t) - 1)), "p = " << p << " sendBuffer.End() = " << &*sendBuffer.end())
 						ting::util::Serialize32LE(scnt, p);
 						++scnt;
 					}
-					ASSERT_ALWAYS(p == sendBuffer.end())
+					ASSERT_ALWAYS(p == &*sendBuffer.end())
 				}
 
 				ASSERT_ALWAYS(sendBuffer.size() > 0)
