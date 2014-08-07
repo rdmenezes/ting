@@ -50,7 +50,7 @@ namespace fs{
 class FSFile : public File{
 	std::string rootDir;
 
-	ting::Inited<FILE*, 0> handle;
+	FILE* handle = nullptr;
 
 protected:
 

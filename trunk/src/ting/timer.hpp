@@ -136,7 +136,7 @@ class Timer{
 		return std::uint32_t(-1);
 	}
 	
-	ting::Inited<bool, false> isRunning;//true if timer has been started and has not stopped yet
+	bool isRunning = false;//true if timer has been started and has not stopped yet
 
 private:
 	typedef std::multimap<std::uint64_t, Timer*> T_TimerList;
@@ -220,7 +220,7 @@ class Lib : public IntrusiveSingleton<Lib>{
 
 	class TimerThread : public ting::mt::Thread{
 	public:
-		ting::Inited<volatile bool, false> quitFlag;
+		volatile bool quitFlag = false;
 
 		ting::mt::Mutex mutex;
 		ting::mt::Semaphore sema;
@@ -235,8 +235,8 @@ class Lib : public IntrusiveSingleton<Lib>{
 
 
 
-		ting::Inited<std::uint64_t, 0> ticks;
-		ting::Inited<bool, false> incTicks;//flag indicates that high word of ticks needs increment
+		std::uint64_t ticks = 0;
+		bool incTicks = false;//flag indicates that high word of ticks needs increment
 
 		//This function should be called at least once in 16 days (half of std::uint32_t(-1) milliseconds)
 		//in order to function properly.

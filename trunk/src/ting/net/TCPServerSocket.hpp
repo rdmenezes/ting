@@ -51,7 +51,7 @@ namespace net{
  * and accept them creating an ordinary TCP socket for it.
  */
 class TCPServerSocket : public Socket{
-	ting::Inited<bool, false> disableNaggle;//this flag indicates if accepted sockets should be created with disabled Naggle
+	bool disableNaggle = false;//this flag indicates if accepted sockets should be created with disabled Naggle
 public:
 	/**
 	 * @brief Creates an invalid (unopened) TCP server socket.

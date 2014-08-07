@@ -95,7 +95,7 @@ public:
 			ASSERT_ALWAYS(sock.GetLocalAddress().host.IPv4Host() == 0x7f000001)
 			ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
-			ting::StaticBuffer<std::uint8_t, 4> data;
+			std::array<std::uint8_t, 4> data;
 			data[0] = '0';
 			data[1] = '1';
 			data[2] = '2';
@@ -129,7 +129,7 @@ void Run(){
 		
 		ASSERT_ALWAYS(sock.GetRemoteAddress().host.IPv4Host() == 0x7f000001)
 
-		ting::StaticBuffer<std::uint8_t, 4> data;
+		std::array<std::uint8_t, 4> data;
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 30; ++i){
 			ASSERT_ALWAYS(bytesReceived < 4)
@@ -204,17 +204,17 @@ void Run(){
 	unsigned bytesSent = 0;
 
 	std::uint32_t rcnt = 0;
-	ting::StaticBuffer<std::uint8_t, sizeof(std::uint32_t)> recvBuffer;
+	std::array<std::uint8_t, sizeof(std::uint32_t)> recvBuffer;
 	unsigned recvBufBytes = 0;
 
 
 	std::uint32_t startTime = ting::timer::GetTicks();
 	
 	while(ting::timer::GetTicks() - startTime < 5000){ //5 seconds
-		ting::StaticBuffer<ting::Waitable*, 2> triggered;
+		std::array<ting::Waitable*, 2> triggered;
 
-		unsigned numTriggered = ws.WaitWithTimeout(1000, &triggered);
-//		unsigned numTriggered = ws.Wait(&triggered);
+		unsigned numTriggered = ws.WaitWithTimeout(1000, triggered);
+//		unsigned numTriggered = ws.Wait(triggered);
 
 		ASSERT_ALWAYS(numTriggered <= 2)
 
@@ -287,7 +287,7 @@ void Run(){
 				ASSERT_ALWAYS(!sockR.CanWrite())
 
 				while(true){
-					ting::StaticBuffer<std::uint8_t, 0x2000> buf; //8kb buffer
+					std::array<std::uint8_t, 0x2000> buf; //8kb buffer
 					unsigned numBytesReceived;
 					try{
 						numBytesReceived = sockR.Recv(buf);
@@ -394,7 +394,7 @@ void Run(){
 		//READ
 
 		while(true){
-			ting::StaticBuffer<std::uint8_t, 0x2000> buf; //8kb buffer
+			std::array<std::uint8_t, 0x2000> buf; //8kb buffer
 			unsigned numBytesReceived;
 			try{
 				numBytesReceived = sockR.Recv(buf);
@@ -484,7 +484,7 @@ void Run(){
 	try{
 		sendSock.Open();
 
-		ting::StaticBuffer<std::uint8_t, 4> data;
+		std::array<std::uint8_t, 4> data;
 		data[0] = '0';
 		data[1] = '1';
 		data[2] = '2';
@@ -511,7 +511,7 @@ void Run(){
 	}
 
 	try{
-		ting::StaticBuffer<std::uint8_t, 1024> buf;
+		std::array<std::uint8_t, 1024> buf;
 		
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 10; ++i){
@@ -557,7 +557,7 @@ void Run(){
 
 			ws.Add(sendSock, ting::Waitable::READ_AND_WRITE);
 
-			if(ws.WaitWithTimeout(3000, 0) == 0){
+			if(ws.WaitWithTimeout(3000) == 0){
 				//if timeout was hit
 //NOTE: for some reason waiting for writing to UDP socket does not work on Win32 (aaarrrggghh).
 #if M_OS == M_OS_WINDOWS

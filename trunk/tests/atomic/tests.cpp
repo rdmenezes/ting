@@ -42,7 +42,7 @@ public:
 void Run(){
 	ting::atomic::S32 a;
 	
-	ting::StaticBuffer<ting::Ptr<Thread>, 100> threads;
+	std::array<ting::Ptr<Thread>, 100> threads;
 	
 	//Create and start all the threads
 	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){

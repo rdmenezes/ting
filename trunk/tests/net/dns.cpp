@@ -166,7 +166,7 @@ public:
 	
 	Resolver(){}
 	
-	ting::Inited<volatile bool, false> called;
+	volatile bool called = false;
 	
 	//override
 	void OnCompleted_ts(E_Result result, ting::net::IPAddress::Host ip)noexcept{

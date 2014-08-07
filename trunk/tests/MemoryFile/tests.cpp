@@ -26,7 +26,7 @@ void Run(){
 	}
 	
 	{
-		ting::StaticBuffer<std::uint8_t, 4> b;
+		std::array<std::uint8_t, 4> b;
 		
 		ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
 		

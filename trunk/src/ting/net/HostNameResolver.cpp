@@ -153,7 +153,7 @@ public:
 	
 	//this is to indicate that the thread is exiting and new DNS lookup requests should be queued to
 	//a new thread.
-	ting::Inited<volatile bool, true> isExiting;//initially the thread is not running, so set to true
+	volatile bool isExiting = true;//initially the thread is not running, so set to true
 	
 	//This variable is for detecting system clock ticks warp around.
 	//True if last call to ting::GetTicks() returned value in first half.
@@ -204,7 +204,7 @@ public:
 	//NOTE: call to this function should be protected by mutex, to make sure the request is not canceled while sending.
 	//returns true if request is sent, false otherwise.
 	bool SendRequestToDNS(const dns::Resolver* r){
-		ting::StaticBuffer<std::uint8_t, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
+		std::array<std::uint8_t, 512> buf; //RFC 1035 limits DNS request UDP packet size to 512 bytes.
 		
 		size_t packetSize =
 				2 + //ID
@@ -598,7 +598,7 @@ private:
 				}
 			} key;
 			
-			ting::StaticBuffer<char, 256> subkey;//according to MSDN docs maximum key name length is 255 chars.
+			std::array<char, 256> subkey;//according to MSDN docs maximum key name length is 255 chars.
 			
 			for(unsigned i = 0; RegEnumKey(key.key, i, subkey.Begin(), subkey.Size()) == ERROR_SUCCESS; ++i){
 				HKEY hSub;
@@ -606,7 +606,7 @@ private:
 					continue;
 				}
 				
-				ting::StaticBuffer<BYTE, 1024> value;
+				std::array<BYTE, 1024> value;
 				
 				DWORD len = value.Size();
 				
@@ -742,7 +742,7 @@ private:
 				if(this->socket.CanRead()){
 					TRACE(<< "can read" << std::endl)
 					try{
-						ting::StaticBuffer<std::uint8_t, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes. So, no need to allocate bigger buffer.
+						std::array<std::uint8_t, 512> buf;//RFC 1035 limits DNS request UDP packet size to 512 bytes. So, no need to allocate bigger buffer.
 						ting::net::IPAddress address;
 						size_t ret = this->socket.Recv(buf, address);
 						

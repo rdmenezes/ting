@@ -63,8 +63,8 @@ class Queue : public ting::Waitable{
 
 	atomic::SpinLock mut;
 
-	ting::Inited<Message*, 0> first;
-	ting::Inited<Message*, 0> last;
+	Message* first = nullptr;
+	Message* last = nullptr;
 
 #if M_OS == M_OS_WINDOWS
 	//use Event to implement Waitable on Windows

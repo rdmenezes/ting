@@ -159,7 +159,7 @@ size_t File::Write(
 
 
 size_t File::SeekForwardInternal(size_t numBytesToSeek){
-	ting::StaticBuffer<std::uint8_t, 0x1000> buf;//4kb buffer
+	std::array<std::uint8_t, 0x1000> buf;//4kb buffer
 	
 	size_t bytesRead = 0;
 	for(; bytesRead != numBytesToSeek;){
@@ -193,7 +193,7 @@ const size_t DReadBlockSize = 4 * 1024;
 //Define a class derived from StaticBuffer. This is just to define custom
 //copy constructor which will do nothing to avoid unnecessary buffer copying when
 //inserting new element to the list of chunks.
-struct Chunk : public ting::StaticBuffer<std::uint8_t, DReadBlockSize>{
+struct Chunk : public std::array<std::uint8_t, DReadBlockSize>{
 	inline Chunk(){}
 	inline Chunk(const Chunk&){}
 };

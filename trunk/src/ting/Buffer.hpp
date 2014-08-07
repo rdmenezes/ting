@@ -26,7 +26,7 @@ THE SOFTWARE. */
 
 /**
  * @author Ivan Gagis <igagis@gmail.com>
- * @brief buffer wrapper class and static buffer wrapper.
+ * @brief buffer wrapper class.
  */
 
 
@@ -109,7 +109,7 @@ public:
      * @param a - reference to instance of std::array.
      */
 	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
-			buf(&(*a.begin())),
+			buf(&(*const_cast<std::array<T_1, array_size>&>(a).begin())),
 			bufSize(a.size())
 	{}
 	
@@ -247,33 +247,6 @@ public:
 	}
 #endif
 };//~template class Buffer
-
-
-
-/**
- * @brief static buffer class template.
- * @deprecated use std::array
- * The static buffer template.
- */
-template <class T, size_t bufSize> class StaticBuffer : public ting::Buffer<T>{
-	T staticBuffer[bufSize];
-public:
-	StaticBuffer() :
-			ting::Buffer<T>(staticBuffer, bufSize)
-	{}
-
-
-
-	/**
-	 * @brief Copy constructor.
-	 * Performs a copy of a buffer, calling copy constructor on each element of the buffer.
-	 * @param buf - static buffer to copy.
-	 */
-	StaticBuffer(const StaticBuffer<T, bufSize>& buf) :
-			ting::Buffer<T>(staticBuffer, bufSize),
-			staticBuffer(buf.staticBuffer)
-	{}
-};
 
 
 

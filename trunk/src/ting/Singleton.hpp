@@ -34,8 +34,8 @@ THE SOFTWARE. */
 
 #include "Exc.hpp"
 #include "debug.hpp"
-#include "types.hpp"
 
+#include <memory>
 
 
 namespace ting{
@@ -73,14 +73,14 @@ template <class T, class T_InstanceOwner = T> class IntrusiveSingleton{
 
 protected://use only as a base class
 	IntrusiveSingleton(){
-		if(T_InstanceOwner::instance != 0){
+		if(T_InstanceOwner::instance){
 			throw ting::Exc("Singleton::Singleton(): instance is already created");
 		}
 
-		T_InstanceOwner::instance = static_cast<T*>(this);
+		T_InstanceOwner::instance.reset(static_cast<T*>(this));
 	}
 
-	typedef ting::Inited<T*, 0> T_Instance;
+	typedef std::unique_ptr<T> T_Instance;
 	
 private:
 
@@ -110,8 +110,8 @@ public:
 	}
 
 	virtual ~IntrusiveSingleton()noexcept{
-		ASSERT(T_InstanceOwner::instance == static_cast<T*>(this))
-		T_InstanceOwner::instance = 0;
+		ASSERT(T_InstanceOwner::instance.operator->() == static_cast<T*>(this))
+		T_InstanceOwner::instance.release();
 	}
 };
 

@@ -18,7 +18,7 @@ public:
 
 		ws.Add(this->queue, ting::Waitable::READ);
 
-		unsigned res = ws.WaitWithTimeout(3000, 0);
+		unsigned res = ws.WaitWithTimeout(3000);
 
 		ASSERT_ALWAYS(res == 1)
 
@@ -50,37 +50,37 @@ void Run(){
 	ws.Add(q1, ting::Waitable::READ);
 	ws.Add(q2, ting::Waitable::READ);
 
-	ting::StaticBuffer<ting::Waitable*, 4> buf;
+	std::array<ting::Waitable*, 4> buf;
 
 
 
 	//test Wait() with zero timeout, no objects should trigger, so, expecting return value of 0.
 	ASSERT_ALWAYS(ws.WaitWithTimeout(0) == 0)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(0, &buf) == 0)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(0, buf) == 0)
 
 
 
 	//test Wait() with non-zero timeout, no objects should trigger, so, expecting return value of 0.
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 0)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 0)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 0)
 
 
 
 	//test Wait with 1 triggered object
 	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
 	ASSERT_ALWAYS(ws.Wait() == 1)
-	ASSERT_ALWAYS(ws.Wait(&buf) == 1)
+	ASSERT_ALWAYS(ws.Wait(buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q1)
 
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 1)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 1)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q1)
 	ASSERT_ALWAYS(!q2.CanRead())
 
 	//check that no objects trigger after reading from queue
 	q1.GetMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 0)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 0)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 0)
 
 
 
@@ -88,22 +88,22 @@ void Run(){
 	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
 	q2.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
 	ASSERT_ALWAYS(ws.Wait() == 2)
-	ASSERT_ALWAYS(ws.Wait(&buf) == 2)
+	ASSERT_ALWAYS(ws.Wait(buf) == 2)
 	ASSERT_ALWAYS((buf[0] == &q1 && buf[1] == &q2) || (buf[0] == &q2 && buf[1] == &q1))
 
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 2)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 2)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 2)
 	ASSERT_ALWAYS((buf[0] == &q1 && buf[1] == &q2) || (buf[0] == &q2 && buf[1] == &q1))
 
 	//check that no objects trigger after reading from queue
 	q1.GetMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 1)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 1)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q2)
 
 	q2.GetMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 0)
-	ASSERT_ALWAYS(ws.WaitWithTimeout(100, &buf) == 0)
+	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 0)
 
 
 

@@ -80,9 +80,9 @@ namespace ting{
 class Waitable{
 	friend class WaitSet;
 
-	ting::Inited<bool, false> isAdded;
+	bool isAdded = false;
 
-	ting::Inited<void*, 0> userData;
+	void* userData = nullptr;
 
 public:
 	enum EReadinessFlags{
@@ -228,7 +228,7 @@ public:
  */
 class WaitSet{
 	const unsigned size;
-	ting::Inited<unsigned, 0> numWaitables;//number of Waitables added
+	unsigned numWaitables = 0;//number of Waitables added
 
 #if M_OS == M_OS_WINDOWS
 	Array<Waitable*> waitables;
@@ -385,8 +385,17 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 objects triggered.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	unsigned Wait(Buffer<Waitable*>* out_events = 0){
-		return this->Wait(true, 0, out_events);
+	unsigned Wait(const Buffer<Waitable*>& out_events){
+		return this->Wait(true, 0, &out_events);
+	}
+	
+	/**
+	 * @brief wait for event.
+	 * Same as Wait(const Buffer<Waitable*>& out_events) but does not return out_events.
+     * @return number of objects triggered.
+     */
+	unsigned Wait(){
+		return this->Wait(true, 0, 0);
 	}
 
 
@@ -398,22 +407,33 @@ public:
 	 * implementation for linux, if wait is interrupted by signal it will start waiting again,
 	 * and so on.
 	 * @param timeout - maximum time in milliseconds to wait for event.
-	 * @param out_events - pointer to buffer where to put pointers to triggered Waitable objects.
-	 *                     The buffer size must be equal or greater than the number ow waitables
+	 * @param out_events - buffer where to put pointers to triggered Waitable objects.
+	 *                     The buffer size must be equal or greater than the number of waitables
 	 *                     currently added to the wait set.
-	 *                     This pointer can be 0, if you are not interested in list of triggered waitables.
 	 * @return number of objects triggered. If 0 then timeout was hit.
 	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	unsigned WaitWithTimeout(std::uint32_t timeout, Buffer<Waitable*>* out_events = 0){
-		return this->Wait(false, timeout, out_events);
+	unsigned WaitWithTimeout(std::uint32_t timeout, const Buffer<Waitable*>& out_events){
+		return this->Wait(false, timeout, &out_events);
+	}
+	
+	/**
+	 * @brief wait for event with timeout.
+	 * Same as WaitWithTimeout(std::uint32_t timeout, const Buffer<Waitable*>& out_events) but
+	 * does not return out_events.
+     * @param timeout - maximum time in milliseconds to wait for event.
+     * @return number of objects triggered. If 0 then timeout was hit.
+	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
+     */
+	unsigned WaitWithTimeout(std::uint32_t timeout){
+		return this->Wait(false, timeout, 0);
 	}
 
 
 
 private:
-	unsigned Wait(bool waitInfinitly, std::uint32_t timeout, Buffer<Waitable*>* out_events);
+	unsigned Wait(bool waitInfinitly, std::uint32_t timeout, const Buffer<Waitable*>* out_events);
 	
 	
 #if M_OS == M_OS_MACOSX

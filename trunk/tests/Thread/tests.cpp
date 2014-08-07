@@ -75,7 +75,7 @@ public:
 
 void Run(){
 	//TODO: read ulimit
-	ting::StaticBuffer<
+	std::array<
 			TestThread1,
 #if M_OS == M_OS_MACOSX
 			50

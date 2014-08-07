@@ -16,7 +16,7 @@ void Run(){
 	ASSERT_ALWAYS(!f.IsOpened())
 	
 	for(unsigned numToSeek = 0; numToSeek < 0x1000; numToSeek += (0x1000 / 4)){
-		ting::StaticBuffer<std::uint8_t, 1> testByte;
+		std::array<std::uint8_t, 1> testByte;
 		{
 			ting::Array<std::uint8_t> buf(numToSeek);
 			
@@ -36,7 +36,7 @@ void Run(){
 
 			f.File::SeekForward(numToSeek);
 
-			ting::StaticBuffer<std::uint8_t, 1> buf;
+			std::array<std::uint8_t, 1> buf;
 
 			unsigned res = f.Read(buf, 1);
 			ASSERT_ALWAYS(res == 1)
@@ -49,7 +49,7 @@ void Run(){
 
 			f.SeekForward(numToSeek);
 
-			ting::StaticBuffer<std::uint8_t, 1> buf;
+			std::array<std::uint8_t, 1> buf;
 
 			unsigned res = f.Read(buf, 1);
 			ASSERT_ALWAYS(res == 1)

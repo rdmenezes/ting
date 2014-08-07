@@ -202,20 +202,20 @@ IPAddress::IPAddress(const char* ip){
 	}
 	
 	if(*ip == '['){//IPv6 with port
-		ting::StaticBuffer<char, (4 * 6 + 6 + (3 * 4 + 3) + 1)> buf;
+		std::array<char, (4 * 6 + 6 + (3 * 4 + 3) + 1)> buf;
 		
 		++ip;
 		
 		char* dst;
 		for(dst = buf.begin(); *ip != ']'; ++dst, ++ip){
-			if(*ip == 0 || !buf.Overlaps(dst + 1)){
+			if(*ip == 0 || !ting::Buffer<char>(buf).Overlaps(dst + 1)){
 				throw BadIPAddressFormatExc();
 			}
 			
 			*dst = *ip;
 		}
 		
-		ASSERT(buf.Overlaps(dst))
+		ASSERT(ting::Buffer<char>(buf).Overlaps(dst))
 		*dst = 0;//null-terminate
 				
 		this->host = Host::ParseIPv6(buf.begin());
@@ -225,18 +225,18 @@ IPAddress::IPAddress(const char* ip){
 		//IPv4 or IPv6 without port
 		
 		if(IsIPv4String(ip)){
-			ting::StaticBuffer<char, (3 * 4 + 3 + 1)> buf;
+			std::array<char, (3 * 4 + 3 + 1)> buf;
 			
 			char* dst;
 			for(dst = buf.begin(); *ip != ':' && *ip != 0; ++dst, ++ip){
-				if(!buf.Overlaps(dst + 1)){
+				if(!ting::Buffer<char>(buf).Overlaps(dst + 1)){
 					throw BadIPAddressFormatExc();
 				}
 
 				*dst = *ip;
 			}
 
-			ASSERT(buf.Overlaps(dst))
+			ASSERT(ting::Buffer<char>(buf).Overlaps(dst))
 			*dst = 0;//null-terminate
 
 			this->host = Host::ParseIPv4(buf.begin());

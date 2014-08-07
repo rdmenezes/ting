@@ -98,7 +98,7 @@ class Thread{
 		JOINED
 	};
 	
-	ting::Inited<volatile E_State, NEW> state;
+	volatile E_State state = NEW;
 
 	//system dependent handle
 #if M_OS == M_OS_WINDOWS

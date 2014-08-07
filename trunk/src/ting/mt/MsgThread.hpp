@@ -72,7 +72,7 @@ protected:
 	 * };
 	 * @endcode
 	 */
-	ting::Inited<volatile bool, false> quitFlag;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
+	volatile bool quitFlag = false;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
 
 	Queue queue;
 	

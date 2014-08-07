@@ -260,7 +260,7 @@ void Run(){
 		TestClass::Trig(100);
 
 		{
-			ting::StaticBuffer<TestClass, 12> buffer;
+			std::array<TestClass, 12> buffer;
 
 			{
 				ASSERT_ALWAYS(TestClass::Inc(true) == 0)
@@ -284,7 +284,7 @@ void Run(){
 		TestClass::Trig(100);
 
 		{
-			ting::StaticBuffer<TestClass, 12> buffer;
+			std::array<TestClass, 12> buffer;
 
 			ting::Array<TestClass> a;
 
@@ -304,7 +304,7 @@ void Run(){
 
 	//test that destructors are called when exception is thrown by one of the copy constructor
 	{
-		ting::StaticBuffer<TestClass, 134> buffer;
+		std::array<TestClass, 134> buffer;
 
 		TestClass::Trig(46); //set exception triggering value
 
@@ -326,7 +326,7 @@ void Run(){
 
 	//Same ass previous but using Init()
 	{
-		ting::StaticBuffer<TestClass, 134> buffer;
+		std::array<TestClass, 134> buffer;
 
 		TestClass::Trig(46); //set exception triggering value
 

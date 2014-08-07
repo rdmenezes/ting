@@ -68,7 +68,7 @@ template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class M
 	M_DECLARE_ALIGNED(sizeof(int));
 	
 	struct Chunk{
-		ting::Inited<size_t, 0> freeIndex;//Used for first pass of elements allocation.
+		size_t freeIndex = 0;//Used for first pass of elements allocation.
 		
 		ElemSlot elements[num_elements_in_chunk];
 		

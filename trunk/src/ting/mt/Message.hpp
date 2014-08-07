@@ -49,7 +49,7 @@ namespace mt{
 class Message{
 	friend class Queue;
 
-	ting::Inited<Message*, 0> next;//pointer to the next message in a single-linked list
+	Message* next = nullptr;//pointer to the next message in a single-linked list
 
 protected:
 	Message()noexcept{}

@@ -54,9 +54,9 @@ class File{
 	
 	//TODO: add file permissions
 
-	ting::Inited<bool, false> isOpened;
+	bool isOpened = false;
 	
-	ting::Inited<size_t, 0> curPos;//holds current position from file beginning
+	size_t curPos = 0;//holds current position from file beginning
 	
 public:
 	/**
