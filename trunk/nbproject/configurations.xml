@@ -35,10 +35,6 @@
         <in>main.cpp</in>
         <in>tests.cpp</in>
       </df>
-      <df name="atomic">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
       <df name="Buffer">
         <in>main.cpp</in>
         <in>tests.cpp</in>
@@ -69,10 +65,6 @@
         <in>socket.cpp</in>
       </df>
       <df name="PoolStored">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
-      <df name="Ptr">
         <in>main.cpp</in>
         <in>tests.cpp</in>
       </df>
@@ -254,16 +246,6 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/atomic">
-        <ccTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
       <folder path="1/debug">
         <ccTool>
           <incDir>
@@ -384,10 +366,6 @@
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="8">
@@ -432,10 +410,6 @@
       <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
@@ -542,13 +516,6 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Ptr">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
       <folder path="1/Ref">
         <ccTool>
           <preprocessorList>
@@ -578,13 +545,6 @@
         </ccTool>
       </folder>
       <folder path="1/WaitSet">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
-      <folder path="1/atomic">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
@@ -700,10 +660,6 @@
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="8">
@@ -753,10 +709,6 @@
       <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
@@ -879,10 +831,6 @@
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
-      <item path="tests/Ptr/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/Ptr/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
       <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="9">
@@ -918,10 +866,6 @@
       <item path="tests/WaitSet/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/WaitSet/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/atomic/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/atomic/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/debug/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
