@@ -60,24 +60,6 @@ void Run(){
 		int b = ASS(pc)->a;
 		ASSERT_ALWAYS(b == 13)
 	}
-
-
-	{
-		STATIC_ASSERT(sizeof(int) == 4)
-
-		class TestClass{
-		public:
-			int a;
-
-			//make sure that unsigned char type and signed char type are 8 bit wide.
-			STATIC_ASSERT((unsigned char)(-1) == 0xFF)
-			STATIC_ASSERT((signed char)(0xFF) == -1)
-			STATIC_ASSERT(sizeof(unsigned char) == sizeof(signed char))
-		};
-
-
-		STATIC_ASSERT(sizeof(TestClass) == sizeof(int))
-	}
 }
 
 }//~namespace

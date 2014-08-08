@@ -41,7 +41,8 @@ THE SOFTWARE. */
 #include "debug.hpp"
 #include "types.hpp"
 #include "Exc.hpp"
-#include "atomic.hpp"
+#include "mt/SpinLock.hpp"
+#include "util.hpp"
 
 
 //#define M_ENABLE_POOL_TRACE
@@ -53,8 +54,6 @@ THE SOFTWARE. */
 
 namespace ting{
 
-//make sure theat we align PoolElem by int size when using MSVC compiler.
-STATIC_ASSERT(sizeof(int) == 4)
 
 
 
@@ -131,7 +130,7 @@ template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class M
 	T_ChunkList fullChunks;
 	T_ChunkList chunks;
 	
-	ting::atomic::SpinLock lock;
+	ting::mt::SpinLock lock;
 	
 public:
 	~MemoryPool()noexcept{
@@ -143,7 +142,7 @@ public:
 	
 public:
 	void* Alloc_ts(){
-		atomic::SpinLock::GuardYield guard(this->lock);
+		typename decltype(this->lock)::Guard guard(this->lock);
 		
 		if(this->chunks.size() == 0){
 			//create new chunk
@@ -166,7 +165,7 @@ public:
 			return;
 		}
 		
-		atomic::SpinLock::GuardYield guard(this->lock);
+		typename decltype(this->lock)::Guard guard(this->lock);
 		
 		ElemSlot& e = *reinterpret_cast<ElemSlot*>(p);
 		

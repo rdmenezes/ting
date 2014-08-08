@@ -178,32 +178,3 @@ inline void LogAssert(const char* msg, const char* file, int line){
 #	define ASSCOND(x, cond) (x)
 
 #endif//~#ifdef DEBUG
-
-//==================
-//=  Static assert =
-//==================
-
-//TODO: deprecated. c++11 has built in static_assert()
-
-#ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-namespace ting{
-namespace ting_debug{
-template <bool b> struct C_StaticAssert{
-	virtual void STATIC_ASSERTION_FAILED() = 0;
-	virtual ~C_StaticAssert(){};
-};
-template <> struct C_StaticAssert<true>{};
-}//~namespace ting_debug
-}//~namespace ting
-#	define M_STATIC_ASSERT_II(x, l, c) struct C_StaticAssertInst_##l##_##c{ \
-			ting::ting_debug::C_StaticAssert<x> STATIC_ASSERTION_FAILED; \
-		};
-#	define M_STATIC_ASSERT_I(x, l, c) M_STATIC_ASSERT_II(x, l, c)
-#endif //~M_DOXYGEN_DONT_EXTRACT //for doxygen
-
-#if defined(__GNUG__) || (_MSC_VER >= 7100) //__COUNTER__ macro is only supported in these compilers
-#	define STATIC_ASSERT(x) M_STATIC_ASSERT_I(x, __LINE__, __COUNTER__)
-#else
-#	define STATIC_ASSERT(x)
-#endif
-

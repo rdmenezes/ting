@@ -946,7 +946,7 @@ HostNameResolver::~HostNameResolver(){
 	//check that there is no ongoing DNS lookup operation.
 	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
 	
-	if(dns::thread.IsValid()){
+	if(dns::thread){
 		ting::mt::Mutex::Guard mutexGuard(dns::thread->mutex);
 		
 		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
@@ -994,7 +994,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 		}
 	}
 	
-	ASSERT(dns::thread.IsValid())
+	ASSERT(dns::thread)
 	
 	std::unique_ptr<dns::Resolver> r(new dns::Resolver());
 	r->hnr = this;

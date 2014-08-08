@@ -34,10 +34,9 @@ THE SOFTWARE. */
 #include "../config.hpp"
 #include "../debug.hpp"
 #include "../WaitSet.hpp"
-#include "../atomic.hpp"
 #include "../util.hpp"
 
-#include "Semaphore.hpp"
+#include "SpinLock.hpp"
 
 #include <list>
 #include <functional>
@@ -59,9 +58,7 @@ namespace mt{
  * undefined.
  */
 class Queue : public ting::Waitable{
-	Semaphore sem;
-
-	atomic::SpinLock mut;
+	ting::mt::SpinLock mut;
 
 public:
 	typedef std::function<void()> T_Message;

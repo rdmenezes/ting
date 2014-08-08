@@ -244,7 +244,6 @@ void Run(){
 					sendBuffer.resize(0xffff + 1);
 					bytesSent = 0;
 					
-					STATIC_ASSERT(sizeof(std::uint32_t) == 4)
 					ASSERT_INFO_ALWAYS((sendBuffer.size() % sizeof(std::uint32_t)) == 0,
 							"sendBuffer.Size() = " << sendBuffer.size()
 							<< " (sendBuffer.Size() % sizeof(std::uint32_t)) = "

@@ -230,7 +230,7 @@ public:
 		return T_ThreadID(GetCurrentThreadId());
 #elif M_OS == M_OS_MACOSX || M_OS == M_OS_LINUX
 		pthread_t t = pthread_self();
-		STATIC_ASSERT(sizeof(pthread_t) <= sizeof(T_ThreadID))
+		static_assert(sizeof(pthread_t) <= sizeof(T_ThreadID), "error");
 		return T_ThreadID(t);
 #else
 #	error "Unsupported OS"

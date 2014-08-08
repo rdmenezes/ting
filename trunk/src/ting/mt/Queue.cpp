@@ -72,8 +72,7 @@ Queue::~Queue()noexcept{
 
 
 void Queue::PushMessage(std::function<void()>&& msg)noexcept{
-	ASSERT(msg.IsValid())
-	atomic::SpinLock::GuardYield mutexGuard(this->mut);
+	decltype(this->mut)::Guard mutexGuard(this->mut);
 	this->messages.push_back(std::move(msg));
 	
 	if(this->messages.size() == 1){//if it is a first message
@@ -107,22 +106,14 @@ void Queue::PushMessage(std::function<void()>&& msg)noexcept{
 	}
 
 	ASSERT(this->CanRead())
-	//NOTE: must do signaling while mutex is locked!!!
-	this->sem.Signal();
 }
 
 
 
 Queue::T_Message Queue::PeekMsg(){
-	atomic::SpinLock::GuardYield mutexGuard(this->mut);
+	decltype(this->mut)::Guard mutexGuard(this->mut);
 	if(this->messages.size() != 0){
 		ASSERT(this->CanRead())
-		//NOTE: Decrement semaphore value, because we take one message from queue.
-		//      The semaphore value should be > 0 here, so there will be no hang
-		//      in Wait().
-		//      The semaphore value actually reflects the number of Messages in
-		//      the queue.
-		this->sem.Wait();
 
 		if(this->messages.size() == 1){//if we are taking away the last message from the queue
 #if M_OS == M_OS_WINDOWS

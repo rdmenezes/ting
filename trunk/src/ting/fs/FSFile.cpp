@@ -147,7 +147,7 @@ size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
 	typedef long int T_FSeekOffset;
 	const size_t DMax = ((size_t(T_FSeekOffset(-1))) >> 1);
 	ASSERT((size_t(1) << ((sizeof(T_FSeekOffset) * 8) - 1)) - 1 == DMax)
-	STATIC_ASSERT(size_t(-(-T_FSeekOffset(DMax))) == DMax)
+	static_assert(size_t(-(-T_FSeekOffset(DMax))) == DMax, "error");
 	
 	ting::util::ClampTop(numBytesToSeek, this->CurPos());
 	

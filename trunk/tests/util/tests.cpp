@@ -14,7 +14,6 @@ namespace TestSerialization{
 void Run(){
 	//16 bit
 	for(std::uint32_t i = 0; i <= std::uint16_t(-1); ++i){
-		STATIC_ASSERT(sizeof(std::uint16_t) == 2)
 		std::array<std::uint8_t, sizeof(std::uint16_t)> buf;
 		ting::util::Serialize16LE(std::uint16_t(i), buf.begin());
 
@@ -28,7 +27,6 @@ void Run(){
 
 	//32 bit
 	for(std::uint64_t i = 0; i <= std::uint32_t(-1); i += 1317){//increment by 1317, because if increment by 1 it takes too long to run the test
-		STATIC_ASSERT(sizeof(std::uint32_t) == 4)
 		std::array<std::uint8_t, sizeof(std::uint32_t)> buf;
 		ting::util::Serialize32LE(std::uint32_t(i), buf.begin());
 
