@@ -78,7 +78,7 @@ void Run(){
 	ASSERT_ALWAYS(!q2.CanRead())
 
 	//check that no objects trigger after reading from queue
-	q1.GetMsg();//should not block since one message was pushed before
+	q1.PeekMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 0)
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 0)
 
@@ -96,12 +96,12 @@ void Run(){
 	ASSERT_ALWAYS((buf[0] == &q1 && buf[1] == &q2) || (buf[0] == &q2 && buf[1] == &q1))
 
 	//check that no objects trigger after reading from queue
-	q1.GetMsg();//should not block since one message was pushed before
+	q1.PeekMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 1)
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q2)
 
-	q2.GetMsg();//should not block since one message was pushed before
+	q2.PeekMsg();//should not block since one message was pushed before
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100) == 0)
 	ASSERT_ALWAYS(ws.WaitWithTimeout(100, buf) == 0)
 

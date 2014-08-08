@@ -119,20 +119,6 @@ public:
 	T_Message PeekMsg();
 
 
-
-	/**
-	 * @brief Get message from queue, blocks if no messages queued.
-	 * This method gets a message from message queue. If there are no messages on the queue
-	 * it will wait until any message is posted to the queue.
-	 * Note, that this method, due to its implementation, is not intended to be called from
-	 * multiple threads simultaneously (unlike Queue::PeekMsg()).
-	 * If it is called from multiple threads the behavior will be undefined.
-	 * It is also forbidden to call GetMsg() from one thread and PeekMsg() from another
-	 * thread on the same Queue instance, because it will also lead to undefined behavior.
-	 * @return auto-pointer to Message instance.
-	 */
-	T_Message GetMsg();
-
 private:
 #if M_OS == M_OS_WINDOWS
 	HANDLE GetHandle() override;

@@ -4,6 +4,7 @@
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/types.hpp"
 #include "../../src/ting/config.hpp"
+#include "../../src/ting/WaitSet.hpp"
 
 #include "tests.hpp"
 
@@ -65,9 +66,18 @@ public:
 
 	//override
 	void Run(){
+		ting::WaitSet ws(1);
+		
+		ws.Add(this->queue, ting::Waitable::READ);
+		
 		while(!this->quitFlag){
-			this->queue.GetMsg()();
+			ws.Wait();
+			while(auto m = this->queue.PeekMsg()){
+				m();
+			}
 		}
+		
+		ws.Remove(this->queue);
 	}
 };
 
