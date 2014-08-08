@@ -1,12 +1,13 @@
 //make sure all ting debugging facilities are turned on
 #ifndef DEBUG
-#define DEBUG
+#	define DEBUG
 #endif
 
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/Ptr.hpp"
 
 #include "tests.hpp"
+
+#include <memory>
 
 
 namespace TestBasicDebugStuff{
@@ -52,7 +53,7 @@ void Run(){
 	}
 
 	{
-		ting::Ptr<TestClass> pc(new TestClass());
+		std::unique_ptr<TestClass> pc(new TestClass());
 
 		//make sure, "pc" is valid before accessing member a.
 		ASS(pc)->a = 13;

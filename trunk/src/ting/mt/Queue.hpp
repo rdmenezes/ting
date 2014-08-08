@@ -34,7 +34,6 @@ THE SOFTWARE. */
 #include "../config.hpp"
 #include "../debug.hpp"
 #include "../WaitSet.hpp"
-#include "../Ptr.hpp"
 #include "../atomic.hpp"
 #include "../util.hpp"
 

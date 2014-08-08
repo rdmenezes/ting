@@ -3,8 +3,8 @@
 #include "../../src/ting/net/HostNameResolver.hpp"
 #include "../../src/ting/mt/Thread.hpp"
 #include "../../src/ting/mt/Semaphore.hpp"
-#include "../../src/ting/Ptr.hpp"
 
+#include <memory>
 #include <vector>
 
 namespace TestSimpleDNSLookup{
@@ -68,14 +68,14 @@ void Run(){
 	{//test several resolves at a time
 		ting::mt::Semaphore sema;
 
-		typedef std::vector<ting::Ptr<Resolver> > T_ResolverList;
+		typedef std::vector<std::unique_ptr<Resolver> > T_ResolverList;
 		typedef T_ResolverList::iterator T_ResolverIter;
 		T_ResolverList r;
 
-		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "google.ru")));
-		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "ya.ru")));
-		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "mail.ru")));
-		r.push_back(ting::Ptr<Resolver>(new Resolver(sema, "vk.com")));
+		r.push_back(std::unique_ptr<Resolver>(new Resolver(sema, "google.ru")));
+		r.push_back(std::unique_ptr<Resolver>(new Resolver(sema, "ya.ru")));
+		r.push_back(std::unique_ptr<Resolver>(new Resolver(sema, "mail.ru")));
+		r.push_back(std::unique_ptr<Resolver>(new Resolver(sema, "vk.com")));
 		
 //		TRACE(<< "starting resolutions" << std::endl)
 		

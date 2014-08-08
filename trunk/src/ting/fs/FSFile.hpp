@@ -30,9 +30,9 @@ THE SOFTWARE. */
 #pragma once
 
 #include <cstdio>
+#include <memory>
 
 #include "../debug.hpp"
-#include "../Ptr.hpp"
 #include "File.hpp"
 #include "../util.hpp"
 
@@ -136,8 +136,8 @@ public:
      * @param pathName - path to a file.
      * @return Auto-pointer holding a new FSFile instance.
      */
-	static ting::Ptr<FSFile> New(const std::string& pathName = std::string()){
-		return ting::Ptr<FSFile>(new FSFile(pathName));
+	static std::unique_ptr<FSFile> New(const std::string& pathName = std::string()){
+		return std::unique_ptr<FSFile>(new FSFile(pathName));
 	}
 };
 

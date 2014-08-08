@@ -3,9 +3,10 @@
 #include "../../src/ting/mt/Thread.hpp"
 #include "../../src/ting/mt/Semaphore.hpp"
 #include "../../src/ting/Buffer.hpp"
-#include "../../src/ting/Ptr.hpp"
 
 #include "tests.hpp"
+
+#include <memory>
 
 
 using namespace ting;
@@ -42,11 +43,11 @@ public:
 void Run(){
 	ting::atomic::S32 a;
 	
-	std::array<ting::Ptr<Thread>, 100> threads;
+	std::array<std::unique_ptr<Thread>, 100> threads;
 	
 	//Create and start all the threads
-	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
-		(*i) = ting::Ptr<Thread>(new Thread(a));
+	for(std::unique_ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
+		(*i) = std::unique_ptr<Thread>(new Thread(a));
 		(*i)->Start();
 	}
 	
@@ -55,12 +56,12 @@ void Run(){
 	
 	//signal all threads semaphores
 //	TRACE(<< "Signalling..." << std::endl)
-	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
+	for(std::unique_ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
 		(*i)->sema.Signal();
 	}
 	
 	//wait for all threads to finish
-	for(ting::Ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
+	for(std::unique_ptr<Thread>* i = threads.begin(); i != threads.end(); ++i){
 		(*i)->Join();
 	}
 //	TRACE(<< "All threads finished" << std::endl)

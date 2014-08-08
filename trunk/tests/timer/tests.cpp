@@ -1,7 +1,6 @@
 #include <vector>
 
 #include "../../src/ting/debug.hpp"
-#include "../../src/ting/Ptr.hpp"
 #include "../../src/ting/timer.hpp"
 
 #include "tests.hpp"
@@ -101,12 +100,12 @@ void Run(){
 	
 	const unsigned DNumTimers = 100;
 	
-	typedef std::vector<ting::Ptr<TestTimer> > T_TimerList;
+	typedef std::vector<std::unique_ptr<TestTimer> > T_TimerList;
 	typedef T_TimerList::iterator T_TimerIter;
 	T_TimerList timers;
 	
 	for(unsigned i = 0; i != DNumTimers; ++i){
-		timers.push_back(ting::Ptr<TestTimer>(
+		timers.push_back(std::unique_ptr<TestTimer>(
 				new TestTimer(&counter, &mutex)
 			));
 	}

@@ -4,7 +4,6 @@
 #include "../../src/ting/net/TCPSocket.hpp"
 #include "../../src/ting/net/TCPServerSocket.hpp"
 #include "../../src/ting/net/UDPSocket.hpp"
-#include "../../src/ting/Ptr.hpp"
 #include "../../src/ting/WaitSet.hpp"
 #include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/config.hpp"

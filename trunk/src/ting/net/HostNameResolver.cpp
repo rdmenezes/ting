@@ -110,7 +110,7 @@ typedef T_IdMap::iterator T_IdIter;
 typedef std::list<Resolver*> T_RequestsToSendList;
 typedef T_RequestsToSendList::iterator T_RequestsToSendIter;
 
-typedef std::map<HostNameResolver*, ting::Ptr<Resolver> > T_ResolversMap;
+typedef std::map<HostNameResolver*, std::unique_ptr<Resolver> > T_ResolversMap;
 typedef T_ResolversMap::iterator T_ResolversIter;
 
 
@@ -534,14 +534,14 @@ public:
 	//returns Ptr owning the removed resolver, returns invalid Ptr if there was
 	//no such resolver object found.
 	//NOTE: call to this function should be protected by mutex.
-	ting::Ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver)noexcept{
-		ting::Ptr<dns::Resolver> r;
+	std::unique_ptr<dns::Resolver> RemoveResolver(HostNameResolver* resolver)noexcept{
+		std::unique_ptr<dns::Resolver> r;
 		{
 			dns::T_ResolversIter i = this->resolversMap.find(resolver);
 			if(i == this->resolversMap.end()){
 				return r;
 			}
-			r = i->second;
+			r = std::move(i->second);
 			this->resolversMap.erase(i);
 		}
 
@@ -563,7 +563,7 @@ private:
 	//NOTE: call to this function should be protected by dns::mutex
 	void RemoveAllResolvers(){
 		while(this->resolversMap.size() != 0){
-			ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
+			std::unique_ptr<dns::Resolver> r = this->RemoveResolver(this->resolversMap.begin()->first);
 			ASSERT(r)
 
 #if M_OS == M_OS_WINDOWS && defined(ERROR)
@@ -778,11 +778,11 @@ private:
 											}
 										}catch(...){
 											//failed adding to sending list, report error
-											ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
+											std::unique_ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
 											this->CallCallback(r.operator->(), ting::net::HostNameResolver::ERROR);
 										}										
 									}else{
-										ting::Ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
+										std::unique_ptr<dns::Resolver> r = this->RemoveResolver(i->second->hnr);
 										//call callback
 										this->CallCallback(r.operator->(), res.result, res.host);
 									}
@@ -826,7 +826,7 @@ private:
 								r->sendIter = this->sendList.end();//end() value will indicate that the request has already been sent
 								this->sendList.pop_front();
 							}else{
-								ting::Ptr<dns::Resolver> removedResolver = this->RemoveResolver(r->hnr);
+								std::unique_ptr<dns::Resolver> removedResolver = this->RemoveResolver(r->hnr);
 								ASSERT(removedResolver)
 
 								//Notify about error. OnCompleted_ts() does not throw any exceptions, so no worries about that.
@@ -854,7 +854,7 @@ private:
 						//Time warped.
 						//Timeout all requests from first time map
 						while(this->timeMap1->size() != 0){
-							ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
+							std::unique_ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
 							ASSERT(r)
 
 							//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
@@ -873,7 +873,7 @@ private:
 					}
 					
 					//timeout
-					ting::Ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
+					std::unique_ptr<dns::Resolver> r = this->RemoveResolver(this->timeMap1->begin()->second->hnr);
 					ASSERT(r)
 					
 					//Notify about timeout. OnCompleted_ts() does not throw any exceptions, so no worries about that.
@@ -996,7 +996,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 	
 	ASSERT(dns::thread.IsValid())
 	
-	ting::Ptr<dns::Resolver> r(new dns::Resolver());
+	std::unique_ptr<dns::Resolver> r(new dns::Resolver());
 	r->hnr = this;
 	r->hostName = hostName;
 	r->dns = dnsIP;
@@ -1062,7 +1062,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 	
 	//insert the resolver to main resolvers map
 	try{
-		dns::thread->resolversMap[this] = r;
+		dns::thread->resolversMap[this] = std::move(r);
 	
 		//If there was no send requests in the list, send the message to the thread to switch
 		//socket to wait for sending mode.
@@ -1102,7 +1102,7 @@ bool HostNameResolver::Cancel_ts()noexcept{
 	
 	ting::mt::Mutex::Guard mutexGuard2(dns::thread->mutex);
 	
-	bool ret = dns::thread->RemoveResolver(this).IsValid();
+	bool ret = bool(dns::thread->RemoveResolver(this));
 	
 	if(dns::thread->resolversMap.size() == 0){
 		dns::thread->PushPreallocatedQuitMessage();

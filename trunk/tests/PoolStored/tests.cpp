@@ -1,8 +1,8 @@
 #include <deque>
+#include <memory>
 
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/PoolStored.hpp"
-#include "../../src/ting/Ptr.hpp"
 
 #include "tests.hpp"
 
@@ -29,10 +29,10 @@ public:
 
 
 void Run(){
-	std::deque<ting::Ptr<TestClass> > vec;
+	std::deque<std::unique_ptr<TestClass> > vec;
 
 	for(unsigned i = 0; i < 10000; ++i){
-		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
+		vec.push_back(std::unique_ptr<TestClass>(new TestClass()));
 		vec.back()->a = int(i);
 		vec.back()->b = -int(i);
 	}
@@ -42,7 +42,7 @@ void Run(){
 	}
 	
 	for(unsigned i = 0; i < 100; ++i){
-		vec.push_back(ting::Ptr<TestClass>(new TestClass()));
+		vec.push_back(std::unique_ptr<TestClass>(new TestClass()));
 	}
 	
 	while(vec.size() != 0){
