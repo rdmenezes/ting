@@ -149,7 +149,7 @@ public:
 	ting::mt::Mutex completedMutex;
 	
 	//this variable is for joining and destroying previous thread object if there was any.
-	ting::Ptr<ting::mt::MsgThread> prevThread;
+	std::unique_ptr<ting::mt::MsgThread> prevThread;
 	
 	//this is to indicate that the thread is exiting and new DNS lookup requests should be queued to
 	//a new thread.
@@ -703,7 +703,7 @@ private:
 			//first DNS lookup request it is OK to call Join() on such not
 			//started thread.
 			this->prevThread->Join();
-			this->prevThread.Reset();
+			this->prevThread.reset();
 			TRACE(<< "Previous thread destroyed" << std::endl)
 		}
 		
@@ -914,8 +914,8 @@ private:
 			}
 			
 			if(this->queue.CanRead()){
-				while(ting::Ptr<ting::mt::Message> m = this->queue.PeekMsg()){
-					m->Handle();
+				while(auto m = std::move(this->queue.PeekMsg())){
+					m();
 				}
 			}			
 		}//~while(!this->quitFlag)
@@ -926,27 +926,13 @@ private:
 	}
 	
 public:
-	class StartSendingMessage : public ting::mt::Message{
-		LookupThread* thr;
-	public:
-		StartSendingMessage(LookupThread* thr) :
-				thr(ASS(thr))
-		{}
-		
-		//override
-		void Handle(){
-			this->thr->StartSending();
-			TRACE(<< "socket wait mode changed to read and write" << std::endl)
-		}
-	};
-	
-	static inline ting::Ptr<LookupThread> New(){
-		return ting::Ptr<LookupThread>(new LookupThread());
+	static std::unique_ptr<LookupThread> New(){
+		return std::unique_ptr<LookupThread>(new LookupThread());
 	}
 };
 
 //accessing this variable must be protected by dnsMutex
-ting::Ptr<LookupThread> thread;
+std::unique_ptr<LookupThread> thread;
 
 
 
@@ -987,7 +973,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 	bool needStartTheThread = false;
 	
 	//check if thread is created
-	if(dns::thread.IsNotValid()){
+	if(!dns::thread){
 		dns::thread = dns::LookupThread::New();
 		needStartTheThread = true;
 	}else{
@@ -1001,9 +987,9 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 		//Thread is created, check if it is running.
 		//If there are active requests then the thread must be running.
 		if(dns::thread->isExiting == true){
-			ting::Ptr<dns::LookupThread> t = dns::LookupThread::New();
-			t->prevThread = dns::thread;
-			dns::thread = t;
+			std::unique_ptr<dns::LookupThread> t = dns::LookupThread::New();
+			t->prevThread = std::move(dns::thread);
+			dns::thread = std::move(t);
 			needStartTheThread = true;
 		}
 	}
@@ -1081,10 +1067,11 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 		//If there was no send requests in the list, send the message to the thread to switch
 		//socket to wait for sending mode.
 		if(dns::thread->sendList.size() == 1){
+			std::unique_ptr<dns::LookupThread>& t = dns::thread;
 			dns::thread->PushMessage(
-					ting::Ptr<dns::LookupThread::StartSendingMessage>(
-							new dns::LookupThread::StartSendingMessage(dns::thread.operator->())
-						)
+					[&t](){
+						t->StartSending();
+					}
 				);
 		}
 
@@ -1109,7 +1096,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 bool HostNameResolver::Cancel_ts()noexcept{
 	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
 	
-	if(dns::thread.IsNotValid()){
+	if(!dns::thread){
 		return false;
 	}
 	
@@ -1138,12 +1125,12 @@ bool HostNameResolver::Cancel_ts()noexcept{
 void HostNameResolver::CleanUp(){
 	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
 
-	if(dns::thread.IsValid()){
+	if(dns::thread){
 		dns::thread->PushPreallocatedQuitMessage();
 		dns::thread->Join();
 
 		ASSERT_INFO(dns::thread->resolversMap.size() == 0, "There are active DNS requests upon Sockets library de-initialization, all active DNS requests must be canceled before that.")
 
-		dns::thread.Reset();
+		dns::thread.reset();
 	}
 }

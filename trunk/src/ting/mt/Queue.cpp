@@ -57,23 +57,6 @@ Queue::Queue(){
 
 
 Queue::~Queue()noexcept{
-	//destroy messages which are currently on the queue
-	{
-		atomic::SpinLock::GuardYield mutexGuard(this->mut);
-		Message *msg = this->first;
-		Message	*nextMsg;
-		while(msg){
-			nextMsg = msg->next;
-			//use Ptr to kill messages instead of "delete msg;" because
-			//the messages are passed to PushMessage() as Ptr, and thus, it is better
-			//to use Ptr to delete them.
-			{
-				Ptr<Message> killer(msg);
-			}
-
-			msg = nextMsg;
-		}
-	}
 #if M_OS == M_OS_WINDOWS
 	CloseHandle(this->eventForWaitable);
 #elif M_OS == M_OS_MACOSX
@@ -88,17 +71,12 @@ Queue::~Queue()noexcept{
 
 
 
-void Queue::PushMessage(ting::Ptr<ting::mt::Message> msg)noexcept{
+void Queue::PushMessage(std::function<void()>&& msg)noexcept{
 	ASSERT(msg.IsValid())
 	atomic::SpinLock::GuardYield mutexGuard(this->mut);
-	if(this->first){
-		ASSERT(this->last && this->last->next == 0)
-		this->last = this->last->next = msg.Extract();
-		ASSERT(this->last->next == 0)
-	}else{
-		ASSERT(msg.IsValid())
-		this->last = this->first = msg.Extract();
-
+	this->messages.push_back(std::move(msg));
+	
+	if(this->messages.size() == 1){//if it is a first message
 		//Set CanRead flag.
 		//NOTE: in linux implementation with epoll(), the CanRead
 		//flag will also be set in WaitSet::Wait() method.
@@ -135,9 +113,9 @@ void Queue::PushMessage(ting::Ptr<ting::mt::Message> msg)noexcept{
 
 
 
-ting::Ptr<Message> Queue::PeekMsg(){
+Queue::T_Message Queue::PeekMsg(){
 	atomic::SpinLock::GuardYield mutexGuard(this->mut);
-	if(this->first){
+	if(this->messages.size() != 0){
 		ASSERT(this->CanRead())
 		//NOTE: Decrement semaphore value, because we take one message from queue.
 		//      The semaphore value should be > 0 here, so there will be no hang
@@ -146,8 +124,7 @@ ting::Ptr<Message> Queue::PeekMsg(){
 		//      the queue.
 		this->sem.Wait();
 
-		ASSERT(this->first)
-		if(this->first->next == 0){//if we are taking away the last message from the queue
+		if(this->messages.size() == 1){//if we are taking away the last message from the queue
 #if M_OS == M_OS_WINDOWS
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
@@ -175,22 +152,23 @@ ting::Ptr<Message> Queue::PeekMsg(){
 		}else{
 			ASSERT(this->CanRead())
 		}
-
-		Message* ret = this->first;
-		this->first = this->first->next;
 		
-		return Ptr<Message>(ret);
+		T_Message ret = std::move(this->messages.front());
+		
+		this->messages.pop_front();
+		
+		return std::move(ret);
 	}
-	return Ptr<Message>();
+	return nullptr;
 }
 
 
 
-ting::Ptr<Message> Queue::GetMsg(){
+Queue::T_Message Queue::GetMsg(){
 	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): enter" << std::endl)
 	{
 		atomic::SpinLock::GuardYield mutexGuard(this->mut);
-		if(this->first){
+		if(this->messages.size() != 0){
 			ASSERT(this->CanRead())
 			//NOTE: Decrement semaphore value, because we take one message from queue.
 			//      The semaphore value should be > 0 here, so there will be no hang
@@ -198,10 +176,8 @@ ting::Ptr<Message> Queue::GetMsg(){
 			//      The semaphore value actually reflects the number of Messages in
 			//      the queue.
 			this->sem.Wait();
-
-			ASSERT(this->first)
 			
-			if(this->first->next == 0){//if we are taking away the last message from the queue
+			if(this->messages.size() == 1){//if we are taking away the last message from the queue
 #if M_OS == M_OS_WINDOWS
 				if(ResetEvent(this->eventForWaitable) == 0){
 					ASSERT(false)
@@ -228,11 +204,11 @@ ting::Ptr<Message> Queue::GetMsg(){
 				ASSERT(this->CanRead())
 			}
 			
-			Message* ret = this->first;
-			this->first = this->first->next;
+			T_Message ret = std::move(this->messages.front());
 
+			this->messages.pop_front();
 			M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit without waiting on semaphore" << std::endl)
-			return Ptr<Message>(ret);
+			return std::move(ret);
 		}
 	}
 	M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): waiting" << std::endl)
@@ -243,9 +219,8 @@ ting::Ptr<Message> Queue::GetMsg(){
 	{
 		atomic::SpinLock::GuardYield mutexGuard(this->mut);
 		ASSERT(this->CanRead())
-		ASSERT(this->first)
 
-		if(this->first->next == 0){//if we are taking away the last message from the queue
+		if(this->messages.size() == 1){//if we are taking away the last message from the queue
 #if M_OS == M_OS_WINDOWS
 			if(ResetEvent(this->eventForWaitable) == 0){
 				ASSERT(false)
@@ -272,11 +247,11 @@ ting::Ptr<Message> Queue::GetMsg(){
 			ASSERT(this->CanRead())
 		}
 		
-		Message* ret = this->first;
-		this->first = this->first->next;
+		T_Message ret = std::move(this->messages.front());
 
+		this->messages.pop_front();
 		M_QUEUE_TRACE(<< "Queue[" << this << "]::GetMsg(): exit after waiting on semaphore" << std::endl)
-		return Ptr<Message>(ret);
+		return std::move(ret);
 	}
 }
 

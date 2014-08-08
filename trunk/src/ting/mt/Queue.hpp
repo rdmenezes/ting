@@ -38,9 +38,10 @@ THE SOFTWARE. */
 #include "../atomic.hpp"
 #include "../util.hpp"
 
-#include "Message.hpp"
 #include "Semaphore.hpp"
 
+#include <list>
+#include <functional>
 
 
 namespace ting{
@@ -63,9 +64,12 @@ class Queue : public ting::Waitable{
 
 	atomic::SpinLock mut;
 
-	Message* first = nullptr;
-	Message* last = nullptr;
-
+public:
+	typedef std::function<void()> T_Message;
+	
+private:
+	std::list<T_Message> messages;
+	
 #if M_OS == M_OS_WINDOWS
 	//use Event to implement Waitable on Windows
 	HANDLE eventForWaitable;
@@ -98,12 +102,11 @@ public:
 
 
 
-	//TODO: rewrite using std::function
 	/**
 	 * @brief Pushes a new message to the queue.
 	 * @param msg - the message to push into the queue.
 	 */
-	void PushMessage(Ptr<Message> msg)noexcept;
+	void PushMessage(T_Message&& msg)noexcept;
 
 
 
@@ -114,7 +117,7 @@ public:
 	 * @return auto-pointer to Message instance.
 	 * @return invalid auto-pointer if there are no messages in the queue.
 	 */
-	Ptr<Message> PeekMsg();
+	T_Message PeekMsg();
 
 
 
@@ -129,7 +132,7 @@ public:
 	 * thread on the same Queue instance, because it will also lead to undefined behavior.
 	 * @return auto-pointer to Message instance.
 	 */
-	Ptr<Message> GetMsg();
+	T_Message GetMsg();
 
 private:
 #if M_OS == M_OS_WINDOWS

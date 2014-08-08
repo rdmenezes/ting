@@ -1,7 +1,6 @@
 #include "../../src/ting/timer.hpp"
 #include "../../src/ting/mt/Thread.hpp"
 #include "../../src/ting/mt/MsgThread.hpp"
-#include "../../src/ting/mt/Message.hpp"
 #include "../../src/ting/net/TCPSocket.hpp"
 #include "../../src/ting/net/TCPServerSocket.hpp"
 #include "../../src/ting/net/UDPSocket.hpp"
@@ -84,8 +83,8 @@ public:
 			while(!sock && !this->quitFlag){
 				sock = listenSock.Accept();
 				ting::mt::Thread::Sleep(100);
-				if(ting::Ptr<ting::mt::Message> m = this->queue.PeekMsg()){
-					m->Handle();
+				if(auto m = this->queue.PeekMsg()){
+					m();
 				}
 			}
 

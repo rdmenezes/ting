@@ -67,7 +67,7 @@ void Run(){
 
 
 	//test Wait with 1 triggered object
-	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
+	q1.PushMessage([](){});
 	ASSERT_ALWAYS(ws.Wait() == 1)
 	ASSERT_ALWAYS(ws.Wait(buf) == 1)
 	ASSERT_ALWAYS(buf[0] == &q1)
@@ -85,8 +85,8 @@ void Run(){
 
 
 	//test Wait with 2 triggered objects
-	q1.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
-	q2.PushMessage(ting::Ptr<ting::mt::Message>(new ting::mt::NopMessage()));
+	q1.PushMessage([](){});
+	q2.PushMessage([](){});
 	ASSERT_ALWAYS(ws.Wait() == 2)
 	ASSERT_ALWAYS(ws.Wait(buf) == 2)
 	ASSERT_ALWAYS((buf[0] == &q1 && buf[1] == &q2) || (buf[0] == &q2 && buf[1] == &q1))

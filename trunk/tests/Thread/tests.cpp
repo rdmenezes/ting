@@ -66,7 +66,7 @@ public:
 	//override
 	void Run(){
 		while(!this->quitFlag){
-			this->queue.GetMsg()->Handle();
+			this->queue.GetMsg()();
 		}
 	}
 };

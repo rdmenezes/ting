@@ -41,10 +41,10 @@ Mutex quitMessageMutex;
 void MsgThread::PushPreallocatedQuitMessage()noexcept{
 	Mutex::Guard mutexGuard(quitMessageMutex);
 	
-	if(this->quitMessage.IsNotValid()){
+	if(!this->quitMessage){
 		return;
 	}
 	
-	this->queue.PushMessage(this->quitMessage);
+	this->queue.PushMessage(std::move(this->quitMessage));
 }
 

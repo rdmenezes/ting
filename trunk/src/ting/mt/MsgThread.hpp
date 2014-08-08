@@ -50,8 +50,6 @@ class QuitMessage;
  * This is just a facility class which already contains message queue and boolean 'quit' flag.
  */
 class MsgThread : public Thread{
-	friend class QuitMessage;
-	
 protected:
 	/**
 	 * @brief Flag indicating that the thread should exit.
@@ -76,10 +74,10 @@ protected:
 
 	Queue queue;
 	
-	ting::Ptr<QuitMessage> quitMessage;
+	Queue::T_Message quitMessage = [this](){this->quitFlag = true;};
 
 public:
-	inline MsgThread();
+	MsgThread() = default;
 
 	
 	
@@ -94,15 +92,17 @@ public:
 	/**
 	 * @brief Send 'Quit' message to thread's queue.
 	 */
-	inline void PushQuitMessage();
+	void PushQuitMessage(){
+		this->PushMessage([this](){this->quitFlag = true;});
+	}
 
 
 
 	/**
 	 * @brief Send "no operation" message to thread's queue.
 	 */
-	inline void PushNopMessage(){
-		this->PushMessage(Ptr<Message>(new NopMessage()));
+	void PushNopMessage(){
+		this->PushMessage([](){});
 	}
 
 
@@ -111,46 +111,10 @@ public:
 	 * @brief Send a message to thread's queue.
 	 * @param msg - a message to send.
 	 */
-	inline void PushMessage(Ptr<Message> msg)noexcept{
-		this->queue.PushMessage(msg);
+	void PushMessage(Queue::T_Message&& msg)noexcept{
+		this->queue.PushMessage(std::move(msg));
 	}
 };
-
-
-
-/**
- * @brief Tells the thread that it should quit its execution.
- * The handler of this message sets the quit flag (Thread::quitFlag)
- * of the thread which this message is sent to.
- */
-class QuitMessage : public Message{
-	MsgThread *thr;
-public:
-	QuitMessage(MsgThread* thread) :
-			thr(thread)
-	{
-		if(!this->thr){
-			throw ting::Exc("QuitMessage::QuitMessage(): thread pointer passed is 0");
-		}
-	}
-
-	//override
-	void Handle(){
-		this->thr->quitFlag = true;
-	}
-};
-
-
-
-inline MsgThread::MsgThread() :
-		quitMessage(new QuitMessage(this))
-{}
-
-
-
-inline void MsgThread::PushQuitMessage(){
-	this->PushMessage(Ptr<Message>(new QuitMessage(this)));
-}
 
 
 
