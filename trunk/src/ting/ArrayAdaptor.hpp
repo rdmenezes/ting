@@ -85,7 +85,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	ArrayAdaptor(pointer bufPtr, size_type bufSize)noexcept :
+	ArrayAdaptor(pointer bufPtr = nullptr, size_type bufSize = 0)noexcept :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
