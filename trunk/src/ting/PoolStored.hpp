@@ -219,7 +219,7 @@ template <size_t element_size, size_t num_elements_in_chunk> typename ting::Memo
  * PoolStored is only useful for systems with large amount of small and
  * simple objects which have to be allocated dynamically (i.e. using new/delete
  * operators).
- * For example, PoolStored is used in ting::Ref (reference counted objects)
+ * For example, PoolStored is used in std::shared_ptr (reference counted objects)
  * class to allocate reference counting objects which holds number of references  and
  * pointer to reference counted object.
  * NOTE: class derived from PoolStored SHALL NOT be used as a base class further.

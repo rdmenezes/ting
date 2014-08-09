@@ -64,7 +64,7 @@ public:
  * @return std::shared_ptr pointing to a newly created object.
  */
 template< class T, class... Args > std::shared_ptr<T> New(Args&&... args){
-	return std::move(std::shared_ptr<T>(new T(args...)));
+	return std::move(std::shared_ptr<T>(new T(std::forward<Args>(args)...)));
 }
 
 

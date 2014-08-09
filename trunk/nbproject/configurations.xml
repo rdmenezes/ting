@@ -31,10 +31,6 @@
       </df>
     </df>
     <df root="tests" name="1">
-      <df name="Array">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
       <df name="Buffer">
         <in>main.cpp</in>
         <in>tests.cpp</in>
@@ -68,19 +64,7 @@
         <in>main.cpp</in>
         <in>tests.cpp</in>
       </df>
-      <df name="Ref">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
-      <df name="RefOverSharedLibrary">
-        <in>Ref_test.cpp</in>
-        <in>testso.cpp</in>
-      </df>
       <df name="Shared">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
-      <df name="Signal">
         <in>main.cpp</in>
         <in>tests.cpp</in>
       </df>
@@ -93,10 +77,6 @@
         <in>tests.cpp</in>
       </df>
       <df name="timer">
-        <in>main.cpp</in>
-        <in>tests.cpp</in>
-      </df>
-      <df name="types">
         <in>main.cpp</in>
         <in>tests.cpp</in>
       </df>
@@ -135,9 +115,7 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <flagsDictionary>
-        <element flagsID="0" commonFlags="-funsigned-char -std=c++11 -fPIC"/>
-        <element flagsID="1" commonFlags="-std=c++11"/>
-        <element flagsID="2" commonFlags="-std=c++11 -fPIC"/>
+        <element flagsID="0" commonFlags="-std=c++11"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -342,10 +320,6 @@
       </item>
       <item path="src/ting/timer.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="8">
@@ -366,33 +340,15 @@
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/RefOverSharedLibrary/Ref_test.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-      </item>
-      <item path="tests/RefOverSharedLibrary/testso.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-      </item>
       <item path="tests/Shared/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Shared/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/SingletonOverSharedLibrary/Singleton_test.cpp"
             ex="false"
             tool="1"
             flavor2="8">
-        <ccTool flags="1">
+        <ccTool flags="0">
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
@@ -429,10 +385,6 @@
       </item>
       <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/utf8/tests.cpp" ex="false" tool="1" flavor2="8">
@@ -448,9 +400,6 @@
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
-      <flagsDictionary>
-        <element flagsID="0" commonFlags="-std=c++11 -fPIC"/>
-      </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
       <makefileType>
@@ -468,13 +417,6 @@
         </makeTool>
       </makefileType>
       <folder path="0">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
-      <folder path="1/Array">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
@@ -516,21 +458,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Ref">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
       <folder path="1/Shared">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
-      <folder path="1/Signal">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
@@ -573,13 +501,6 @@
         </ccTool>
       </folder>
       <folder path="1/timer">
-        <ccTool>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
-      <folder path="1/types">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
@@ -636,10 +557,6 @@
       </item>
       <item path="src/ting/timer.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="8">
@@ -660,32 +577,9 @@
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/RefOverSharedLibrary/Ref_test.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-        <ccTool flags="0">
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </item>
-      <item path="tests/RefOverSharedLibrary/testso.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-      </item>
       <item path="tests/Shared/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/Shared/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/SingletonOverSharedLibrary/Singleton_test.cpp"
             ex="false"
@@ -727,10 +621,6 @@
       <item path="tests/timer/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="8">
-      </item>
-      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="8">
       </item>
@@ -807,10 +697,6 @@
       </item>
       <item path="src/ting/timer.cpp" ex="false" tool="1" flavor2="4">
       </item>
-      <item path="tests/Array/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/Array/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
       <item path="tests/Buffer/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/Buffer/tests.cpp" ex="false" tool="1" flavor2="9">
@@ -830,24 +716,6 @@
       <item path="tests/PoolStored/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/PoolStored/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/Ref/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/Ref/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/RefOverSharedLibrary/Ref_test.cpp"
-            ex="false"
-            tool="1"
-            flavor2="4">
-      </item>
-      <item path="tests/RefOverSharedLibrary/testso.cpp"
-            ex="false"
-            tool="1"
-            flavor2="4">
-      </item>
-      <item path="tests/Signal/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/Signal/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/SingletonOverSharedLibrary/Singleton_test.cpp"
             ex="false"
@@ -884,10 +752,6 @@
       <item path="tests/timer/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/timer/tests.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/types/main.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="tests/types/tests.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="tests/utf8/main.cpp" ex="false" tool="1" flavor2="9">
       </item>
