@@ -150,7 +150,7 @@ size_t File::Write(
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
 	
-	ting::ArrayAdaptor<std::uint8_t> b(const_cast<decltype(buf)::iterator>(buf.begin() + offset), actualNumBytesToWrite);
+	ting::ArrayAdaptor<std::uint8_t> b(const_cast<std::remove_const<decltype(buf)>::type&>(buf).begin() + offset, actualNumBytesToWrite);
 	
 	size_t ret = this->WriteInternal(b);
 	this->curPos += ret;
