@@ -48,7 +48,7 @@ private:
 	BufferFile& operator=(const BufferFile&);
 	
 private:
-	const ting::Buffer<std::uint8_t> data;
+	ting::ArrayAdaptor<std::uint8_t> data;
 	std::uint8_t* ptr;
 	
 public:
@@ -59,8 +59,8 @@ public:
 	 *               but ownership of the buffer is not taken. Thus, the buffer should remain alive during lifetime of this BufferFile object.
 	 */
 	//NOTE: ownership of the buffer is not taken, buffer must remain alive during this object's lifetime.
-	BufferFile(const ting::Buffer<std::uint8_t>& data) :
-			data(data.begin(), data.size())
+	BufferFile(const ting::ArrayAdaptor<std::uint8_t>& data) :
+			data(data)
 	{}
 	
 	virtual ~BufferFile()noexcept{}
@@ -71,9 +71,9 @@ protected:
 	
 	void CloseInternal()noexcept override{}
 	
-	size_t ReadInternal(const ting::Buffer<std::uint8_t>& buf) override;
+	size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf) override;
 
-	size_t WriteInternal(const ting::Buffer<const std::uint8_t>& buf) override;
+	size_t WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf)override;
 	
 	size_t SeekForwardInternal(size_t numBytesToSeek) override;
 	

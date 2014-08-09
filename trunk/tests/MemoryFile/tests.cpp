@@ -18,7 +18,7 @@ void Run(){
 
 	{
 		std::uint8_t buf[] = {1, 2, 3, 4};
-		ting::Buffer<std::uint8_t> b(buf, sizeof(buf));
+		ting::ArrayAdaptor<std::uint8_t> b(buf, sizeof(buf));
 		
 		ting::fs::File::Guard fileGuard(f, ting::fs::File::CREATE);
 		

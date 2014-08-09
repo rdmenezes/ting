@@ -96,18 +96,18 @@ public:
 		return this->rootDir;
 	}
 
-	void OpenInternal(E_Mode mode) override;
+	void OpenInternal(E_Mode mode)override;
 
 	void CloseInternal()noexcept override;
 
-	size_t ReadInternal(const ting::Buffer<std::uint8_t>& buf) override;
+	size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf)override;
 
-	size_t WriteInternal(const ting::Buffer<const std::uint8_t>& buf) override;
+	size_t WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf)override;
 
 	//NOTE: use default implementation of SeekForward() because of the problems with
 	//      fseek() as it can set file pointer beyond the end of file.
 	
-	size_t SeekBackwardInternal(size_t numBytesToSeek) override;
+	size_t SeekBackwardInternal(size_t numBytesToSeek)override;
 	
 	void RewindInternal() override;
 	

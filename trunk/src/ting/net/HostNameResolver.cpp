@@ -283,7 +283,7 @@ public:
 		ASSERT(size_t(p - buf.begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		ting::Buffer<const std::uint8_t> bufToSend(buf.begin(), packetSize);
+		ting::ArrayAdaptor<const std::uint8_t> bufToSend(buf.begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
@@ -320,7 +320,7 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex
 	//This function will call the Resolver callback.
-	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::Buffer<const std::uint8_t>& buf){
+	ParseResult ParseReplyFromDNS(dns::Resolver* r, const ting::ArrayAdaptor<std::uint8_t> buf){
 		TRACE(<< "dns::Resolver::ParseReplyFromDNS(): enter" << std::endl)
 #ifdef DEBUG
 		for(unsigned i = 0; i < buf.size(); ++i){
@@ -760,7 +760,7 @@ private:
 								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.end());
 								
 								if(host == i->second->hostName){
-									ParseResult res = this->ParseReplyFromDNS(i->second, ting::Buffer<std::uint8_t>(buf.begin(), ret));
+									ParseResult res = this->ParseReplyFromDNS(i->second, ting::ArrayAdaptor<std::uint8_t>(buf.begin(), ret));
 									
 									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && i->second->recordType == D_DNSRecordAAAA){
 										//try getting record type A

@@ -110,7 +110,7 @@ void FSFile::CloseInternal()noexcept{
 
 
 //override
-size_t FSFile::ReadInternal(const ting::Buffer<std::uint8_t>& buf){
+size_t FSFile::ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf){
 	ASSERT(this->handle)
 	size_t numBytesRead = fread(buf.begin(), 1, buf.size(), this->handle);
 	if(numBytesRead != buf.size()){//something happened
@@ -124,7 +124,7 @@ size_t FSFile::ReadInternal(const ting::Buffer<std::uint8_t>& buf){
 
 
 //override
-size_t FSFile::WriteInternal(const ting::Buffer<const std::uint8_t>& buf){
+size_t FSFile::WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf){
 	ASSERT(this->handle)
 	size_t bytesWritten = fwrite(buf.begin(), 1, buf.size(), this->handle);
 	if(bytesWritten != buf.size()){//something bad has happened

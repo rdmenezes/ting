@@ -49,43 +49,48 @@ namespace ting{
 
 
 /**
- * @brief Memory buffer wrapper template class.
- * This class is a wrapper of memory buffer, it encapsulates pointer to memory block and size of that memory block.
+ * @brief Array adaptor template class.
+ * This class is a wrapper of continuous memory buffer, it encapsulates pointer to memory block and size of that memory block.
+ * It does not own the memory.
  */
-template <class T> class Buffer final{
-	Buffer(const Buffer&) = delete;
-
-protected:
-	T* buf;
-	size_t bufSize;
-
+template <class T> class ArrayAdaptor final{
 public:
+	typedef T value_type;
+	typedef value_type* pointer;
+	typedef const value_type* const_pointer;
+	typedef value_type& reference;
+	typedef const value_type& const_reference;
+	typedef value_type* iterator;
+	typedef const value_type* const_iterator;
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef std::reverse_iterator<iterator> reverse_iterator;
+	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+	
+private:
+	pointer buf;
+	size_type bufSize;
+	
+public:
+
+	ArrayAdaptor(const ArrayAdaptor&) = default;
+	ArrayAdaptor& operator=(const ArrayAdaptor&) = default;
+	
+	
 	/**
-	 * @brief Create a Buffer object.
-	 * Creates a Buffer object which wraps given memory buffer of specified size.
-	 * Note, the memory will not be freed upon this Buffer object destruction.
+	 * @brief Create a ArrayAdaptor object.
+	 * Creates a ArrayAdaptor object which wraps given memory buffer of specified size.
+	 * Note, the memory will not be freed upon this Buffer object destruction,
+	 * ArrayAdaptor does not own the memory.
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	Buffer(T* bufPtr = nullptr, size_t bufSize = 0)noexcept :
+	ArrayAdaptor(pointer bufPtr, size_type bufSize)noexcept :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
+
 	
-	
-	
-	Buffer(Buffer&& b){
-		this->operator=(std::move(b));
-	}
-	
-	
-	
-	Buffer& operator=(Buffer&& b){
-		this->buf = b.buf;
-		this->bufSize = b.bufSize;
-		b.buf = 0;
-		b.bufSize = 0;
-	}
 	
 	
 	/**
@@ -93,7 +98,7 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::array.
      * @param a - reference to instance of std::array.
      */
-	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
+	template <class T_1, std::size_t array_size> ArrayAdaptor(const std::array<T_1, array_size>& a) :
 			buf(&*const_cast<std::array<T_1, array_size>&>(a).begin()),
 			bufSize(a.size())
 	{}
@@ -104,7 +109,7 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::vector.
      * @param v - reference to instance of std::vector.
      */
-	template <class T_1> Buffer(const std::vector<T_1>& v) :
+	template <class T_1> ArrayAdaptor(const std::vector<T_1>& v) :
 			buf(&*const_cast<std::vector<T_1>&>(v).begin()),
 			bufSize(v.size())
 	{}
@@ -115,7 +120,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	size_t size()const noexcept{
+	size_type size()const noexcept{
 		return this->bufSize;
 	}
 
@@ -125,7 +130,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	size_t SizeOfElem()const noexcept{
+	size_type SizeOfElem()const noexcept{
 		return sizeof(this->buf[0]);
 	}
 
@@ -135,7 +140,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	size_t SizeInBytes()const noexcept{
+	size_type SizeInBytes()const noexcept{
 		return this->size() * this->SizeOfElem();
 	}
 
@@ -147,7 +152,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	T& operator[](size_t i)const noexcept{
+	const_reference operator[](size_type i)const noexcept{
 		ASSERT(i < this->size())
 		return this->buf[i];
 	}
@@ -159,7 +164,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	T& operator[](size_t i)noexcept{
+	reference operator[](size_type i)noexcept{
 		ASSERT_INFO(i < this->size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -170,7 +175,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* begin()noexcept{
+	iterator begin()noexcept{
 		return this->buf;
 	}
 
@@ -180,17 +185,20 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	T* begin()const noexcept{
-		return this->buf;
+	const_iterator begin()const noexcept{
+		return this->cbegin();
 	}
 
+	const_iterator cbegin()const noexcept{
+		return this->buf;
+	}
 
 
 	/**
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	T* end()noexcept{
+	iterator end()noexcept{
 		return this->buf + this->bufSize;
 	}
 
@@ -200,10 +208,47 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	T* end()const noexcept{
+	const_iterator end()const noexcept{
+		return this->cend();
+	}
+	
+	const_iterator cend()const noexcept{
 		return this->buf + this->bufSize;
 	}
 
+	
+	const_reverse_iterator crbegin()const noexcept{
+		return const_reverse_iterator(this->end());
+	}
+
+	const_reverse_iterator crend()const noexcept{
+		return const_reverse_iterator(this->begin());
+	}
+	
+	reverse_iterator rbegin()noexcept{
+		return reverse_iterator(this->end());
+	}
+
+	const_reverse_iterator rbegin()const noexcept{
+		return const_reverse_iterator(this->end());
+	}
+
+	reverse_iterator rend()noexcept{
+		return reverse_iterator(this->begin());
+	}
+
+	const_reverse_iterator rend()const noexcept{
+		return const_reverse_iterator(this->begin());
+	}
+	
+	pointer data()noexcept{
+		return this->buf;
+	}
+
+	const_pointer data()const noexcept{
+		return this->buf;
+	}
+	
 
 
 	/**
@@ -212,21 +257,16 @@ public:
 	 * @return true - if pointer passed as argument points somewhere within the buffer.
 	 * @return false otherwise.
 	 */
-	bool Overlaps(const T* p)const noexcept{
+	bool Overlaps(const_pointer p)const noexcept{
 		return this->begin() <= p && p <= (this->end() - 1);
 	}
 
 
 
-	operator const Buffer<const T>& ()const noexcept{
-		return *reinterpret_cast<const Buffer<const T>* >(this);
-	}
-
-
 #ifdef DEBUG
-	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
-		for(size_t i = 0; i < buf.size(); ++i){
-			s << "\t" << buf[i] << std::endl;
+	friend std::ostream& operator<<(std::ostream& s, const ArrayAdaptor<T>& buf){
+		for(auto i = buf.begin(); i != buf.end(); ++i){
+			s << "\t" << (*i) << std::endl;
 		}
 		return s;
 	}

@@ -94,7 +94,7 @@ std::vector<std::string> File::ListDirContents(size_t maxEntries){
 
 
 size_t File::Read(
-			const ting::Buffer<std::uint8_t>& buf,
+			ting::ArrayAdaptor<std::uint8_t> buf,
 			size_t numBytesToRead,
 			size_t offset
 		)
@@ -115,7 +115,7 @@ size_t File::Read(
 	}
 
 	ASSERT(actualNumBytesToRead + offset <= buf.size())
-	ting::Buffer<std::uint8_t> b(buf.begin() + offset, actualNumBytesToRead);
+	ting::ArrayAdaptor<std::uint8_t> b(buf.begin() + offset, actualNumBytesToRead);
 	
 	size_t ret = this->ReadInternal(b);
 	this->curPos += ret;
@@ -125,7 +125,7 @@ size_t File::Read(
 
 
 size_t File::Write(
-			const ting::Buffer<const std::uint8_t>& buf,
+			const ting::ArrayAdaptor<std::uint8_t> buf,
 			size_t numBytesToWrite,
 			size_t offset
 		)
@@ -149,7 +149,8 @@ size_t File::Write(
 	}
 
 	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
-	ting::Buffer<const std::uint8_t> b(buf.begin() + offset, actualNumBytesToWrite);
+	
+	ting::ArrayAdaptor<std::uint8_t> b(const_cast<decltype(buf)::iterator>(buf.begin() + offset), actualNumBytesToWrite);
 	
 	size_t ret = this->WriteInternal(b);
 	this->curPos += ret;

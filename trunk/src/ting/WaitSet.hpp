@@ -42,7 +42,7 @@ THE SOFTWARE. */
 #include "types.hpp"
 #include "debug.hpp"
 #include "Exc.hpp"
-#include "Buffer.hpp"
+#include "ArrayAdaptor.hpp"
 
 
 #if M_OS == M_OS_WINDOWS
@@ -385,7 +385,7 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 objects triggered.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	unsigned Wait(const Buffer<Waitable*>& out_events){
+	unsigned Wait(ArrayAdaptor<Waitable*> out_events){
 		return this->Wait(true, 0, &out_events);
 	}
 	
@@ -414,7 +414,7 @@ public:
 	 *         NOTE: for some reason, on Windows it can return 0 before timeout was hit.
 	 * @throw ting::WaitSet::Exc - in case of errors.
 	 */
-	unsigned WaitWithTimeout(std::uint32_t timeout, const Buffer<Waitable*>& out_events){
+	unsigned WaitWithTimeout(std::uint32_t timeout, ArrayAdaptor<Waitable*> out_events){
 		return this->Wait(false, timeout, &out_events);
 	}
 	
@@ -433,7 +433,7 @@ public:
 
 
 private:
-	unsigned Wait(bool waitInfinitly, std::uint32_t timeout, const Buffer<Waitable*>* out_events);
+	unsigned Wait(bool waitInfinitly, std::uint32_t timeout, ArrayAdaptor<Waitable*>* out_events);
 	
 	
 #if M_OS == M_OS_MACOSX

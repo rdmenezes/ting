@@ -1,7 +1,7 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/mt/Thread.hpp"
 #include "../../src/ting/mt/MsgThread.hpp"
-#include "../../src/ting/Buffer.hpp"
+#include "../../src/ting/ArrayAdaptor.hpp"
 #include "../../src/ting/types.hpp"
 #include "../../src/ting/config.hpp"
 #include "../../src/ting/WaitSet.hpp"

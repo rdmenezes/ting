@@ -14,15 +14,13 @@ using namespace fs;
 
 
 
-//override
 void MemoryFile::OpenInternal(E_Mode mode){
 	this->idx = 0;
 }
 
 
 
-//override
-size_t MemoryFile::ReadInternal(const ting::Buffer<std::uint8_t>& buf){
+size_t MemoryFile::ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf){
 	ASSERT(this->idx <= this->data.size())
 	size_t numBytesRead = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
 	memcpy(buf.begin(), &this->data[idx], numBytesRead);
@@ -33,8 +31,7 @@ size_t MemoryFile::ReadInternal(const ting::Buffer<std::uint8_t>& buf){
 
 
 
-//override
-size_t MemoryFile::WriteInternal(const ting::Buffer<const std::uint8_t>& buf){
+size_t MemoryFile::WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf){
 	ASSERT(this->idx <= this->data.size())
 	
 	size_t numBytesTillEOF = this->data.size() - this->idx;

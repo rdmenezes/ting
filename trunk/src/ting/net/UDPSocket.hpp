@@ -96,7 +96,7 @@ public:
 	 * @return number of bytes actually sent. Actually it is either 0 or the size of the
 	 *         datagram passed in as argument.
 	 */
-	size_t Send(const ting::Buffer<const std::uint8_t>& buf, const IPAddress& destinationIP);
+	size_t Send(const ting::ArrayAdaptor<const std::uint8_t>& buf, const IPAddress& destinationIP);
 
 
 
@@ -115,7 +115,7 @@ public:
 	 *                       of the sender will be stored.
 	 * @return number of bytes stored in the output buffer.
 	 */
-	size_t Recv(const ting::Buffer<std::uint8_t>& buf, IPAddress &out_SenderIP);
+	size_t Recv(ting::ArrayAdaptor<std::uint8_t> buf, IPAddress &out_SenderIP);
 
 
 
