@@ -196,7 +196,7 @@ public:
 protected:
 	virtual HANDLE GetHandle() = 0;
 
-	virtual void SetWaitingEvents(u32 /*flagsToWaitFor*/){}
+	virtual void SetWaitingEvents(std::uint32_t /*flagsToWaitFor*/){}
 
 	//returns true if signaled
 	virtual bool CheckSignaled(){
@@ -231,8 +231,8 @@ class WaitSet{
 	unsigned numWaitables = 0;//number of Waitables added
 
 #if M_OS == M_OS_WINDOWS
-	Array<Waitable*> waitables;
-	Array<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
+	std::vector<Waitable*> waitables;
+	std::vector<HANDLE> handles; //used to pass array of HANDLEs to WaitForMultipleObjectsEx()
 
 #elif M_OS == M_OS_LINUX
 	int epollSet;
@@ -241,7 +241,7 @@ class WaitSet{
 #elif M_OS == M_OS_MACOSX
 	int queue; // kqueue
 	
-	Array<struct kevent> revents;//used for getting the result
+	std::vector<struct kevent> revents;//used for getting the result
 #else
 #	error "Unsupported OS"
 #endif

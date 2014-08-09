@@ -55,7 +55,7 @@ Semaphore::~Semaphore()noexcept{
 
 bool Semaphore::Wait(std::uint32_t timeoutMillis){
 #if M_OS == M_OS_WINDOWS
-	STATIC_ASSERT(INFINITE == 0xffffffff)
+	static_assert(INFINITE == 0xffffffff, "error");
 	switch(WaitForSingleObject(this->s, DWORD(timeoutMillis == INFINITE ? INFINITE - 1 : timeoutMillis))){
 		case WAIT_OBJECT_0:
 			return true;

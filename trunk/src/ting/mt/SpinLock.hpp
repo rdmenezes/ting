@@ -33,6 +33,10 @@ THE SOFTWARE. */
 #include <atomic>
 #include <thread>
 
+#if M_OS == M_OS_WINDOWS && M_COMPILER == M_COMPILER_GCC
+#	include "../windows.hpp"
+#endif
+
 
 namespace ting{
 namespace mt{
@@ -60,7 +64,11 @@ public:
 	 */
 	void Lock()noexcept{
 		while(this->flag.test_and_set(std::memory_order_acquire)){
+#if M_OS == M_OS_WINDOWS && M_COMPILER == M_COMPILER_GCC
+			SleepEx(0, FALSE);
+#else
 			std::this_thread::yield();
+#endif
 		}
 	}
 	

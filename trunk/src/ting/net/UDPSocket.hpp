@@ -1,6 +1,6 @@
 /* The MIT License:
 
-Copyright (c) 2009-2013 Ivan Gagis <igagis@gmail.com>
+Copyright (c) 2009-2014 Ivan Gagis <igagis@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -121,8 +121,7 @@ public:
 
 #if M_OS == M_OS_WINDOWS
 private:
-	//override
-	void SetWaitingEvents(u32 flagsToWaitFor);
+	void SetWaitingEvents(std::uint32_t flagsToWaitFor)override;
 #endif
 };//~class UDPSocket
 

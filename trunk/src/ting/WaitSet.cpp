@@ -86,7 +86,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 
 #if M_OS == M_OS_WINDOWS
 	ASSERT(this->numWaitables <= this->handles.Size())
-	if(this->numWaitables == this->handles.Size()){
+	if(this->numWaitables == this->handles.size()){
 		throw Exc("WaitSet::Add(): wait set is full");
 	}
 
@@ -261,7 +261,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, ArrayAdaptor<W
 
 	DWORD res = WaitForMultipleObjectsEx(
 			this->numWaitables,
-			this->handles.Begin(),
+			&*this->handles.begin(),
 			FALSE, //do not wait for all objects, wait for at least one
 			waitTimeout,
 			FALSE

@@ -600,21 +600,21 @@ private:
 			
 			std::array<char, 256> subkey;//according to MSDN docs maximum key name length is 255 chars.
 			
-			for(unsigned i = 0; RegEnumKey(key.key, i, subkey.Begin(), subkey.Size()) == ERROR_SUCCESS; ++i){
+			for(unsigned i = 0; RegEnumKey(key.key, i, subkey.begin(), subkey.size()) == ERROR_SUCCESS; ++i){
 				HKEY hSub;
-				if(RegOpenKey(key.key, subkey.Begin(), &hSub) != ERROR_SUCCESS){
+				if(RegOpenKey(key.key, subkey.begin(), &hSub) != ERROR_SUCCESS){
 					continue;
 				}
 				
 				std::array<BYTE, 1024> value;
 				
-				DWORD len = value.Size();
+				DWORD len = value.size();
 				
-				if(RegQueryValueEx(hSub, "NameServer", 0, NULL, value.Begin(), &len) != ERROR_SUCCESS){
+				if(RegQueryValueEx(hSub, "NameServer", 0, NULL, value.begin(), &len) != ERROR_SUCCESS){
 					TRACE(<< "NameServer reading failed " << std::endl)
 				}else{
 					try{
-						std::string str(reinterpret_cast<char*>(value.Begin()));
+						std::string str(reinterpret_cast<char*>(value.begin()));
 						size_t spaceIndex = str.find(' ');
 
 						std::string ip = str.substr(0, spaceIndex);
@@ -626,15 +626,15 @@ private:
 					}catch(...){}
 				}
 
-				len = value.Size();
-				if(RegQueryValueEx(hSub, "DhcpNameServer", 0, NULL, value.Begin(), &len) != ERROR_SUCCESS){
+				len = value.size();
+				if(RegQueryValueEx(hSub, "DhcpNameServer", 0, NULL, value.begin(), &len) != ERROR_SUCCESS){
 					TRACE(<< "DhcpNameServer reading failed " << std::endl)
 					RegCloseKey(hSub);
 					continue;
 				}
 
 				try{
-					std::string str(reinterpret_cast<char*>(value.Begin()));
+					std::string str(reinterpret_cast<char*>(value.begin()));
 					size_t spaceIndex = str.find(' ');
 
 					std::string ip = str.substr(0, spaceIndex);

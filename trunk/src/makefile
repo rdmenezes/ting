@@ -66,6 +66,8 @@ this_cflags += -g #include debugging symbols
 
 ifeq ($(prorab_os),linux)
     this_cflags += -fPIC # Since we are building shared library, we need Position-Independend Code
+else ifeq ($(prorab_os),windows)
+
 endif
 
 
