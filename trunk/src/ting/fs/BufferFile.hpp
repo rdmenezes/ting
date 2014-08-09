@@ -59,11 +59,11 @@ public:
 	 *               but ownership of the buffer is not taken. Thus, the buffer should remain alive during lifetime of this BufferFile object.
 	 */
 	//NOTE: ownership of the buffer is not taken, buffer must remain alive during this object's lifetime.
-	BufferFile(const ting::ArrayAdaptor<std::uint8_t>& data) :
+	BufferFile(ting::ArrayAdaptor<std::uint8_t> data) :
 			data(data)
 	{}
 	
-	virtual ~BufferFile()noexcept{}
+	~BufferFile()noexcept override{}
 
 protected:
 
