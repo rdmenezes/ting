@@ -43,19 +43,16 @@ else
 endif
 
 
+$(eval $(prorab-build-app))
+
 define this_rule
-testnet:: $(abspath $(prorab_this_dir)$(this_name))
+testnet:: $(prorab_this_name)
 	@echo running $$^...
 	@$(this_test_cmd)
 endef
 $(eval $(this_rule))
 
 
-
-
-
-
-$(eval $(prorab-build-app))
 
 #add dependency on libting.so
 $(prorab_this_name): $(abspath $(prorab_this_dir)../../src/libting$(prorab_lib_extension))

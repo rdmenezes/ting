@@ -127,7 +127,7 @@ void Run(){
 		Func2(buf);
 	}
 	
-//	Func(ting::Buffer<TestClass>(0, 0));
+//	Func(ting::ArrayAdaptor<TestClass>(0, 0));
 	Func2(ting::ArrayAdaptor<TestClass>(0, 0));
 }
 
