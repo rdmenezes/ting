@@ -27,7 +27,6 @@ LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/Socket.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/TCPServerSocket.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/TCPSocket.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/net/UDPSocket.cpp
-LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/Ref.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/timer.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/WaitSet.cpp
 
