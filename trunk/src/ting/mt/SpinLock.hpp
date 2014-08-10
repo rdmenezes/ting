@@ -42,7 +42,12 @@ namespace ting{
 namespace mt{
 
 class SpinLock{
-	std::atomic_flag flag = ATOMIC_FLAG_INIT;//initialize to false
+	std::atomic_flag flag
+#if M_OS == M_OS_WINDOWS
+	;
+#else
+	= ATOMIC_FLAG_INIT;//initialize to false
+#endif
 	
 public:
 	SpinLock(){

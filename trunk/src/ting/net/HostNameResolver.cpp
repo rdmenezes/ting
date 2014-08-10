@@ -220,7 +220,7 @@ public:
 		
 		ASSERT(packetSize <= buf.size())
 		
-		std::uint8_t* p = buf.begin();
+		std::uint8_t* p = &*buf.begin();
 		
 		//ID
 		ting::util::Serialize16BE(r->id, p);
@@ -266,7 +266,7 @@ public:
 			
 			++dotPos;
 			
-			ASSERT(p <= buf.end());
+			ASSERT(p <= &*buf.end());
 		}
 		
 		*p = 0; //terminate labels sequence
@@ -279,11 +279,11 @@ public:
 		ting::util::Serialize16BE(1, p);
 		p += 2;
 		
-		ASSERT(buf.begin() <= p && p <= buf.end());
-		ASSERT(size_t(p - buf.begin()) == packetSize);
+		ASSERT(&*buf.begin() <= p && p <= &*buf.end());
+		ASSERT(size_t(p - &*buf.begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		ting::ArrayAdaptor<const std::uint8_t> bufToSend(buf.begin(), packetSize);
+		ting::ArrayAdaptor<const std::uint8_t> bufToSend(&*buf.begin(), packetSize);
 		size_t ret = this->socket.Send(bufToSend, r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
@@ -600,9 +600,9 @@ private:
 			
 			std::array<char, 256> subkey;//according to MSDN docs maximum key name length is 255 chars.
 			
-			for(unsigned i = 0; RegEnumKey(key.key, i, subkey.begin(), subkey.size()) == ERROR_SUCCESS; ++i){
+			for(unsigned i = 0; RegEnumKey(key.key, i, &*subkey.begin(), subkey.size()) == ERROR_SUCCESS; ++i){
 				HKEY hSub;
-				if(RegOpenKey(key.key, subkey.begin(), &hSub) != ERROR_SUCCESS){
+				if(RegOpenKey(key.key, &*subkey.begin(), &hSub) != ERROR_SUCCESS){
 					continue;
 				}
 				
@@ -610,11 +610,11 @@ private:
 				
 				DWORD len = value.size();
 				
-				if(RegQueryValueEx(hSub, "NameServer", 0, NULL, value.begin(), &len) != ERROR_SUCCESS){
+				if(RegQueryValueEx(hSub, "NameServer", 0, NULL, &*value.begin(), &len) != ERROR_SUCCESS){
 					TRACE(<< "NameServer reading failed " << std::endl)
 				}else{
 					try{
-						std::string str(reinterpret_cast<char*>(value.begin()));
+						std::string str(reinterpret_cast<char*>(&*value.begin()));
 						size_t spaceIndex = str.find(' ');
 
 						std::string ip = str.substr(0, spaceIndex);
@@ -627,14 +627,14 @@ private:
 				}
 
 				len = value.size();
-				if(RegQueryValueEx(hSub, "DhcpNameServer", 0, NULL, value.begin(), &len) != ERROR_SUCCESS){
+				if(RegQueryValueEx(hSub, "DhcpNameServer", 0, NULL, &*value.begin(), &len) != ERROR_SUCCESS){
 					TRACE(<< "DhcpNameServer reading failed " << std::endl)
 					RegCloseKey(hSub);
 					continue;
 				}
 
 				try{
-					std::string str(reinterpret_cast<char*>(value.begin()));
+					std::string str(reinterpret_cast<char*>(&*value.begin()));
 					size_t spaceIndex = str.find(' ');
 
 					std::string ip = str.substr(0, spaceIndex);
@@ -749,18 +749,18 @@ private:
 						ASSERT(ret != 0)
 						ASSERT(ret <= buf.size())
 						if(ret >= 13){//at least there should be standard header and host name, otherwise ignore received UDP packet
-							std::uint16_t id = ting::util::Deserialize16BE(buf.begin());
+							std::uint16_t id = ting::util::Deserialize16BE(&*buf.begin());
 							
 							T_IdIter i = this->idMap.find(id);
 							if(i != this->idMap.end()){
 								ASSERT(id == i->second->id)
 								
 								//check by host name also
-								const std::uint8_t* p = buf.begin() + 12;//start of the host name
-								std::string host = dns::ParseHostNameFromDNSPacket(p, buf.end());
+								const std::uint8_t* p = &*buf.begin() + 12;//start of the host name
+								std::string host = dns::ParseHostNameFromDNSPacket(p, &*buf.end());
 								
 								if(host == i->second->hostName){
-									ParseResult res = this->ParseReplyFromDNS(i->second, ting::ArrayAdaptor<std::uint8_t>(buf.begin(), ret));
+									ParseResult res = this->ParseReplyFromDNS(i->second, ting::ArrayAdaptor<std::uint8_t>(&*buf.begin(), ret));
 									
 									if(res.result == ting::net::HostNameResolver::NO_SUCH_HOST && i->second->recordType == D_DNSRecordAAAA){
 										//try getting record type A

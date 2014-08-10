@@ -39,7 +39,7 @@ THE SOFTWARE. */
 #	include <iostream>
 #endif
 
-#include "types.hpp"
+#include "util.hpp"
 #include "debug.hpp"
 
 
@@ -85,7 +85,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	ArrayAdaptor(pointer bufPtr = nullptr, size_type bufSize = 0)noexcept :
+	ArrayAdaptor(pointer bufPtr = nullptr, size_type bufSize = 0)NOEXCEPT :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
@@ -120,7 +120,7 @@ public:
 	 * @brief get buffer size.
 	 * @return number of elements in buffer.
 	 */
-	size_type size()const noexcept{
+	size_type size()const NOEXCEPT{
 		return this->bufSize;
 	}
 
@@ -130,7 +130,7 @@ public:
 	 * @brief get size of element.
 	 * @return size of element in bytes.
 	 */
-	size_type SizeOfElem()const noexcept{
+	size_type SizeOfElem()const NOEXCEPT{
 		return sizeof(this->buf[0]);
 	}
 
@@ -140,7 +140,7 @@ public:
 	 * @brief get size of buffer in bytes.
 	 * @return size of array in bytes.
 	 */
-	size_type SizeInBytes()const noexcept{
+	size_type SizeInBytes()const NOEXCEPT{
 		return this->size() * this->SizeOfElem();
 	}
 
@@ -152,7 +152,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	const_reference operator[](size_type i)const noexcept{
+	const_reference operator[](size_type i)const NOEXCEPT{
 		ASSERT(i < this->size())
 		return this->buf[i];
 	}
@@ -164,7 +164,7 @@ public:
 	 * @param i - element index.
 	 * @return reference to i'th element of the buffer.
 	 */
-	reference operator[](size_type i)noexcept{
+	reference operator[](size_type i)NOEXCEPT{
 		ASSERT_INFO(i < this->size(), "operator[]: index out of bounds")
 		return this->buf[i];
 	}
@@ -175,7 +175,7 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	iterator begin()noexcept{
+	iterator begin()NOEXCEPT{
 		return this->buf;
 	}
 
@@ -185,11 +185,11 @@ public:
 	 * @brief get pointer to first element of the buffer.
 	 * @return pointer to first element of the buffer.
 	 */
-	const_iterator begin()const noexcept{
+	const_iterator begin()const NOEXCEPT{
 		return this->cbegin();
 	}
 
-	const_iterator cbegin()const noexcept{
+	const_iterator cbegin()const NOEXCEPT{
 		return this->buf;
 	}
 
@@ -198,7 +198,7 @@ public:
 	 * @brief get pointer to "after last" element of the buffer.
 	 * @return pointer to "after last" element of the buffer.
 	 */
-	iterator end()noexcept{
+	iterator end()NOEXCEPT{
 		return this->buf + this->bufSize;
 	}
 
@@ -208,44 +208,44 @@ public:
 	 * @brief get const pointer to "after last" element of the buffer.
 	 * @return const pointer to "after last" element of the buffer.
 	 */
-	const_iterator end()const noexcept{
+	const_iterator end()const NOEXCEPT{
 		return this->cend();
 	}
 	
-	const_iterator cend()const noexcept{
+	const_iterator cend()const NOEXCEPT{
 		return this->buf + this->bufSize;
 	}
 
 	
-	const_reverse_iterator crbegin()const noexcept{
+	const_reverse_iterator crbegin()const NOEXCEPT{
 		return const_reverse_iterator(this->end());
 	}
 
-	const_reverse_iterator crend()const noexcept{
+	const_reverse_iterator crend()const NOEXCEPT{
 		return const_reverse_iterator(this->begin());
 	}
 	
-	reverse_iterator rbegin()noexcept{
+	reverse_iterator rbegin()NOEXCEPT{
 		return reverse_iterator(this->end());
 	}
 
-	const_reverse_iterator rbegin()const noexcept{
+	const_reverse_iterator rbegin()const NOEXCEPT{
 		return const_reverse_iterator(this->end());
 	}
 
-	reverse_iterator rend()noexcept{
+	reverse_iterator rend()NOEXCEPT{
 		return reverse_iterator(this->begin());
 	}
 
-	const_reverse_iterator rend()const noexcept{
+	const_reverse_iterator rend()const NOEXCEPT{
 		return const_reverse_iterator(this->begin());
 	}
 	
-	pointer data()noexcept{
+	pointer data()NOEXCEPT{
 		return this->buf;
 	}
 
-	const_pointer data()const noexcept{
+	const_pointer data()const NOEXCEPT{
 		return this->buf;
 	}
 	
@@ -257,7 +257,7 @@ public:
 	 * @return true - if pointer passed as argument points somewhere within the buffer.
 	 * @return false otherwise.
 	 */
-	bool Overlaps(const_pointer p)const noexcept{
+	bool Overlaps(const_pointer p)const NOEXCEPT{
 		return this->begin() <= p && p <= (this->end() - 1);
 	}
 

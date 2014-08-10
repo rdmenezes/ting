@@ -134,9 +134,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\ting\Ref.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\ting\timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -259,7 +259,7 @@ std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	
 	ASSERT(chunks.size() == 1)
 	ASSERT(res <= chunks.front().size())
-	memcpy(p, chunks.front().begin(), res);
+	memcpy(p, &*chunks.front().begin(), res);
 	ASSERT(p + res == &*ret.end())
 	
 	return std::move(ret);

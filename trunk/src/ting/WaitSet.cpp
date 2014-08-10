@@ -85,7 +85,7 @@ void WaitSet::Add(Waitable& w, Waitable::EReadinessFlags flagsToWaitFor){
 	ASSERT(!w.isAdded)
 
 #if M_OS == M_OS_WINDOWS
-	ASSERT(this->numWaitables <= this->handles.Size())
+	ASSERT(this->numWaitables <= this->handles.size())
 	if(this->numWaitables == this->handles.size()){
 		throw Exc("WaitSet::Add(): wait set is full");
 	}

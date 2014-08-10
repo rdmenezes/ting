@@ -64,3 +64,7 @@ THE SOFTWARE. */
 #		undef _WINSOCK_H
 #	endif
 #endif
+
+#ifdef max
+#	undef max
+#endif

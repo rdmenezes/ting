@@ -139,7 +139,6 @@
     <ClCompile Include="..\..\src\ting\net\TCPServerSocket.cpp" />
     <ClCompile Include="..\..\src\ting\net\TCPSocket.cpp" />
     <ClCompile Include="..\..\src\ting\net\UDPSocket.cpp" />
-    <ClCompile Include="..\..\src\ting\Ref.cpp" />
     <ClCompile Include="..\..\src\ting\timer.cpp" />
     <ClCompile Include="..\..\src\ting\WaitSet.cpp" />
   </ItemGroup>
