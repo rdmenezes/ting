@@ -33,7 +33,7 @@ THE SOFTWARE. */
 
 #include "../config.hpp"
 #include "../debug.hpp"
-
+#include "../util.hpp"
 
 #if M_OS == M_OS_WINDOWS
 #include "../windows.hpp"
@@ -85,7 +85,7 @@ public:
 	 */
 	Mutex();
 
-	~Mutex()noexcept;
+	~Mutex()NOEXCEPT;
 
 
 	/**
@@ -94,7 +94,7 @@ public:
 	 * attempting to acquire the lock on the same mutex will wait until the
 	 * mutex lock will be released with Mutex::Unlock().
 	 */
-	inline void Lock()noexcept{
+	inline void Lock()NOEXCEPT{
 //		TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #if M_OS == M_OS_WINDOWS
 		EnterCriticalSection(&this->m);
@@ -112,7 +112,7 @@ public:
 	/**
 	 * @brief Release mutex lock.
 	 */
-	inline void Unlock()noexcept{
+	inline void Unlock()NOEXCEPT{
 //		TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #if M_OS == M_OS_WINDOWS
 		LeaveCriticalSection(&this->m);
@@ -141,12 +141,12 @@ public:
 		Guard(const Guard& );
 		Guard& operator=(const Guard& );
 	public:
-		Guard(Mutex &m)noexcept :
+		Guard(Mutex &m)NOEXCEPT :
 				mutex(m)
 		{
 			this->mutex.Lock();
 		}
-		~Guard()noexcept{
+		~Guard()NOEXCEPT{
 			this->mutex.Unlock();
 		}
 	};//~class Guard

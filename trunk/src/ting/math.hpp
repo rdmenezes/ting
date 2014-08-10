@@ -35,6 +35,7 @@ THE SOFTWARE. */
 
 #include <cmath>
 
+#include "util.hpp"
 
 
 namespace ting{
@@ -53,7 +54,7 @@ namespace math{
  * @return -1 if the argument is negative.
  * @return 1 if the number is positive.
  */
-template <typename T> inline T Sign(T n)noexcept{
+template <typename T> inline T Sign(T n)NOEXCEPT{
 	return n < 0 ? T(-1) : T(1);
 }
 
@@ -70,7 +71,7 @@ template <typename T> inline T Sign(T n)noexcept{
  * @param n - number to get absolute value of.
  * @return absolute value of the passed argument.
  */
-template <typename T> inline T Abs(T n)noexcept{
+template <typename T> inline T Abs(T n)NOEXCEPT{
 	return n < 0 ? (-n) : (n);
 }
 
@@ -81,19 +82,19 @@ template <typename T> inline T Abs(T n)noexcept{
  * @param n - value to round.
  * @return Rounded value.
  */
-template <typename T> inline T Ceil(T n)noexcept{
+template <typename T> inline T Ceil(T n)NOEXCEPT{
 	return n.Ceil();
 }
 
 
 
-template <> inline float Ceil<float>(float n)noexcept{
+template <> inline float Ceil<float>(float n)NOEXCEPT{
 	return ::ceil(n);
 }
 
 
 
-template <> inline double Ceil<double>(double n)noexcept{
+template <> inline double Ceil<double>(double n)NOEXCEPT{
 	return ::ceil(n);
 }
 
@@ -104,19 +105,19 @@ template <> inline double Ceil<double>(double n)noexcept{
  * @param n - value to round.
  * @return Rounded value.
  */
-template <typename T> inline T Floor(T n)noexcept{
+template <typename T> inline T Floor(T n)NOEXCEPT{
 	return n.Floor();
 }
 
 
 
-template <> inline float Floor<float>(float n)noexcept{
+template <> inline float Floor<float>(float n)NOEXCEPT{
 	return ::floor(n);
 }
 
 
 
-template <> inline double Floor<double>(double n)noexcept{
+template <> inline double Floor<double>(double n)NOEXCEPT{
 	return ::floor(n);
 }
 
@@ -127,7 +128,7 @@ template <> inline double Floor<double>(double n)noexcept{
  * @param n - value to round.
  * @return Rounded value.
  */
-template <typename T> inline T Round(T n)noexcept{
+template <typename T> inline T Round(T n)NOEXCEPT{
 	T f = Floor<T>(n);
 	if(Abs<T>(n - f) < T(0.5)){
 		return f;
@@ -142,7 +143,7 @@ template <typename T> inline T Round(T n)noexcept{
  * @brief Get number Pi.
  * @return number Pi.
  */
-template <typename T> inline T DPi()noexcept{
+template <typename T> inline T DPi()NOEXCEPT{
 	return T(3.14159265358979323846264338327950288);
 }
 
@@ -152,7 +153,7 @@ template <typename T> inline T DPi()noexcept{
  * @brief Get 2 * Pi.
  * @return 2 * Pi.
  */
-template <typename T> inline T D2Pi()noexcept{
+template <typename T> inline T D2Pi()NOEXCEPT{
 	return T(2) * DPi<T>();
 }
 
@@ -162,7 +163,7 @@ template <typename T> inline T D2Pi()noexcept{
  * @brief Get natural logarithm of 2, i.e. ln(2).
  * @return natural logarithm of 2.
  */
-template <typename T> inline T DLnOf2()noexcept{
+template <typename T> inline T DLnOf2()NOEXCEPT{
 	return T(0.693147181);
 }
 
@@ -175,35 +176,35 @@ template <typename T> inline T DLnOf2()noexcept{
  * @param x - value.
  * @return x * x.
  */
-template <typename T> inline T Pow2(T x)noexcept{
+template <typename T> inline T Pow2(T x)NOEXCEPT{
 	return x * x;
 }
 
 /**
  * @brief Calculate x^3.
  */
-template <typename T> inline T Pow3(T x)noexcept{
+template <typename T> inline T Pow3(T x)NOEXCEPT{
 	return Pow2(x) * x;
 }
 
 /**
  * @brief Calculate x^4.
  */
-template <typename T> inline T Pow4(T x)noexcept{
+template <typename T> inline T Pow4(T x)NOEXCEPT{
 	return Pow2(Pow2(x));
 }
 
 /**
  * @brief Calculate x^5.
  */
-template <typename T> inline T Pow5(T x)noexcept{
+template <typename T> inline T Pow5(T x)NOEXCEPT{
 	return Pow4(x) * x;
 }
 
 /**
  * @brief Calculate x^6.
  */
-template <typename T> inline T Pow6(T x)noexcept{
+template <typename T> inline T Pow6(T x)NOEXCEPT{
 	return Pow2(Pow3(x));
 }
 
@@ -215,24 +216,24 @@ template <typename T> inline T Pow6(T x)noexcept{
  * @param p - power
  * @return x^p
  */
-template <typename T> inline T Pow(T x, T p)noexcept{
+template <typename T> inline T Pow(T x, T p)NOEXCEPT{
 	return x.Pow(p);
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Pow<float>(float x, float p)noexcept{
+template <> inline float Pow<float>(float x, float p)NOEXCEPT{
 	return ::pow(x, p);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Pow<double>(double x, double p)noexcept{
+template <> inline double Pow<double>(double x, double p)NOEXCEPT{
 	return ::pow(x, p);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Pow<long double>(long double x, long double p)noexcept{
+template <> inline long double Pow<long double>(long double x, long double p)NOEXCEPT{
 	return ::pow(x, p);
 }
 #endif
@@ -242,24 +243,24 @@ template <> inline long double Pow<long double>(long double x, long double p)noe
 /**
  * @brief Calculate sine of an angle.
  */
-template <typename T> inline T Sin(T x)noexcept{
+template <typename T> inline T Sin(T x)NOEXCEPT{
 	return x.Sin();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Sin<float>(float x)noexcept{
+template <> inline float Sin<float>(float x)NOEXCEPT{
 	return ::sin(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Sin<double>(double x)noexcept{
+template <> inline double Sin<double>(double x)NOEXCEPT{
 	return ::sin(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Sin<long double>(long double x)noexcept{
+template <> inline long double Sin<long double>(long double x)NOEXCEPT{
 	return ::sin(x);
 }
 #endif
@@ -269,24 +270,24 @@ template <> inline long double Sin<long double>(long double x)noexcept{
 /**
  * @brief Calculate cosine of an angle.
  */
-template <typename T> inline T Cos(T x)noexcept{
+template <typename T> inline T Cos(T x)NOEXCEPT{
 	return x.Cos();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Cos<float>(float x)noexcept{
+template <> inline float Cos<float>(float x)NOEXCEPT{
 	return ::cos(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Cos<double>(double x)noexcept{
+template <> inline double Cos<double>(double x)NOEXCEPT{
 	return ::cos(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Cos<long double>(long double x)noexcept{
+template <> inline long double Cos<long double>(long double x)NOEXCEPT{
 	return ::cos(x);
 }
 #endif
@@ -296,24 +297,24 @@ template <> inline long double Cos<long double>(long double x)noexcept{
 /**
  * @brief Calculate tangent of a number.
  */
-template <typename T> inline T Tan(T x)noexcept{
+template <typename T> inline T Tan(T x)NOEXCEPT{
 	return x.Tan();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Tan<float>(float x)noexcept{
+template <> inline float Tan<float>(float x)NOEXCEPT{
 	return ::tan(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Tan<double>(double x)noexcept{
+template <> inline double Tan<double>(double x)NOEXCEPT{
 	return ::tan(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Tan<long double>(long double x)noexcept{
+template <> inline long double Tan<long double>(long double x)NOEXCEPT{
 	return ::tan(x);
 }
 #endif
@@ -323,24 +324,24 @@ template <> inline long double Tan<long double>(long double x)noexcept{
 /**
  * @brief Calculate arcsine of a number.
  */
-template <typename T> inline T Asin(T x)noexcept{
+template <typename T> inline T Asin(T x)NOEXCEPT{
 	return x.Asin();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Asin<float>(float x)noexcept{
+template <> inline float Asin<float>(float x)NOEXCEPT{
 	return ::asin(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Asin<double>(double x)noexcept{
+template <> inline double Asin<double>(double x)NOEXCEPT{
 	return ::asin(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Asin<long double>(long double x)noexcept{
+template <> inline long double Asin<long double>(long double x)NOEXCEPT{
 	return ::asin(x);
 }
 #endif
@@ -350,24 +351,24 @@ template <> inline long double Asin<long double>(long double x)noexcept{
 /**
  * @brief Calculate arccosine of a number.
  */
-template <typename T> inline T Acos(T x)noexcept{
+template <typename T> inline T Acos(T x)NOEXCEPT{
 	return x.Acos();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Acos<float>(float x)noexcept{
+template <> inline float Acos<float>(float x)NOEXCEPT{
 	return ::acos(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Acos<double>(double x)noexcept{
+template <> inline double Acos<double>(double x)NOEXCEPT{
 	return ::acos(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Acos<long double>(long double x)noexcept{
+template <> inline long double Acos<long double>(long double x)NOEXCEPT{
 	return ::acos(x);
 }
 #endif
@@ -377,24 +378,24 @@ template <> inline long double Acos<long double>(long double x)noexcept{
 /**
  * @brief Calculate arctangent of a number.
  */
-template <typename T> inline T Atan(T x)noexcept{
+template <typename T> inline T Atan(T x)NOEXCEPT{
 	return x.Atan();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Atan<float>(float x)noexcept{
+template <> inline float Atan<float>(float x)NOEXCEPT{
 	return ::atan(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Atan<double>(double x)noexcept{
+template <> inline double Atan<double>(double x)NOEXCEPT{
 	return ::atan(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Atan<long double>(long double x)noexcept{
+template <> inline long double Atan<long double>(long double x)NOEXCEPT{
 	return ::atan(x);
 }
 #endif
@@ -404,24 +405,24 @@ template <> inline long double Atan<long double>(long double x)noexcept{
 /**
  * @brief Calculate square root of a number.
  */
-template <typename T> inline T Sqrt(T x)noexcept{
+template <typename T> inline T Sqrt(T x)NOEXCEPT{
 	return x.Sqrt();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Sqrt<float>(float x)noexcept{
+template <> inline float Sqrt<float>(float x)NOEXCEPT{
 	return ::sqrt(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Sqrt<double>(double x)noexcept{
+template <> inline double Sqrt<double>(double x)NOEXCEPT{
 	return ::sqrt(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Sqrt<long double>(long double x)noexcept{
+template <> inline long double Sqrt<long double>(long double x)NOEXCEPT{
 	return ::sqrt(x);
 }
 #endif
@@ -431,24 +432,24 @@ template <> inline long double Sqrt<long double>(long double x)noexcept{
 /**
  * @brief Calculate e^x.
  */
-template <typename T> inline T Exp(T x)noexcept{
+template <typename T> inline T Exp(T x)NOEXCEPT{
 	return x.Exp();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Exp<float>(float x)noexcept{
+template <> inline float Exp<float>(float x)NOEXCEPT{
 	return ::exp(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Exp<double>(double x)noexcept{
+template <> inline double Exp<double>(double x)NOEXCEPT{
 	return ::exp(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Exp<long double>(long double x)noexcept{
+template <> inline long double Exp<long double>(long double x)NOEXCEPT{
 	return ::exp(x);
 }
 #endif
@@ -459,24 +460,24 @@ template <> inline long double Exp<long double>(long double x)noexcept{
  * @brief Calculate ln(x).
  * Calculate natural logarithm of x.
  */
-template <typename T> inline T Ln(T x)noexcept{
+template <typename T> inline T Ln(T x)NOEXCEPT{
 	return x.Ln();
 }
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline float Ln<float>(float x)noexcept{
+template <> inline float Ln<float>(float x)NOEXCEPT{
 	return ::log(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline double Ln<double>(double x)noexcept{
+template <> inline double Ln<double>(double x)NOEXCEPT{
 	return ::log(x);
 }
 #endif
 
 #ifndef M_DOXYGEN_DONT_EXTRACT //for doxygen
-template <> inline long double Ln<long double>(long double x)noexcept{
+template <> inline long double Ln<long double>(long double x)NOEXCEPT{
 	return ::log(x);
 }
 #endif
@@ -486,7 +487,7 @@ template <> inline long double Ln<long double>(long double x)noexcept{
 /**
  * @brief Calculate cubic root of a number.
  */
-template <typename T> inline T CubicRoot(T x)noexcept{
+template <typename T> inline T CubicRoot(T x)NOEXCEPT{
 	if(x > 0){
 		return Exp<T>(Ln<T>(x) / 3);
 	}
@@ -511,7 +512,7 @@ template <typename T> inline T CubicRoot(T x)noexcept{
  * @param y - imaginary part of a complex number.
  * @return argument of a complex number.
  */
-template <typename T> inline T Arg(T x, T y)noexcept{
+template <typename T> inline T Arg(T x, T y)NOEXCEPT{
 	T a;
 	if(x == 0){
 		a = DPi<T>() / 2;

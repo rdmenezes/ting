@@ -56,7 +56,7 @@ Queue::Queue(){
 
 
 
-Queue::~Queue()noexcept{
+Queue::~Queue()NOEXCEPT{
 #if M_OS == M_OS_WINDOWS
 	CloseHandle(this->eventForWaitable);
 #elif M_OS == M_OS_MACOSX
@@ -71,7 +71,7 @@ Queue::~Queue()noexcept{
 
 
 
-void Queue::PushMessage(std::function<void()>&& msg)noexcept{
+void Queue::PushMessage(std::function<void()>&& msg)NOEXCEPT{
 	decltype(this->mut)::Guard mutexGuard(this->mut);
 	this->messages.push_back(std::move(msg));
 	

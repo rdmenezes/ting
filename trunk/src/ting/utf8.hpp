@@ -33,7 +33,7 @@ THE SOFTWARE. */
 
 #include "types.hpp"
 #include "ArrayAdaptor.hpp"
-
+#include "util.hpp"
 
 
 namespace ting{
@@ -74,7 +74,7 @@ public:
 	 * @brief Get current unicode character.
      * @return unicode value of the character this interator is currently pointing to.
      */
-	std::uint32_t Char()const noexcept{
+	std::uint32_t Char()const NOEXCEPT{
 		return this->c;
 	}
 
@@ -86,7 +86,7 @@ public:
 	 * If iterator points to the end of the string before this operation then the result of this operation is undefined.
      * @return reference to this iterator object.
      */
-	Iterator& operator++()noexcept{
+	Iterator& operator++()NOEXCEPT{
 		std::uint8_t b = *this->n;
 //		TRACE(<< "utf8::Iterator::operator++(): b = " << std::hex << unsigned(b) << std::endl)
 		++this->n;
@@ -125,7 +125,7 @@ public:
      * @return true if iterator points to the end of the string.
 	 * @return false otherwise.
      */
-	bool IsEnd()const noexcept{
+	bool IsEnd()const NOEXCEPT{
 		return this->c == 0;
 	}
 
@@ -134,7 +134,7 @@ public:
      * @return false if iterator points to the end of the string.
 	 * @return true otherwise.
      */
-	bool IsNotEnd()const noexcept{
+	bool IsNotEnd()const NOEXCEPT{
 		return !this->IsEnd();
 	}
 };

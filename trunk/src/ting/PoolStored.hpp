@@ -77,22 +77,22 @@ template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class M
 			ASSERT(num_elements_in_chunk != 0)
 		}
 		
-		std::uint32_t NumAllocated()const noexcept{
+		std::uint32_t NumAllocated()const NOEXCEPT{
 			ASSERT(this->freeIndex > this->freeIndices.size() || (this->freeIndex == 0 && this->freeIndices.size() == 0))
 			return this->freeIndex - this->freeIndices.size();
 		}
 		
 		//returns number of free slots in chunk
-		std::uint32_t NumFree()const noexcept{
+		std::uint32_t NumFree()const NOEXCEPT{
 			ASSERT(num_elements_in_chunk >= this->NumAllocated())
 			return num_elements_in_chunk - this->NumAllocated();
 		} 
 		
-		bool IsFull()const noexcept{
+		bool IsFull()const NOEXCEPT{
 			return this->freeIndex == num_elements_in_chunk && this->freeIndices.size() == 0;
 		}
 		
-		bool IsEmpty()const noexcept{
+		bool IsEmpty()const NOEXCEPT{
 			return this->freeIndex == this->freeIndices.size();
 		}
 		
@@ -110,14 +110,14 @@ template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class M
 			return this->elements[this->freeIndex++];
 		}
 
-		void Free(ElemSlot& e)noexcept{
+		void Free(ElemSlot& e)NOEXCEPT{
 			ASSERT(this->HoldsElement(e))
 			std::uint32_t idx = std::uint32_t(&e - &this->elements[0]);
 			ASSERT(idx < num_elements_in_chunk)
 			this->freeIndices.push_back(idx);
 		}
 		
-		bool HoldsElement(ElemSlot& e)const noexcept{
+		bool HoldsElement(ElemSlot& e)const NOEXCEPT{
 			ASSERT(num_elements_in_chunk != 0)
 			return (&this->elements[0] <= &e) && (&e <= &this->elements[num_elements_in_chunk - 1]);
 		}
@@ -133,7 +133,7 @@ template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class M
 	ting::mt::SpinLock lock;
 	
 public:
-	~MemoryPool()noexcept{
+	~MemoryPool()NOEXCEPT{
 		ASSERT_INFO(
 				this->fullChunks.size() == 0 && this->chunks.size() == 0,
 				"MemoryPool: cannot destroy memory pool because it is not empty. Check for static PoolStored objects, they are not allowed, e.g. static Ref/WeakRef are not allowed!"
@@ -160,7 +160,7 @@ public:
 		return reinterpret_cast<void*>(&ret);
 	}
 
-	void Free_ts(void* p)noexcept{
+	void Free_ts(void* p)NOEXCEPT{
 		if(p == 0){
 			return;
 		}
@@ -199,7 +199,7 @@ public:
 		return instance.Alloc_ts();
 	}
 	
-	static void Free_ts(void* p)noexcept{
+	static void Free_ts(void* p)NOEXCEPT{
 		instance.Free_ts(p);
 	}
 };
@@ -238,7 +238,7 @@ public:
 		return StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Alloc_ts();
 	}
 
-	static void operator delete(void *p)noexcept{
+	static void operator delete(void *p)NOEXCEPT{
 		StaticMemoryPool<sizeof(T), num_elements_in_chunk>::Free_ts(p);
 	}
 

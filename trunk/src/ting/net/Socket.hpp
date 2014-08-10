@@ -166,7 +166,7 @@ public:
 
 	
 	
-	virtual ~Socket()noexcept;
+	virtual ~Socket()NOEXCEPT;
 
 
 
@@ -174,7 +174,7 @@ public:
 	 * @brief Tells whether the socket is opened or not.
 	 * @return Returns true if the socket is opened or false otherwise.
 	 */
-	explicit operator bool()const noexcept{
+	explicit operator bool()const NOEXCEPT{
 		return this->socket != DInvalidSocket();
 	}
 
@@ -184,7 +184,7 @@ public:
 	/**
 	 * @brief Closes the socket disconnecting it if necessary.
 	 */
-	void Close()noexcept;
+	void Close()NOEXCEPT;
 
 
 

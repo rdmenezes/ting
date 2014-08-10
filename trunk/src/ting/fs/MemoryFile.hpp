@@ -60,7 +60,7 @@ public:
      */
 	MemoryFile(){}
 	
-	virtual ~MemoryFile()noexcept{}
+	virtual ~MemoryFile()NOEXCEPT{}
 
 	/**
 	 * @brief Current file size.
@@ -74,7 +74,7 @@ protected:
 
 	void OpenInternal(E_Mode mode)override;
 	
-	void CloseInternal()noexcept override{}
+	void CloseInternal()NOEXCEPT override{}
 	
 	size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf)override;
 	

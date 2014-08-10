@@ -71,7 +71,7 @@ public:
 	 * @brief Destructor.
 	 * This destructor calls the Close() method.
 	 */
-	virtual ~FSFile()noexcept{
+	virtual ~FSFile()NOEXCEPT{
 		this->Close();
 	}
 
@@ -92,13 +92,13 @@ public:
 	 * for more details.
      * @return Current root directory.
      */
-	const std::string& GetRootDir()const noexcept{
+	const std::string& GetRootDir()const NOEXCEPT{
 		return this->rootDir;
 	}
 
 	void OpenInternal(E_Mode mode)override;
 
-	void CloseInternal()noexcept override;
+	void CloseInternal()NOEXCEPT override;
 
 	size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf)override;
 

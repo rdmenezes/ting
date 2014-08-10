@@ -43,13 +43,13 @@ using namespace ting::net;
 
 
 
-Socket::~Socket()noexcept{
+Socket::~Socket()NOEXCEPT{
 	this->Close();
 }
 
 
 
-void Socket::Close()noexcept{
+void Socket::Close()NOEXCEPT{
 //		TRACE(<< "Socket::Close(): invoked " << this << std::endl)
 	ASSERT_INFO(!this->IsAdded(), "Socket::Close(): trying to close socket which is added to the WaitSet. Remove the socket from WaitSet before closing.")
 	

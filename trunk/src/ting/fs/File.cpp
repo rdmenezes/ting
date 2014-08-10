@@ -72,7 +72,7 @@ std::string File::ExtractDirectory()const{
 
 
 
-bool File::IsDir()const noexcept{
+bool File::IsDir()const NOEXCEPT{
 	if(this->Path().size() == 0){
 		return false;
 	}

@@ -36,7 +36,7 @@ Semaphore::Semaphore(unsigned initialValue){
 
 
 
-Semaphore::~Semaphore()noexcept{
+Semaphore::~Semaphore()NOEXCEPT{
 #if M_OS == M_OS_WINDOWS
 	CloseHandle(this->s);
 #elif M_OS == M_OS_SYMBIAN

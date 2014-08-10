@@ -73,7 +73,7 @@ Lib::Lib(){
 
 
 
-Lib::~Lib()noexcept{
+Lib::~Lib()NOEXCEPT{
 	//check that there are no active dns lookups and finish the DNS request thread
 	HostNameResolver::CleanUp();
 	

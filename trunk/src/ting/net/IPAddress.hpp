@@ -75,7 +75,7 @@ public:
 		 * The return value will be 0x12345678.
 		 * @return 32 bit value, zeroth quad of IPv6 address.
 		 */
-		inline std::uint32_t Quad0()const noexcept{
+		inline std::uint32_t Quad0()const NOEXCEPT{
 			return this->host[0];
 		}
 		
@@ -85,7 +85,7 @@ public:
 		 * The return value will be 0x93454243.
 		 * @return 32 bit value, first quad of IPv6 address.
 		 */
-		inline std::uint32_t Quad1()const noexcept{
+		inline std::uint32_t Quad1()const NOEXCEPT{
 			return this->host[1];
 		}
 		
@@ -95,7 +95,7 @@ public:
 		 * The return value will be 0x22223333.
 		 * @return 32 bit value, second quad of IPv6 address.
 		 */
-		inline std::uint32_t Quad2()const noexcept{
+		inline std::uint32_t Quad2()const NOEXCEPT{
 			return this->host[2];
 		}
 		
@@ -105,7 +105,7 @@ public:
 		 * The return value will be 0x11112342.
 		 * @return 32 bit value, third quad of IPv6 address.
 		 */
-		inline std::uint32_t Quad3()const noexcept{
+		inline std::uint32_t Quad3()const NOEXCEPT{
 			return this->host[3];
 		}
 		
@@ -117,7 +117,7 @@ public:
 		 * @param q2 - second quad.
 		 * @param q3 - third quad.
 		 */
-		inline void Init(std::uint32_t q0, std::uint32_t q1, std::uint32_t q2, std::uint32_t q3)noexcept{
+		inline void Init(std::uint32_t q0, std::uint32_t q1, std::uint32_t q2, std::uint32_t q3)NOEXCEPT{
 			this->host[0] = q0;
 			this->host[1] = q1;
 			this->host[2] = q2;
@@ -129,7 +129,7 @@ public:
 		 * Initializes this Host object to a IPv6 mapped IPv4 address.
 		 * @param h - IPv4 host address.
 		 */
-		inline void Init(std::uint32_t h)noexcept{
+		inline void Init(std::uint32_t h)NOEXCEPT{
 			this->Init(0, 0, 0xffff, h);
 		}
 		
@@ -144,7 +144,7 @@ public:
 		 * @param a6 - sixth number.
 		 * @param a7 - sevens number.
 		 */
-		inline void Init(std::uint16_t a0, std::uint16_t a1, std::uint16_t a2, std::uint16_t a3, std::uint16_t a4, std::uint16_t a5, std::uint16_t a6, std::uint16_t a7)noexcept{
+		inline void Init(std::uint16_t a0, std::uint16_t a1, std::uint16_t a2, std::uint16_t a3, std::uint16_t a4, std::uint16_t a5, std::uint16_t a6, std::uint16_t a7)NOEXCEPT{
 			this->Init(
 					(std::uint32_t(a0) << 16) | std::uint32_t(a1),
 					(std::uint32_t(a2) << 16) | std::uint32_t(a3),
@@ -156,7 +156,7 @@ public:
 		/**
 		 * @brief Initialize to given bytes.
 		 */
-		inline void Init(std::uint8_t a0, std::uint8_t a1, std::uint8_t a2, std::uint8_t a3, std::uint8_t a4, std::uint8_t a5, std::uint8_t a6, std::uint8_t a7, std::uint8_t a8, std::uint8_t a9, std::uint8_t a10, std::uint8_t a11, std::uint8_t a12, std::uint8_t a13, std::uint8_t a14, std::uint8_t a15)noexcept{
+		inline void Init(std::uint8_t a0, std::uint8_t a1, std::uint8_t a2, std::uint8_t a3, std::uint8_t a4, std::uint8_t a5, std::uint8_t a6, std::uint8_t a7, std::uint8_t a8, std::uint8_t a9, std::uint8_t a10, std::uint8_t a11, std::uint8_t a12, std::uint8_t a13, std::uint8_t a14, std::uint8_t a15)NOEXCEPT{
 			this->Init(
 					(std::uint16_t(a0) << 8) | std::uint16_t(a1),
 					(std::uint16_t(a2) << 8) | std::uint16_t(a3),
@@ -182,34 +182,34 @@ public:
 		/**
 		 * @brief Creates an undefined Host object.
 		 */
-		Host()noexcept{}
+		Host()NOEXCEPT{}
 		
 		/**
 		 * @brief Creates a host object initialized to IPv6 mapped IPv4 using given IPv4.
 		 * @param h - IPv4 host to use for initialization.
 		 */
-		Host(std::uint32_t h)noexcept{
+		Host(std::uint32_t h)NOEXCEPT{
 			this->Init(h);
 		}
 		
 		/**
 		 * @brief Creates a Host object using given IPv6 quads.
 		 */
-		inline Host(std::uint32_t q0, std::uint32_t q1, std::uint32_t q2, std::uint32_t q3)noexcept{
+		inline Host(std::uint32_t q0, std::uint32_t q1, std::uint32_t q2, std::uint32_t q3)NOEXCEPT{
 			this->Init(q0, q1, q2, q3);
 		}
 		
 		/**
 		 * @brief Creates a Host object using given IPv6 numbers.
          */
-		inline Host(std::uint16_t a0, std::uint16_t a1, std::uint16_t a2, std::uint16_t a3, std::uint16_t a4, std::uint16_t a5, std::uint16_t a6, std::uint16_t a7)noexcept{
+		inline Host(std::uint16_t a0, std::uint16_t a1, std::uint16_t a2, std::uint16_t a3, std::uint16_t a4, std::uint16_t a5, std::uint16_t a6, std::uint16_t a7)NOEXCEPT{
 			this->Init(a0, a1, a2, a3, a4, a5, a6, a7);
 		}
 		
 		/**
 		 * @brief Creates a Host object using IPv6 bytes.
          */
-		inline Host(std::uint8_t a0, std::uint8_t a1, std::uint8_t a2, std::uint8_t a3, std::uint8_t a4, std::uint8_t a5, std::uint8_t a6, std::uint8_t a7, std::uint8_t a8, std::uint8_t a9, std::uint8_t a10, std::uint8_t a11, std::uint8_t a12, std::uint8_t a13, std::uint8_t a14, std::uint8_t a15)noexcept{
+		inline Host(std::uint8_t a0, std::uint8_t a1, std::uint8_t a2, std::uint8_t a3, std::uint8_t a4, std::uint8_t a5, std::uint8_t a6, std::uint8_t a7, std::uint8_t a8, std::uint8_t a9, std::uint8_t a10, std::uint8_t a11, std::uint8_t a12, std::uint8_t a13, std::uint8_t a14, std::uint8_t a15)NOEXCEPT{
 			this->Init(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
 		}
 		
@@ -245,7 +245,7 @@ public:
          * @return true if this Host object holds IPv4 address mapped to IPv6.
 		 * @return false otherwise.
          */
-		inline bool IsIPv4()const noexcept{
+		inline bool IsIPv4()const NOEXCEPT{
 			return this->host[2] == 0xffff && this->host[1] == 0 && this->host[0] == 0;
 		}
 		
@@ -254,7 +254,7 @@ public:
          * @return IPv4 host if this is a IPv4 mapped to IPv6.
 		 * @return undefined value otherwise.
          */
-		inline std::uint32_t IPv4Host()const noexcept{
+		inline std::uint32_t IPv4Host()const NOEXCEPT{
 			return this->host[3];
 		}
 		
@@ -264,7 +264,7 @@ public:
          * @return true if this IP address is not a zero address.
 		 * @return false if this IP address is all zeroes.
          */
-		inline bool IsValid()const noexcept{
+		inline bool IsValid()const NOEXCEPT{
 			if(this->IsIPv4()){
 				return this->IPv4Host() != 0;
 			}
@@ -299,14 +299,14 @@ public:
 	/**
 	 * @brief Construct IP address with undefined host and port.
      */
-	inline IPAddress()noexcept{}
+	inline IPAddress()NOEXCEPT{}
 
 	/**
 	 * @brief Create IPv4-address specifying exact IP-address and port number.
 	 * @param h - IPv4 address. For example, 0x7f000001 represents "127.0.0.1" IP address value.
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(std::uint32_t h, std::uint16_t p)noexcept :
+	inline IPAddress(std::uint32_t h, std::uint16_t p)NOEXCEPT :
 			host(h),
 			port(p)
 	{}
@@ -323,7 +323,7 @@ public:
 	 * @param h4 - 4th triplet of IPv4 address.
 	 * @param p - IP port number.
 	 */
-	inline IPAddress(std::uint8_t h1, std::uint8_t h2, std::uint8_t h3, std::uint8_t h4, std::uint16_t p)noexcept :
+	inline IPAddress(std::uint8_t h1, std::uint8_t h2, std::uint8_t h3, std::uint8_t h4, std::uint16_t p)NOEXCEPT :
 			host((std::uint32_t(h1) << 24) + (std::uint32_t(h2) << 16) + (std::uint32_t(h3) << 8) + std::uint32_t(h4)),
 			port(p)
 	{}
@@ -333,7 +333,7 @@ public:
      * @param h - host to use for construction.
      * @param p - port to use for construction.
      */
-	inline IPAddress(Host h, std::uint16_t p)noexcept :
+	inline IPAddress(Host h, std::uint16_t p)NOEXCEPT :
 			host(h),
 			port(p)
 	{}

@@ -32,6 +32,7 @@ THE SOFTWARE. */
 
 #include <memory>
 
+#include "util.hpp"
 
 namespace ting{
 
@@ -53,7 +54,7 @@ protected:
 	}
 	
 public:
-	virtual ~Shared()noexcept{}
+	virtual ~Shared()NOEXCEPT{}
 };
 
 

@@ -17,7 +17,7 @@ struct TestTimer1 : public ting::timer::Timer{
 	{}
 
 	//override
-	void OnExpired()noexcept{
+	void OnExpired()NOEXCEPT{
 		TRACE_ALWAYS(<< "\t- timer1 fired!" << std::endl)
 		*this->e = true;
 	}
@@ -29,7 +29,7 @@ struct TestTimer2 : public ting::timer::Timer{
 	TestTimer2(){}
 
 	//override
-	void OnExpired()noexcept{
+	void OnExpired()NOEXCEPT{
 		TRACE_ALWAYS(<< "\t- timer2 fired!" << std::endl)
 
 		this->Start(2500);
@@ -83,7 +83,7 @@ struct TestTimer : public ting::timer::Timer{
 	}
 
 	//override
-	void OnExpired()noexcept{
+	void OnExpired()NOEXCEPT{
 //		TRACE_ALWAYS(<<"\t- timer fired!"<<std::endl)
 		ting::mt::Mutex::Guard mutexGuard(*this->m);
 		++(*this->e);
@@ -133,7 +133,7 @@ struct TestTimer : public ting::timer::Timer{
 	{}
 
 	//override
-	void OnExpired()noexcept{
+	void OnExpired()NOEXCEPT{
 //		TRACE_ALWAYS(<<"\t- timer1 fired!"<<std::endl)
 		*this->e = true;
 	}

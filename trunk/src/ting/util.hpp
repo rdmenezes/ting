@@ -62,6 +62,14 @@ THE SOFTWARE. */
 
 
 
+#if M_COMPILER == M_COMPILER_MSVC
+#	define NOEXCEPT throw()
+#else
+#	define NOEXCEPT noexcept
+#endif
+
+
+
 namespace ting{
 namespace util{
 
@@ -73,7 +81,7 @@ namespace util{
  * @param top - top to clamp to.
  * @return clamped value.
  */
-template <class T> inline T ClampedTop(T v, const T top)noexcept{
+template <class T> inline T ClampedTop(T v, const T top)NOEXCEPT{
 	if(v > top){
 		return top;
 	}
@@ -107,7 +115,7 @@ template <class T> inline T ClampedTop(T v, const T top)noexcept{
  * @param v - reference to the value which top is to be clamped.
  * @param top - value to clamp the top to.
  */
-template <class T> inline void ClampTop(T& v, const T top)noexcept{
+template <class T> inline void ClampTop(T& v, const T top)NOEXCEPT{
 	v = ClampedTop(v, top);
 }
 
@@ -119,7 +127,7 @@ template <class T> inline void ClampTop(T& v, const T top)noexcept{
  * @param bottom - bottom to clamp to.
  * @return clamped value.
  */
-template <class T> inline T ClampedBottom(T v, const T bottom)noexcept{
+template <class T> inline T ClampedBottom(T v, const T bottom)NOEXCEPT{
 	if(v < bottom){
 		return bottom;
 	}
@@ -135,7 +143,7 @@ template <class T> inline T ClampedBottom(T v, const T bottom)noexcept{
  * @param v - reference to the value which bottom is to be clamped.
  * @param bottom - value to clamp the bottom to.
  */
-template <class T> inline void ClampBottom(T& v, const T bottom)noexcept{
+template <class T> inline void ClampBottom(T& v, const T bottom)NOEXCEPT{
 	v = ClampedBottom(v, bottom);
 }
 
@@ -148,7 +156,7 @@ template <class T> inline void ClampBottom(T& v, const T bottom)noexcept{
  * @param top - value to clamp the top to.
  * @return clamped value.
  */
-template <class T> inline T ClampedRange(T v, const T bottom, const T top)noexcept{
+template <class T> inline T ClampedRange(T v, const T bottom, const T top)NOEXCEPT{
 	if(v < bottom){
 		return bottom;
 	}
@@ -167,7 +175,7 @@ template <class T> inline T ClampedRange(T v, const T bottom, const T top)noexce
  * @param bottom - value to clamp the bottom to.
  * @param top - value to clamp the top to.
  */
-template <class T> inline void ClampRange(T& v, const T bottom, const T top)noexcept{
+template <class T> inline void ClampRange(T& v, const T bottom, const T top)NOEXCEPT{
 	v = ClampedRange(v, bottom, top);
 }
 
@@ -179,7 +187,7 @@ template <class T> inline void ClampRange(T& v, const T bottom, const T top)noex
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16LE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
+inline void Serialize16LE(std::uint16_t value, std::uint8_t* out_buf)NOEXCEPT{
 	out_buf[0] = value & 0xff;
 	out_buf[1] = value >> 8;
 }
@@ -192,7 +200,7 @@ inline void Serialize16LE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32LE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
+inline void Serialize32LE(std::uint32_t value, std::uint8_t* out_buf)NOEXCEPT{
 	*out_buf = std::uint8_t(value & 0xff);
 	++out_buf;
 	*out_buf = std::uint8_t((value >> 8) & 0xff);
@@ -211,7 +219,7 @@ inline void Serialize32LE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
  * @param buf - pointer to buffer containing 2 bytes to convert from little-endian format.
  * @return 16 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline std::uint16_t Deserialize16LE(const std::uint8_t* buf)noexcept{
+inline std::uint16_t Deserialize16LE(const std::uint8_t* buf)NOEXCEPT{
 	std::uint16_t ret;
 
 	//assume little-endian
@@ -231,7 +239,7 @@ inline std::uint16_t Deserialize16LE(const std::uint8_t* buf)noexcept{
  * @param buf - pointer to buffer containing 4 bytes to convert from little-endian format.
  * @return 32 bit unsigned integer converted from little-endian byte order to native byte order.
  */
-inline std::uint32_t Deserialize32LE(const std::uint8_t* buf)noexcept{
+inline std::uint32_t Deserialize32LE(const std::uint8_t* buf)NOEXCEPT{
 	std::uint32_t ret;
 
 	//assume little-endian
@@ -254,7 +262,7 @@ inline std::uint32_t Deserialize32LE(const std::uint8_t* buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 2 byte buffer where the result will be placed.
  */
-inline void Serialize16BE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
+inline void Serialize16BE(std::uint16_t value, std::uint8_t* out_buf)NOEXCEPT{
 	out_buf[0] = value >> 8;
 	out_buf[1] = value & 0xff;
 }
@@ -267,7 +275,7 @@ inline void Serialize16BE(std::uint16_t value, std::uint8_t* out_buf)noexcept{
  * @param value - the value.
  * @param out_buf - pointer to the 4 byte buffer where the result will be placed.
  */
-inline void Serialize32BE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
+inline void Serialize32BE(std::uint32_t value, std::uint8_t* out_buf)NOEXCEPT{
 	*out_buf = std::uint8_t((value >> 24) & 0xff);
 	++out_buf;
 	*out_buf = std::uint8_t((value >> 16) & 0xff);
@@ -286,7 +294,7 @@ inline void Serialize32BE(std::uint32_t value, std::uint8_t* out_buf)noexcept{
  * @param buf - pointer to buffer containing 2 bytes to convert from big-endian format.
  * @return 16 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline std::uint16_t Deserialize16BE(const std::uint8_t* buf)noexcept{
+inline std::uint16_t Deserialize16BE(const std::uint8_t* buf)NOEXCEPT{
 	std::uint16_t ret;
 
 	//assume big-endian
@@ -306,7 +314,7 @@ inline std::uint16_t Deserialize16BE(const std::uint8_t* buf)noexcept{
  * @param buf - pointer to buffer containing 4 bytes to convert from big-endian format.
  * @return 32 bit unsigned integer converted from big-endian byte order to native byte order.
  */
-inline std::uint32_t Deserialize32BE(const std::uint8_t* buf)noexcept{
+inline std::uint32_t Deserialize32BE(const std::uint8_t* buf)NOEXCEPT{
 	std::uint32_t ret;
 
 	//assume big-endian

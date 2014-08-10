@@ -85,7 +85,7 @@ public:
 	 * @brief Send preallocated 'Quit' message to thread's queue.
 	 * This function throws no exceptions. It can send the quit message only once.
 	 */
-	void PushPreallocatedQuitMessage()noexcept;
+	void PushPreallocatedQuitMessage()NOEXCEPT;
 	
 	
 	
@@ -111,7 +111,7 @@ public:
 	 * @brief Send a message to thread's queue.
 	 * @param msg - a message to send.
 	 */
-	void PushMessage(Queue::T_Message&& msg)noexcept{
+	void PushMessage(Queue::T_Message&& msg)NOEXCEPT{
 		this->queue.PushMessage(std::move(msg));
 	}
 };

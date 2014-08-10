@@ -63,13 +63,13 @@ public:
 			data(data)
 	{}
 	
-	~BufferFile()noexcept override{}
+	~BufferFile()NOEXCEPT override{}
 
 protected:
 
 	void OpenInternal(E_Mode mode)override;
 	
-	void CloseInternal()noexcept override{}
+	void CloseInternal()NOEXCEPT override{}
 	
 	size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf)override;
 

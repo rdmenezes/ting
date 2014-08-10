@@ -45,7 +45,7 @@ public:
 	 * @brief Exception constructor.
 	 * Creates exception with empty message.
      */
-	inline Exc()noexcept{}
+	inline Exc()NOEXCEPT{}
 	
 	/**
 	 * @brief Exception constructor.

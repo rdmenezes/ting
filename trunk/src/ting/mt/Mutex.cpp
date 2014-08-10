@@ -28,7 +28,7 @@ Mutex::Mutex(){
 
 
 
-Mutex::~Mutex()noexcept{
+Mutex::~Mutex()NOEXCEPT{
 //	TRACE(<< "Mutex::~Mutex(): invoked " << this << std::endl)
 #if M_OS == M_OS_WINDOWS
 	DeleteCriticalSection(&this->m);

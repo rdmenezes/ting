@@ -35,7 +35,8 @@ THE SOFTWARE. */
 #include <string.h>
 #include <string>
 #include <exception>
-#include <new>                    //for std::nothrow
+
+#include "util.hpp"
 
 namespace ting{
 
@@ -53,7 +54,7 @@ public:
 			message(message)
 	{}
 
-	virtual ~Exc()noexcept{}
+	virtual ~Exc()NOEXCEPT{}
 
 	/**
 	 * @brief Returns a pointer to exception message.
@@ -62,7 +63,7 @@ public:
 	 *         Note, that after the exception object is destroyed
 	 *         the pointer returned by this method become invalid.
 	 */
-	inline const char *What()const noexcept{
+	const char *What()const NOEXCEPT{
 		return this->what();
 	}
 
@@ -70,7 +71,7 @@ public:
 
 private:
 	//override from std::exception
-	const char *what()const noexcept{
+	const char *what()const NOEXCEPT{
 		return this->message.c_str();
 	}
 };

@@ -127,7 +127,7 @@ public:
 	 *                 This means that the DNS lookup operation was not started
 	 *                 or has finished before the Cancel_ts() method was called.
      */
-	bool Cancel_ts()noexcept;
+	bool Cancel_ts()NOEXCEPT;
 	
 	/**
 	 * @brief Enumeration of the DNS lookup operation result.
@@ -170,7 +170,7 @@ public:
 	 * @param ip - resolved IP-address. This value can later be used to create the
 	 *             ting::net::IPAddress object.
 	 */
-	virtual void OnCompleted_ts(E_Result result, IPAddress::Host ip)noexcept = 0;
+	virtual void OnCompleted_ts(E_Result result, IPAddress::Host ip)NOEXCEPT = 0;
 	
 private:
 	friend class ting::net::Lib;

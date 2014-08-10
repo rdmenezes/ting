@@ -53,7 +53,7 @@ public:
 	SpinLock(const SpinLock&) = delete;
 	SpinLock& operator=(const SpinLock&) = delete;
 	
-	~SpinLock()noexcept{}
+	~SpinLock()NOEXCEPT{}
 
 	/**
 	 * @brief Lock the spinlock.
@@ -62,7 +62,7 @@ public:
 	 * Each cycle of the busy loop it will yield the thread.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
-	void Lock()noexcept{
+	void Lock()NOEXCEPT{
 		while(this->flag.test_and_set(std::memory_order_acquire)){
 #if M_OS == M_OS_WINDOWS && M_COMPILER == M_COMPILER_GCC
 			SleepEx(0, FALSE);
@@ -78,7 +78,7 @@ public:
 	 * @brief Unlock the spinlock.
 	 * Right before releasing the lock the memory barrier is set.
 	 */
-	void Unlock()noexcept{
+	void Unlock()NOEXCEPT{
 		this->flag.clear(std::memory_order_release);
 	}
 	
@@ -94,13 +94,13 @@ public:
 	class Guard{
 		SpinLock& sl;
 	public:
-		Guard(SpinLock& sl)noexcept :
+		Guard(SpinLock& sl)NOEXCEPT :
 				sl(sl)
 		{
 			this->sl.Lock();
 		}
 		
-		~Guard()noexcept{
+		~Guard()NOEXCEPT{
 			this->sl.Unlock();
 		}
 	};
