@@ -79,7 +79,7 @@ protected:
 public:
 	MsgThread() = default;
 
-	
+	~MsgThread()NOEXCEPT{}
 	
 	/**
 	 * @brief Send preallocated 'Quit' message to thread's queue.
