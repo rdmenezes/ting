@@ -250,17 +250,16 @@ std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 	
 	std::vector<std::uint8_t> ret((chunks.size() - 1) * chunks.front().size() + res);
 	
-	std::uint8_t* p;
-	for(p = &*ret.begin(); chunks.size() > 1; p += chunks.front().size()){
-		ASSERT(p < &*ret.end())
-		memcpy(p, &*chunks.front().begin(), chunks.front().size());
+	auto p = ret.begin();
+	for(; chunks.size() > 1; p += chunks.front().size()){
+		memcpy(&*p, &*chunks.front().begin(), chunks.front().size());
 		chunks.pop_front();
 	}
 	
 	ASSERT(chunks.size() == 1)
 	ASSERT(res <= chunks.front().size())
-	memcpy(p, &*chunks.front().begin(), res);
-	ASSERT(p + res == &*ret.end())
+	memcpy(&*p, &*chunks.front().begin(), res);
+	ASSERT(p + res == ret.end())
 	
 	return std::move(ret);
 }

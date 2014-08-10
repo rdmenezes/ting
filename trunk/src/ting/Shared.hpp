@@ -36,6 +36,7 @@ THE SOFTWARE. */
 
 namespace ting{
 
+template< class T, class... Args > std::shared_ptr<T> New(Args&&... args);
 
 
 /**
