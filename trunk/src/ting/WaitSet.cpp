@@ -377,7 +377,7 @@ unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, ArrayAdaptor<W
 				this->queue,
 				0,
 				0,
-				this->revents.begin(),
+				&*this->revents.begin(),
 				this->revents.size(),
 				(waitInfinitly) ? 0 : &ts
 			);

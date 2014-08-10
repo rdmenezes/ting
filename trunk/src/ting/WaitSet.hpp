@@ -55,6 +55,7 @@ THE SOFTWARE. */
 #elif M_OS == M_OS_MACOSX
 #	include <sys/types.h>
 #	include <sys/event.h>
+#	include <unistd.h>
 
 #else
 #	error "Unsupported OS"

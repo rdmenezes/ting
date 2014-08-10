@@ -91,7 +91,7 @@ void Queue::PushMessage(std::function<void()>&& msg)NOEXCEPT{
 		}
 #elif M_OS == M_OS_MACOSX
 		{
-			u8 oneByteBuf[1];
+			std::uint8_t oneByteBuf[1];
 			if(write(this->pipeEnds[1], oneByteBuf, 1) != 1){
 				ASSERT(false)
 			}
@@ -123,7 +123,7 @@ Queue::T_Message Queue::PeekMsg(){
 			}
 #elif M_OS == M_OS_MACOSX
 			{
-				u8 oneByteBuf[1];
+				std::uint8_t oneByteBuf[1];
 				if(read(this->pipeEnds[0], oneByteBuf, 1) != 1){
 					throw ting::Exc("Queue::Wait(): read() failed");
 				}

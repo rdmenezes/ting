@@ -60,18 +60,20 @@ ifneq ($(prorab_included),true)
     PREFIX := /usr
 
     #Detect operating system
-    prorab_operating_system := $(shell uname)
-    ifeq ($(patsubst MINGW%,MINGW,$(prorab_operating_system)), MINGW)
+    prorab_private_os := $(shell uname)
+    ifeq ($(patsubst MINGW%,MINGW,$(prorab_private_os)), MINGW)
         prorab_os := windows
-    else ifeq ($(prorab_operating_system), Darwin)
+    else ifeq ($(prorab_private_os), Darwin)
         prorab_os := macosx
     else
         prorab_os := linux
     endif
 
     #set library extension
-    ifeq ($(prorab_os),windows)
+    ifeq ($(prorab_os), windows)
         prorab_lib_extension := .dll
+    else ifeq ($(prorab_os), macosx)
+        prorab_lib_extension := .dylib
     else
         prorab_lib_extension := .so
     endif
