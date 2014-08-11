@@ -23,7 +23,7 @@ Description: debugging symbols for libting3 package.
 Package: libting-dev
 Section: devel
 Architecture: any
-Depends: libting3 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libting3 (= ${binary:Version}), ${misc:Depends}
 Suggests: libting-doc, libting3-dbg (= ${binary:Version})
 Description: cross-platform C++ utility library.
  For multithreaded development ting provides classes such as Mutex, Semaphore, Thread, Queue, Message, CondVar.
