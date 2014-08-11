@@ -56,8 +56,9 @@ ifneq ($(prorab_included),true)
     prorab_dir := $(dir $(lastword $(MAKEFILE_LIST)))
 
     #initialize standard vars for "install" target
-    DESTDIR :=
-    PREFIX := /usr
+    ifeq ($(PREFIX),) #PREFIX is environment variable, but if it is not set, then set default value
+        PREFIX := /usr/local
+    endif
 
     #Detect operating system
     prorab_private_os := $(shell uname)
