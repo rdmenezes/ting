@@ -108,12 +108,6 @@ int Func2(const ting::ArrayAdaptor<TestClass> buf){
 
 void Run(){
 	{
-		const std::array<TestClass, 20> buf(void);
-
-		Func2(buf);
-	}
-	
-	{
 		std::array<TestClass, 20> buf;
 		
 //		Func(buf);
