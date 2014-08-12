@@ -17,13 +17,15 @@ this_cflags += -Wall
 this_cflags += #-DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
 
-
-ifeq ($(prorab_os),windows)
+ifeq ($(prorab_os),macosx)
+    this_cflags += -stdlib=libc++ #this is needed to be able to use c++11 std lib
+    this_ldlibs += -lc++
+else ifeq ($(prorab_os),windows)
 else
     this_cflags += -fPIC
 endif
 
-this_srcs := testso.cpp
+this_srcs += testso.cpp
 
 #$(info $(prorab-build-lib))
 $(eval $(prorab-build-lib))
@@ -45,10 +47,14 @@ this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
 
-this_srcs := Singleton_test.cpp
+this_srcs += Singleton_test.cpp
 
-this_ldlibs := $(lib_target_name)
+this_ldlibs += $(lib_target_name)
 
+ifeq ($(prorab_os),macosx)
+    this_cflags += -stdlib=libc++ #this is needed to be able to use c++11 std lib
+    this_ldlibs += -lc++
+endif
 
 $(eval $(prorab-build-app))
 
