@@ -106,9 +106,15 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-private-lib-specific-rules-nix-systems
-        $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension)))
-        $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name))
-        $(eval prorab_private_lib_ldflags += -Wl,-soname,$(notdir $(prorab_private_name)))
+        $(if $(filter macosx,$(prorab_os)), \
+                $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
+                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_so_name)$(prorab_lib_extension))) \
+                $(eval prorab_private_lib_ldflags += -dynamiclib -Wl,-install_name,$(prorab_private_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
+            ,\
+                $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
+                $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name)) \
+                $(eval prorab_private_lib_ldflags := -shared -Wl,-soname,$(notdir $(prorab_private_name))) \
+            )
 
         $(eval prorab_this_name := $(prorab_private_symbolic_link))
 
@@ -129,11 +135,9 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-private-lib-specific-rules
-        $(eval prorab_private_lib_ldflags := -shared)
-
         $(if $(filter windows,$(prorab_os)), \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_lib_ldflags += -s) \
+                $(eval prorab_private_lib_ldflags := -shared -s) \
                 $(eval prorab_this_name := $(prorab_private_name)) \
             , \
                 $(prorab-private-lib-specific-rules-nix-systems) \
@@ -156,12 +160,15 @@ ifneq ($(prorab_included),true)
 
         install:: $(prorab_this_staticlib) $(prorab_private_name)
 		$(prorab_echo)for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name "*.hpp")); do \
-		    install -D $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
+		    install -d $(DESTDIR)$(PREFIX)/include/$$$${i%/*}; \
+		    install $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
 		done
 		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/lib/
 		$(prorab_echo)install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
 		$(prorab_echo)install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
-
+		$(if $(filter macosx,$(prorab_os)), \
+		        $(prorab_echo)install_name_tool -id "$(PREFIX)/lib/$(notdir $(prorab_private_name))" $(DESTDIR)$(PREFIX)/lib/$(notdir $(prorab_private_name)) \
+		    )
     endef
 
 
