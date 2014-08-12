@@ -18,6 +18,10 @@ this_cflags += -Wall
 this_cflags += -DDEBUG
 this_cflags += -fstrict-aliasing #strict aliasing!!!
 
+ifeq ($(prorab_os),macosx)
+    this_cflags += -stdlib=libc++ #this is needed to be able to use c++11 std lib
+endif
+
 this_srcs := main.cpp tests.cpp
 
 
