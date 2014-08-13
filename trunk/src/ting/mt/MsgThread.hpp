@@ -74,12 +74,10 @@ protected:
 
 	Queue queue;
 
-	Queue::T_Message quitMessage;
+	Queue::T_Message quitMessage = [this](){this->quitFlag = true;};
 
 public:
-	MsgThread(){
-		this->quitMessage = [this](){this->quitFlag = true;};
-	}
+	MsgThread() = default;
 
 	~MsgThread()NOEXCEPT{}
 	
