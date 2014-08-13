@@ -70,13 +70,13 @@ void FSFile::OpenInternal(E_Mode mode){
 	
 	const char* modeStr;
 	switch(mode){
-		case File::WRITE:
+		case File::E_Mode::WRITE:
 			modeStr = "r+b";
 			break;
-		case File::CREATE:
+		case File::E_Mode::CREATE:
 			modeStr = "w+b";
 			break;
-		case File::READ:
+		case File::E_Mode::READ:
 			modeStr = "rb";
 			break;
 		default:

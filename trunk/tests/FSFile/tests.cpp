@@ -20,7 +20,7 @@ void Run(){
 		{
 			std::vector<std::uint8_t> buf(numToSeek);
 			
-			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::E_Mode::READ);
 			
 			unsigned res = f.Read(buf);
 			ASSERT_ALWAYS(res == buf.size())
@@ -32,7 +32,7 @@ void Run(){
 		}
 		
 		{
-			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::E_Mode::READ);
 
 			f.File::SeekForward(numToSeek);
 
@@ -45,7 +45,7 @@ void Run(){
 		}
 
 		{
-			ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
+			ting::fs::File::Guard fileGuard(f, ting::fs::File::E_Mode::READ);
 
 			f.SeekForward(numToSeek);
 

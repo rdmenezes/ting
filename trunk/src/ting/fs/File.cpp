@@ -134,7 +134,7 @@ size_t File::Write(
 		throw File::IllegalStateExc("Cannot write, file is not opened");
 	}
 
-	if(this->ioMode != WRITE){
+	if(this->ioMode != E_Mode::WRITE){
 		throw File::Exc("file is opened, but not in WRITE mode");
 	}
 
@@ -207,7 +207,7 @@ std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 		throw File::IllegalStateExc("file should not be opened");
 	}
 
-	File::Guard fileGuard(*this, File::READ);//make sure we close the file upon exit from the function
+	File::Guard fileGuard(*this, File::E_Mode::READ);//make sure we close the file upon exit from the function
 	
 	std::list<Chunk> chunks;
 	
@@ -278,7 +278,7 @@ bool File::Exists()const{
 	//try opening and closing the file to find out if it exists or not
 	ASSERT(!this->IsOpened())
 	try{
-		File::Guard fileGuard(const_cast<File&>(*this), File::READ);
+		File::Guard fileGuard(const_cast<File&>(*this), File::E_Mode::READ);
 	}catch(File::Exc&){
 		return false;//file opening failed, assume the file does not exist
 	}

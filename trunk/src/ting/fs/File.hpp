@@ -50,8 +50,6 @@ namespace fs{
  */
 class File{
 	std::string path;
-	
-	//TODO: add file permissions
 
 	bool isOpened = false;
 	
@@ -92,7 +90,7 @@ public:
 	/**
 	 * @brief Modes of opening the file.
 	 */
-	enum E_Mode{
+	enum class E_Mode{
 		READ,  ///Open existing file for read only
 		WRITE, ///Open existing file for read and write
 		CREATE ///Create new file and open it for read and write. If file exists it will be replaced by empty file.
@@ -191,8 +189,8 @@ public:
 		this->OpenInternal(mode);
 		
 		//set open mode
-		if(mode == CREATE){
-			this->ioMode = WRITE;
+		if(mode == E_Mode::CREATE){
+			this->ioMode = E_Mode::WRITE;
 		}else{
 			this->ioMode = mode;
 		}

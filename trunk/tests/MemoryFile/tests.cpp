@@ -20,7 +20,7 @@ void Run(){
 		std::uint8_t buf[] = {1, 2, 3, 4};
 		ting::ArrayAdaptor<std::uint8_t> b(buf, sizeof(buf));
 		
-		ting::fs::File::Guard fileGuard(f, ting::fs::File::CREATE);
+		ting::fs::File::Guard fileGuard(f, ting::fs::File::E_Mode::CREATE);
 		
 		f.Write(b);
 	}
@@ -28,7 +28,7 @@ void Run(){
 	{
 		std::array<std::uint8_t, 4> b;
 		
-		ting::fs::File::Guard fileGuard(f, ting::fs::File::READ);
+		ting::fs::File::Guard fileGuard(f, ting::fs::File::E_Mode::READ);
 		
 		f.Read(b);
 		
