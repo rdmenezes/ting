@@ -31,7 +31,7 @@ size_t MemoryFile::ReadInternal(ting::Buffer<std::uint8_t> buf){
 
 
 
-size_t MemoryFile::WriteInternal(const ting::Buffer<std::uint8_t> buf){
+size_t MemoryFile::WriteInternal(ting::Buffer<const std::uint8_t> buf){
 	ASSERT(this->idx <= this->data.size())
 	
 	size_t numBytesTillEOF = this->data.size() - this->idx;

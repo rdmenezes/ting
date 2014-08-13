@@ -96,10 +96,9 @@ public:
 	 * Sends data on connected socket. This method does not guarantee that the whole
 	 * buffer will be sent completely, it will return the number of bytes actually sent.
 	 * @param buf - pointer to the buffer with data to send.
-	 * @param offset - offset inside the buffer from where to start sending the data.
 	 * @return the number of bytes actually sent.
 	 */
-	size_t Send(const ting::Buffer<std::uint8_t> buf, size_t offset = 0);
+	size_t Send(ting::Buffer<const std::uint8_t> buf);
 
 
 
@@ -111,10 +110,9 @@ public:
 	 * If previous WaitSet::Wait() indicated that socket is ready for reading
 	 * and TCPSocket::Recv() returns 0, then connection was closed by peer.
 	 * @param buf - pointer to the buffer where to put received data.
-	 * @param offset - offset inside the buffer where to start putting data from.
 	 * @return the number of bytes written to the buffer.
 	 */
-	size_t Recv(ting::Buffer<std::uint8_t> buf, size_t offset = 0);
+	size_t Recv(ting::Buffer<std::uint8_t> buf);
 
 	
 	

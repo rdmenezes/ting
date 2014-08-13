@@ -35,7 +35,7 @@ size_t BufferFile::ReadInternal(ting::Buffer<std::uint8_t> buf){
 
 
 //override
-size_t BufferFile::WriteInternal(const ting::Buffer<std::uint8_t> buf){
+size_t BufferFile::WriteInternal(ting::Buffer<const std::uint8_t> buf){
 	ASSERT(this->ptr <= this->data.end())
 	size_t numBytesWritten = std::min(buf.SizeInBytes(), size_t(this->data.end() - this->ptr));
 	memcpy(this->ptr, buf.begin(), numBytesWritten);

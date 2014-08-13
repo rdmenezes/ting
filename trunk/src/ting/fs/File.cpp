@@ -93,43 +93,19 @@ std::vector<std::string> File::ListDirContents(size_t maxEntries){
 
 
 
-size_t File::Read(
-			ting::Buffer<std::uint8_t> buf,
-			size_t numBytesToRead,
-			size_t offset
-		)
-{
+size_t File::Read(ting::Buffer<std::uint8_t> buf){
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("Cannot read, file is not opened");
 	}
-
-	size_t actualNumBytesToRead =
-			numBytesToRead == 0 ? buf.size() : numBytesToRead;
-
-	if(offset > buf.size()){
-		throw File::Exc("offset is out of buffer bounds");
-	}
-
-	if(actualNumBytesToRead > buf.size() - offset){
-		throw File::Exc("attempt to read more bytes than the number of bytes from offset to the buffer end");
-	}
-
-	ASSERT(actualNumBytesToRead + offset <= buf.size())
-	ting::Buffer<std::uint8_t> b(buf.begin() + offset, actualNumBytesToRead);
 	
-	size_t ret = this->ReadInternal(b);
+	size_t ret = this->ReadInternal(buf);
 	this->curPos += ret;
 	return ret;
 }
 
 
 
-size_t File::Write(
-			const ting::Buffer<std::uint8_t> buf,
-			size_t numBytesToWrite,
-			size_t offset
-		)
-{
+size_t File::Write(ting::Buffer<const std::uint8_t> buf){
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("Cannot write, file is not opened");
 	}
@@ -137,22 +113,8 @@ size_t File::Write(
 	if(this->ioMode != E_Mode::WRITE){
 		throw File::Exc("file is opened, but not in WRITE mode");
 	}
-
-	size_t actualNumBytesToWrite = (numBytesToWrite == 0 ? buf.SizeInBytes() : numBytesToWrite);
-
-	if(offset > buf.size()){
-		throw File::Exc("offset is out of buffer bounds");
-	}
-
-	if(actualNumBytesToWrite > buf.size() - offset){
-		throw File::Exc("attempt to write more bytes than passed buffer contains");
-	}
-
-	ASSERT(actualNumBytesToWrite + offset <= buf.SizeInBytes())
 	
-	ting::Buffer<std::uint8_t> b(const_cast<std::remove_const<decltype(buf)>::type&>(buf).begin() + offset, actualNumBytesToWrite);
-	
-	size_t ret = this->WriteInternal(b);
+	size_t ret = this->WriteInternal(buf);
 	this->curPos += ret;
 	return ret;
 }
@@ -166,7 +128,7 @@ size_t File::SeekForwardInternal(size_t numBytesToSeek){
 	for(; bytesRead != numBytesToSeek;){
 		size_t curNumToRead = numBytesToSeek - bytesRead;
 		ting::util::ClampTop(curNumToRead, buf.size());
-		size_t res = this->Read(buf, curNumToRead);
+		size_t res = this->Read(ting::Buffer<std::uint8_t>(&*buf.begin(), curNumToRead));
 		ASSERT(bytesRead < numBytesToSeek)
 		ASSERT(numBytesToSeek >= res)
 		ASSERT(bytesRead <= numBytesToSeek - res)
@@ -226,7 +188,7 @@ std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
 		size_t numBytesToRead = maxBytesToLoad - bytesRead;
 		ting::util::ClampTop(numBytesToRead, chunks.back().size());
 		
-		res = this->Read(chunks.back(), numBytesToRead);
+		res = this->Read(ting::Buffer<std::uint8_t>(&*chunks.back().begin(), numBytesToRead));
 
 		bytesRead += res;
 		

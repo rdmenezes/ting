@@ -38,7 +38,7 @@ void Run(){
 
 			std::array<std::uint8_t, 1> buf;
 
-			unsigned res = f.Read(buf, 1);
+			unsigned res = f.Read(buf);
 			ASSERT_ALWAYS(res == 1)
 
 			ASSERT_ALWAYS(buf[0] == testByte[0])
@@ -51,7 +51,7 @@ void Run(){
 
 			std::array<std::uint8_t, 1> buf;
 
-			unsigned res = f.Read(buf, 1);
+			unsigned res = f.Read(buf);
 			ASSERT_ALWAYS(res == 1)
 
 			ASSERT_ALWAYS(buf[0] == testByte[0])

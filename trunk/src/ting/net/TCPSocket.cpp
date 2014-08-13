@@ -148,21 +148,12 @@ void TCPSocket::Open(const IPAddress& ip, bool disableNaggle){
 
 
 
-size_t TCPSocket::Send(const ting::Buffer<std::uint8_t> buf, size_t offset){
+size_t TCPSocket::Send(ting::Buffer<const std::uint8_t> buf){
 	if(!*this){
 		throw net::Exc("TCPSocket::Send(): socket is not opened");
 	}
 
 	this->ClearCanWriteFlag();
-
-	ASSERT_INFO((
-			(buf.begin() + offset) <= (buf.end() - 1))
-					|| ((buf.size() == 0) && (offset == 0))
-				,
-			"buf.Begin() = " << reinterpret_cast<const void*>(buf.begin())
-					<< " offset = " << offset
-					<< " buf.End() = " << reinterpret_cast<const void*>(buf.end())
-		)
 
 #if M_OS == M_OS_WINDOWS
 	int len;
@@ -173,8 +164,8 @@ size_t TCPSocket::Send(const ting::Buffer<std::uint8_t> buf, size_t offset){
 	while(true){
 		len = send(
 				this->socket,
-				reinterpret_cast<const char*>(buf.begin() + offset),
-				buf.size() - offset,
+				reinterpret_cast<const char*>(&*buf.begin()),
+				buf.size(),
 				0
 			);
 		if(len == DSocketError()){
@@ -214,7 +205,7 @@ size_t TCPSocket::Send(const ting::Buffer<std::uint8_t> buf, size_t offset){
 
 
 
-size_t TCPSocket::Recv(ting::Buffer<std::uint8_t> buf, size_t offset){
+size_t TCPSocket::Recv(ting::Buffer<std::uint8_t> buf){
 	//the 'can read' flag shall be cleared even if this function fails to avoid subsequent
 	//calls to Recv() because it indicates that there's activity.
 	//So, do it at the beginning of the function.
@@ -223,15 +214,6 @@ size_t TCPSocket::Recv(ting::Buffer<std::uint8_t> buf, size_t offset){
 	if(!*this){
 		throw net::Exc("TCPSocket::Recv(): socket is not opened");
 	}
-
-	ASSERT_INFO(
-			((buf.begin() + offset) <= (buf.end() - 1))
-					|| ((buf.size() == 0) && (offset == 0))
-				,
-			"buf.Begin() = " << reinterpret_cast<void*>(buf.begin())
-					<< " offset = " << offset
-					<< " buf.End() = " << reinterpret_cast<void*>(buf.end())
-		)
 
 #if M_OS == M_OS_WINDOWS
 	int len;
@@ -242,8 +224,8 @@ size_t TCPSocket::Recv(ting::Buffer<std::uint8_t> buf, size_t offset){
 	while(true){
 		len = recv(
 				this->socket,
-				reinterpret_cast<char*>(buf.begin() + offset),
-				buf.size() - offset,
+				reinterpret_cast<char*>(&*buf.begin()),
+				buf.size(),
 				0
 			);
 		if(len == DSocketError()){

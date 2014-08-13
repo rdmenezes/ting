@@ -264,20 +264,11 @@ public:
 	 * of bytes, unless end of file reached, in which case the return value will
 	 * be less than number of bytes to read was requested by argument.
 	 * @param buf - buffer where to store the read data.
-	 * @param numBytesToRead - number of bytes to read. If this value is more than
-	 *                         the buffer holds (minus the offset) then an exception will be thrown.
-	 *                         Zero passed value means the whole buffer size.
-	 * @param offset - offset into the buffer from where to start storing the read data. Offset should
-	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually read. Shall always be equal to number of bytes requested to read
 	 *         except the case when end of file reached.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	size_t Read(
-			ting::Buffer<std::uint8_t> buf,
-			size_t numBytesToRead = 0, //0 means the whole buffer size
-			size_t offset = 0
-		);
+	size_t Read(ting::Buffer<std::uint8_t> buf);
 
 protected:
 	/**
@@ -297,21 +288,12 @@ public:
 	 * @brief Write data to file.
 	 * Not all file systems support writing to a file, some file systems are read-only.
 	 * @param buf - buffer holding the data to write.
-	 * @param numBytesToWrite - number of bytes to write. If this value is more than
-	 *                          the buffer holds (minus the offset) then an exception will be thrown.
-	 *                          Zero passed value means the whole buffer size.
-	 * @param offset - offset into the buffer from where to start taking the data for writing. Offset should
-	 *                 be less or equal to the size of the buffer, otherwise an exception is thrown.
 	 * @return Number of bytes actually written. Normally, should always write all the passed data,
 	 *         the only reasonable case when less data is written is when there is no more free space
 	 *         in the file system.
 	 * @throw IllegalStateExc - if file is not opened or opened for reading only.
 	 */
-	size_t Write(
-			const ting::Buffer<std::uint8_t> buf,
-			size_t numBytesToWrite = 0, //0 means the whole buffer size
-			size_t offset = 0
-		);
+	size_t Write(ting::Buffer<const std::uint8_t> buf);
 
 protected:
 	/**
@@ -322,7 +304,7 @@ protected:
      * @param buf - buffer containing the data to write.
      * @return number of bytes actually written.
      */
-	virtual size_t WriteInternal(const ting::Buffer<std::uint8_t> buf){
+	virtual size_t WriteInternal(ting::Buffer<const std::uint8_t> buf){
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	

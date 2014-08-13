@@ -40,7 +40,7 @@ bool IsIPv6SupportedByOS(){
 
 namespace BasicClientServerTest{
 
-void SendAll(ting::net::TCPSocket& s, const ting::Buffer<std::uint8_t> buf){
+void SendAll(ting::net::TCPSocket& s, ting::Buffer<std::uint8_t> buf){
 	if(!s){
 		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
 	}
@@ -51,12 +51,12 @@ void SendAll(ting::net::TCPSocket& s, const ting::Buffer<std::uint8_t> buf){
 	size_t offset = 0;
 
 	while(true){
-		int res = s.Send(buf, offset);
+		int res = s.Send(decltype(buf)(&*buf.begin() + offset, buf.size() - offset));
 		DEBUG_CODE(left -= res;)
 		ASSERT(left >= 0)
 		offset += res;
 		if(offset == buf.size()){
-				break;
+			break;
 		}
 		//give 30ms to allow data from send buffer to be sent
 		ting::mt::Thread::Sleep(30);
@@ -130,7 +130,7 @@ void Run(){
 		unsigned bytesReceived = 0;
 		for(unsigned i = 0; i < 30; ++i){
 			ASSERT_ALWAYS(bytesReceived < 4)
-			bytesReceived += sock.Recv(data, bytesReceived);
+			bytesReceived += sock.Recv(ting::Buffer<std::uint8_t>(&*data.begin() + bytesReceived, data.size() - bytesReceived));
 			ASSERT_ALWAYS(bytesReceived <= 4)
 			if(bytesReceived == 4){
 				break;
@@ -262,7 +262,7 @@ void Run(){
 				ASSERT_ALWAYS(sendBuffer.size() > 0)
 
 				try{
-					unsigned res = sockS.Send(sendBuffer, bytesSent);
+					unsigned res = sockS.Send(ting::Buffer<std::uint8_t>(&*sendBuffer.begin() + bytesSent, sendBuffer.size() - bytesSent));
 					bytesSent += res;
 					if(res == 0){
 						ASSERT_ALWAYS(res > 0) //since it was CanWrite() we should be able to write at least something

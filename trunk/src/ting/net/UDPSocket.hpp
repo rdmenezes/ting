@@ -96,7 +96,7 @@ public:
 	 * @return number of bytes actually sent. Actually it is either 0 or the size of the
 	 *         datagram passed in as argument.
 	 */
-	size_t Send(const ting::Buffer<std::uint8_t> buf, const IPAddress& destinationIP);
+	size_t Send(ting::Buffer<const std::uint8_t> buf, const IPAddress& destinationIP);
 
 
 
