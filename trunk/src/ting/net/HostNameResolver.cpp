@@ -283,8 +283,7 @@ public:
 		ASSERT(size_t(p - &*buf.begin()) == packetSize);
 		
 		TRACE(<< "sending DNS request to " << std::hex << (r->dns.host.IPv4Host()) << std::dec << " for " << r->hostName << ", reqID = " << r->id << std::endl)
-		ting::Buffer<const std::uint8_t> bufToSend(&*buf.begin(), packetSize);
-		size_t ret = this->socket.Send(bufToSend, r->dns);
+		size_t ret = this->socket.Send(ting::Buffer<std::uint8_t>(&*buf.begin(), packetSize), r->dns);
 		
 		ASSERT(ret == packetSize || ret == 0)
 		
