@@ -73,11 +73,13 @@ protected:
 	volatile bool quitFlag = false;//looks like it is not necessary to protect this flag by mutex, volatile will be enough
 
 	Queue queue;
-	
-	Queue::T_Message quitMessage = [this](){this->quitFlag = true;};
+
+	Queue::T_Message quitMessage;
 
 public:
-	MsgThread() = default;
+	MsgThread(){
+		this->quitMessage = [this](){this->quitFlag = true;};
+	}
 
 	~MsgThread()NOEXCEPT{}
 	
