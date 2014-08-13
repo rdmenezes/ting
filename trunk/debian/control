@@ -2,7 +2,8 @@ Source: libting
 Section: misc
 Priority: extra
 Maintainer: Ivan Gagis <igagis@gmail.com>
-Build-Depends: debhelper (>= 9), doxygen, libc6-dev
+Build-Depends: debhelper (>= 9), libc6-dev
+Build-Depends-Indep: doxygen
 Standards-Version: 3.9.2
 
 Package: libting3
