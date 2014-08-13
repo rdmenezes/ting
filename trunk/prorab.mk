@@ -45,11 +45,14 @@ ifneq ($(prorab_included),true)
     
 
 
-    .PHONY: clean all install
+    .PHONY: clean all install distclean
 
 
     #define the very first default target
     all:
+
+    #define distclean target which does same as clean. This is to make some older versions of debhelper happy.
+    distclean: clean
 
 
     #directory of prorab.mk
