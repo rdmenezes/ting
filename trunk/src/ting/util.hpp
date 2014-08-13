@@ -45,23 +45,6 @@ THE SOFTWARE. */
 
 
 
-//define macro used to align structures in memory
-#if M_COMPILER == M_COMPILER_MSVC
-#	define M_DECLARE_ALIGNED(x)
-#	define M_DECLARE_ALIGNED_MSVC(x) __declspec(align(x))
-
-#elif M_COMPILER == M_COMPILER_GCC
-#	define M_DECLARE_ALIGNED(x) __attribute__ ((aligned(x)))
-#	define M_DECLARE_ALIGNED_MSVC(x)
-
-#else
-#	define M_DECLARE_ALIGNED(x)
-#	define M_DECLARE_ALIGNED_MSVC(x)
-
-#endif
-
-
-
 #if M_COMPILER == M_COMPILER_MSVC
 #	define NOEXCEPT throw()
 #else

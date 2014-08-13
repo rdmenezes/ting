@@ -57,14 +57,10 @@ namespace ting{
 
 
 
-template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class MemoryPool{		
-	M_DECLARE_ALIGNED_MSVC(4) struct ElemSlot{
+template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class MemoryPool{
+	struct alignas(int) ElemSlot{
 		std::uint8_t buf[element_size];
-	}
-	//Align by sizeof(int) boundary, just to be more safe.
-	//I once had a problem with pthread mutex when it was not aligned by 4 byte boundary,
-	//so I resolved this by declaring PoolElem structure as aligned by sizeof(int).
-	M_DECLARE_ALIGNED(sizeof(int));
+	};
 	
 	struct Chunk{
 		size_t freeIndex = 0;//Used for first pass of elements allocation.
