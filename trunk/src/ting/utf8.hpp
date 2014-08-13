@@ -32,7 +32,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include "types.hpp"
-#include "ArrayAdaptor.hpp"
+#include "Buffer.hpp"
 #include "util.hpp"
 
 
@@ -147,7 +147,7 @@ public:
  * @param str - iterator into the utf-8 string.
  * @return Number of characters filled in to the buffer.
  */
-inline size_t FillBuffer(ting::ArrayAdaptor<std::uint32_t> buf, Iterator& str){
+inline size_t FillBuffer(ting::Buffer<std::uint32_t> buf, Iterator& str){
 	std::uint32_t* p = buf.begin();
 	for(; p != buf.end() && str.IsNotEnd(); ++p, ++str){
 		*p = str.Char();

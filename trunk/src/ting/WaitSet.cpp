@@ -245,7 +245,7 @@ void WaitSet::Remove(Waitable& w)NOEXCEPT{
 
 
 
-unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, ArrayAdaptor<Waitable*>* out_events){
+unsigned WaitSet::Wait(bool waitInfinitly, std::uint32_t timeout, Buffer<Waitable*>* out_events){
 	if(this->numWaitables == 0){
 		throw Exc("WaitSet::Wait(): no Waitable objects were added to the WaitSet, can't perform Wait()");
 	}

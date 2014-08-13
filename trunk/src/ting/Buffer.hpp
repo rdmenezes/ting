@@ -49,11 +49,11 @@ namespace ting{
 
 
 /**
- * @brief Array adaptor template class.
+ * @brief Buffer template class.
  * This class is a wrapper of continuous memory buffer, it encapsulates pointer to memory block and size of that memory block.
  * It does not own the memory.
  */
-template <class T> class ArrayAdaptor final{
+template <class T> class Buffer final{
 public:
 	typedef T value_type;
 	typedef value_type* pointer;
@@ -73,8 +73,8 @@ private:
 	
 public:
 
-	ArrayAdaptor(const ArrayAdaptor&) = default;
-	ArrayAdaptor& operator=(const ArrayAdaptor&) = default;
+	Buffer(const Buffer&) = default;
+	Buffer& operator=(const Buffer&) = default;
 	
 	
 	/**
@@ -85,7 +85,7 @@ public:
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	ArrayAdaptor(pointer bufPtr = nullptr, size_type bufSize = 0)NOEXCEPT :
+	Buffer(pointer bufPtr = nullptr, size_type bufSize = 0)NOEXCEPT :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
@@ -98,7 +98,7 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::array.
      * @param a - reference to instance of std::array.
      */
-	template <class T_1, std::size_t array_size> ArrayAdaptor(const std::array<T_1, array_size>& a) :
+	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
 			buf(&*const_cast<std::array<T_1, array_size>&>(a).begin()),
 			bufSize(a.size())
 	{}
@@ -109,7 +109,7 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::vector.
      * @param v - reference to instance of std::vector.
      */
-	template <class T_1> ArrayAdaptor(const std::vector<T_1>& v) :
+	template <class T_1> Buffer(const std::vector<T_1>& v) :
 			buf(&*const_cast<std::vector<T_1>&>(v).begin()),
 			bufSize(v.size())
 	{}
@@ -264,7 +264,7 @@ public:
 
 
 #ifdef DEBUG
-	friend std::ostream& operator<<(std::ostream& s, const ArrayAdaptor<T>& buf){
+	friend std::ostream& operator<<(std::ostream& s, const Buffer<T>& buf){
 		for(auto i = buf.begin(); i != buf.end(); ++i){
 			s << "\t" << (*i) << std::endl;
 		}

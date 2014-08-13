@@ -28,7 +28,7 @@ THE SOFTWARE. */
 #include "IPAddress.hpp"
 
 #include "../config.hpp"
-#include "../ArrayAdaptor.hpp"
+#include "../Buffer.hpp"
 
 #if M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 #	include <arpa/inet.h>
@@ -208,14 +208,14 @@ IPAddress::IPAddress(const char* ip){
 		
 		char* dst;
 		for(dst = &*buf.begin(); *ip != ']'; ++dst, ++ip){
-			if(*ip == 0 || !ting::ArrayAdaptor<char>(buf).Overlaps(dst + 1)){
+			if(*ip == 0 || !ting::Buffer<char>(buf).Overlaps(dst + 1)){
 				throw BadIPAddressFormatExc();
 			}
 			
 			*dst = *ip;
 		}
 		
-		ASSERT(ting::ArrayAdaptor<char>(buf).Overlaps(dst))
+		ASSERT(ting::Buffer<char>(buf).Overlaps(dst))
 		*dst = 0;//null-terminate
 				
 		this->host = Host::ParseIPv6(&*buf.begin());
@@ -229,14 +229,14 @@ IPAddress::IPAddress(const char* ip){
 			
 			char* dst;
 			for(dst = &*buf.begin(); *ip != ':' && *ip != 0; ++dst, ++ip){
-				if(!ting::ArrayAdaptor<char>(buf).Overlaps(dst + 1)){
+				if(!ting::Buffer<char>(buf).Overlaps(dst + 1)){
 					throw BadIPAddressFormatExc();
 				}
 
 				*dst = *ip;
 			}
 
-			ASSERT(ting::ArrayAdaptor<char>(buf).Overlaps(dst))
+			ASSERT(ting::Buffer<char>(buf).Overlaps(dst))
 			*dst = 0;//null-terminate
 
 			this->host = Host::ParseIPv4(&*buf.begin());

@@ -1,7 +1,7 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/types.hpp"
 #include "../../src/ting/util.hpp"
-#include "../../src/ting/ArrayAdaptor.hpp"
+#include "../../src/ting/Buffer.hpp"
 
 #include "tests.hpp"
 

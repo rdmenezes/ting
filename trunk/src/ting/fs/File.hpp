@@ -33,7 +33,7 @@ THE SOFTWARE. */
 
 #include "../debug.hpp"
 #include "../types.hpp"
-#include "../ArrayAdaptor.hpp"
+#include "../Buffer.hpp"
 
 #include "Exc.hpp"
 
@@ -274,7 +274,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
 	size_t Read(
-			ting::ArrayAdaptor<std::uint8_t> buf,
+			ting::Buffer<std::uint8_t> buf,
 			size_t numBytesToRead = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -288,7 +288,7 @@ protected:
      * @param buf - buffer to fill with read data.
      * @return number of bytes actually read.
      */
-	virtual size_t ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf){
+	virtual size_t ReadInternal(ting::Buffer<std::uint8_t> buf){
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	
@@ -308,7 +308,7 @@ public:
 	 * @throw IllegalStateExc - if file is not opened or opened for reading only.
 	 */
 	size_t Write(
-			const ting::ArrayAdaptor<std::uint8_t> buf,
+			const ting::Buffer<std::uint8_t> buf,
 			size_t numBytesToWrite = 0, //0 means the whole buffer size
 			size_t offset = 0
 		);
@@ -322,7 +322,7 @@ protected:
      * @param buf - buffer containing the data to write.
      * @return number of bytes actually written.
      */
-	virtual size_t WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf){
+	virtual size_t WriteInternal(const ting::Buffer<std::uint8_t> buf){
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	

@@ -5,7 +5,7 @@
 #include "../../src/ting/net/TCPServerSocket.hpp"
 #include "../../src/ting/net/UDPSocket.hpp"
 #include "../../src/ting/WaitSet.hpp"
-#include "../../src/ting/ArrayAdaptor.hpp"
+#include "../../src/ting/Buffer.hpp"
 #include "../../src/ting/config.hpp"
 #include "../../src/ting/util.hpp"
 
@@ -40,7 +40,7 @@ bool IsIPv6SupportedByOS(){
 
 namespace BasicClientServerTest{
 
-void SendAll(ting::net::TCPSocket& s, const ting::ArrayAdaptor<std::uint8_t> buf){
+void SendAll(ting::net::TCPSocket& s, const ting::Buffer<std::uint8_t> buf){
 	if(!s){
 		throw ting::net::Exc("TCPSocket::Send(): socket is not opened");
 	}
@@ -374,7 +374,7 @@ void Run(){
 		//SEND
 
 		try{
-			ting::ArrayAdaptor<std::uint8_t> buf(&scnt, 1);
+			ting::Buffer<std::uint8_t> buf(&scnt, 1);
 			unsigned res = sockS.Send(buf);
 			ASSERT_ALWAYS(res <= 1)
 			if(res == 1){

@@ -1,4 +1,4 @@
-#include "../../src/ting/ArrayAdaptor.hpp"
+#include "../../src/ting/Buffer.hpp"
 
 #include "tests.hpp"
 
@@ -98,7 +98,7 @@ public:
 };
 
 
-int Func2(const ting::ArrayAdaptor<TestClass> buf){
+int Func2(const ting::Buffer<TestClass> buf){
 	if(buf.size() == 0){
 		return 0;
 	}
@@ -121,8 +121,8 @@ void Run(){
 		Func2(buf);
 	}
 	
-//	Func(ting::ArrayAdaptor<TestClass>(0, 0));
-	Func2(ting::ArrayAdaptor<TestClass>(0, 0));
+//	Func(ting::Buffer<TestClass>(0, 0));
+	Func2(ting::Buffer<TestClass>(0, 0));
 }
 
 }//~namespace

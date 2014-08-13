@@ -20,7 +20,7 @@ void MemoryFile::OpenInternal(E_Mode mode){
 
 
 
-size_t MemoryFile::ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf){
+size_t MemoryFile::ReadInternal(ting::Buffer<std::uint8_t> buf){
 	ASSERT(this->idx <= this->data.size())
 	size_t numBytesRead = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
 	memcpy(buf.begin(), &this->data[idx], numBytesRead);
@@ -31,7 +31,7 @@ size_t MemoryFile::ReadInternal(ting::ArrayAdaptor<std::uint8_t> buf){
 
 
 
-size_t MemoryFile::WriteInternal(const ting::ArrayAdaptor<std::uint8_t> buf){
+size_t MemoryFile::WriteInternal(const ting::Buffer<std::uint8_t> buf){
 	ASSERT(this->idx <= this->data.size())
 	
 	size_t numBytesTillEOF = this->data.size() - this->idx;
