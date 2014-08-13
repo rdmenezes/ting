@@ -58,7 +58,14 @@ namespace ting{
 
 
 template <size_t element_size, std::uint32_t num_elements_in_chunk = 32> class MemoryPool{
-	struct alignas(int) ElemSlot{
+#if M_COMPILER == M_COMPILER_MSVC //TODO: remove when MSVC supports aligas(), perhaps in VS2014
+	__declspec(align(4))
+#endif
+	struct
+#if M_COMPILER != M_COMPILER_MSVC  //TODO: remove when MSVC supports aligas(), perhaps in VS2014
+	alignas(int)
+#endif
+	ElemSlot{
 		std::uint8_t buf[element_size];
 	};
 	
