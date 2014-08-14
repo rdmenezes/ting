@@ -87,13 +87,13 @@ bool File::IsDir()const NOEXCEPT{
 
 
 
-std::vector<std::string> File::ListDirContents(size_t maxEntries){
+std::vector<std::string> File::ListDirContents(size_t maxEntries)const{
 	throw File::Exc("File::ListDirContents(): not supported for this File instance");
 }
 
 
 
-size_t File::Read(ting::Buffer<std::uint8_t> buf){
+size_t File::Read(ting::Buffer<std::uint8_t> buf)const{
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("Cannot read, file is not opened");
 	}
@@ -121,7 +121,7 @@ size_t File::Write(ting::Buffer<const std::uint8_t> buf){
 
 
 
-size_t File::SeekForwardInternal(size_t numBytesToSeek){
+size_t File::SeekForwardInternal(size_t numBytesToSeek)const{
 	std::array<std::uint8_t, 0x1000> buf;//4kb buffer
 	
 	size_t bytesRead = 0;
@@ -164,12 +164,12 @@ struct Chunk : public std::array<std::uint8_t, DReadBlockSize>{
 
 
 
-std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad){
+std::vector<std::uint8_t> File::LoadWholeFileIntoMemory(size_t maxBytesToLoad)const{
 	if(this->IsOpened()){
 		throw File::IllegalStateExc("file should not be opened");
 	}
 
-	File::Guard fileGuard(*this, File::E_Mode::READ);//make sure we close the file upon exit from the function
+	File::Guard fileGuard(*this);//make sure we close the file upon exit from the function
 	
 	std::list<Chunk> chunks;
 	
@@ -252,12 +252,23 @@ bool File::Exists()const{
 File::Guard::Guard(File& file, E_Mode mode) :
 		f(file)
 {
-	if(this->f.IsOpened())
+	if(this->f.IsOpened()){
 		throw File::Exc("File::Guard::Guard(): file is already opened");
+	}
 
-	this->f.Open(mode);
+	const_cast<File&>(this->f).Open(mode);
 }
 
+
+File::Guard::Guard(const File& file) :
+		f(file)
+{
+	if(this->f.IsOpened()){
+		throw File::Exc("File::Guard::Guard(): file is already opened");
+	}
+
+	this->f.Open();
+}
 
 
 File::Guard::~Guard(){

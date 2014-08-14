@@ -51,7 +51,7 @@ private:
 	
 private:
 	std::vector<std::uint8_t> data;
-	size_t idx;
+	mutable size_t idx;
 	
 public:
 	/**
@@ -74,17 +74,17 @@ protected:
 
 	void OpenInternal(E_Mode mode)override;
 	
-	void CloseInternal()NOEXCEPT override{}
+	void CloseInternal()const NOEXCEPT override{}
 	
-	size_t ReadInternal(ting::Buffer<std::uint8_t> buf)override;
+	size_t ReadInternal(ting::Buffer<std::uint8_t> buf)const override;
 	
 	size_t WriteInternal(ting::Buffer<const std::uint8_t> buf)override;
 	
-	size_t SeekForwardInternal(size_t numBytesToSeek)override;
+	size_t SeekForwardInternal(size_t numBytesToSeek)const override;
 	
-	size_t SeekBackwardInternal(size_t numBytesToSeek)override;
+	size_t SeekBackwardInternal(size_t numBytesToSeek)const override;
 	
-	void RewindInternal()override;
+	void RewindInternal()const override;
 };
 
 }}//~namespace

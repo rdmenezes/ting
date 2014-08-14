@@ -20,7 +20,7 @@ void MemoryFile::OpenInternal(E_Mode mode){
 
 
 
-size_t MemoryFile::ReadInternal(ting::Buffer<std::uint8_t> buf){
+size_t MemoryFile::ReadInternal(ting::Buffer<std::uint8_t> buf)const{
 	ASSERT(this->idx <= this->data.size())
 	size_t numBytesRead = std::min(buf.SizeInBytes(), this->data.size() - this->idx);
 	memcpy(buf.begin(), &this->data[idx], numBytesRead);
@@ -50,7 +50,7 @@ size_t MemoryFile::WriteInternal(ting::Buffer<const std::uint8_t> buf){
 
 
 //override
-size_t MemoryFile::SeekForwardInternal(size_t numBytesToSeek){
+size_t MemoryFile::SeekForwardInternal(size_t numBytesToSeek)const{
 	ASSERT(this->idx <= this->data.size())
 	numBytesToSeek = std::min(this->data.size() - this->idx, numBytesToSeek);
 	this->idx += numBytesToSeek;
@@ -61,7 +61,7 @@ size_t MemoryFile::SeekForwardInternal(size_t numBytesToSeek){
 
 
 //override
-size_t MemoryFile::SeekBackwardInternal(size_t numBytesToSeek){
+size_t MemoryFile::SeekBackwardInternal(size_t numBytesToSeek)const{
 	ASSERT(this->idx <= this->data.size())
 	numBytesToSeek = std::min(this->idx, numBytesToSeek);
 	this->idx -= numBytesToSeek;
@@ -72,6 +72,6 @@ size_t MemoryFile::SeekBackwardInternal(size_t numBytesToSeek){
 
 
 //override
-void MemoryFile::RewindInternal(){
+void MemoryFile::RewindInternal()const{
 	this->idx = 0;
 }

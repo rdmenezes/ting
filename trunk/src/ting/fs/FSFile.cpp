@@ -100,7 +100,7 @@ void FSFile::OpenInternal(E_Mode mode){
 
 
 //override
-void FSFile::CloseInternal()NOEXCEPT{
+void FSFile::CloseInternal()const NOEXCEPT{
 	ASSERT(this->handle)
 
 	fclose(this->handle);
@@ -110,7 +110,7 @@ void FSFile::CloseInternal()NOEXCEPT{
 
 
 //override
-size_t FSFile::ReadInternal(ting::Buffer<std::uint8_t> buf){
+size_t FSFile::ReadInternal(ting::Buffer<std::uint8_t> buf)const{
 	ASSERT(this->handle)
 	size_t numBytesRead = fread(buf.begin(), 1, buf.size(), this->handle);
 	if(numBytesRead != buf.size()){//something happened
@@ -137,7 +137,7 @@ size_t FSFile::WriteInternal(ting::Buffer<const std::uint8_t> buf){
 
 
 //override
-size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
+size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek)const{
 	ASSERT(this->handle)
 	
 	//NOTE: fseek() accepts 'long int' as offset argument which is signed and can be
@@ -179,7 +179,7 @@ size_t FSFile::SeekBackwardInternal(size_t numBytesToSeek){
 
 
 //override
-void FSFile::RewindInternal(){
+void FSFile::RewindInternal()const{
 	if(!this->IsOpened()){
 		throw File::IllegalStateExc("cannot rewind, file is not opened");
 	}
@@ -279,7 +279,7 @@ std::string FSFile::GetHomeDir(){
 
 
 //override
-std::vector<std::string> FSFile::ListDirContents(size_t maxEntries){
+std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 	if(!this->IsDir()){
 		throw File::Exc("FSFile::ListDirContents(): this is not a directory");
 	}

@@ -51,9 +51,9 @@ namespace fs{
 class File{
 	std::string path;
 
-	bool isOpened = false;
+	mutable bool isOpened = false;
 	
-	size_t curPos = 0;//holds current position from file beginning
+	mutable size_t curPos = 0;//holds current position from file beginning
 	
 public:
 	/**
@@ -107,13 +107,10 @@ protected:
 			path(pathName)
 	{}
 
-private:
-	//no copying
-	File(const File& f);
-
-	//no assigning
-	File& operator=(const File& f);
 public:
+	File(const File&) = delete;
+	File(File&&) = delete;
+	File& operator=(const File&) = delete;
 
 	/**
 	 * @brief Destructor.
@@ -152,7 +149,7 @@ public:
 	size_t CurPos()const NOEXCEPT{
 		return this->curPos;
 	}
-	
+
 	/**
 	 * @brief Get file extension.
 	 * Returns a string containing the tail part of the file path, everything that
@@ -180,7 +177,7 @@ public:
 	 * @brief Open file.
 	 * Opens file for reading/writing or creates the file.
 	 * @param mode - file opening mode (reading/writing/create).
-	 * @throw IllegalStateExc - if file already opened.
+	 * @throw IllegalStateExc - if file is already opened.
 	 */
 	void Open(E_Mode mode){
 		if(this->IsOpened()){
@@ -200,6 +197,15 @@ public:
 		this->curPos = 0;
 	};
 	
+	/**
+	 * @brief Open file for reading.
+	 * This is equivalent to Open(E_Mode::READ);
+	 * @throw IllegalStateExc - if file is already opened.
+     */
+	void Open()const{
+		const_cast<File*>(this)->Open(E_Mode::READ);
+	}
+	
 protected:
 	/**
 	 * @brief Open file, internal implementation.
@@ -212,7 +218,7 @@ public:
 	/**
 	 * @brief Close file.
 	 */
-	void Close()NOEXCEPT{
+	void Close()const NOEXCEPT{
 		if(!this->IsOpened()){
 			return;
 		}
@@ -225,7 +231,7 @@ protected:
 	 * @brief Close file, internal implementation.
 	 * Derived class should override this function with its own implementation.
      */
-	virtual void CloseInternal()NOEXCEPT = 0;
+	virtual void CloseInternal()const NOEXCEPT = 0;
 	
 public:
 	/**
@@ -255,7 +261,7 @@ public:
 	 * @param maxEntries - maximum number of entries in the returned list. 0 means no limit.
 	 * @return The array of string objects representing the directory entries.
 	 */
-	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0);
+	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0)const;
 
 	/**
 	 * @brief Read data from file.
@@ -268,7 +274,7 @@ public:
 	 *         except the case when end of file reached.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	size_t Read(ting::Buffer<std::uint8_t> buf);
+	size_t Read(ting::Buffer<std::uint8_t> buf)const;
 
 protected:
 	/**
@@ -279,7 +285,7 @@ protected:
      * @param buf - buffer to fill with read data.
      * @return number of bytes actually read.
      */
-	virtual size_t ReadInternal(ting::Buffer<std::uint8_t> buf){
+	virtual size_t ReadInternal(ting::Buffer<std::uint8_t> buf)const{
 		throw ting::Exc("WriteInternal(): unsupported");
 	}
 	
@@ -319,7 +325,7 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	size_t SeekForward(size_t numBytesToSeek){
+	size_t SeekForward(size_t numBytesToSeek)const{
 		if(!this->IsOpened()){
 			throw File::IllegalStateExc("SeekForward(): file is not opened");
 		}
@@ -338,7 +344,7 @@ protected:
      * @param numBytesToSeek - number of bytes to seek.
 	 * @return number of bytes actually skipped.
      */
-	virtual size_t SeekForwardInternal(size_t numBytesToSeek);
+	virtual size_t SeekForwardInternal(size_t numBytesToSeek)const;
 	
 public:
 
@@ -350,7 +356,7 @@ public:
 	 * @return number of bytes actually skipped.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	size_t SeekBackward(size_t numBytesToSeek){
+	size_t SeekBackward(size_t numBytesToSeek)const{
 		if(!this->IsOpened()){
 			throw File::IllegalStateExc("SeekForward(): file is not opened");
 		}
@@ -368,7 +374,7 @@ protected:
      * @param numBytesToSeek - number of bytes to seek.
 	 * @return number of bytes actually skipped.
      */
-	virtual size_t SeekBackwardInternal(size_t numBytesToSeek){
+	virtual size_t SeekBackwardInternal(size_t numBytesToSeek)const{
 		throw ting::Exc("SeekBackward(): unsupported");
 	}
 	
@@ -379,7 +385,7 @@ public:
 	 * There is a default implementation of this operation by just closing and opening the file again.
 	 * @throw IllegalStateExc - if file is not opened.
 	 */
-	void Rewind(){
+	void Rewind()const{
 		if(!this->IsOpened()){
 			throw File::IllegalStateExc("Rewind(): file is not opened");
 		}
@@ -393,10 +399,10 @@ protected:
 	 * This function is called by Rewind() after it has done some safety checks.
 	 * Derived class may override this function with its own implementation.
      */
-	virtual void RewindInternal(){
+	virtual void RewindInternal()const{
 		E_Mode m = this->ioMode;
 		this->Close();
-		this->Open(m);
+		const_cast<File*>(this)->Open(m);
 	}
 	
 public:
@@ -417,7 +423,7 @@ public:
 	 * @return Array containing loaded file data.
 	 * @throw IllegalStateExc - if file is already opened.
 	 */
-	std::vector<std::uint8_t> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1));
+	std::vector<std::uint8_t> LoadWholeFileIntoMemory(size_t maxBytesToLoad = size_t(-1))const;
 
 	/**
 	 * @brief Check for file/directory existence.
@@ -452,10 +458,12 @@ public:
 	 * @endcode
 	 */
 	class Guard{
-		File& f;
+		const File& f;
 	public:
 		Guard(File &file, E_Mode mode);
 
+		Guard(const File &file);
+		
 		~Guard();
 	};
 };

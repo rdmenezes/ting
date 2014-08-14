@@ -50,7 +50,7 @@ namespace fs{
 class FSFile : public File{
 	std::string rootDir;
 
-	FILE* handle = nullptr;
+	mutable FILE* handle = nullptr;
 
 protected:
 
@@ -58,6 +58,21 @@ protected:
 		return this->rootDir + this->Path();
 	}
 
+	void OpenInternal(E_Mode mode)override;
+
+	void CloseInternal()const NOEXCEPT override;
+
+	size_t ReadInternal(ting::Buffer<std::uint8_t> buf)const override;
+
+	size_t WriteInternal(ting::Buffer<const std::uint8_t> buf)override;
+
+	//NOTE: use default implementation of SeekForward() because of the problems with
+	//      fseek() as it can set file pointer beyond the end of file.
+	
+	size_t SeekBackwardInternal(size_t numBytesToSeek)const override;
+	
+	void RewindInternal()const override;
+	
 public:
 	/**
 	 * @brief Constructor.
@@ -96,28 +111,12 @@ public:
 		return this->rootDir;
 	}
 
-	void OpenInternal(E_Mode mode)override;
-
-	void CloseInternal()NOEXCEPT override;
-
-	size_t ReadInternal(ting::Buffer<std::uint8_t> buf)override;
-
-	size_t WriteInternal(ting::Buffer<const std::uint8_t> buf)override;
-
-	//NOTE: use default implementation of SeekForward() because of the problems with
-	//      fseek() as it can set file pointer beyond the end of file.
 	
-	size_t SeekBackwardInternal(size_t numBytesToSeek)override;
-	
-	void RewindInternal() override;
 	
 	bool Exists()const override;
 	
 	void MakeDir() override;
 
-
-
-public:
 	/**
 	 * @brief Get user home directory.
 	 * Returns an absolute path to the current user's home directory.
@@ -128,8 +127,7 @@ public:
 
 
 
-	//override
-	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0);
+	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0)const override;
 	
 	/**
 	 * @brief Create new instance managed by auto-pointer.
