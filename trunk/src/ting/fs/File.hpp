@@ -30,6 +30,7 @@ THE SOFTWARE. */
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include "../debug.hpp"
 #include "../types.hpp"
@@ -432,6 +433,20 @@ public:
 	 */
 	virtual bool Exists()const;
 
+	
+	/**
+	 * @brief Creates another File object of same implementation.
+	 * Creates a 'clone' of the file system implementation represented by this object.
+	 * It does not copy current file path or open/close state etc. Spawned object is in
+	 * initial state.
+     * @return Newly spawned File object.
+     */
+	virtual std::unique_ptr<File> Spawn() = 0;
+	
+	std::unique_ptr<const File> Spawn()const{
+		return const_cast<File*>(this)->Spawn();
+	}
+	
 public:
 	/**
 	 * @brief File guard class.

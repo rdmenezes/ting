@@ -45,9 +45,10 @@ namespace fs{
  */
 class MemoryFile : public File{
 	
-private:
-	MemoryFile(const MemoryFile&);
-	MemoryFile& operator=(const MemoryFile&);
+	MemoryFile(const MemoryFile&) = delete;
+	MemoryFile(MemoryFile&&) = delete;
+	MemoryFile& operator=(const MemoryFile&) = delete;
+	MemoryFile& operator=(MemoryFile&&) = delete;
 	
 private:
 	std::vector<std::uint8_t> data;
@@ -66,12 +67,17 @@ public:
 	 * @brief Current file size.
      * @return current size of the file.
      */
-	inline size_t Size(){
+	size_t Size(){
 		return this->data.size();
 	}
 	
-protected:
 
+	virtual std::unique_ptr<File> Spawn()override{
+		return std::unique_ptr<File>(new MemoryFile);
+	}
+
+	
+protected:
 	void OpenInternal(E_Mode mode)override;
 	
 	void CloseInternal()const NOEXCEPT override{}

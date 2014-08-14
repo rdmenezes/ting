@@ -33,7 +33,7 @@ THE SOFTWARE. */
 
 namespace ting{
 namespace fs{
-
+ 
 /**
  * @brief Memory buffer file.
  * A memory buffer represented as a File.
@@ -44,8 +44,10 @@ namespace fs{
 class BufferFile : public File{
 	
 private:
-	BufferFile(const BufferFile&);
-	BufferFile& operator=(const BufferFile&);
+	BufferFile(const BufferFile&) = delete;
+	BufferFile(BufferFile&&) = delete;
+	BufferFile& operator=(const BufferFile&) = delete;
+	BufferFile& operator=(BufferFile&&) = delete;
 	
 private:
 	ting::Buffer<std::uint8_t> data;
@@ -64,6 +66,10 @@ public:
 	{}
 	
 	~BufferFile()NOEXCEPT override{}
+
+	virtual std::unique_ptr<File> Spawn()override{
+		throw File::Exc("BufferFile::Spawn(): spawning is not supported.");
+	}
 
 protected:
 

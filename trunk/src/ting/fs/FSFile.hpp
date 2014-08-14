@@ -48,7 +48,7 @@ namespace fs{
  * Implementation of a ting::File interface for native file system of the OS.
  */
 class FSFile : public File{
-	std::string rootDir;
+	const std::string rootDir;
 
 	mutable FILE* handle = nullptr;
 
@@ -76,10 +76,17 @@ protected:
 public:
 	/**
 	 * @brief Constructor.
+	 * A root directory can be set which holds the file system subtree. The file path
+	 * set by SetPath() method will refer to a file path relative to the root directory.
+	 * That means that all file operations like opening the file and other will be 
+	 * performed on the actual file/directory referred by the final path which is a concatenation of
+	 * the root directory and the path returned by Path() method. 
      * @param pathName - initial path to set passed to File constructor.
+	 * @param rootDir - path to the root directory to set. It should have trailing '/' character.
      */
-	FSFile(const std::string& pathName = std::string()) :
-			File(pathName)
+	FSFile(const std::string& pathName = std::string(), const std::string& rootDir = std::string()) :
+			File(pathName),
+			rootDir(rootDir)
 	{}
 	
 	/**
@@ -101,16 +108,6 @@ public:
      */
 	void SetRootDir(const std::string &dir);
 
-	/**
-	 * @brief Get current root directory.
-	 * Returns the current root directory. See description of SetRootDir() method
-	 * for more details.
-     * @return Current root directory.
-     */
-	const std::string& GetRootDir()const NOEXCEPT{
-		return this->rootDir;
-	}
-
 	
 	
 	bool Exists()const override;
@@ -129,13 +126,16 @@ public:
 
 	virtual std::vector<std::string> ListDirContents(size_t maxEntries = 0)const override;
 	
+	virtual std::unique_ptr<File> Spawn()override;
+	
 	/**
 	 * @brief Create new instance managed by auto-pointer.
      * @param pathName - path to a file.
+	 * @param rootDir - path to the root directory to set. It should have trailing '/' character.
      * @return Auto-pointer holding a new FSFile instance.
      */
-	static std::unique_ptr<FSFile> New(const std::string& pathName = std::string()){
-		return std::unique_ptr<FSFile>(new FSFile(pathName));
+	static std::unique_ptr<FSFile> New(const std::string& pathName = std::string(), const std::string& rootDir = std::string()){
+		return std::unique_ptr<FSFile>(new FSFile(pathName, rootDir));
 	}
 };
 

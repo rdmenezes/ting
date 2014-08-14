@@ -47,21 +47,6 @@ using namespace ting::fs;
 
 
 
-void FSFile::SetRootDir(const std::string &dir){
-	if(this->IsOpened()){
-		throw File::IllegalStateExc("cannot set root directory when file is opened");
-	}
-	
-	if(dir.size() > 0){
-		if(dir[dir.size() - 1] != '/'){
-			throw File::Exc("FSFile::SetRootDir(): argument is not a directory, should have trailing '/'");
-		}
-	}
-	this->rootDir = std::string(dir.c_str());//immediate copy (we do not want copy-on-write)
-}
-
-
-
 //override
 void FSFile::OpenInternal(E_Mode mode){
 	if(this->IsDir()){
@@ -397,3 +382,8 @@ std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 #endif
 	return std::move(files);
 }//~ListDirContents()
+
+
+std::unique_ptr<File> FSFile::Spawn(){
+	return FSFile::New(std::string(), this->rootDir);
+}
