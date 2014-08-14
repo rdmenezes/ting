@@ -48,16 +48,9 @@ namespace fs{
  * Implementation of a ting::File interface for native file system of the OS.
  */
 class FSFile : public File{
-	const std::string rootDir;
-
 	mutable FILE* handle = nullptr;
 
 protected:
-
-	std::string TruePath()const{
-		return this->rootDir + this->Path();
-	}
-
 	void OpenInternal(E_Mode mode)override;
 
 	void CloseInternal()const NOEXCEPT override;
@@ -82,11 +75,9 @@ public:
 	 * performed on the actual file/directory referred by the final path which is a concatenation of
 	 * the root directory and the path returned by Path() method. 
      * @param pathName - initial path to set passed to File constructor.
-	 * @param rootDir - path to the root directory to set. It should have trailing '/' character.
      */
-	FSFile(const std::string& pathName = std::string(), const std::string& rootDir = std::string()) :
-			File(pathName),
-			rootDir(rootDir)
+	FSFile(const std::string& pathName = std::string()) :
+			File(pathName)
 	{}
 	
 	/**
@@ -95,24 +86,11 @@ public:
 	 */
 	virtual ~FSFile()NOEXCEPT{
 		this->Close();
-	}
-
-	/**
-	 * @brief Set root directory.
-	 * Sets the root directory which holds the file system subtree. The file path
-	 * set by SetPath() method will refer to a file path relative to the root directory.
-	 * That means that all file operations like opening the file and other will be 
-	 * performed on the actual file/directory referred by the final path which is a concatenation of
-	 * the root directory and the path returned by Path() method. 
-     * @param dir - path to the root directory to set. It should have trailing '/' character.
-     */
-	void SetRootDir(const std::string &dir);
-
-	
+	}	
 	
 	bool Exists()const override;
 	
-	void MakeDir() override;
+	void MakeDir()override;
 
 	/**
 	 * @brief Get user home directory.
@@ -131,11 +109,10 @@ public:
 	/**
 	 * @brief Create new instance managed by auto-pointer.
      * @param pathName - path to a file.
-	 * @param rootDir - path to the root directory to set. It should have trailing '/' character.
      * @return Auto-pointer holding a new FSFile instance.
      */
-	static std::unique_ptr<FSFile> New(const std::string& pathName = std::string(), const std::string& rootDir = std::string()){
-		return std::unique_ptr<FSFile>(new FSFile(pathName, rootDir));
+	static std::unique_ptr<FSFile> New(const std::string& pathName = std::string()){
+		return std::unique_ptr<FSFile>(new FSFile(pathName));
 	}
 };
 

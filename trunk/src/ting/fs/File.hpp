@@ -132,9 +132,16 @@ public:
 			throw File::IllegalStateExc("Cannot set path when file is opened");
 		}
 
-		this->path = pathName;
+		this->SetPathInternal(pathName);
 	}
 
+protected:
+	virtual void SetPathInternal(const std::string& pathName){
+		this->path = pathName;
+	}
+	
+public:
+	
 	/**
 	 * @brief Get the current path being held by this File instance.
 	 * @return The path this File instance holds.
