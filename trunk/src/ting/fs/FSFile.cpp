@@ -70,14 +70,14 @@ void FSFile::OpenInternal(E_Mode mode){
 	}
 
 #if M_COMPILER == M_COMPILER_MSVC
-	if(fopen_s(&this->handle, this->TruePath().c_str(), modeStr) != 0){
+	if(fopen_s(&this->handle, this->Path().c_str(), modeStr) != 0){
 		this->handle = 0;
 	}
 #else
-	this->handle = fopen(this->TruePath().c_str(), modeStr);
+	this->handle = fopen(this->Path().c_str(), modeStr);
 #endif
 	if(!this->handle){
-		TRACE(<< "FSFile::Open(): TruePath() = " << this->TruePath().c_str() << std::endl)
+		TRACE(<< "FSFile::Open(): TruePath() = " << this->Path().c_str() << std::endl)
 		throw File::Exc("fopen() failed");
 	}
 }
@@ -190,7 +190,7 @@ bool FSFile::Exists()const{
 	//if it is a directory, check directory existence
 	if(this->Path()[this->Path().size() - 1] == '/'){
 #if M_OS == M_OS_LINUX
-		DIR *pdir = opendir(this->TruePath().c_str());
+		DIR *pdir = opendir(this->Path().c_str());
 		if(!pdir){
 			return false;
 		}else{
@@ -220,7 +220,7 @@ void FSFile::MakeDir(){
 #if M_OS == M_OS_LINUX
 //	TRACE(<< "creating directory = " << this->Path() << std::endl)
 	umask(0);//clear umask for proper permissions of newly created directory
-	if(mkdir(this->TruePath().c_str(), 0777) != 0){
+	if(mkdir(this->Path().c_str(), 0777) != 0){
 		throw File::Exc("mkdir() failed");
 	}
 #else
@@ -318,7 +318,7 @@ std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 	}
 #elif M_OS == M_OS_LINUX || M_OS == M_OS_MACOSX
 	{
-		DIR *pdir = opendir(this->TruePath().c_str());
+		DIR *pdir = opendir(this->Path().c_str());
 
 		if(!pdir){
 			std::stringstream ss;
@@ -351,7 +351,7 @@ std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 
 			struct stat fileStats;
 			//TRACE(<< s << std::endl)
-			if(stat((this->TruePath() + s).c_str(), &fileStats) < 0){
+			if(stat((this->Path() + s).c_str(), &fileStats) < 0){
 				std::stringstream ss;
 				ss << "FSFile::ListDirContents(): stat() failure, error code = " << strerror(errno);
 				throw File::Exc(ss.str());
@@ -385,5 +385,5 @@ std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 
 
 std::unique_ptr<File> FSFile::Spawn(){
-	return FSFile::New(std::string(), this->rootDir);
+	return FSFile::New();
 }

@@ -47,7 +47,11 @@ public:
 	RootDirFile(std::unique_ptr<File> baseFile, const std::string& rootDir) :
 			baseFile(std::move(baseFile)),
 			rootDir(rootDir)
-	{}
+	{
+		if(!this->baseFile){
+			throw File::Exc("RootDirFile(): passed in base file pointer is null");
+		}
+	}
 	
 	static std::unique_ptr<RootDirFile> New(std::unique_ptr<File> baseFile, const std::string& rootDir){
 		return std::unique_ptr<RootDirFile>(baseFile, rootDir));
@@ -71,15 +75,57 @@ public:
 			throw File::IllegalStateExc("Cannot set root directory when file is opened");
 		}
 		this->rootDir = dir;
+		this->SetPath(this->Path());
 	}
 	
 private:
 	void SetPathInternal(const std::string& pathName)override{
 		this->File::SetPathInternal(this->rootDir + pathName);
 	}
-
 	
+	void OpenInternal(E_Mode mode)override{
+		this->baseFile->Open(mode);
+	}
 	
+	void CloseInternal()const NOEXCEPT override{
+		this->baseFile->Close();
+	}
+	
+	std::vector<std::string> ListDirContents(size_t maxEntries = 0)const override{
+		return this->baseFile->ListDirContents(maxEntries);
+	}
+	
+	size_t ReadInternal(ting::Buffer<std::uint8_t> buf)const override{
+		return this->baseFile->Read(buf);
+	}
+	
+	size_t WriteInternal(ting::Buffer<const std::uint8_t> buf)override{
+		return this->baseFile->Write(buf);
+	}
+	
+	size_t SeekForwardInternal(size_t numBytesToSeek)const override{
+		return this->baseFile->SeekForward(numBytesToSeek);
+	}
+	
+	size_t SeekBackwardInternal(size_t numBytesToSeek)const override{
+		return this->baseFile->SeekBackward(numBytesToSeek);
+	}
+	
+	void RewindInternal()const override{
+		this->baseFile->Rewind();
+	}
+	
+	void MakeDir()override{
+		this->baseFile->MakeDir();
+	}
+	
+	bool Exists()const override{
+		return this->baseFile->Exists();
+	}
+	
+	std::unique_ptr<File> Spawn()override{
+		return New(this->baseFile->Spawn(), this->rootDir);
+	}
 };
 
 }
