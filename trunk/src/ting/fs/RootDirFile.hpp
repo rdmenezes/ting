@@ -60,24 +60,6 @@ public:
 	RootDirFile(const RootDirFile&) = delete;
 	RootDirFile& operator=(const RootDirFile&) = delete;
 	
-
-	/**
-	 * @brief Set root directory.
-	 * Sets the root directory which holds the file system subtree. The file path
-	 * set by SetPath() method will refer to a file path relative to the root directory.
-	 * That means that all file operations like opening the file and other will be 
-	 * performed on the actual file/directory referred by the final path which is a concatenation of
-	 * the root directory and the path returned by Path() method. 
-     * @param dir - path to the root directory to set. It should have trailing '/' character.
-     */
-	void SetRootDir(const std::string &dir){
-		if(this->IsOpened()){
-			throw File::IllegalStateExc("Cannot set root directory when file is opened");
-		}
-		this->rootDir = dir;
-		this->SetPath(this->Path());
-	}
-	
 private:
 	void SetPathInternal(const std::string& pathName)override{
 		this->File::SetPathInternal(this->rootDir + pathName);
