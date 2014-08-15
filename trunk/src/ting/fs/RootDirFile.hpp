@@ -54,7 +54,7 @@ public:
 	}
 	
 	static std::unique_ptr<RootDirFile> New(std::unique_ptr<File> baseFile, const std::string& rootDir){
-		return std::unique_ptr<RootDirFile>(std::move(baseFile), rootDir));
+		return std::unique_ptr<RootDirFile>(new RootDirFile(std::move(baseFile), rootDir)));
 	}
 	
 	RootDirFile(const RootDirFile&) = delete;
