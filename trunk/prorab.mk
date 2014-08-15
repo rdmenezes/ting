@@ -91,7 +91,7 @@ ifneq ($(prorab_included),true)
 
 
     define prorab-private-app-specific-rules
-        $(eval prorab_private_lib_ldflags := )
+        $(eval prorab_private_ldflags := )
 
         $(if $(filter windows,$(prorab_os)), \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name).exe)) \
@@ -112,11 +112,11 @@ ifneq ($(prorab_included),true)
         $(if $(filter macosx,$(prorab_os)), \
                 $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_so_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_lib_ldflags += -dynamiclib -Wl,-install_name,$(prorab_private_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
+                $(eval prorab_private_ldflags += -dynamiclib -Wl,-install_name,$(prorab_private_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
             ,\
                 $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
                 $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name)) \
-                $(eval prorab_private_lib_ldflags := -shared -Wl,-soname,$(notdir $(prorab_private_name))) \
+                $(eval prorab_private_ldflags := -shared -Wl,-soname,$(notdir $(prorab_private_name))) \
             )
 
         $(eval prorab_this_name := $(prorab_private_symbolic_link))
@@ -140,7 +140,7 @@ ifneq ($(prorab_included),true)
     define prorab-private-lib-specific-rules
         $(if $(filter windows,$(prorab_os)), \
                 $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_lib_ldflags := -shared -s) \
+                $(eval prorab_private_ldflags := -shared -s) \
                 $(eval prorab_this_name := $(prorab_private_name)) \
             , \
                 $(prorab-private-lib-specific-rules-nix-systems) \
@@ -182,7 +182,7 @@ ifneq ($(prorab_included),true)
         $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
 
         #compile static pattern rule
-        $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp
+        $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp $(prorab_this_dir)makefile
 		@echo Compiling $$<...
 		$(prorab_echo)mkdir -p $$(dir $$@)
 		$(prorab_echo)$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
@@ -191,9 +191,9 @@ ifneq ($(prorab_included),true)
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_private_name): $(prorab_this_objs)
+        $(prorab_private_name): $(prorab_this_objs) $(prorab_this_dir)makefile
 		@echo Linking $$@...
-		$(prorab_echo)$$(CXX) $$^ -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_lib_ldflags)
+		$(prorab_echo)$$(CXX) $(prorab_this_objs) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
 
         #clean rule
         clean::

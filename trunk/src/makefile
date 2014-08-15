@@ -16,7 +16,6 @@ this_name := ting
 this_so_name := 3
 
 
-
 #Sources
 this_srcs :=
 this_srcs += ting/fs/BufferFile.cpp
