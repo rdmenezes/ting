@@ -273,7 +273,7 @@ std::vector<std::string> FSFile::ListDirContents(size_t maxEntries)const{
 
 #if M_OS == M_OS_WINDOWS
 	{
-		std::string pattern = this->TruePath();
+		std::string pattern = this->Path();
 		pattern += '*';
 
 		TRACE(<< "FSFile::ListDirContents(): pattern = " << pattern << std::endl)
