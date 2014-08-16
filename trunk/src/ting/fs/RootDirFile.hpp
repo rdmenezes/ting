@@ -51,6 +51,8 @@ public:
 		if(!this->baseFile){
 			throw File::Exc("RootDirFile(): passed in base file pointer is null");
 		}
+		this->File::SetPathInternal(this->baseFile->Path());
+		this->baseFile->SetPath(this->rootDir + this->Path());
 	}
 	
 	static std::unique_ptr<RootDirFile> New(std::unique_ptr<File> baseFile, const std::string& rootDir){
@@ -62,7 +64,8 @@ public:
 	
 private:
 	void SetPathInternal(const std::string& pathName)override{
-		this->File::SetPathInternal(this->rootDir + pathName);
+		this->File::SetPathInternal(pathName);
+		this->baseFile->SetPath(this->rootDir + pathName);
 	}
 	
 	void OpenInternal(E_Mode mode)override{
