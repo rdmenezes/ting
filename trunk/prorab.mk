@@ -42,6 +42,7 @@ ifneq ($(prorab_included),true)
     this_ldflags :=
     this_ldlibs :=
     this_srcs :=
+    this_objs :=
     
 
 
@@ -155,7 +156,7 @@ ifneq ($(prorab_included),true)
         #static library rule
         $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs)))
 			@echo "Creating static library $$(notdir $$@)..."
-			$(prorab_echo)ar cr $$@ $$^
+			$(prorab_echo)ar cr $$@ $$^ $(this_objs)
 
 
         clean::
@@ -193,7 +194,7 @@ ifneq ($(prorab_included),true)
         #link rule
         $(prorab_private_name): $(prorab_this_objs) $(prorab_this_dir)makefile
 		@echo Linking $$@...
-		$(prorab_echo)$$(CXX) $(prorab_this_objs) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
+		$(prorab_echo)$$(CXX) $(prorab_this_objs) $(this_objs) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
 
         #clean rule
         clean::
