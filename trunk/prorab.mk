@@ -6,6 +6,8 @@
 ifneq ($(prorab_included),true)
     prorab_included := true
 
+    $(info Prorab build system version 1.0. Copyright Ivan Gagis <igagis@gmail.com>)
+
 
     #for storing list of included makefiles
     prorab_included_makefiles :=
