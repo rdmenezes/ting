@@ -77,8 +77,10 @@ void FSFile::OpenInternal(E_Mode mode){
 	this->handle = fopen(this->Path().c_str(), modeStr);
 #endif
 	if(!this->handle){
-		TRACE(<< "FSFile::Open(): TruePath() = " << this->Path().c_str() << std::endl)
-		throw File::Exc("fopen() failed");
+		TRACE(<< "FSFile::Open(): Path() = " << this->Path().c_str() << std::endl)
+		std::stringstream ss;
+		ss << "fopen(" << this->Path().c_str() << ") failed";
+		throw File::Exc(ss.str());
 	}
 }
 

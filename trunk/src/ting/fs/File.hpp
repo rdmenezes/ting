@@ -36,8 +36,7 @@ THE SOFTWARE. */
 #include "../types.hpp"
 #include "../Buffer.hpp"
 
-#include "Exc.hpp"
-
+#include "../Exc.hpp"
 
 
 namespace ting{
@@ -60,14 +59,14 @@ public:
 	/**
 	 * @brief Basic exception class.
 	 */
-	class Exc : public fs::Exc{
+	class Exc : public ting::Exc{
 	public:
 		/**
 		 * @brief Constructor.
 		 * @param descr - human readable description of the error.
 		 */
 		Exc(const std::string& descr) :
-				ting::fs::Exc(std::string("[File::Exc]: ") + descr)
+				ting::Exc(std::string("[File::Exc]: ") + descr)
 		{}
 	};
 
