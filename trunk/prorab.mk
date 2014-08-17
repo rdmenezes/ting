@@ -44,7 +44,6 @@ ifneq ($(prorab_included),true)
     this_ldflags :=
     this_ldlibs :=
     this_srcs :=
-    this_objs :=
     
 
 
@@ -125,7 +124,7 @@ ifneq ($(prorab_included),true)
         $(eval prorab_this_name := $(prorab_private_symbolic_link))
 
         #symbolic link to shared library rule
-        $(prorab_private_symbolic_link): $(prorab_private_name)
+        $(prorab_private_symbolic_link): $(prorab_private_name) $(prorab_this_dir)makefile
 			@echo "Creating symbolic link $$(notdir $$@) -> $$(notdir $$<)..."
 			$(prorab_echo)(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
@@ -156,9 +155,9 @@ ifneq ($(prorab_included),true)
 
 
         #static library rule
-        $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))) $(this_objs)
+        $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))) $(prorab_this_dir)makefile
 			@echo "Creating static library $$(notdir $$@)..."
-			$(prorab_echo)ar cr $$@ $$^ $(this_objs)
+			$(prorab_echo)ar cr $$@ $$(filter %.o,$$^)
 
 
         clean::
@@ -194,9 +193,9 @@ ifneq ($(prorab_included),true)
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_private_name): $(prorab_this_objs) $(this_objs) $(prorab_this_dir)makefile
+        $(prorab_private_name): $(prorab_this_objs) $(prorab_this_dir)makefile
 		@echo Linking $$@...
-		$(prorab_echo)$$(CXX) $(prorab_this_objs) $(this_objs) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
+		$(prorab_echo)$$(CXX) $$(filter %.o,$$^) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
 
         #clean rule
         clean::
