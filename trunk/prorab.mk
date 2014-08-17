@@ -96,54 +96,52 @@ ifneq ($(prorab_included),true)
         $(eval prorab_private_ldflags := )
 
         $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name).exe)) \
+                $(eval prorab_this_name := $(abspath $(prorab_this_dir)$(this_name).exe)) \
             , \
-                $(eval prorab_private_name := $(abspath $(prorab_this_dir)$(this_name))) \
+                $(eval prorab_this_name := $(abspath $(prorab_this_dir)$(this_name))) \
             )
 
-        $(eval prorab_this_name := $(prorab_private_name))
+        $(eval prorab_this_symbolic_name := $(prorab_this_name))
 
-        install:: $(prorab_private_name)
+        install:: $(prorab_this_name)
 		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/bin/
-		$(prorab_echo)install $(prorab_private_name) $(DESTDIR)$(PREFIX)/bin/
+		$(prorab_echo)install $(prorab_this_name) $(DESTDIR)$(PREFIX)/bin/
     endef
 
 
 
     define prorab-private-lib-specific-rules-nix-systems
         $(if $(filter macosx,$(prorab_os)), \
-                $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_so_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_ldflags += -dynamiclib -Wl,-install_name,$(prorab_private_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
+                $(eval prorab_this_symbolic_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
+                $(eval prorab_this_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_so_name)$(prorab_lib_extension))) \
+                $(eval prorab_private_ldflags += -dynamiclib -Wl,-install_name,$(prorab_this_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
             ,\
-                $(eval prorab_private_symbolic_link := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_private_name := $(prorab_private_symbolic_link).$(this_so_name)) \
-                $(eval prorab_private_ldflags := -shared -Wl,-soname,$(notdir $(prorab_private_name))) \
+                $(eval prorab_this_symbolic_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
+                $(eval prorab_this_name := $(prorab_this_symbolic_name).$(this_so_name)) \
+                $(eval prorab_private_ldflags := -shared -Wl,-soname,$(notdir $(prorab_this_name))) \
             )
 
-        $(eval prorab_this_name := $(prorab_private_symbolic_link))
-
         #symbolic link to shared library rule
-        $(prorab_private_symbolic_link): $(prorab_private_name) $(prorab_this_dir)makefile
+        $(prorab_this_symbolic_name): $(prorab_this_name) $(prorab_this_dir)makefile
 			@echo "Creating symbolic link $$(notdir $$@) -> $$(notdir $$<)..."
 			$(prorab_echo)(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
-        all: $(prorab_private_symbolic_link)
+        all: $(prorab_this_symbolic_name)
 
-        install:: $(prorab_private_symbolic_link)
+        install:: $(prorab_this_symbolic_name)
 		@install -d $(DESTDIR)$(PREFIX)/lib/
-		$(prorab_echo)(cd $(DESTDIR)$(PREFIX)/lib/; ln -f -s $(notdir $(prorab_private_name)) $(notdir $(prorab_private_symbolic_link)))
+		$(prorab_echo)(cd $(DESTDIR)$(PREFIX)/lib/; ln -f -s $(notdir $(prorab_this_name)) $(notdir $(prorab_this_symbolic_name)))
 
         clean::
-		$(prorab_echo)rm -f $(prorab_private_symbolic_link)
+		$(prorab_echo)rm -f $(prorab_this_symbolic_name)
     endef
 
 
     define prorab-private-lib-specific-rules
         $(if $(filter windows,$(prorab_os)), \
-                $(eval prorab_private_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
+                $(eval prorab_this_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
                 $(eval prorab_private_ldflags := -shared -s) \
-                $(eval prorab_this_name := $(prorab_private_name)) \
+                $(eval prorab_this_symbolic_name := $(prorab_this_name)) \
             , \
                 $(prorab-private-lib-specific-rules-nix-systems) \
             )
@@ -163,23 +161,23 @@ ifneq ($(prorab_included),true)
         clean::
 		$(prorab_echo)rm -f $(prorab_this_staticlib)
 
-        install:: $(prorab_this_staticlib) $(prorab_private_name)
+        install:: $(prorab_this_staticlib) $(prorab_this_name)
 		$(prorab_echo)for i in $(patsubst $(prorab_this_dir)%,%,$(shell find $(prorab_this_dir) -type f -name "*.hpp")); do \
 		    install -d $(DESTDIR)$(PREFIX)/include/$$$${i%/*}; \
 		    install $(prorab_this_dir)$$$$i $(DESTDIR)$(PREFIX)/include/$$$$i; \
 		done
 		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/lib/
 		$(prorab_echo)install $(prorab_this_staticlib) $(DESTDIR)$(PREFIX)/lib/
-		$(prorab_echo)install $(prorab_private_name) $(DESTDIR)$(PREFIX)/lib/
+		$(prorab_echo)install $(prorab_this_name) $(DESTDIR)$(PREFIX)/lib/
 		$(if $(filter macosx,$(prorab_os)), \
-		        $(prorab_echo)install_name_tool -id "$(PREFIX)/lib/$(notdir $(prorab_private_name))" $(DESTDIR)$(PREFIX)/lib/$(notdir $(prorab_private_name)) \
+		        $(prorab_echo)install_name_tool -id "$(PREFIX)/lib/$(notdir $(prorab_this_name))" $(DESTDIR)$(PREFIX)/lib/$(notdir $(prorab_this_name)) \
 		    )
     endef
 
 
     define prorab-private-common-rules
 
-        all: $(prorab_private_name)
+        all: $(prorab_this_name)
 
         $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
 
@@ -193,14 +191,14 @@ ifneq ($(prorab_included),true)
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_private_name): $(prorab_this_objs) $(prorab_this_dir)makefile
+        $(prorab_this_name): $(prorab_this_objs) $(prorab_this_dir)makefile
 		@echo Linking $$@...
 		$(prorab_echo)$$(CXX) $$(filter %.o,$$^) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
 
         #clean rule
         clean::
 		$(prorab_echo)rm -rf $(prorab_this_dir)$(prorab_obj_dir)
-		$(prorab_echo)rm -f $(prorab_private_name)
+		$(prorab_echo)rm -f $(prorab_this_name)
     endef
 
 
