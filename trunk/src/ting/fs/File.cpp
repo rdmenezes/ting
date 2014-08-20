@@ -36,7 +36,7 @@ using namespace ting::fs;
 
 
 
-std::string File::ExtractExtension()const{
+std::string File::Extension()const{
 	size_t dotPos = this->Path().rfind('.');
 	if(dotPos == std::string::npos || dotPos == 0){//NOTE: dotPos is 0 for hidden files in *nix systems
 		return std::string();
@@ -57,7 +57,7 @@ std::string File::ExtractExtension()const{
 
 
 
-std::string File::ExtractDirectory()const{
+std::string File::Directory()const{
 	size_t slashPos = this->Path().rfind('/');
 	if(slashPos == std::string::npos){//no slash found
 		return std::string();

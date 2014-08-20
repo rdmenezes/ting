@@ -49,7 +49,7 @@ namespace fs{
  * This class represents an abstract interface to a file system.
  */
 class File{
-	std::string path;
+	mutable std::string path;
 
 	mutable bool isOpened = false;
 	
@@ -126,7 +126,7 @@ public:
 	 * @brief Set the path for this File instance.
 	 * @param pathName - the path to a file or directory.
 	 */
-	void SetPath(const std::string& pathName){
+	void SetPath(const std::string& pathName)const{
 		if(this->IsOpened()){
 			throw File::IllegalStateExc("Cannot set path when file is opened");
 		}
@@ -135,7 +135,7 @@ public:
 	}
 
 protected:
-	virtual void SetPathInternal(const std::string& pathName){
+	virtual void SetPathInternal(const std::string& pathName)const{
 		this->path = pathName;
 	}
 	
@@ -170,7 +170,7 @@ public:
 	 * does have an extension and the function will return 'txt'.
 	 * @return String representing file extension.
 	 */
-	std::string ExtractExtension()const;
+	std::string Extension()const;
 
 	/**
 	 * @brief Get directory part of the path.
@@ -178,7 +178,7 @@ public:
 	 * will be '/home/user/'.
      * @return String representation of directory part of the path.
      */
-	std::string ExtractDirectory()const;
+	std::string Directory()const;
 	
 	/**
 	 * @brief Open file.

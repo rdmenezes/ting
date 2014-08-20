@@ -1,5 +1,6 @@
 #include "../../src/ting/debug.hpp"
 #include "../../src/ting/fs/FSFile.hpp"
+#include "../../src/ting/fs/RootDirFile.hpp"
 
 #include "tests.hpp"
 
@@ -99,7 +100,8 @@ void Run(){
 
 namespace TestLoadWholeFileToMemory{
 void Run(){
-	ting::fs::FSFile f("test.file.txt");
+	ting::fs::RootDirFile f(ting::fs::FSFile::New(), "");
+	f.SetPath("test.file.txt");
 	ASSERT_ALWAYS(!f.IsDir())
 	ASSERT_ALWAYS(!f.IsOpened())
 	
