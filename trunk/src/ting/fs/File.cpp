@@ -36,7 +36,7 @@ using namespace ting::fs;
 
 
 
-std::string File::Extension()const{
+std::string File::Ext()const{
 	size_t dotPos = this->Path().rfind('.');
 	if(dotPos == std::string::npos || dotPos == 0){//NOTE: dotPos is 0 for hidden files in *nix systems
 		return std::string();
@@ -57,7 +57,7 @@ std::string File::Extension()const{
 
 
 
-std::string File::Directory()const{
+std::string File::Dir()const{
 	size_t slashPos = this->Path().rfind('/');
 	if(slashPos == std::string::npos){//no slash found
 		return std::string();
@@ -68,6 +68,21 @@ std::string File::Directory()const{
 	ASSERT(this->Path().size() >= slashPos + 1)
 
 	return std::string(this->Path(), 0, slashPos + 1);
+}
+
+
+
+std::string File::NotDir()const{
+	size_t slashPos = this->Path().rfind('/');
+	if(slashPos == std::string::npos){//no slash found
+		return this->Path();
+	}
+
+	ASSERT(slashPos > 0)
+	ASSERT(this->Path().size() > 0)
+	ASSERT(this->Path().size() >= slashPos + 1)
+
+	return std::string(this->Path(), slashPos + 1);
 }
 
 

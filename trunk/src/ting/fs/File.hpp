@@ -170,7 +170,7 @@ public:
 	 * does have an extension and the function will return 'txt'.
 	 * @return String representing file extension.
 	 */
-	std::string Extension()const;
+	std::string Ext()const;
 
 	/**
 	 * @brief Get directory part of the path.
@@ -178,7 +178,15 @@ public:
 	 * will be '/home/user/'.
      * @return String representation of directory part of the path.
      */
-	std::string Directory()const;
+	std::string Dir()const;
+	
+	/**
+	 * @brief Get file part of the path.
+	 * Example: if path is '/home/user/some.file.txt' then the return value
+	 * will be 'some.file.txt'.
+     * @return String representation of directory part of the path.
+     */
+	std::string NotDir()const;
 	
 	/**
 	 * @brief Open file.
