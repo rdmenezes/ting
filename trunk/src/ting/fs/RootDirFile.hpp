@@ -59,7 +59,7 @@ public:
 		return std::unique_ptr<RootDirFile>(new RootDirFile(std::move(baseFile), rootDir));
 	}
 	
-	static std::unique_ptr<const RootDirFile> New(std::unique_ptr<const File> baseFile, const std::string& rootDir){
+	static std::unique_ptr<const RootDirFile> NewConst(std::unique_ptr<const File> baseFile, const std::string& rootDir){
 		return std::unique_ptr<const RootDirFile>(new RootDirFile(std::unique_ptr<File>(const_cast<File*>(baseFile.release())), rootDir));
 	}
 	
