@@ -51,7 +51,7 @@ private:
 	
 private:
 	ting::Buffer<std::uint8_t> data;
-	mutable std::uint8_t* ptr;
+	mutable decltype(data)::iterator ptr;
 	
 public:
 	/**

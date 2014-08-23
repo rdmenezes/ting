@@ -28,7 +28,7 @@ size_t BufferFile::ReadInternal(ting::Buffer<std::uint8_t> buf)const {
 	size_t numBytesRead = std::min(buf.SizeInBytes(), size_t(this->data.end() - this->ptr));
 	memcpy(buf.begin(), this->ptr, numBytesRead);
 	this->ptr += numBytesRead;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
+	ASSERT(this->data.Overlaps(&*this->ptr) || this->ptr == this->data.end())
 	return numBytesRead;
 }
 
@@ -40,7 +40,7 @@ size_t BufferFile::WriteInternal(ting::Buffer<const std::uint8_t> buf){
 	size_t numBytesWritten = std::min(buf.SizeInBytes(), size_t(this->data.end() - this->ptr));
 	memcpy(this->ptr, buf.begin(), numBytesWritten);
 	this->ptr += numBytesWritten;
-	ASSERT(this->data.Overlaps(this->ptr) || this->ptr == this->data.end())
+	ASSERT(this->data.Overlaps(&*this->ptr) || this->ptr == this->data.end())
 	return numBytesWritten;
 }
 
