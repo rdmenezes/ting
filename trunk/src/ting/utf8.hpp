@@ -158,5 +158,30 @@ inline size_t FillBuffer(ting::Buffer<std::uint32_t> buf, Iterator& str){
 
 
 
+//TODO: doxygen
+inline std::vector<std::uint32_t> ToUTF32(Iterator str){
+	std::vector<std::uint32_t> ret;
+	for(; str.IsNotEnd(); ++str){
+		ret.push_back(str.Char());
+	}
+	return std::move(ret);
+}
+
+
+
+//TODO: doxygen
+inline std::vector<std::uint32_t> ToUTF32(const char* str){
+	return ToUTF32(Iterator(str));
+}
+
+
+
+//TODO: doxygen
+inline std::vector<std::uint32_t> ToUTF32(const std::string& str){
+	return ToUTF32(str.c_str());
+}
+
+
+
 }//~namespace
 }//~namespace
