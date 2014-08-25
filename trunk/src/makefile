@@ -13,7 +13,7 @@ debug := false
 
 this_name := ting
 
-this_so_name := 3
+this_soname := 3
 
 
 #Sources
