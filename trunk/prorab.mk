@@ -44,7 +44,7 @@ ifneq ($(prorab_included),true)
     this_ldflags :=
     this_ldlibs :=
     this_srcs :=
-    
+
 
 
     .PHONY: clean all install distclean deb test
@@ -268,18 +268,22 @@ ifneq ($(prorab_included),true)
 
     endef
 
-    
+
 
     define prorab-build-deb
+        $(if $(filter true, $(prorab_private_deb_target_set)), $(error more than one 'prorab-build-deb' detected, only one is allowed in a makefile))
+
+        $(eval prorab_private_deb_target_set := true)
+
         deb: $(prorab_this_dir)debian/control
         deb: $(patsubst %.install.in, %$(this_soname).install, $(shell ls $(prorab_this_dir)debian/*.install.in))
 		$(prorab_echo)(cd $(prorab_this_dir); dpkg-buildpackage)
 
-        $(prorab_this_dir)debian/control: $(prorab_this_dir)src/soname.txt $(prorab_this_dir)debian/control.in
-		$(prorab_echo)sed -e "s/\$$(soname)/$(shell cat $<)/" $(filter %debian/control.in, $^) >> $@
+        $(prorab_this_dir)debian/control: $(prorab_this_dir)debian/control.in $(prorab_this_dir)makefile
+		$(prorab_echo)sed -e "s/\$$$$(soname)/$(this_soname)/" $$(filter %debian/control.in, $$^) >> $$@
 
-        %$(this_soname).install: %.install.in
-		$(prorab_echo)cp $< $@
+        %$(this_soname).install: %.install.in $(prorab_this_dir)makefile
+		$(prorab_echo)cp $$< $$@
     endef
 
 
