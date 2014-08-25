@@ -47,7 +47,7 @@ ifneq ($(prorab_included),true)
 
 
 
-    .PHONY: clean all install distclean deb test
+    .PHONY: clean all install distclean deb
 
 
     #define the very first default target
@@ -122,7 +122,7 @@ ifneq ($(prorab_included),true)
             )
 
         #symbolic link to shared library rule
-        $(prorab_this_symbolic_name): $(prorab_this_name) $(prorab_this_dir)makefile
+        $(prorab_this_symbolic_name): $(prorab_this_name) $(prorab_this_makefile)
 			@echo "Creating symbolic link $$(notdir $$@) -> $$(notdir $$<)..."
 			$(prorab_echo)(cd $$(dir $$<); ln -f -s $$(notdir $$<) $$(notdir $$@))
 
@@ -153,7 +153,7 @@ ifneq ($(prorab_included),true)
 
 
         #static library rule
-        $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))) $(prorab_this_dir)makefile
+        $(prorab_this_staticlib): $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))) $(prorab_this_makefile)
 			@echo "Creating static library $$(notdir $$@)..."
 			$(prorab_echo)ar cr $$@ $$(filter %.o,$$^)
 
@@ -182,8 +182,8 @@ ifneq ($(prorab_included),true)
         $(eval prorab_this_objs := $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(patsubst %.cpp,%.o,$(this_srcs))))
 
         #compile static pattern rule
-        $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp $(prorab_this_dir)makefile
-		@echo Compiling $$<...
+        $(prorab_this_objs): $(prorab_this_dir)$(prorab_obj_dir)%.o: $(prorab_this_dir)%.cpp $(prorab_this_makefile)
+		@echo "Compiling $$<..."
 		$(prorab_echo)mkdir -p $$(dir $$@)
 		$(prorab_echo)$$(CXX) -c -MF "$$(patsubst %.o,%.d,$$@)" -MD -o "$$@" $(CXXFLAGS) $(CPPFLAGS) $(this_cflags) $$<
 
@@ -191,8 +191,8 @@ ifneq ($(prorab_included),true)
         include $(wildcard $(addsuffix *.d,$(dir $(addprefix $(prorab_this_dir)$(prorab_obj_dir),$(this_srcs)))))
 
         #link rule
-        $(prorab_this_name): $(prorab_this_objs) $(prorab_this_dir)makefile
-		@echo Linking $$@...
+        $(prorab_this_name): $(prorab_this_objs) $(prorab_this_makefile)
+		@echo "Linking $$@..."
 		$(prorab_echo)$$(CXX) $$(filter %.o,$$^) -o "$$@" $(this_ldlibs) $(this_ldflags) $(LDLIBS) $(LDFLAGS) $(prorab_private_ldflags)
 
         #clean rule
@@ -230,7 +230,7 @@ ifneq ($(prorab_included),true)
 
     #include file with correct prorab_this_dir
     define prorab-private-include
-        prorab_private_this_makefiles += $$(prorab_this_dir)
+        prorab_private_this_makefiles += $$(prorab_this_makefile)
         prorab_this_makefile := $1
         prorab_this_dir := $$(dir $$(prorab_this_makefile))
         include $1
@@ -256,7 +256,7 @@ ifneq ($(prorab_included),true)
         doc:: $(prorab_this_dir)doxygen
 
         $(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
-		@echo Building docs...
+		@echo "Building docs..."
 		$(prorab_echo)(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
 
         clean::
@@ -275,14 +275,15 @@ ifneq ($(prorab_included),true)
 
         $(eval prorab_private_deb_target_set := true)
 
-        deb: $(prorab_this_dir)debian/control
-        deb: $(patsubst %.install.in, %$(this_soname).install, $(shell ls $(prorab_this_dir)debian/*.install.in))
+        deb: $(prorab_this_dir)debian/control $(patsubst %.install.in, %$(this_soname).install, $(shell ls $(prorab_this_dir)debian/*.install.in))
 		$(prorab_echo)(cd $(prorab_this_dir); dpkg-buildpackage)
 
-        $(prorab_this_dir)debian/control: $(prorab_this_dir)debian/control.in $(prorab_this_dir)makefile
-		$(prorab_echo)sed -e "s/\$$$$(soname)/$(this_soname)/" $$(filter %debian/control.in, $$^) >> $$@
+        $(prorab_this_dir)debian/control: $(prorab_this_dir)debian/control.in $(prorab_this_makefile) $(this_soname_dependency)
+		@echo "Generating $$@..."
+		$(prorab_echo)sed -e "s/\$$$$(soname)/$(this_soname)/" $$(filter %debian/control.in, $$^) > $$@
 
-        %$(this_soname).install: %.install.in $(prorab_this_dir)makefile
+        %$(this_soname).install: %.install.in $(prorab_this_makefile) $(this_soname_dependency)
+		@echo "Generating $$@..."
 		$(prorab_echo)cp $$< $$@
     endef
 
