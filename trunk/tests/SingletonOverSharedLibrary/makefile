@@ -10,7 +10,7 @@ endif
 
 
 this_name := testso
-this_so_name := 0
+this_soname := 0
 
 this_cflags += -std=c++11
 this_cflags += -Wall
