@@ -13,7 +13,7 @@ debug := false
 
 this_name := ting
 
-this_soname := 3
+this_soname := $(shell cat $(prorab_this_dir)soname.txt)
 
 
 #Sources

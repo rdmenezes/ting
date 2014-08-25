@@ -47,7 +47,7 @@ ifneq ($(prorab_included),true)
     
 
 
-    .PHONY: clean all install distclean
+    .PHONY: clean all install distclean deb test
 
 
     #define the very first default target
@@ -257,16 +257,31 @@ ifneq ($(prorab_included),true)
 
         $(prorab_this_dir)doxygen: $(prorab_this_dir)doxygen.cfg
 		@echo Building docs...
-		@(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
+		$(prorab_echo)(cd $(prorab_this_dir); doxygen doxygen.cfg || true)
 
         clean::
-		@rm -rf $(prorab_this_dir)doxygen
+		$(prorab_echo)rm -rf $(prorab_this_dir)doxygen
 
         install::
-		@install -d $(DESTDIR)$(PREFIX)/share/doc/$(this_name)
-		@install $(prorab_this_dir)doxygen/* $(DESTDIR)$(PREFIX)/share/doc/$(this_name) || true #ignore error, not all systems have doxygen
+		$(prorab_echo)install -d $(DESTDIR)$(PREFIX)/share/doc/$(this_name)
+		$(prorab_echo)install $(prorab_this_dir)doxygen/* $(DESTDIR)$(PREFIX)/share/doc/$(this_name) || true #ignore error, not all systems have doxygen
 
     endef
+
+    
+
+    define prorab-build-deb
+        deb: $(prorab_this_dir)debian/control
+        deb: $(patsubst %.install.in, %$(this_soname).install, $(shell ls $(prorab_this_dir)debian/*.install.in))
+		$(prorab_echo)(cd $(prorab_this_dir); dpkg-buildpackage)
+
+        $(prorab_this_dir)debian/control: $(prorab_this_dir)src/soname.txt $(prorab_this_dir)debian/control.in
+		$(prorab_echo)sed -e "s/\$$(soname)/$(shell cat $<)/" $(filter %debian/control.in, $^) >> $@
+
+        %$(this_soname).install: %.install.in
+		$(prorab_echo)cp $< $@
+    endef
+
 
 
 endif #~once
