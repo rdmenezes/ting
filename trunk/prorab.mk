@@ -39,7 +39,7 @@ ifneq ($(prorab_included),true)
 
     #define local variables used by prorab
     this_name :=
-    this_so_name :=
+    this_soname :=
     this_cflags :=
     this_ldflags :=
     this_ldlibs :=
@@ -113,11 +113,11 @@ ifneq ($(prorab_included),true)
     define prorab-private-lib-specific-rules-nix-systems
         $(if $(filter macosx,$(prorab_os)), \
                 $(eval prorab_this_symbolic_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_this_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_so_name)$(prorab_lib_extension))) \
+                $(eval prorab_this_name := $(abspath $(prorab_this_dir)lib$(this_name).$(this_soname)$(prorab_lib_extension))) \
                 $(eval prorab_private_ldflags += -dynamiclib -Wl,-install_name,$(prorab_this_name),-headerpad_max_install_names,-undefined,dynamic_lookup,-compatibility_version,1.0,-current_version,1.0) \
             ,\
                 $(eval prorab_this_symbolic_name := $(abspath $(prorab_this_dir)lib$(this_name)$(prorab_lib_extension))) \
-                $(eval prorab_this_name := $(prorab_this_symbolic_name).$(this_so_name)) \
+                $(eval prorab_this_name := $(prorab_this_symbolic_name).$(this_soname)) \
                 $(eval prorab_private_ldflags := -shared -Wl,-soname,$(notdir $(prorab_this_name))) \
             )
 
