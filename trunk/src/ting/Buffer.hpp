@@ -99,12 +99,12 @@ public:
      * @param a - reference to instance of std::array.
      */
 	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
-			buf(&*a.begin()),
+			buf(a.size() == 0 ? 0 : &*a.begin()), //operator* on invalid pointer may cause crash
 			bufSize(a.size())
 	{}
 	
 	template <class T_1, std::size_t array_size> Buffer(std::array<T_1, array_size>& a) :
-			buf(&*a.begin()),
+			buf(a.size() == 0 ? 0 : &*a.begin()), //operator* on invalid pointer may cause crash
 			bufSize(a.size())
 	{}
 	
@@ -115,12 +115,12 @@ public:
      * @param v - reference to instance of std::vector.
      */
 	template <class T_1> Buffer(const std::vector<T_1>& v) :
-			buf(&*v.begin()),
+			buf(v.size() == 0 ? 0 : &*v.begin()), //operator* on invalid pointer may cause crash
 			bufSize(v.size())
 	{}
 	
 	template <class T_1> Buffer(std::vector<T_1>& v) :
-			buf(&*v.begin()),
+			buf(v.size() == 0 ? 0 : &*v.begin()), //operator* on invalid pointer may cause crash
 			bufSize(v.size())
 	{}
 	
