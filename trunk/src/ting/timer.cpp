@@ -137,7 +137,7 @@ void Lib::TimerThread::Run(){
 					break;//~while(true)
 				}
 				
-				this->expiredTimersNotifyMutex.Lock();
+				this->expiredTimersNotifyMutex.lock();
 			}
 
 			try{
@@ -152,7 +152,7 @@ void Lib::TimerThread::Run(){
 				ASSERT(false)
 			}
 			
-			this->expiredTimersNotifyMutex.Unlock();
+			this->expiredTimersNotifyMutex.unlock();
 		}
 
 		this->sema.Wait(millis);

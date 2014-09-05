@@ -94,7 +94,7 @@ public:
 	 * attempting to acquire the lock on the same mutex will wait until the
 	 * mutex lock will be released with Mutex::Unlock().
 	 */
-	inline void Lock()NOEXCEPT{
+	inline void lock()NOEXCEPT{
 //		TRACE(<< "Mutex::Lock(): invoked " << this << std::endl)
 #if M_OS == M_OS_WINDOWS
 		EnterCriticalSection(&this->m);
@@ -112,7 +112,7 @@ public:
 	/**
 	 * @brief Release mutex lock.
 	 */
-	inline void Unlock()NOEXCEPT{
+	inline void unlock()NOEXCEPT{
 //		TRACE(<< "Mutex::Unlock(): invoked " << this << std::endl)
 #if M_OS == M_OS_WINDOWS
 		LeaveCriticalSection(&this->m);
@@ -144,10 +144,10 @@ public:
 		Guard(Mutex &m)NOEXCEPT :
 				mutex(m)
 		{
-			this->mutex.Lock();
+			this->mutex.lock();
 		}
 		~Guard()NOEXCEPT{
-			this->mutex.Unlock();
+			this->mutex.unlock();
 		}
 	};//~class Guard
 };//~class Mutex

@@ -300,11 +300,11 @@ public:
 	
 	//NOTE: call to this function should be protected by mutex
 	inline void CallCallback(dns::Resolver* r, ting::net::HostNameResolver::E_Result result, IPAddress::Host ip = IPAddress::Host(0, 0, 0, 0))NOEXCEPT{
-		this->completedMutex.Lock();
-		this->mutex.Unlock();
+		this->completedMutex.lock();
+		this->mutex.unlock();
 		r->hnr->OnCompleted_ts(result, ip);
-		this->completedMutex.Unlock();
-		this->mutex.Lock();
+		this->completedMutex.unlock();
+		this->mutex.lock();
 	}
 	
 	struct ParseResult{
