@@ -22,7 +22,6 @@ this_srcs += ting/fs/BufferFile.cpp
 this_srcs += ting/fs/File.cpp
 this_srcs += ting/fs/FSFile.cpp
 this_srcs += ting/fs/MemoryFile.cpp
-this_srcs += ting/mt/Mutex.cpp
 this_srcs += ting/mt/MsgThread.cpp
 this_srcs += ting/mt/Queue.cpp
 this_srcs += ting/mt/Semaphore.cpp

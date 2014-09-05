@@ -24,6 +24,7 @@ THE SOFTWARE. */
 
 #include "MsgThread.hpp"
 
+#include <mutex>
 
 
 using namespace ting::mt;
@@ -32,14 +33,14 @@ using namespace ting::mt;
 
 namespace{
 
-Mutex quitMessageMutex;
+std::mutex quitMessageMutex;
 
 }//~namespace
 
 
 
 void MsgThread::PushPreallocatedQuitMessage()NOEXCEPT{
-	Mutex::Guard mutexGuard(quitMessageMutex);
+	std::lock_guard<decltype(quitMessageMutex)> mutexGuard(quitMessageMutex);
 	
 	if(!this->quitMessage){
 		return;

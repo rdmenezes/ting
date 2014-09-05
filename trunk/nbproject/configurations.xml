@@ -11,7 +11,6 @@
         </df>
         <df name="mt">
           <in>MsgThread.cpp</in>
-          <in>Mutex.cpp</in>
           <in>Queue.cpp</in>
           <in>Semaphore.cpp</in>
           <in>Thread.cpp</in>
@@ -296,8 +295,6 @@
       </item>
       <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="src/ting/mt/Semaphore.cpp" ex="false" tool="1" flavor2="8">
@@ -533,8 +530,6 @@
       </item>
       <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="8">
       </item>
-      <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="8">
-      </item>
       <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="8">
       </item>
       <item path="src/ting/mt/Semaphore.cpp" ex="false" tool="1" flavor2="8">
@@ -672,8 +667,6 @@
       <item path="src/ting/fs/MemoryFile.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/ting/mt/MsgThread.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="src/ting/mt/Mutex.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/ting/mt/Queue.cpp" ex="false" tool="1" flavor2="9">
       </item>

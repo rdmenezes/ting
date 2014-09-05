@@ -38,7 +38,7 @@ THE SOFTWARE. */
 #include "../types.hpp"
 #include "../Exc.hpp"
 
-#include "Mutex.hpp"
+#include <mutex>
 
 
 
@@ -88,7 +88,7 @@ class Thread{
 #endif
 
 
-	ting::mt::Mutex mutex1;
+	std::mutex mutex1;
 
 
 	enum E_State{

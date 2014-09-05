@@ -39,7 +39,7 @@ namespace{
 
 
 
-Mutex threadMutex2;
+std::mutex threadMutex2;
 
 
 
@@ -73,7 +73,7 @@ void* Thread::RunThread(void *data)
 	{
 		//protect by mutex to avoid changing the
 		//this->state variable before Start() has finished.
-		Mutex::Guard mutexGuard(threadMutex2);
+		std::lock_guard<decltype(threadMutex2)> mutexGuard(threadMutex2);
 
 		thr->state = STOPPED;
 	}
@@ -127,11 +127,11 @@ void Thread::Start(size_t stackSize){
 	//Protect by mutex to avoid several Start() methods to be called
 	//by concurrent threads simultaneously and to protect call to Join() before Start()
 	//has returned.
-	Mutex::Guard mutexGuard1(this->mutex1);
+	std::lock_guard<decltype(this->mutex1)> mutexGuard1(this->mutex1);
 	
 	//Protect by mutex to avoid incorrect state changing in case when thread
 	//exits before the Start() method returned.
-	Mutex::Guard mutexGuard2(threadMutex2);
+	std::lock_guard<decltype(threadMutex2)> mutexGuard2(threadMutex2);
 
 	if(this->state != NEW){
 		throw HasAlreadyBeenStartedExc();
@@ -193,7 +193,7 @@ void Thread::Join() NOEXCEPT{
 
 	//protect by mutex to avoid several Join() methods to be called by concurrent threads simultaneously.
 	//NOTE: excerpt from pthread docs: "If multiple threads simultaneously try to join with the same thread, the results are undefined."
-	Mutex::Guard mutexGuard(this->mutex1);
+	std::lock_guard<decltype(this->mutex1)> mutexGuard(this->mutex1);
 
 	if(this->state == NEW){
 		//thread was not started, do nothing

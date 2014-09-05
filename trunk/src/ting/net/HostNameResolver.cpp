@@ -99,7 +99,7 @@ std::string ParseHostNameFromDNSPacket(const std::uint8_t* & p, const std::uint8
 
 
 //this mutex is used to protect the dns::thread access.
-ting::mt::Mutex mutex;
+std::mutex mutex;
 
 typedef std::multimap<std::uint32_t, Resolver*> T_ResolversTimeMap;
 typedef T_ResolversTimeMap::iterator T_ResolversTimeIter;
@@ -142,11 +142,11 @@ class LookupThread : public ting::mt::MsgThread{
 	T_ResolversTimeMap resolversByTime1, resolversByTime2;
 	
 public:
-	ting::mt::Mutex mutex;//this mutex is used to protect access to members of the thread object.
+	std::mutex mutex;//this mutex is used to protect access to members of the thread object.
 	
 	//this mutex is used to make sure that the callback has finished calling when Cancel_ts() method is called.
 	//I.e. to guarantee that after Cancel_ts() method has returned the callback will not be called anymore.
-	ting::mt::Mutex completedMutex;
+	std::mutex completedMutex;
 	
 	//this variable is for joining and destroying previous thread object if there was any.
 	std::unique_ptr<ting::mt::MsgThread> prevThread;
@@ -713,7 +713,7 @@ private:
 		TRACE(<< "this->dns.host = " << this->dns.host.ToString() << std::endl)
 		
 		{
-			ting::mt::Mutex::Guard mutexGuard(dns::mutex);//mutex is needed because socket opening may fail and we will have to set isExiting flag which should be protected by mutex
+			std::lock_guard<decltype(dns::mutex)> mutexGuard(dns::mutex);//mutex is needed because socket opening may fail and we will have to set isExiting flag which should be protected by mutex
 			
 			try{
 				this->socket.Open();
@@ -730,7 +730,7 @@ private:
 		while(!this->quitFlag){
 			std::uint32_t timeout;
 			{
-				ting::mt::Mutex::Guard mutexGuard(this->mutex);
+				std::lock_guard<decltype(this->mutex)> mutexGuard(this->mutex);
 				
 				if(this->socket.ErrorCondition()){
 					this->isExiting = true;
@@ -943,10 +943,10 @@ std::unique_ptr<LookupThread> thread;
 HostNameResolver::~HostNameResolver(){
 #ifdef DEBUG
 	//check that there is no ongoing DNS lookup operation.
-	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
+	std::lock_guard<decltype(dns::mutex)> mutexGuard(dns::mutex);
 	
 	if(dns::thread){
-		ting::mt::Mutex::Guard mutexGuard(dns::thread->mutex);
+		std::lock_guard<decltype(dns::thread->mutex)> mutexGuard(dns::thread->mutex);
 		
 		dns::T_ResolversIter i = dns::thread->resolversMap.find(this);
 		if(i != dns::thread->resolversMap.end()){
@@ -967,7 +967,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 		throw DomainNameTooLongExc();
 	}
 	
-	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
+	std::lock_guard<decltype(dns::mutex)> mutexGuard(dns::mutex);
 	
 	bool needStartTheThread = false;
 	
@@ -976,7 +976,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 		dns::thread = dns::LookupThread::New();
 		needStartTheThread = true;
 	}else{
-		ting::mt::Mutex::Guard mutexGuard(dns::thread->mutex);
+		std::lock_guard<decltype(dns::thread->mutex)> mutexGuard(dns::thread->mutex);
 		
 		//check if already in progress
 		if(dns::thread->resolversMap.find(this) != dns::thread->resolversMap.end()){
@@ -1019,7 +1019,7 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 	r->recordType = D_DNSRecordAAAA;//start with IPv6 first
 #endif
 	
-	ting::mt::Mutex::Guard mutexGuard2(dns::thread->mutex);
+	std::lock_guard<decltype(dns::thread->mutex)> mutexGuard2(dns::thread->mutex);
 	
 	//Find free ID, it will throw TooMuchRequestsExc if there are no free IDs
 	{
@@ -1093,13 +1093,13 @@ void HostNameResolver::Resolve_ts(const std::string& hostName, std::uint32_t tim
 
 
 bool HostNameResolver::Cancel_ts()NOEXCEPT{
-	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
+	std::lock_guard<decltype(dns::mutex)> mutexGuard(dns::mutex);
 	
 	if(!dns::thread){
 		return false;
 	}
 	
-	ting::mt::Mutex::Guard mutexGuard2(dns::thread->mutex);
+	std::lock_guard<decltype(dns::thread->mutex)> mutexGuard2(dns::thread->mutex);
 	
 	bool ret = bool(dns::thread->RemoveResolver(this));
 	
@@ -1112,7 +1112,7 @@ bool HostNameResolver::Cancel_ts()NOEXCEPT{
 		//Because upon calling the callback the resolver object is already removed from all the lists and maps
 		//and if 'ret' is false then it is possible that the resolver is in process of calling the callback.
 		//To do that, lock and unlock the mutex.
-		ting::mt::Mutex::Guard mutexGuard(dns::thread->completedMutex);
+		std::lock_guard<decltype(dns::thread->completedMutex)> mutexGuard(dns::thread->completedMutex);
 	}
 	
 	return ret;
@@ -1122,7 +1122,7 @@ bool HostNameResolver::Cancel_ts()NOEXCEPT{
 
 //static
 void HostNameResolver::CleanUp(){
-	ting::mt::Mutex::Guard mutexGuard(dns::mutex);
+	std::lock_guard<decltype(dns::mutex)> mutexGuard(dns::mutex);
 
 	if(dns::thread){
 		dns::thread->PushPreallocatedQuitMessage();

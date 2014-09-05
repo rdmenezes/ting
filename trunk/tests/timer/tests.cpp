@@ -72,9 +72,9 @@ namespace SeveralTimersForTheSameInterval{
 
 struct TestTimer : public ting::timer::Timer{
 	unsigned *e;
-	ting::mt::Mutex* m;
+	std::mutex* m;
 
-	TestTimer(unsigned* cnt, ting::mt::Mutex* mut) :
+	TestTimer(unsigned* cnt, std::mutex* mut) :
 			e(cnt),
 			m(mut)
 	{
@@ -85,7 +85,7 @@ struct TestTimer : public ting::timer::Timer{
 	//override
 	void OnExpired()NOEXCEPT{
 //		TRACE_ALWAYS(<<"\t- timer fired!"<<std::endl)
-		ting::mt::Mutex::Guard mutexGuard(*this->m);
+		std::lock_guard<decltype(*this->m)> mutexGuard(*this->m);
 		++(*this->e);
 	}
 };
@@ -95,7 +95,7 @@ struct TestTimer : public ting::timer::Timer{
 void Run(){
 	TRACE_ALWAYS(<< "\tRunning SeveralTimersForTheSameInterval, it will take about 1 second..." << std::endl)
 	
-	ting::mt::Mutex mutex;
+	std::mutex mutex;
 	unsigned counter = 0;
 	
 	const unsigned DNumTimers = 100;

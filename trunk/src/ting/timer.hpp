@@ -222,12 +222,12 @@ class Lib : public IntrusiveSingleton<Lib>{
 	public:
 		volatile bool quitFlag = false;
 
-		ting::mt::Mutex mutex;
+		std::mutex mutex;
 		ting::mt::Semaphore sema;
 
 		//mutex used to make sure that after Timer::Stop() method is called the
 		//expired notification callback will not be called
-		ting::mt::Mutex expiredTimersNotifyMutex;
+		std::mutex expiredTimersNotifyMutex;
 		
 		//map requires key uniqueness, but in our case the key is a stop ticks,
 		//so, use std::multimap to allow similar keys.
@@ -301,7 +301,7 @@ public:
 		}
 #ifdef DEBUG
 		{
-			ting::mt::Mutex::Guard mutexGuard(this->thread.mutex);
+			std::lock_guard<decltype(this->thread.mutex)> mutexGuard(this->thread.mutex);
 			ASSERT(this->thread.timers.size() == 0)
 		}
 #endif
