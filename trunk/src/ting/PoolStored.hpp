@@ -37,6 +37,7 @@ THE SOFTWARE. */
 #include <new>
 #include <list>
 #include <vector>
+#include <mutex>
 
 #include "debug.hpp"
 #include "types.hpp"
@@ -145,7 +146,7 @@ public:
 	
 public:
 	void* Alloc_ts(){
-		typename decltype(this->lock)::Guard guard(this->lock);
+		std::lock_guard<decltype(this->lock)> guard(this->lock);
 		
 		if(this->chunks.size() == 0){
 			//create new chunk
@@ -168,7 +169,7 @@ public:
 			return;
 		}
 		
-		typename decltype(this->lock)::Guard guard(this->lock);
+		std::lock_guard<decltype(this->lock)> guard(this->lock);
 		
 		ElemSlot& e = *reinterpret_cast<ElemSlot*>(p);
 		

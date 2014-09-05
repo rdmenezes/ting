@@ -51,7 +51,7 @@ class SpinLock{
 	
 public:
 	SpinLock(){
-		this->Unlock();//NOTE: initialization of flag does not work forr some reason, so set to unlocket state initially.
+		this->unlock();//NOTE: initialization of flag does not work for some reason, so set to unlocked state initially.
 	}
 	
 	
@@ -67,7 +67,7 @@ public:
 	 * Each cycle of the busy loop it will yield the thread.
 	 * Right after acquiring the lock the memory barrier is set.
 	 */
-	void Lock()NOEXCEPT{
+	void lock()NOEXCEPT{
 		while(this->flag.test_and_set(std::memory_order_acquire)){
 #if M_OS == M_OS_WINDOWS && M_COMPILER == M_COMPILER_GCC
 			SleepEx(0, FALSE);
@@ -83,32 +83,9 @@ public:
 	 * @brief Unlock the spinlock.
 	 * Right before releasing the lock the memory barrier is set.
 	 */
-	void Unlock()NOEXCEPT{
+	void unlock()NOEXCEPT{
 		this->flag.clear(std::memory_order_release);
 	}
-	
-	
-	
-	/**
-	 * @brief Helper class which automatically Locks the given spinlock.
-	 * This helper class automatically locks the given spinlock in the constructor and
-	 * unlocks the spinlock in destructor. This class is useful if the code between
-	 * spinlock lock/unlock may return or throw an exception,
-	 * then the spinlock will be automatically unlocked in such case.
-	 */
-	class Guard{
-		SpinLock& sl;
-	public:
-		Guard(SpinLock& sl)NOEXCEPT :
-				sl(sl)
-		{
-			this->sl.Lock();
-		}
-		
-		~Guard()NOEXCEPT{
-			this->sl.Unlock();
-		}
-	};
 };
 
 }

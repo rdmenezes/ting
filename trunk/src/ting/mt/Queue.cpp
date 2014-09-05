@@ -1,5 +1,6 @@
 #include "Queue.hpp"
 
+#include <mutex>
 
 #if M_OS == M_OS_LINUX
 #	include <sys/eventfd.h>
@@ -72,7 +73,7 @@ Queue::~Queue()NOEXCEPT{
 
 
 void Queue::PushMessage(std::function<void()>&& msg)NOEXCEPT{
-	decltype(this->mut)::Guard mutexGuard(this->mut);
+	std::lock_guard<decltype(this->mut)> mutexGuard(this->mut);
 	this->messages.push_back(std::move(msg));
 	
 	if(this->messages.size() == 1){//if it is a first message
@@ -111,7 +112,7 @@ void Queue::PushMessage(std::function<void()>&& msg)NOEXCEPT{
 
 
 Queue::T_Message Queue::PeekMsg(){
-	decltype(this->mut)::Guard mutexGuard(this->mut);
+	std::lock_guard<decltype(this->mut)> mutexGuard(this->mut);
 	if(this->messages.size() != 0){
 		ASSERT(this->CanRead())
 
