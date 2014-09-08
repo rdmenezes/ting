@@ -315,7 +315,7 @@ inline std::uint32_t Deserialize32BE(const std::uint8_t* buf)NOEXCEPT{
 
 
 template <typename T> struct remove_constptr{
-	typedef std::remove_const<std::remove_pointer<T>::type>::type type;
+	typedef typename std::remove_const<typename std::remove_pointer<T>::type>::type type;
 };
 
 
