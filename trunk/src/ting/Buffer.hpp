@@ -68,8 +68,8 @@ public:
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 	
 private:
-	pointer buf;
-	size_type bufSize;
+	pointer buf = nullptr;
+	size_type bufSize = 0;
 	
 public:
 
@@ -78,19 +78,20 @@ public:
 	
 	
 	/**
-	 * @brief Create a ArrayAdaptor object.
-	 * Creates a ArrayAdaptor object which wraps given memory buffer of specified size.
+	 * @brief Create a Buffer object.
+	 * Creates a Buffer object which wraps given memory buffer of specified size.
 	 * Note, the memory will not be freed upon this Buffer object destruction,
-	 * ArrayAdaptor does not own the memory.
+	 * Buffer does not own the memory.
 	 * @param bufPtr - pointer to the memory buffer.
 	 * @param bufSize - size of the memory buffer.
 	 */
-	Buffer(pointer bufPtr = nullptr, size_type bufSize = 0)NOEXCEPT :
+	Buffer(pointer bufPtr, size_type bufSize)NOEXCEPT :
 			buf(bufPtr),
 			bufSize(bufSize)
 	{}
 
 	
+	Buffer()NOEXCEPT = default;
 	
 	
 	/**
