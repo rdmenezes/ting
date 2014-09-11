@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="94">
+<configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="src" name="0">
       <df name="ting">
@@ -29,7 +29,9 @@
         <in>timer.cpp</in>
       </df>
     </df>
-    <df root="tests" name="1">
+    <df root="src" name="1">
+    </df>
+    <df root="tests" name="2">
       <df name="Buffer">
         <in>main.cpp</in>
         <in>tests.cpp</in>
@@ -92,6 +94,15 @@
         <in>tests.cpp</in>
       </df>
     </df>
+    <df root="tests" name="3">
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>makefile</itemPath>
+      <itemPath>prorab.mk</itemPath>
+    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -102,6 +113,8 @@
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
+    <Elem>src</Elem>
+    <Elem>tests</Elem>
     <Elem>src</Elem>
     <Elem>tests</Elem>
   </sourceRootList>
@@ -136,7 +149,7 @@
           </incDir>
         </ccTool>
       </folder>
-      <folder path="1/Buffer">
+      <folder path="2/Buffer">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -146,7 +159,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/FSFile">
+      <folder path="2/FSFile">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -156,7 +169,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Flags">
+      <folder path="2/Flags">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -166,7 +179,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/MemoryFile">
+      <folder path="2/MemoryFile">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -176,7 +189,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/PoolStored">
+      <folder path="2/PoolStored">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -186,7 +199,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Shared">
+      <folder path="2/Shared">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -196,24 +209,14 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/SingletonOverSharedLibrary">
+      <folder path="2/SingletonOverSharedLibrary">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
           </incDir>
         </ccTool>
       </folder>
-      <folder path="1/Thread">
-        <ccTool>
-          <incDir>
-            <pElem>.</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>DEBUG</Elem>
-          </preprocessorList>
-        </ccTool>
-      </folder>
-      <folder path="1/WaitSet">
+      <folder path="2/Thread">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -223,7 +226,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/debug">
+      <folder path="2/WaitSet">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -233,7 +236,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/math">
+      <folder path="2/debug">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -243,7 +246,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/net">
+      <folder path="2/math">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -253,7 +256,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/timer">
+      <folder path="2/net">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -263,7 +266,7 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/utf8">
+      <folder path="2/timer">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -273,7 +276,17 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/util">
+      <folder path="2/utf8">
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+        </ccTool>
+      </folder>
+      <folder path="2/util">
         <ccTool>
           <incDir>
             <pElem>.</pElem>
@@ -420,98 +433,98 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Buffer">
+      <folder path="2/Buffer">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/FSFile">
+      <folder path="2/FSFile">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Flags">
+      <folder path="2/Flags">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/MemoryFile">
+      <folder path="2/MemoryFile">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/PoolStored">
+      <folder path="2/PoolStored">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Shared">
+      <folder path="2/Shared">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/Thread">
+      <folder path="2/Thread">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/WaitSet">
+      <folder path="2/WaitSet">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/debug">
+      <folder path="2/debug">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/math">
+      <folder path="2/math">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/net">
+      <folder path="2/net">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/timer">
+      <folder path="2/timer">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/utf8">
+      <folder path="2/utf8">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="1/util">
+      <folder path="2/util">
         <ccTool>
           <preprocessorList>
             <Elem>DEBUG</Elem>

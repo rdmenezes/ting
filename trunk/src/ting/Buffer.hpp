@@ -98,12 +98,12 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::array.
      * @param a - reference to instance of std::array.
      */
-	template <class T_1, std::size_t array_size> Buffer(const std::array<T_1, array_size>& a) :
+	template <std::size_t array_size> Buffer(const std::array<typename std::remove_const<T>::type, array_size>& a) :
 			buf(a.size() == 0 ? 0 : &*a.begin()), //operator* on invalid pointer may cause crash
 			bufSize(a.size())
 	{}
 	
-	template <class T_1, std::size_t array_size> Buffer(std::array<T_1, array_size>& a) :
+	template <std::size_t array_size> Buffer(std::array<T, array_size>& a) :
 			buf(a.size() == 0 ? 0 : &*a.begin()), //operator* on invalid pointer may cause crash
 			bufSize(a.size())
 	{}
@@ -114,12 +114,12 @@ public:
 	 * Creates a Buffer object pointing to the contents of given std::vector.
      * @param v - reference to instance of std::vector.
      */
-	template <class T_1> Buffer(const std::vector<T_1>& v) :
+	Buffer(const std::vector<typename std::remove_const<T>::type>& v) :
 			buf(v.size() == 0 ? 0 : &*v.begin()), //operator* on invalid pointer may cause crash
 			bufSize(v.size())
 	{}
 	
-	template <class T_1> Buffer(std::vector<T_1>& v) :
+	Buffer(std::vector<T>& v) :
 			buf(v.size() == 0 ? 0 : &*v.begin()), //operator* on invalid pointer may cause crash
 			bufSize(v.size())
 	{}
