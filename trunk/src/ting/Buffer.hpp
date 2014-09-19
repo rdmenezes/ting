@@ -91,7 +91,7 @@ public:
 	{}
 
 	
-	Buffer()NOEXCEPT = default;
+	Buffer()NOEXCEPT{}
 	
 	
 	/**

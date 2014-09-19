@@ -155,9 +155,6 @@
     <ClCompile Include="..\..\src\ting\mt\MsgThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ting\mt\Mutex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\ting\mt\Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
