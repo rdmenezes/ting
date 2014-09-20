@@ -16,7 +16,6 @@ LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/File.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/FSFile.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/fs/MemoryFile.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/MsgThread.cpp
-LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Mutex.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Queue.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Semaphore.cpp
 LOCAL_SRC_FILES += $(SRC_BASE_DIR)ting/mt/Thread.cpp
