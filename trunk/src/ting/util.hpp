@@ -38,6 +38,7 @@ THE SOFTWARE. */
 //#endif
 
 #include <vector>
+#include <functional>
 
 #include "debug.hpp"
 #include "types.hpp"
@@ -55,6 +56,25 @@ THE SOFTWARE. */
 
 namespace ting{
 namespace util{
+
+
+class ScopeExit{
+	std::function<void()> f;
+
+public:
+	ScopeExit(const ScopeExit&) = delete;
+	ScopeExit& operator=(const ScopeExit&) = delete;
+	
+	ScopeExit(decltype(ScopeExit::f)&& f) :
+			f(std::move(f))
+	{}
+	
+    ~ScopeExit(){
+		if(this->f){
+			this->f();
+		}
+	}
+};
 
 
 

@@ -41,3 +41,17 @@ void Run(){
 	}
 }
 }//~namespace
+
+
+
+namespace TestScopeExit{
+void Run(){
+	bool flag = false;
+	{
+		ting::util::ScopeExit se([&flag](){
+			flag = true;
+		});
+	}
+	ASSERT_ALWAYS(flag)
+}
+}

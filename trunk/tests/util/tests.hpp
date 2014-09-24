@@ -4,3 +4,8 @@
 namespace TestSerialization{
 void Run();
 }
+
+
+namespace TestScopeExit{
+void Run();
+}
