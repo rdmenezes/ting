@@ -83,6 +83,9 @@ public:
      * @return Data previously held by this file.
      */
 	decltype(data) ResetData(){
+		if(this->IsOpened()){
+			throw IllegalStateExc("MemoryFile::ResetData(): could not reset data while file is opened");
+		}
 		return std::move(this->data);
 	}
 	
