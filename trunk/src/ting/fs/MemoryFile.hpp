@@ -77,6 +77,15 @@ public:
 	}
 
 	
+	/**
+	 * @brief Clear the data of the file.
+	 * After this operation the file becomes empty.
+     * @return Data previously held by this file.
+     */
+	decltype(data) ResetData(){
+		return std::move(this->data);
+	}
+	
 protected:
 	void OpenInternal(E_Mode mode)override;
 	
